@@ -164,6 +164,17 @@ impl Binder {
             return !(existing_alias && new_alias);
         }
 
+        // Go declareSymbol：var 的 excludes（Value & ^FunctionScopedVariable）
+        // 不含 var 自身，重复 var（含参数名）并入同一符号；类型一致性由
+        // checker 的 TS2403 按声明序比较。既有符号带其他值意义位
+        //（function/class/let 等）时不并入，走冲突报告
+        if existing_flags.contains(SymbolFlags::FunctionScopedVariable)
+            && new_flags == SymbolFlags::FunctionScopedVariable
+            && !existing_flags.intersects(SymbolFlags::VALUE & !SymbolFlags::FunctionScopedVariable)
+        {
+            return true;
+        }
+
         // Go NamespaceModuleExcludes = None：非实例化 namespace 声明与任何既有符号合并且不冲突
         if new_flags.contains(SymbolFlags::NamespaceModule) {
             return true;

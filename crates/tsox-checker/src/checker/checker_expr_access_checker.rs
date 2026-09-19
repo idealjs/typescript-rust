@@ -47,8 +47,67 @@ impl Checker {
                 | InKeyword
                 | InstanceOfKeyword => self.boolean_type(),
 
-                AmpersandAmpersandToken | BarBarToken | QuestionQuestionToken => {
-                    self.get_type_of_node(&data.left)
+                AmpersandAmpersandToken | AmpersandAmpersandEqualsToken => {
+                    // Go checkBinaryExpressionWorker：&& 结果 =
+                    // union(extractDefinitelyFalsy(left), right)，
+                    // 左操作数无真值事实时结果为左类型
+                    let left_type = self.get_type_of_node(&data.left);
+                    let right_type = self.get_type_of_node(&data.right);
+                    if self
+                        .constituent_types(&left_type)
+                        .iter()
+                        .any(|c| self.has_truthy_fact(c))
+                    {
+                        let falsy = self.extract_definitely_falsy_constituents(&left_type);
+                        self.get_union_type(vec![falsy, right_type])
+                    } else {
+                        left_type
+                    }
+                }
+
+                BarBarToken | BarBarEqualsToken => {
+                    // Go checkBinaryExpressionWorker：|| 结果 =
+                    // union(nonNullable(removeDefinitelyFalsy(left)), right)，
+                    // 左操作数无假值事实时结果为左类型
+                    let left_type = self.get_type_of_node(&data.left);
+                    let right_type = self.get_type_of_node(&data.right);
+                    if self
+                        .constituent_types(&left_type)
+                        .iter()
+                        .any(|c| self.has_falsy_fact(c))
+                    {
+                        let removed = self.remove_definitely_falsy_constituents(&left_type);
+                        let non_null = self.get_non_nullable_type_of(&removed);
+                        let reduced =
+                            self.remove_subtype_redundant_members(vec![non_null, right_type]);
+                        self.get_union_type(reduced)
+                    } else {
+                        left_type
+                    }
+                }
+
+                QuestionQuestionToken | QuestionQuestionEqualsToken => {
+                    // Go checkBinaryExpressionWorker：?? 结果 =
+                    // union(nonNullable(left), right)，左操作数不可空时为左类型
+                    let left_type = self.get_type_of_node(&data.left);
+                    let right_type = self.get_type_of_node(&data.right);
+                    let may_be_nullish = self.constituent_types(&left_type).iter().any(|c| {
+                        c.flags.intersects(
+                            TypeFlags::Undefined
+                                | TypeFlags::Null
+                                | TypeFlags::Any
+                                | TypeFlags::Unknown
+                                | TypeFlags::TypeParameter,
+                        )
+                    });
+                    if may_be_nullish {
+                        let non_null = self.get_non_nullable_type_of(&left_type);
+                        let reduced =
+                            self.remove_subtype_redundant_members(vec![non_null, right_type]);
+                        self.get_union_type(reduced)
+                    } else {
+                        left_type
+                    }
                 }
 
                 CommaToken => self.get_type_of_node(&data.right),
@@ -65,10 +124,7 @@ impl Checker {
                 | GreaterThanGreaterThanGreaterThanEqualsToken
                 | AmpersandEqualsToken
                 | BarEqualsToken
-                | CaretEqualsToken
-                | BarBarEqualsToken
-                | AmpersandAmpersandEqualsToken
-                | QuestionQuestionEqualsToken => self.get_type_of_node(&data.right),
+                | CaretEqualsToken => self.get_type_of_node(&data.right),
                 _ => self.get_any_type(),
             }
         } else {

@@ -338,7 +338,19 @@ impl Checker {
                     None => self.get_any_type(),
                 },
             };
-            let mut symbol = Symbol::new(SymbolFlags::Property, name.clone());
+            // Go bindParameter+getTypeForVariableLikeDeclaration：可选参数属性
+            // 符号带 Optional 位，strictNullChecks 下属性类型补 | undefined
+            let is_optional = pd.question_token.is_some();
+            let prop_type = if is_optional && self.strict_null_checks {
+                self.get_union_type(vec![prop_type, self.undefined_type()])
+            } else {
+                prop_type
+            };
+            let mut flags = SymbolFlags::Property;
+            if is_optional {
+                flags |= SymbolFlags::Optional;
+            }
+            let mut symbol = Symbol::new(flags, name.clone());
 
             symbol.declarations.push(Arc::clone(param));
             if modifiers.modifier_flags.contains(ModifierFlags::Readonly) {

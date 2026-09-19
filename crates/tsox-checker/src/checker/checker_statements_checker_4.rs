@@ -359,26 +359,35 @@ impl Checker {
                 if let Some(primary) = primary
                     && !Arc::ptr_eq(&primary, node)
                     && symbol.declarations.len() > 1
-                    && primary.kind == SyntaxKind::VariableDeclaration
                     && symbol.flags.intersects(
                         SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable,
                     )
+                    && !symbol.flags.intersects(SymbolFlags::Assignment)
                 {
-                    let auto_to_any = |t: &Arc<Type>| -> Arc<Type> {
+                    let primary_type_raw = self.get_type_of_symbol(&symbol);
+                    // Go getTypeForVariableLikeDeclaration(includeOptionality=true)：
+                    // 可选参数的符号类型在 strictNullChecks 下补 | undefined
+                    let primary_type_raw = if primary.kind == SyntaxKind::Parameter
+                        && self.strict_null_checks
+                        && matches!(
+                            &primary.data,
+                            tsox_frontend::ast::NodeData::ParameterDeclaration(pd)
+                                if pd.question_token.is_some()
+                        ) {
+                        self.get_union_type(vec![primary_type_raw, self.undefined_type()])
+                    } else {
+                        primary_type_raw
+                    };
+                    fn auto_to_any(c: &Checker, t: &Arc<Type>) -> Arc<Type> {
                         if t.intrinsic_name() == Some("auto") {
-                            self.get_any_type()
+                            c.get_any_type()
                         } else {
                             Arc::clone(t)
                         }
-                    };
-                    let primary_type = self
-                        .type_node_links
-                        .get(&primary)
-                        .and_then(|l| l.resolved_type.clone())
-                        .map(|t| auto_to_any(&t));
-                    let this_type = auto_to_any(&resolved_type);
-                    if let Some(primary_type) = primary_type
-                        && !matches!(primary_type.intrinsic_name(), Some("error"))
+                    }
+                    let primary_type = auto_to_any(self, &primary_type_raw);
+                    let this_type = auto_to_any(self, &resolved_type);
+                    if !matches!(primary_type.intrinsic_name(), Some("error"))
                         && !matches!(this_type.intrinsic_name(), Some("error"))
                         && !self
                             .compare_types_identical(&primary_type, &this_type)
@@ -388,13 +397,20 @@ impl Checker {
                         let first_str = self.type_to_string(&primary_type);
                         let next_str = self.type_to_string(&this_type);
                         let file = self.current_file.clone();
-                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        let mut diag = tsox_frontend::ast::Diagnostic::new(
                             file,
                             data.name.loc,
                             tsox_core::diagnostics::messages_generated::
                                 SUBSEQUENT_VARIABLE_DECLARATIONS_MUST_HAVE_THE_SAME_TYPE_VARIABLE_0_MUST_BE_OF_TYPE_1_BUT_HERE_HAS_TYPE_2,
-                            vec![name_text, first_str, next_str],
+                            vec![name_text.clone(), first_str, next_str],
+                        );
+                        diag.related_information.push(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            primary.loc,
+                            tsox_core::diagnostics::messages_generated::X_0_WAS_ALSO_DECLARED_HERE,
+                            vec![name_text],
                         ));
+                        self.diagnostics.add(diag);
                     }
                 }
             }
@@ -406,9 +422,17 @@ impl Checker {
                 .resolved_type = Some(resolved_type.clone());
 
             if let Some(symbol) = self.resolve_identifier(&data.name) {
-                self.value_symbol_links
-                    .get_or_default(&symbol)
-                    .resolved_type = Some(resolved_type);
+                // Go getTypeOfVariableOrParameterOrPropertyWorker：符号类型取
+                // value_declaration（首声明）计算，二级 var 声明不覆盖符号类型
+                let is_primary = symbol
+                    .value_declaration
+                    .as_ref()
+                    .is_none_or(|vd| Arc::ptr_eq(vd, node));
+                if is_primary {
+                    self.value_symbol_links
+                        .get_or_default(&symbol)
+                        .resolved_type = Some(resolved_type);
+                }
             }
 
             // Go checkVariableLikeDeclaration：绑定模式名逐元素急切解析

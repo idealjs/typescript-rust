@@ -199,9 +199,12 @@ impl Checker {
                 NodeData::ConstructorDeclaration(_) => {
                     self.add_constructor_properties(member, tbl, props);
                 }
-                NodeData::IndexSignatureDeclaration(_) => unsafe {
-                    self.add_index_signature_member(member, &mut *sink.index_infos);
-                },
+                NodeData::IndexSignatureDeclaration(_) => {
+                    if !member.has_syntactic_modifier(ModifierFlags::Static) {
+                        let infos = unsafe { &mut *sink.index_infos };
+                        self.add_index_signature_member(member, infos);
+                    }
+                }
                 _ => {}
             }
         }
