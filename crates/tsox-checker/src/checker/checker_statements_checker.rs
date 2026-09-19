@@ -189,6 +189,48 @@ impl Checker {
                     } else {
                         self.check_for_initializer(&data.initializer);
                         self.check_expression(&data.expression);
+                        if data.initializer.kind != SyntaxKind::VariableDeclarationList
+                            && !matches!(
+                                data.initializer.kind,
+                                SyntaxKind::ArrayLiteralExpression
+                                    | SyntaxKind::ObjectLiteralExpression
+                            )
+                        {
+                            // Go checkForInStatement：getIndexTypeOrString(右值)
+                            // 可赋给左值表达式类型，否则 TS2405
+                            let left_type = self.get_type_of_node(&data.initializer);
+                            let right_type = self.get_type_of_node(&data.expression);
+                            let right_type = self.get_non_nullable_type_of(&right_type);
+                            let index_or_string = if self.is_array_type(&right_type) {
+                                self.get_array_element_type(&right_type)
+                            } else {
+                                right_type
+                                    .as_structured()
+                                    .and_then(|s| {
+                                        s.index_infos.iter().find_map(|info| {
+                                            let key_number = info.key_type.as_ref().is_some_and(
+                                                |k| k.flags.contains(TypeFlags::Number),
+                                            );
+                                            if key_number {
+                                                info.value_type.clone()
+                                            } else {
+                                                None
+                                            }
+                                        })
+                                    })
+                                    .unwrap_or_else(|| self.string_type())
+                            };
+                            if !self.is_type_assignable_to(&index_or_string, &left_type) {
+                                let file = self.current_file.clone();
+                                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                    file,
+                                    data.initializer.loc,
+                                    tsox_core::diagnostics::messages_generated::
+                                        THE_LEFT_HAND_SIDE_OF_A_FOR_IN_STATEMENT_MUST_BE_OF_TYPE_STRING_OR_ANY,
+                                    Vec::new(),
+                                ));
+                            }
+                        }
                     }
                     self.break_continue_context_stack
                         .push(BreakContinueContext {
