@@ -42,6 +42,7 @@ impl Checker {
 
         if file.external_module_indicator.is_some() {
             self.check_export_star_ambiguity(&file_node);
+            self.check_external_module_export_duplicates(&statements);
         }
 
         self.check_declaration_diagnostics(&statements);

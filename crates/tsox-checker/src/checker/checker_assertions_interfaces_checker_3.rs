@@ -417,3 +417,100 @@ impl Checker {
         None
     }
 }
+
+impl Checker {
+    // Go checkExternalModuleExports 的 export * 冲突段：同一导出名多个
+    // 非重载声明时报 TS2323（namespace/enum/接口合并/类型别名合并除外）
+    pub(crate) fn check_external_module_export_duplicates(&mut self, statements: &[Arc<Node>]) {
+        let Some(module_symbol) = self.current_file_symbol.clone() else {
+            return;
+        };
+        let default_locs: Vec<tsox_core::core::text::TextRange> = statements
+            .iter()
+            .filter(|s| {
+                matches!(&s.data, tsox_frontend::ast::NodeData::ExportAssignment(d) if !d.is_export_equals)
+                    || s.has_syntactic_modifier(ModifierFlags::Default)
+            })
+            .map(|s| s.name().map(|n| n.loc).unwrap_or(s.loc))
+            .collect();
+        if default_locs.len() > 1 {
+            for loc in default_locs {
+                let file = self.current_file.clone();
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    loc,
+                    tsox_core::diagnostics::messages_generated::
+                        CANNOT_REDECLARE_EXPORTED_VARIABLE_0,
+                    vec!["default".to_string()],
+                ));
+            }
+        }
+        let exports = self.get_exports_of_module_table(&module_symbol);
+        for (name, symbol) in exports.entries.iter() {
+            if name == "export*" || name == "export=" {
+                continue;
+            }
+            let flags = self.get_symbol_flags(symbol);
+            if flags.intersects(SymbolFlags::NAMESPACE | SymbolFlags::ENUM) {
+                continue;
+            }
+            let is_not_overload = |d: &Arc<Node>| {
+                !matches!(d.kind, SyntaxKind::FunctionDeclaration | SyntaxKind::MethodDeclaration)
+                    || body_of(d).is_some()
+            };
+            let exported_declarations_count = symbol
+                .declarations
+                .iter()
+                .filter(|d| {
+                    is_not_overload(d)
+                        && !matches!(
+                            d.kind,
+                            SyntaxKind::GetAccessor | SyntaxKind::SetAccessor
+                        )
+                        && d.kind != SyntaxKind::InterfaceDeclaration
+                })
+                .count();
+            if flags.intersects(SymbolFlags::TypeAlias) && exported_declarations_count <= 2 {
+                continue;
+            }
+            if exported_declarations_count > 1
+                && !symbol.declarations.iter().all(|d| {
+                    crate::binder::get_assignment_declaration_kind(d)
+                        == crate::binder::bind_js_assignment_declarations::JsDeclarationKind::ExportsProperty
+                })
+            {
+                for declaration in symbol.declarations.iter() {
+                    if is_not_overload(declaration)
+                        && let Some(loc) = declaration_name_loc(declaration)
+                    {
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            file,
+                            loc,
+                            tsox_core::diagnostics::messages_generated::
+                                CANNOT_REDECLARE_EXPORTED_VARIABLE_0,
+                            vec![name.clone()],
+                        ));
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn body_of(d: &Arc<Node>) -> Option<Arc<Node>> {
+    match &d.data {
+        tsox_frontend::ast::NodeData::FunctionDeclaration(f) => f.body.clone(),
+        tsox_frontend::ast::NodeData::MethodDeclaration(m) => m.body.clone(),
+        _ => None,
+    }
+}
+
+// Go scanner.GetErrorRangeForNode：报错定位到声明名（变量/函数/类等），
+// ExportAssignment 用整节点
+fn declaration_name_loc(d: &Arc<Node>) -> Option<tsox_core::core::text::TextRange> {
+    if matches!(d.kind, SyntaxKind::ExportAssignment) {
+        return Some(d.loc);
+    }
+    d.name().map(|n| n.loc)
+}
