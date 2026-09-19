@@ -288,6 +288,7 @@ impl Parser {
             yield_context: self.yield_context,
             await_context: self.await_context,
             decorator_context: self.decorator_context,
+            disallow_in_context: self.disallow_in_context,
             parsing_contexts: self.parsing_contexts,
         }
     }

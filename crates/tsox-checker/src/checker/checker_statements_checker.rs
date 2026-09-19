@@ -143,8 +143,21 @@ impl Checker {
                                 );
                             }
                         }
-                        self.check_expression(&data.expression);
-                        let iterated = self.check_right_hand_side_of_for_of(node);
+                        let decl_list_empty = data.initializer.kind
+                            == SyntaxKind::VariableDeclarationList
+                            && matches!(
+                                &data.initializer.data,
+                                tsox_frontend::ast::NodeData::VariableDeclarationList(d)
+                                    if d.declarations.nodes.is_empty()
+                            );
+                        if !decl_list_empty {
+                            self.check_expression(&data.expression);
+                        }
+                        let iterated = if decl_list_empty {
+                            None
+                        } else {
+                            self.check_right_hand_side_of_for_of(node)
+                        };
                         if data.initializer.kind == SyntaxKind::VariableDeclarationList {
                             self.check_variable_declaration_list(&data.initializer);
                         } else {

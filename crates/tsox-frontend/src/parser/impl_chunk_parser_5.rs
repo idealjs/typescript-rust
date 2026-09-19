@@ -118,6 +118,21 @@ impl Parser {
         self.token == SyntaxKind::Identifier || is_keyword(self.token)
     }
 
+    pub(crate) fn next_is_identifier_and_close_paren(&self) -> bool {
+        let mut s = self.scanner.clone();
+        s.scan();
+        let token = s.token();
+        let token_is_identifier = !(token == SyntaxKind::YieldKeyword && self.yield_context)
+            && !(token == SyntaxKind::AwaitKeyword && self.await_context)
+            && !is_reserved_word_kind(token)
+            && (token == SyntaxKind::Identifier || is_keyword(token));
+        if !token_is_identifier {
+            return false;
+        }
+        s.scan();
+        s.token() == SyntaxKind::CloseParenToken
+    }
+
     pub(crate) fn is_binding_identifier_or_pattern(&self) -> bool {
         self.is_binding_identifier()
             || self.token == SyntaxKind::PrivateIdentifier
@@ -387,7 +402,7 @@ impl Parser {
             SyntaxKind::OpenBracketToken => {
                 let pos = self.token_pos();
                 self.next_token();
-                let expression = self.parse_assignment_expression();
+                let expression = self.allow_in(|p| p.parse_assignment_expression());
                 self.expect(SyntaxKind::CloseBracketToken);
                 let end = self.node_pos();
                 Arc::new(Node::with_loc(

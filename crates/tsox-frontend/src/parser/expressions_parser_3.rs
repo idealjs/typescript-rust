@@ -240,6 +240,9 @@ impl Parser {
         let mut left = self.parse_unary_expression();
 
         loop {
+            if self.token == SyntaxKind::InKeyword && self.disallow_in_context {
+                break;
+            }
             let precedence = binary_precedence(self.token);
             if precedence == 0 || precedence < min_precedence {
                 break;

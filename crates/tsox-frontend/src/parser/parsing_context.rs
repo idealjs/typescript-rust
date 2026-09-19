@@ -48,6 +48,8 @@ pub struct Parser {
 
     pub(crate) decorator_context: bool,
 
+    pub(crate) disallow_in_context: bool,
+
     pub(crate) parsing_contexts: u32,
 }
 

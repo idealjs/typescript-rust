@@ -115,7 +115,7 @@ impl Parser {
 
         if self.token == SyntaxKind::ColonToken {
             self.next_token();
-            let initializer = self.parse_assignment_expression();
+            let initializer = self.allow_in(|p| p.parse_assignment_expression());
             let end = initializer.end();
             Arc::new(Node::with_loc(
                 SyntaxKind::PropertyAssignment,
@@ -137,7 +137,7 @@ impl Parser {
                 // Go parseObjectLiteralElement：非 shorthand 时期望 ':'，
                 // 失败后仍按 PropertyAssignment（解析初始化器）恢复
                 self.expect(SyntaxKind::ColonToken);
-                let initializer = self.parse_assignment_expression();
+                let initializer = self.allow_in(|p| p.parse_assignment_expression());
                 let end = initializer.end();
                 return Arc::new(Node::with_loc(
                     SyntaxKind::PropertyAssignment,
@@ -157,7 +157,7 @@ impl Parser {
             }
             let equals_token = self.parse_optional_token(SyntaxKind::EqualsToken);
             let object_assignment_initializer = if equals_token.is_some() {
-                Some(self.parse_assignment_expression())
+                Some(self.allow_in(|p| p.parse_assignment_expression()))
             } else {
                 None
             };

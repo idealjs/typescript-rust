@@ -271,7 +271,7 @@ impl Parser {
     pub(crate) fn parse_argument(&mut self) -> Arc<Node> {
         if self.parse_optional(SyntaxKind::DotDotDotToken) {
             let pos = self.token_pos();
-            let expression = self.parse_assignment_expression();
+            let expression = self.allow_in(|p| p.parse_assignment_expression());
             let end = expression.end();
             return Arc::new(Node::with_loc(
                 SyntaxKind::SpreadElement,
@@ -279,7 +279,7 @@ impl Parser {
                 TextRange::new(pos, end),
             ));
         }
-        self.parse_assignment_expression()
+        self.allow_in(|p| p.parse_assignment_expression())
     }
 
     pub(crate) fn parse_optional_type_arguments(&mut self) -> Option<Arc<NodeList>> {

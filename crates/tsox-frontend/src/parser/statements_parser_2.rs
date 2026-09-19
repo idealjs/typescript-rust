@@ -268,7 +268,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_variable_declaration_list(&mut self, _in_for: bool) -> Arc<Node> {
+    pub(crate) fn parse_variable_declaration_list(&mut self, in_for: bool) -> Arc<Node> {
         let pos = self.token_pos();
         let flags = match self.token {
             SyntaxKind::VarKeyword => NodeFlags::empty(),
@@ -286,14 +286,29 @@ impl Parser {
         } else {
             self.next_token();
         }
-        let declarations = self.parse_delimited_list(
-            ParsingContext::VariableDeclarations,
-            if _in_for {
-                Parser::parse_variable_declaration
-            } else {
-                Parser::parse_variable_declaration_allow_exclamation
-            },
-        );
+        let empty_declarations = self.token == SyntaxKind::OfKeyword
+            && self.next_is_identifier_and_close_paren();
+        let outer_disallow_in = self.disallow_in_context;
+        if in_for {
+            self.disallow_in_context = true;
+        }
+        let declarations = if empty_declarations {
+            let of_pos = self.scanner.full_start_pos();
+            NodeList {
+                loc: TextRange::new(of_pos, of_pos),
+                nodes: Vec::new(),
+            }
+        } else {
+            self.parse_delimited_list(
+                ParsingContext::VariableDeclarations,
+                if in_for {
+                    Parser::parse_variable_declaration
+                } else {
+                    Parser::parse_variable_declaration_allow_exclamation
+                },
+            )
+        };
+        self.disallow_in_context = outer_disallow_in;
         let end = self.node_pos();
         let mut node = Node::with_loc(
             SyntaxKind::VariableDeclarationList,

@@ -87,6 +87,7 @@ impl Parser {
 
     pub(crate) fn parse_for_statement(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
+        let context_flags = self.context_flags_now();
         self.expect(SyntaxKind::ForKeyword);
 
         let await_modifier = if self.token == SyntaxKind::AwaitKeyword {
@@ -104,7 +105,11 @@ impl Parser {
             ) {
                 Some(self.parse_variable_declaration_list(true))
             } else {
-                Some(self.parse_expression())
+                let outer_disallow_in = self.disallow_in_context;
+                self.disallow_in_context = true;
+                let expr = self.parse_expression();
+                self.disallow_in_context = outer_disallow_in;
+                Some(expr)
             }
         } else {
             None
@@ -116,7 +121,7 @@ impl Parser {
             self.expect(SyntaxKind::CloseParenToken);
             let statement = self.parse_statement();
             let end = statement.end();
-            return Arc::new(Node::with_loc(
+            return Arc::new(Node::with_loc_flags(
                 SyntaxKind::ForInStatement,
                 NodeData::ForInOrOfStatement(ForInOrOfStatementData {
                     await_modifier: None,
@@ -125,6 +130,7 @@ impl Parser {
                     statement,
                 }),
                 TextRange::new(pos, end),
+                context_flags,
             ));
         }
         if self.token == SyntaxKind::OfKeyword {
@@ -133,7 +139,7 @@ impl Parser {
             self.expect(SyntaxKind::CloseParenToken);
             let statement = self.parse_statement();
             let end = statement.end();
-            return Arc::new(Node::with_loc(
+            return Arc::new(Node::with_loc_flags(
                 SyntaxKind::ForOfStatement,
                 NodeData::ForInOrOfStatement(ForInOrOfStatementData {
                     await_modifier,
@@ -142,6 +148,7 @@ impl Parser {
                     statement,
                 }),
                 TextRange::new(pos, end),
+                context_flags,
             ));
         }
 

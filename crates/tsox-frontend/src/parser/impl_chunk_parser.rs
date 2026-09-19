@@ -17,6 +17,7 @@ impl Parser {
             yield_context: false,
             await_context: false,
             decorator_context: false,
+            disallow_in_context: false,
             parsing_contexts: 0,
         };
 
@@ -36,6 +37,14 @@ impl Parser {
 
     pub(crate) fn set_javascript_file(&mut self, javascript_file: bool) {
         self.javascript_file = javascript_file;
+    }
+
+    pub(crate) fn allow_in<T>(&mut self, f: impl FnOnce(&mut Self) -> T) -> T {
+        let outer = self.disallow_in_context;
+        self.disallow_in_context = false;
+        let result = f(self);
+        self.disallow_in_context = outer;
+        result
     }
 
     pub fn parse_source_file(file_name: impl Into<String>) -> SourceFile {

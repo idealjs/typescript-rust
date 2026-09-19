@@ -54,8 +54,10 @@ impl Checker {
         };
         let is_for_of = node.kind == SyntaxKind::ForOfStatement;
 
-        // for (async of ...)：LHS 裸 async 标识符禁止（无 await context 旗标时）
         if is_for_of
+            && !node
+                .flags
+                .intersects(tsox_frontend::ast::node_flags::NodeFlags::AwaitContext)
             && tsox_frontend::ast::is_identifier(&data.initializer)
             && data.initializer.text() == "async"
         {

@@ -73,10 +73,12 @@ impl Parser {
     pub(crate) fn parse_array_binding_pattern(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBracketToken);
-        let elements = self.parse_delimited_list(
-            ParsingContext::ArrayBindingElements,
-            Parser::parse_array_binding_element,
-        );
+        let elements = self.allow_in(|p| {
+            p.parse_delimited_list(
+                ParsingContext::ArrayBindingElements,
+                Parser::parse_array_binding_element,
+            )
+        });
         self.expect(SyntaxKind::CloseBracketToken);
         let end = self.node_pos();
         Arc::new(Node::with_loc(
@@ -121,10 +123,12 @@ impl Parser {
     pub(crate) fn parse_object_binding_pattern(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
-        let elements = self.parse_delimited_list(
-            ParsingContext::ObjectBindingElements,
-            Parser::parse_object_binding_element,
-        );
+        let elements = self.allow_in(|p| {
+            p.parse_delimited_list(
+                ParsingContext::ObjectBindingElements,
+                Parser::parse_object_binding_element,
+            )
+        });
         self.expect(SyntaxKind::CloseBraceToken);
         let end = self.node_pos();
         Arc::new(Node::with_loc(

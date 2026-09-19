@@ -189,7 +189,7 @@ impl Parser {
         let pos = self.token_pos();
         self.next_token();
 
-        let expr = self.parse_expression();
+        let expr = self.allow_in(|p| p.parse_expression());
         self.expect(SyntaxKind::CloseParenToken);
         let end = self.node_pos();
 
@@ -246,7 +246,7 @@ impl Parser {
     pub(crate) fn parse_array_literal_element(&mut self) -> Arc<Node> {
         if self.parse_optional(SyntaxKind::DotDotDotToken) {
             let pos = self.token_pos();
-            let expression = self.parse_assignment_expression();
+            let expression = self.allow_in(|p| p.parse_assignment_expression());
             let end = expression.end();
             return Arc::new(Node::with_loc(
                 SyntaxKind::SpreadElement,
@@ -262,7 +262,7 @@ impl Parser {
                 TextRange::new(pos, pos),
             ));
         }
-        self.parse_assignment_expression()
+        self.allow_in(|p| p.parse_assignment_expression())
     }
 
     pub(crate) fn parse_object_literal(&mut self) -> Arc<Node> {

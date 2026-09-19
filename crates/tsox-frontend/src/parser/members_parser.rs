@@ -9,7 +9,7 @@ impl Parser {
         self.next_token();
         let mut spans = Vec::new();
         loop {
-            let expression = self.parse_expression();
+            let expression = self.allow_in(|p| p.parse_expression());
             let literal = if self.token == SyntaxKind::CloseBraceToken {
                 self.next_template_token();
                 self.create_token_node()
