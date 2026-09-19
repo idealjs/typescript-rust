@@ -268,6 +268,22 @@ impl Checker {
             }
         }
 
+        if s.contains(TypeFlags::TypeParameter)
+            && !t.contains(TypeFlags::TypeParameter)
+            && self.relater_chain_active
+            && self.speculation_depth == 0
+            && relation != RelationKind::Identity
+            && let Some(constraint) = self.get_constraint_of_type_parameter(source)
+            && !constraint.flags.contains(TypeFlags::Unknown)
+        {
+            let cs = self.type_to_string(&constraint);
+            let ts = self.type_to_string(target);
+            self.relater_report_error(
+                tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                vec![cs, ts],
+            );
+        }
+
         false
     }
 
