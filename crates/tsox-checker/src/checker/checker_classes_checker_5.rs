@@ -135,6 +135,7 @@ impl Checker {
             }
 
             for type_ref in data.types.iter() {
+                self.check_extends_private_ctor(type_ref);
                 if let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(ewa) =
                     &type_ref.data
                 {

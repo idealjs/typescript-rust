@@ -32,64 +32,27 @@ impl Checker {
             }
             if let Some(init) = &data.initializer {
                 self.check_expression(init);
-
-                let ambient = node
-                    .parent()
-                    .as_ref()
-                    .is_some_and(|p| p.has_syntactic_modifier(ModifierFlags::Ambient))
-                    || self.ambient_context_depth > 0
-                    || self
-                        .current_file
-                        .as_ref()
-                        .is_some_and(|f| f.is_declaration_file);
-                if ambient && !Self::is_constant_enum_initializer(init) {
-                    let file = self.current_file.clone();
-                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                        file,
-                        init.loc,
-                        tsox_core::diagnostics::messages_generated::
-                            IN_AMBIENT_ENUM_DECLARATIONS_MEMBER_INITIALIZER_MUST_BE_CONSTANT_EXPRESSION,
-                        vec![],
-                    ));
-                }
             }
+            // 值计算路径按 Go computeEnumMemberValue 附带全部成员级诊断
+            // （TS1061/TS18056/TS2474/TS2476/TS18033/TS18055/const-enum NaN/Inf）
+            self.get_enum_member_value(node);
         }
     }
 
-    fn is_constant_enum_initializer(init: &Arc<Node>) -> bool {
-        match &init.data {
-            tsox_frontend::ast::NodeData::NumericLiteral(_)
-            | tsox_frontend::ast::NodeData::StringLiteral(_)
-            | tsox_frontend::ast::NodeData::NoSubstitutionTemplateLiteral(_) => true,
-            tsox_frontend::ast::NodeData::Identifier(_) => true,
-            tsox_frontend::ast::NodeData::PrefixUnaryExpression(u) => {
-                matches!(
-                    u.operator,
-                    SyntaxKind::PlusToken | SyntaxKind::MinusToken | SyntaxKind::TildeToken
-                ) && Self::is_constant_enum_initializer(&u.operand)
-            }
-            tsox_frontend::ast::NodeData::BinaryExpression(b) => {
-                matches!(
-                    b.operator_token.kind,
-                    SyntaxKind::PlusToken
-                        | SyntaxKind::MinusToken
-                        | SyntaxKind::AsteriskToken
-                        | SyntaxKind::SlashToken
-                        | SyntaxKind::PercentToken
-                        | SyntaxKind::LessThanLessThanToken
-                        | SyntaxKind::GreaterThanGreaterThanToken
-                        | SyntaxKind::GreaterThanGreaterThanGreaterThanToken
-                        | SyntaxKind::AmpersandToken
-                        | SyntaxKind::BarToken
-                        | SyntaxKind::CaretToken
-                ) && Self::is_constant_enum_initializer(&b.left)
-                    && Self::is_constant_enum_initializer(&b.right)
-            }
-            tsox_frontend::ast::NodeData::ParenthesizedExpression(p) => {
-                Self::is_constant_enum_initializer(&p.expression)
-            }
-            _ => false,
-        }
+    fn enum_member_diagnostics_context(&self, member: &Arc<Node>) -> (bool, bool) {
+        let parent = member.parent();
+        let is_const_enum = parent
+            .as_ref()
+            .is_some_and(|p| p.has_syntactic_modifier(ModifierFlags::Const));
+        let ambient = parent
+            .as_ref()
+            .is_some_and(|p| p.has_syntactic_modifier(ModifierFlags::Ambient))
+            || self.ambient_context_depth > 0
+            || self
+                .current_file
+                .as_ref()
+                .is_some_and(|f| f.is_declaration_file);
+        (is_const_enum, ambient)
     }
 
     pub fn get_declaration_of_kind(
@@ -144,7 +107,7 @@ impl Checker {
         &mut self,
         member: &Arc<Node>,
         auto_value: Option<f64>,
-        _previous: Option<&Arc<Node>>,
+        previous: Option<&Arc<Node>>,
     ) -> EvalResult {
         // Go computeEnumMemberValue：非字面量计算名报 TS1164
         if let Some(name) = member.name()
@@ -165,15 +128,40 @@ impl Checker {
         if has_initializer {
             return self.compute_constant_enum_member_value(member);
         }
-        match auto_value {
-            Some(v) => EvalResult::new(
-                Some(EvalValue::Number(tsox_core::jsnum::Number(v))),
-                false,
-                false,
-                false,
-            ),
-            None => EvalResult::none(),
+        let name_loc = member.name().map(|n| n.loc).unwrap_or(member.loc);
+        let Some(v) = auto_value else {
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                name_loc,
+                tsox_core::diagnostics::messages_generated::ENUM_MEMBER_MUST_HAVE_INITIALIZER,
+                vec![],
+            ));
+            return EvalResult::none();
+        };
+        if self.compiler_options.isolated_modules.is_true()
+            && let Some(prev) = previous
+            && matches!(&prev.data, NodeData::EnumMember(d) if d.initializer.is_some())
+        {
+            let prev_result = self.enum_member_links.get(prev).map(|l| l.value.clone());
+            let prev_ok = prev_result.as_ref().is_some_and(|r| {
+                matches!(&r.value, Some(EvalValue::Number(_))) && !r.resolved_other_files
+            });
+            if prev_result.is_some() && !prev_ok {
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    name_loc,
+                    tsox_core::diagnostics::messages_generated::
+                        ENUM_MEMBER_FOLLOWING_A_NON_LITERAL_NUMERIC_MEMBER_MUST_HAVE_AN_INITIALIZER_WHEN_ISOLATEDMODULES_IS_ENABLED,
+                    vec![],
+                ));
+            }
         }
+        EvalResult::new(
+            Some(EvalValue::Number(tsox_core::jsnum::Number(v))),
+            false,
+            false,
+            false,
+        )
     }
 
     fn compute_constant_enum_member_value(&mut self, member: &Arc<Node>) -> EvalResult {
@@ -184,6 +172,85 @@ impl Checker {
             },
             _ => return EvalResult::none(),
         };
-        tsox_frontend::evaluator::evaluate_expression(&initializer, Some(member), noop_entity_fn)
+        let result = tsox_frontend::evaluator::evaluate_expression(
+            &initializer,
+            Some(member),
+            noop_entity_fn,
+        );
+        let (is_const_enum, ambient) = self.enum_member_diagnostics_context(member);
+        match &result.value {
+            Some(EvalValue::Number(n)) => {
+                if is_const_enum && (n.0.is_nan() || n.0.is_infinite()) {
+                    let message = if n.0.is_nan() {
+                        tsox_core::diagnostics::messages_generated::
+                            X_CONST_ENUM_MEMBER_INITIALIZER_WAS_EVALUATED_TO_DISALLOWED_VALUE_NAN
+                    } else {
+                        tsox_core::diagnostics::messages_generated::
+                            X_CONST_ENUM_MEMBER_INITIALIZER_WAS_EVALUATED_TO_A_NON_FINITE_VALUE
+                    };
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        initializer.loc,
+                        message,
+                        vec![],
+                    ));
+                }
+            }
+            Some(EvalValue::String(_)) => {
+                if self.compiler_options.isolated_modules.is_true() && !result.is_syntactically_string
+                {
+                    let enum_name = member
+                        .parent()
+                        .and_then(|p| p.name().map(|n| n.text().to_string()));
+                    let member_name = format!(
+                        "{}.{}",
+                        enum_name.unwrap_or_default(),
+                        member.name().map(|n| n.text().to_string()).unwrap_or_default()
+                    );
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        initializer.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_HAS_A_STRING_TYPE_BUT_MUST_HAVE_SYNTACTICALLY_RECOGNIZABLE_STRING_SYNTAX_WHEN_ISOLATEDMODULES_IS_ENABLED,
+                        vec![member_name],
+                    ));
+                }
+            }
+            _ => {
+                if is_const_enum {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        initializer.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            X_CONST_ENUM_MEMBER_INITIALIZERS_MUST_BE_CONSTANT_EXPRESSIONS,
+                        vec![],
+                    ));
+                } else if ambient {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        initializer.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            IN_AMBIENT_ENUM_DECLARATIONS_MEMBER_INITIALIZER_MUST_BE_CONSTANT_EXPRESSION,
+                        vec![],
+                    ));
+                } else {
+                    let init_type = self.get_type_of_node(&initializer);
+                    let number = self.number_type();
+                    self.check_type_related_to_and_optionally_elaborate(
+                        &init_type,
+                        &number,
+                        crate::checker::relater::RelationKind::Assignable,
+                        Some(&initializer),
+                        None,
+                        Some(
+                            &tsox_core::diagnostics::messages_generated::
+                                TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_AS_REQUIRED_FOR_COMPUTED_ENUM_MEMBER_VALUES,
+                        ),
+                        None,
+                    );
+                }
+            }
+        }
+        result
     }
 }

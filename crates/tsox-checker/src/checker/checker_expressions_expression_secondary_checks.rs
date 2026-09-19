@@ -27,6 +27,8 @@ impl Checker {
                 }
             }
 
+            self.check_new_expression_ctor_accessibility(node);
+
             if !reported_abstract {
                 let callee_type = self.get_type_of_node(&data.expression);
                 if self.type_includes_abstract_constructor(&callee_type) {
@@ -39,7 +41,9 @@ impl Checker {
                 }
             }
         }
-        self.check_call_arguments(node, true);
+        if !self.check_new_expression_ctor_accessibility(node) {
+            self.check_call_arguments(node, true);
+        }
     }
 
     pub fn check_function_like_expression(&mut self, node: &Arc<Node>) {

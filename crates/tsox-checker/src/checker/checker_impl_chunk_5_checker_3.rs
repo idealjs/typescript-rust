@@ -46,6 +46,8 @@ impl Checker {
 
         self.check_unused_identifiers_in_file(&file_node);
 
+        self.check_unused_renamed_binding_elements(&file_node);
+
         self.pop_scope();
         self.current_file = None;
         self.current_file_id = 0;
