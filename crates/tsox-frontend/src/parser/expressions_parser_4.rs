@@ -3,6 +3,32 @@
 use crate::parser::expressions::*;
 
 impl Parser {
+    pub(crate) fn parse_super_expression(&mut self) -> Arc<Node> {
+        let pos = self.node_pos();
+        let expression = self.parse_keyword_expression(SyntaxKind::SuperKeyword);
+        if matches!(
+            self.token,
+            SyntaxKind::OpenParenToken | SyntaxKind::DotToken | SyntaxKind::OpenBracketToken
+        ) {
+            return expression;
+        }
+        self.parse_error_at_current_token(
+            tsox_core::diagnostics::X_SUPER_MUST_BE_FOLLOWED_BY_AN_ARGUMENT_LIST_OR_MEMBER_ACCESS,
+            &[],
+        );
+        let name = self.parse_right_side_of_dot();
+        let end = name.end();
+        Arc::new(Node::with_loc(
+            SyntaxKind::PropertyAccessExpression,
+            NodeData::PropertyAccessExpression(PropertyAccessExpressionData {
+                expression,
+                question_dot_token: None,
+                name,
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
     pub(crate) fn parse_unary_expression(&mut self) -> Arc<Node> {
         match self.token {
             SyntaxKind::PlusToken

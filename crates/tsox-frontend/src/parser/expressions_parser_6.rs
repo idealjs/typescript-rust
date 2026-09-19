@@ -89,7 +89,7 @@ impl Parser {
                 self.parse_keyword_expression(SyntaxKind::UndefinedKeyword)
             }
             SyntaxKind::ThisKeyword => self.parse_keyword_expression(SyntaxKind::ThisKeyword),
-            SyntaxKind::SuperKeyword => self.parse_keyword_expression(SyntaxKind::SuperKeyword),
+            SyntaxKind::SuperKeyword => self.parse_super_expression(),
             SyntaxKind::OpenParenToken => self.parse_parenthesized_or_arrow(),
             SyntaxKind::OpenBracketToken => self.parse_array_literal(),
             SyntaxKind::OpenBraceToken => self.parse_object_literal(),

@@ -24,6 +24,10 @@ impl Checker {
         }
         let obj_type = lookup_type;
 
+        if name_text.is_empty() {
+            return;
+        }
+
         if name.kind == SyntaxKind::PrivateIdentifier
             && self.check_private_identifier_access(node, name, name_text, &obj_type)
         {
