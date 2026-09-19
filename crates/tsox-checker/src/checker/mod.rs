@@ -365,6 +365,7 @@ pub(crate) mod utilities_has_only_expression_initialization;
 pub(crate) mod utilities_is_optional_symbol;
 pub(crate) mod utilities_is_private_within_ambient;
 pub(crate) mod checker_class_dup_declarations;
+pub(crate) mod checker_merged_declaration_exports;
 #[cfg(test)]
 pub(crate) mod utilities_tests;
 pub(crate) mod utilities_token_is_identifier_or_keyword;

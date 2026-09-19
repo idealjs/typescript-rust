@@ -6,6 +6,7 @@ impl Checker {
     pub fn check_class_declaration(&mut self, node: &Arc<Node>) {
         self.check_grammar_modifiers(node);
         self.check_grammar_class_declaration_heritage_clauses(node);
+        self.check_exports_on_merged_declarations(node);
 
         if let tsox_frontend::ast::NodeData::ClassDeclaration(data) = &node.data {
             if let Some(name) = &data.name {
@@ -103,6 +104,7 @@ impl Checker {
 
     pub fn check_enum_declaration(&mut self, node: &Arc<Node>) {
         self.check_grammar_modifiers(node);
+        self.check_exports_on_merged_declarations(node);
 
         if let tsox_frontend::ast::NodeData::EnumDeclaration(data) = &node.data {
             self.check_reserved_type_name(

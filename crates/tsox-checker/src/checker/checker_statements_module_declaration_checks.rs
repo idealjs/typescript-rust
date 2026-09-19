@@ -5,6 +5,7 @@ use crate::checker::checker_statements::*;
 impl Checker {
     pub fn check_module_declaration(&mut self, node: &Arc<Node>) {
         self.check_grammar_modifiers(node);
+        self.check_exports_on_merged_declarations(node);
 
         // Go checkModuleDeclaration：global 增强诊断
         if tsox_frontend::ast::is_global_scope_augmentation(node) {

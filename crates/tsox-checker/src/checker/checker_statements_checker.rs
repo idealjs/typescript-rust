@@ -287,6 +287,7 @@ impl Checker {
                 if !self.check_grammar_modifiers(node) {
                     self.check_grammar_interface_declaration(node);
                 }
+                self.check_exports_on_merged_declarations(node);
 
                 if let tsox_frontend::ast::NodeData::InterfaceDeclaration(data) = &node.data {
                     self.check_reserved_type_name(
