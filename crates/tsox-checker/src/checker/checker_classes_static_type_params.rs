@@ -43,21 +43,32 @@ impl Checker {
     /// Go getSymbolFlags：沿别名链逐级 OR 标志；链断（目标未解析）时
     /// 保留已收集部分
     pub(crate) fn symbol_flags_with_alias_chain(&mut self, symbol: &Arc<Symbol>) -> SymbolFlags {
+        self.symbol_flags_with_alias_chain_ex(symbol).0
+    }
+
+    /// 返回（链上 OR 标志，链是否完整解析到非别名终点）；链断即 Go 的
+    /// unknownSymbol（全含义可用）
+    pub(crate) fn symbol_flags_with_alias_chain_ex(
+        &mut self,
+        symbol: &Arc<Symbol>,
+    ) -> (SymbolFlags, bool) {
         let mut flags = symbol.flags;
         let mut cur = Arc::clone(symbol);
         let mut guard = 0;
-        while cur.flags.intersects(tsox_frontend::ast::SymbolFlags::Alias) && guard < 10 {
+        loop {
+            if !cur.flags.intersects(tsox_frontend::ast::SymbolFlags::Alias) || guard >= 10 {
+                return (flags, true);
+            }
             let Some(next) = self.follow_alias_resolving(&cur) else {
-                break;
+                return (flags, false);
             };
             if Arc::ptr_eq(&next, &cur) {
-                break;
+                return (flags, false);
             }
             flags |= next.flags;
             cur = next;
             guard += 1;
         }
-        flags
     }
 
     /// Go resolveName 上溯链的静态成员违规判定：从类型名向上，中途任何

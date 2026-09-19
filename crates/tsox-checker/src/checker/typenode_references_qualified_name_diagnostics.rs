@@ -22,12 +22,26 @@ impl Checker {
         {
             let file = attributed_file;
             if ns_path.is_empty() {
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    file,
-                    segment.loc,
-                    tsox_core::diagnostics::messages_generated::CANNOT_FIND_NAMESPACE_0,
-                    vec![segment.text().to_string()],
-                ));
+                // Go getSuggestedSymbolForNonexistentSymbol：带拼写建议的
+                // 2503 变体（TS2833）
+                let name_text = segment.text().to_string();
+                if let Some(sugg) = self.find_name_suggestion(&name_text, SymbolFlags::NAMESPACE)
+                {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        segment.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            CANNOT_FIND_NAMESPACE_0_DID_YOU_MEAN_1,
+                        vec![name_text, sugg],
+                    ));
+                } else {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        segment.loc,
+                        tsox_core::diagnostics::messages_generated::CANNOT_FIND_NAMESPACE_0,
+                        vec![name_text],
+                    ));
+                }
             } else {
                 let leftmost = crate::checker::checker::base_identifier_of(type_name);
                 let left_hit = self

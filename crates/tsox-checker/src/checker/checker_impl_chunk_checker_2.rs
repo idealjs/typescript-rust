@@ -153,6 +153,39 @@ impl Checker {
             }
         }
 
+        // Go 模型：脚本文件顶层符号即全局符号（无按文件遮蔽）。全局合并后
+        // 把合并符号回写各脚本文件符号表，文件内解析命中同一合并符号
+        for file in &script_files {
+            let Some(file_sym) = self.program.symbol_map().symbol_of(&file.node).cloned() else {
+                continue;
+            };
+            let member_keys: Vec<String> = file_sym.members.iter().map(|(k, _)| k.clone()).collect();
+            let local_keys: Vec<String> = self
+                .program
+                .symbol_map()
+                .locals_of(&file.node)
+                .map(|l| l.iter().map(|(k, _)| k.clone()).collect())
+                .unwrap_or_default();
+            let file_sym_mut = Arc::as_ptr(&file_sym) as *mut tsox_frontend::ast::Symbol;
+            unsafe {
+                for k in member_keys {
+                    if let Some(merged) = self.globals.get(&k) {
+                        (*file_sym_mut).members.insert(k, Arc::clone(merged));
+                    }
+                }
+            }
+            if let Some(locals) = self.program.symbol_map().locals_of(&file.node) {
+                let locals_mut = locals as *const _ as *mut tsox_frontend::ast::SymbolTable;
+                unsafe {
+                    for k in local_keys {
+                        if let Some(merged) = self.globals.get(&k) {
+                            (*locals_mut).insert(k, Arc::clone(merged));
+                        }
+                    }
+                }
+            }
+        }
+
         self.ensure_host_globals();
 
         self.merge_module_augmentations();
