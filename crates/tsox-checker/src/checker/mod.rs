@@ -49,6 +49,7 @@ pub(crate) mod checker_checker_checker;
 pub(crate) mod checker_classes;
 pub(crate) mod checker_parameter_implicit_any;
 pub(crate) mod checker_classes_accessor_member_checks;
+pub(crate) mod checker_classes_base_ctor_check;
 pub(crate) mod checker_classes_accessor_pair_rules;
 pub(crate) mod checker_classes_accessor_override_kinds;
 pub(crate) mod checker_classes_ctor_accessibility;

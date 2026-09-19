@@ -90,7 +90,7 @@ impl Checker {
         instance
     }
 
-    fn resolve_entity_name_class_symbol(&mut self, expr: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub(crate) fn resolve_entity_name_class_symbol(&mut self, expr: &Arc<Node>) -> Option<Arc<Symbol>> {
         match expr.kind {
             SyntaxKind::Identifier => self.resolve_identifier(expr),
             SyntaxKind::PropertyAccessExpression => {
