@@ -335,6 +335,9 @@ impl Checker {
                                         Arc<Node>,
                                         String,
                                         bool,
+                                        bool,
+                                        Arc<Type>,
+                                        Arc<Type>,
                                     )> = None;
                                     for member in cd.members.iter() {
                                         if !member.has_syntactic_modifier(ModifierFlags::Static) {
@@ -410,11 +413,14 @@ impl Checker {
                                                 Arc::clone(&name_node),
                                                 prop_name,
                                                 visibility_narrowed,
+                                                both_private,
+                                                own_t,
+                                                base_t,
                                             ));
                                             break;
                                         }
                                     }
-                                    if let Some((name_node, prop_name, narrowed)) =
+                                    if let Some((name_node, prop_name, narrowed, both_private, own_t, base_t)) =
                                         static_bad
                                     {
                                         let class_name = cd
@@ -436,33 +442,87 @@ impl Checker {
                                                     format!("typeof {}", self.type_to_string(&base_type)),
                                                 ],
                                             );
-                                        let chain_msg = if narrowed {
-                                            tsox_core::diagnostics::messages_generated::
-                                                PROPERTY_0_IS_PROTECTED_IN_TYPE_1_BUT_PUBLIC_IN_TYPE_2
-                                        } else {
-                                            tsox_core::diagnostics::messages_generated::
-                                                TYPES_HAVE_SEPARATE_DECLARATIONS_OF_A_PRIVATE_PROPERTY_0
-                                        };
-                                        let chain_args = if narrowed {
-                                            vec![
-                                                prop_name,
-                                                format!("typeof {class_name}"),
-                                                format!(
-                                                    "typeof {}",
-                                                    self.type_to_string(&base_type)
+                                        if narrowed {
+                                            diag.message_chain = vec![
+                                                tsox_frontend::ast::Diagnostic::new(
+                                                    None,
+                                                    name_node.loc,
+                                                    tsox_core::diagnostics::messages_generated::
+                                                        PROPERTY_0_IS_PROTECTED_IN_TYPE_1_BUT_PUBLIC_IN_TYPE_2,
+                                                    vec![
+                                                        prop_name,
+                                                        format!("typeof {class_name}"),
+                                                        format!(
+                                                            "typeof {}",
+                                                            self.type_to_string(&base_type)
+                                                        ),
+                                                    ],
                                                 ),
-                                            ]
+                                            ];
+                                        } else if both_private {
+                                            diag.message_chain = vec![
+                                                tsox_frontend::ast::Diagnostic::new(
+                                                    None,
+                                                    name_node.loc,
+                                                    tsox_core::diagnostics::messages_generated::
+                                                        TYPES_HAVE_SEPARATE_DECLARATIONS_OF_A_PRIVATE_PROPERTY_0,
+                                                    vec![prop_name],
+                                                ),
+                                            ];
                                         } else {
-                                            vec![prop_name]
-                                        };
-                                        diag.message_chain = vec![
-                                            tsox_frontend::ast::Diagnostic::new(
-                                                None,
-                                                name_node.loc,
-                                                chain_msg,
-                                                chain_args,
-                                            ),
-                                        ];
+                                            let saved_chain =
+                                                std::mem::take(&mut self.relater_error_chain);
+                                            let was_active = self.relater_chain_active;
+                                            self.relater_error_chain.clear();
+                                            self.relater_chain_active = true;
+                                            let _ = self.is_type_assignable_to(&own_t, &base_t);
+                                            if self.relater_error_chain.is_empty() {
+                                                let s_str = self.type_to_string(&own_t);
+                                                let t_str = self.type_to_string(&base_t);
+                                                self.push_relation_head_with_tp_note(
+                                                    &own_t,
+                                                    &base_t,
+                                                    tsox_core::diagnostics::messages_generated::
+                                                        TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                                                    vec![s_str, t_str],
+                                                );
+                                            }
+                                            let chain = std::mem::replace(
+                                                &mut self.relater_error_chain,
+                                                saved_chain,
+                                            );
+                                            self.relater_chain_active = was_active;
+                                            let mut child: Option<
+                                                tsox_frontend::ast::Diagnostic,
+                                            > = None;
+                                            for entry in chain
+                                                .iter()
+                                                .filter(|e| !e.message.elided_in_compatibility_pyramid)
+                                            {
+                                                let mut d = tsox_frontend::ast::Diagnostic::new(
+                                                    None,
+                                                    name_node.loc,
+                                                    entry.message,
+                                                    entry.args.clone(),
+                                                );
+                                                if let Some(c) = child.take() {
+                                                    d.message_chain = vec![c];
+                                                }
+                                                child = Some(d);
+                                            }
+                                            let mut prop_diag =
+                                                tsox_frontend::ast::Diagnostic::new(
+                                                    None,
+                                                    name_node.loc,
+                                                    tsox_core::diagnostics::messages_generated::
+                                                        TYPES_OF_PROPERTY_0_ARE_INCOMPATIBLE,
+                                                    vec![prop_name],
+                                                );
+                                            if let Some(c) = child {
+                                                prop_diag.message_chain = vec![c];
+                                            }
+                                            diag.message_chain = vec![prop_diag];
+                                        }
                                         self.diagnostics.add(diag);
                                     }
                                 }
