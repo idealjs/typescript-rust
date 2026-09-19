@@ -162,12 +162,13 @@ impl Checker {
                 && let Some((module, _)) = self.import_declaration_context(decl)
             {
                 if let Some(target) = self.resolve_default_export_target(&module) {
-                    return target;
+                    return Some(target);
                 }
-                return self
-                    .unknown_symbol
-                    .clone()
-                    .unwrap_or_else(|| Arc::clone(&symbol));
+                return Some(
+                    self.unknown_symbol
+                        .clone()
+                        .unwrap_or_else(|| Arc::clone(&symbol)),
+                );
             }
         }
         if let Some(decl) = symbol

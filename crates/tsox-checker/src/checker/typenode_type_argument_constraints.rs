@@ -234,7 +234,7 @@ impl Checker {
                     vec![arg_str.clone(), constraint_str.clone()],
                 );
                 if let Some(prop) =
-                    self.first_incompatible_property(&arg_type, &constraint_type)
+                    self.first_incompatible_property_types(&arg_type, &constraint_type)
                 {
                     let (name, src_t, tgt_t) = prop;
                     d.message_chain.push(tsox_frontend::ast::Diagnostic::new(
@@ -270,7 +270,7 @@ impl Checker {
         true
     }
 
-    fn first_incompatible_property(
+    fn first_incompatible_property_types(
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
