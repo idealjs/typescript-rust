@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker_assignment2::*;
+use tsox_core::diagnostics::messages_generated::OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1;
 
 impl Checker {
     pub(crate) fn check_assignment_compat(
@@ -131,6 +132,27 @@ impl Checker {
                 self.get_type_of_node(node)
             }
         };
+
+        if data.operator_token.kind == EqualsToken
+            && data.right.kind == SyntaxKind::ObjectLiteralExpression
+        {
+            if let Some(excess_name) = self.get_excess_property_name(&right_type, &left_type) {
+                let loc = self
+                    .find_object_literal_property_name_node(&data.right, &excess_name)
+                    .unwrap_or(data.right.loc);
+                let annot_str = self.type_to_string(&left_type);
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    loc,
+                    OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
+                    vec![
+                        crate::checker::property_name_for_display(&excess_name),
+                        annot_str,
+                    ],
+                ));
+                return;
+            }
+        }
 
         if !self.is_type_assignable_to(&right_type, &left_type) {
             let report_type = self.assignment_report_type(target, &left_type);
