@@ -22,6 +22,8 @@ pub use crate::checker::checker_impl_chunk_6::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_module_alias_target_state::*;
 #[allow(unused_imports)]
+pub use crate::checker::checker_module_element_context::*;
+#[allow(unused_imports)]
 pub use crate::checker::checker_object_literal_is_destructuring_target::*;
 pub(crate) use std::collections::{HashMap, HashSet};
 pub(crate) use std::sync::atomic::{AtomicU32, Ordering};

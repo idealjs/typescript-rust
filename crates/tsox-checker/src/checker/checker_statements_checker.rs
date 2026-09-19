@@ -311,11 +311,62 @@ impl Checker {
             | SyntaxKind::NamespaceExportDeclaration
             | SyntaxKind::ExportSpecifier
             | SyntaxKind::ImportSpecifier => {
+                if matches!(
+                    node.kind,
+                    SyntaxKind::ImportDeclaration
+                        | SyntaxKind::ImportEqualsDeclaration
+                        | SyntaxKind::ExportDeclaration
+                ) && !self.check_module_element_context(node)
+                {
+                    self.check_external_module_name_in_global_scope(node);
+                    return;
+                }
                 if node.kind == SyntaxKind::ImportDeclaration {
                     self.check_import_declaration_grammar(node);
                 }
                 if node.kind == SyntaxKind::ImportEqualsDeclaration {
                     self.check_import_equals_esm_grammar(node);
+                }
+                // Go checkExportDeclaration/checkImportEqualsDeclaration：
+                // 无 from 的导出声明短路通过；外部模块引用走
+                // checkExternalImportOrExportDeclaration，失败即中止
+                let external_ok = match &node.data {
+                    tsox_frontend::ast::NodeData::ImportDeclaration(_) => {
+                        self.check_external_import_or_export_declaration(node)
+                    }
+                    tsox_frontend::ast::NodeData::ExportDeclaration(d) => {
+                        if d.module_specifier.is_some() {
+                            self.check_external_import_or_export_declaration(node)
+                        } else {
+                            true
+                        }
+                    }
+                    tsox_frontend::ast::NodeData::ImportEqualsDeclaration(d) => {
+                        if matches!(
+                            d.module_reference.data,
+                            tsox_frontend::ast::NodeData::ExternalModuleReference(_)
+                        ) {
+                            self.check_external_import_or_export_declaration(node)
+                        } else {
+                            true
+                        }
+                    }
+                    _ => true,
+                };
+                if node.kind == SyntaxKind::ExportDeclaration && external_ok {
+                    // Go checkExportDeclaration：逐 specifier checkExportSpecifier
+                    if let tsox_frontend::ast::NodeData::ExportDeclaration(d) = &node.data
+                        && let Some(clause) = &d.export_clause
+                        && let tsox_frontend::ast::NodeData::NamedExports(ne) = &clause.data
+                    {
+                        for el in ne.elements.iter() {
+                            self.check_alias_symbol(el);
+                        }
+                    }
+                    self.check_export_declaration_namespace(node);
+                }
+                if !external_ok {
+                    return;
                 }
                 self.check_type_alias_and_specifiers(node);
                 self.check_import_ambient_rules(node);
@@ -327,12 +378,18 @@ impl Checker {
                 self.check_enum_declaration(node);
             }
             SyntaxKind::ExportAssignment => {
+                if !self.check_module_element_context(node) {
+                    return;
+                }
                 self.check_export_assignment_grammar(node);
                 if let tsox_frontend::ast::NodeData::ExportAssignment(data) = &node.data {
                     self.check_expression(&data.expression);
                 }
             }
             SyntaxKind::ModuleDeclaration => {
+                if !self.check_module_element_context(node) {
+                    return;
+                }
                 self.check_module_declaration(node);
             }
             SyntaxKind::EmptyStatement => {}
