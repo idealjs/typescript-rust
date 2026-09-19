@@ -7,6 +7,14 @@ impl Checker {
         &mut self,
         members: &Arc<NodeList>,
     ) -> Arc<Type> {
+        self.build_interface_type_from_members_with_symbol(members, None)
+    }
+
+    pub(crate) fn build_interface_type_from_members_with_symbol(
+        &mut self,
+        members: &Arc<NodeList>,
+        symbol: Option<Arc<Symbol>>,
+    ) -> Arc<Type> {
         let mut symbol_table = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::new();
         let mut index_infos: Vec<Arc<crate::checker::IndexInfo>> = Vec::new();
@@ -56,7 +64,7 @@ impl Checker {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
             id: crate::checker::types::next_type_id(),
-            symbol: None,
+            symbol,
             alias: None,
             data: TypeData::Object(ObjectTypeData {
                 structured: StructuredTypeData {

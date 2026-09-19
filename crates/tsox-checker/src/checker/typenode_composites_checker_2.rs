@@ -17,7 +17,8 @@ impl Checker {
         self.cache_type(node, self.error_type());
         let result = match &node.data {
             NodeData::TypeLiteralNode(data) => {
-                self.build_interface_type_from_members(&data.members)
+                let symbol = self.program.symbol_map().symbol_of(node).map(Arc::clone);
+                self.build_interface_type_from_members_with_symbol(&data.members, symbol)
             }
             NodeData::FunctionTypeNode(_) => self.get_type_from_function_type_node(node),
             NodeData::ConstructorTypeNode(_) => self.get_type_from_constructor_type_node(node),
