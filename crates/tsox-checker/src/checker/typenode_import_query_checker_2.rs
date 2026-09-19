@@ -88,11 +88,18 @@ impl Checker {
                             .name()
                             .is_some_and(|n| !matches!(n.kind, SyntaxKind::StringLiteral))
                 });
-                if base
+                let module_without_value_meaning = base
                     .flags
-                    .contains(tsox_frontend::ast::SymbolFlags::ValueModule)
-                    && is_true_namespace
-                    && !self.namespace_usable_as_value(&base)
+                    .contains(tsox_frontend::ast::SymbolFlags::NamespaceModule)
+                    && !base
+                        .flags
+                        .contains(tsox_frontend::ast::SymbolFlags::ValueModule);
+                if is_true_namespace
+                    && (module_without_value_meaning
+                        || (base
+                            .flags
+                            .contains(tsox_frontend::ast::SymbolFlags::ValueModule)
+                            && !self.namespace_usable_as_value(&base)))
                 {
                     let file = self
                         .get_source_file_of_node(&d.expr_name)
@@ -111,17 +118,24 @@ impl Checker {
             }
         }
 
-        if symbol
+        let symbol_module_without_value_meaning = symbol
             .flags
-            .contains(tsox_frontend::ast::SymbolFlags::ValueModule)
-            && d.expr_name.kind == SyntaxKind::Identifier
-            && symbol.declarations.iter().any(|dd| {
-                dd.kind == SyntaxKind::ModuleDeclaration
-                    && dd
-                        .name()
-                        .is_some_and(|n| !matches!(n.kind, SyntaxKind::StringLiteral))
-            })
-            && !self.namespace_usable_as_value(&symbol)
+            .contains(tsox_frontend::ast::SymbolFlags::NamespaceModule)
+            && !symbol
+                .flags
+                .contains(tsox_frontend::ast::SymbolFlags::ValueModule);
+        if symbol_module_without_value_meaning
+            || (symbol
+                .flags
+                .contains(tsox_frontend::ast::SymbolFlags::ValueModule)
+                && d.expr_name.kind == SyntaxKind::Identifier
+                && symbol.declarations.iter().any(|dd| {
+                    dd.kind == SyntaxKind::ModuleDeclaration
+                        && dd
+                            .name()
+                            .is_some_and(|n| !matches!(n.kind, SyntaxKind::StringLiteral))
+                })
+                && !self.namespace_usable_as_value(&symbol))
         {
             let file = self
                 .get_source_file_of_node(&d.expr_name)

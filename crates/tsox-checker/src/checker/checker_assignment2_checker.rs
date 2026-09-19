@@ -76,6 +76,11 @@ impl Checker {
         if target.kind == Identifier {
             if let Some(sym) = self.resolve_identifier(target) {
                 let base = self.resolve_alias_base(sym);
+                if base.flags.contains(SymbolFlags::NamespaceModule)
+                    && !base.flags.contains(SymbolFlags::ValueModule)
+                {
+                    return;
+                }
                 if base
                     .flags
                     .intersects(SymbolFlags::Class | SymbolFlags::ENUM | SymbolFlags::ValueModule)

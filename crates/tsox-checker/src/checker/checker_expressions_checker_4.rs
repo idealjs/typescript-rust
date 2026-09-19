@@ -127,16 +127,40 @@ impl Checker {
                     && d.name()
                         .is_some_and(|n| !matches!(n.kind, SyntaxKind::StringLiteral))
             });
+            // Go 值位语义：模块符号不含 Value 含义（未实例化 namespace）即不可作值；
+            // 另保留 ValueModule 但按声明推导不可用（实例化状态与 binder 判定分叉）的兜底
+            let module_without_value_meaning = base.flags.contains(SymbolFlags::NamespaceModule)
+                && !base.flags.contains(SymbolFlags::ValueModule);
             if !is_export_assignment_name
-                && base.flags.contains(SymbolFlags::ValueModule)
                 && is_true_namespace
-                && !self.namespace_usable_as_value(&base)
+                && (module_without_value_meaning
+                    || (base.flags.contains(SymbolFlags::ValueModule)
+                        && !self.namespace_usable_as_value(&base)))
             {
                 let file = self.current_file.clone();
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,
                     node.loc,
                     tsox_core::diagnostics::messages_generated::CANNOT_USE_NAMESPACE_0_AS_A_VALUE,
+                    vec![name.to_string()],
+                ));
+                return;
+            }
+
+            // Go checkAndReportErrorForUsingTypeAsValue：值位按 Value 含义解析失败
+            // 而全含义解析到类型符号（interface/type alias 等）报 TS2693
+            if !base.flags.intersects(SymbolFlags::VALUE)
+                && base.flags.intersects(SymbolFlags::TYPE)
+                && self
+                    .resolve_identifier_with_meaning(node, SymbolFlags::VALUE)
+                    .is_none()
+            {
+                let file = self.current_file.clone();
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    node.loc,
+                    tsox_core::diagnostics::messages_generated::
+                        X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE,
                     vec![name.to_string()],
                 ));
                 return;

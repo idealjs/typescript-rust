@@ -196,6 +196,8 @@ impl Checker {
                 }
             }
 
+            self.check_object_literal_spread_overrides(node);
+
             let this_typed = self.no_implicit_this
                 || self
                     .current_file

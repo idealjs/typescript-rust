@@ -57,6 +57,8 @@ impl Checker {
             }
             self.check_class_heritage_members(node);
 
+            self.check_property_accessor_override_kinds(node);
+
             self.check_members_for_override_modifier(node);
 
             self.check_property_initialization(node);

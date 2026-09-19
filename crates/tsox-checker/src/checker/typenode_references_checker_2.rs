@@ -75,6 +75,55 @@ impl Checker {
             return self.error_type();
         };
 
+        // Go checkAndReportErrorForUsingNamespaceAsTypeOrValue：类型位解析到
+        // 模块符号（不含类型含义）报 TS2709，优先于 TS2749/TS2304 兜底
+        {
+            let alias_decl_is_namespace_form = !symbol.flags.contains(SymbolFlags::Alias)
+                || symbol
+                    .value_declaration
+                    .as_ref()
+                    .is_some_and(|d| match &d.data {
+                        NodeData::ImportEqualsDeclaration(_) => true,
+                        NodeData::ImportDeclaration(id) => id
+                            .import_clause
+                            .as_ref()
+                            .and_then(|c| match &c.data {
+                                NodeData::ImportClause(ic) => ic.named_bindings.as_ref(),
+                                _ => None,
+                            })
+                            .is_some_and(|nb| nb.kind == SyntaxKind::NamespaceImport),
+                        _ => false,
+                    });
+            let effective = if symbol.flags.contains(SymbolFlags::Alias) {
+                self.resolve_alias_base(Arc::clone(&symbol))
+            } else {
+                Arc::clone(&symbol)
+            };
+            if alias_decl_is_namespace_form
+                && effective
+                    .flags
+                    .intersects(SymbolFlags::ValueModule | SymbolFlags::NamespaceModule)
+                && !effective.flags.intersects(SymbolFlags::TYPE)
+                && type_name.kind == SyntaxKind::Identifier
+                && self.ts2304_reporting_allowed_for(type_name)
+                && self
+                    .current_file
+                    .as_ref()
+                    .is_some_and(|f| !f.file_name.starts_with("bundled://"))
+            {
+                let file = self
+                    .get_source_file_of_node(type_name)
+                    .or_else(|| self.current_file.clone());
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    type_name.loc,
+                    tsox_core::diagnostics::messages_generated::CANNOT_USE_NAMESPACE_0_AS_A_TYPE,
+                    vec![type_name.text().to_string()],
+                ));
+                return self.error_type();
+            }
+        }
+
         if symbol.flags == SymbolFlags::Alias {
             let alias_name = type_name.text().to_string();
             if let Some(target) = self.resolve_import_alias_target_symbol(&symbol) {

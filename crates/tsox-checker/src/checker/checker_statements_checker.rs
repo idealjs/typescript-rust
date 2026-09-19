@@ -273,6 +273,7 @@ impl Checker {
             SyntaxKind::SwitchStatement => {
                 if let tsox_frontend::ast::NodeData::SwitchStatement(data) = &node.data {
                     self.check_expression(&data.expression);
+                    let expression_type = self.get_type_of_node(&data.expression);
                     self.break_continue_context_stack
                         .push(BreakContinueContext {
                             kind: BreakContinueContextKind::Switch,
@@ -285,7 +286,7 @@ impl Checker {
                     {
                         self.push_scope(&data.case_block);
                         for case in case_block.clauses.iter() {
-                            self.check_case_clause(case);
+                            self.check_case_clause(case, &expression_type);
                         }
                         self.pop_scope();
                     }

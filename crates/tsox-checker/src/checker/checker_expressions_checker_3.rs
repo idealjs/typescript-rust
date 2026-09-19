@@ -115,6 +115,7 @@ impl Checker {
                         self.check_jsx_attribute(attr);
                     }
                 }
+                self.check_jsx_attributes_spread_overrides(&attrs);
             }
         }
 
@@ -172,7 +173,17 @@ impl Checker {
             "process" | "require" | "Buffer" | "module" | "NodeJS" => Some(
                 &mg::CANNOT_FIND_NAME_0_DO_YOU_NEED_TO_INSTALL_TYPE_DEFINITIONS_FOR_NODE_TRY_NPM_I_SAVE_DEV_TYPES_SLASHNODE_AND_THEN_ADD_NODE_TO_THE_TYPES_FIELD_IN_YOUR_TSCONFIG,
             ),
-            _ => None,
+            _ => {
+                if node.is_some_and(|n| {
+                    n.parent()
+                        .is_some_and(|p| p.kind == SyntaxKind::ShorthandPropertyAssignment)
+                }) {
+                    return Some(
+                        &mg::NO_VALUE_EXISTS_IN_SCOPE_FOR_THE_SHORTHAND_PROPERTY_0_EITHER_DECLARE_ONE_OR_PROVIDE_AN_INITIALIZER,
+                    );
+                }
+                None
+            }
         }
     }
 

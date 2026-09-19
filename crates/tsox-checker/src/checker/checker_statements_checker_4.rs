@@ -482,14 +482,39 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_case_clause(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_case_clause(
+        &mut self,
+        node: &Arc<Node>,
+        switch_expression_type: &Arc<Type>,
+    ) {
         if let tsox_frontend::ast::NodeData::CaseOrDefaultClause(data) = &node.data {
             if data.expression.kind != SyntaxKind::UnknownKeyword {
                 self.check_expression(&data.expression);
+                if node.kind == SyntaxKind::CaseClause {
+                    let case_type = self.get_type_of_node(&data.expression);
+                    if !self.is_type_equality_comparable_to(switch_expression_type, &case_type) {
+                        self.check_type_related_to_and_optionally_elaborate(
+                            &case_type,
+                            switch_expression_type,
+                            crate::checker::relater::RelationKind::Comparable,
+                            Some(&data.expression),
+                            None,
+                            Some(
+                                &tsox_core::diagnostics::messages_generated::
+                                    TYPE_0_IS_NOT_COMPARABLE_TO_TYPE_1,
+                            ),
+                            None,
+                        );
+                    }
+                }
             }
             for stmt in data.statements.iter() {
                 self.check_statement(stmt);
             }
         }
+    }
+
+    fn is_type_equality_comparable_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+        target.flags.contains(TYPE_FLAGS_NULLABLE) || self.is_type_comparable_to(source, target)
     }
 }

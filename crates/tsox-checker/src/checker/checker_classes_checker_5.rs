@@ -589,11 +589,23 @@ impl Checker {
                         .map(|n| n.loc)
                         .unwrap_or(class_node.loc);
                     let file = self.current_file.clone();
+                    // Go checkClassDeclaration implements 分支：目标是 class 符号时
+                    // 报 TS2720（建议 extends 继承）而非 TS2420
+                    let implements_class = interface_type
+                        .symbol
+                        .as_ref()
+                        .is_some_and(|s| s.flags.contains(SymbolFlags::Class));
+                    let generic_message = if implements_class {
+                        tsox_core::diagnostics::messages_generated::
+                            CLASS_0_INCORRECTLY_IMPLEMENTS_CLASS_1_DID_YOU_MEAN_TO_EXTEND_1_AND_INHERIT_ITS_MEMBERS_AS_A_SUBCLASS
+                    } else {
+                        tsox_core::diagnostics::messages_generated::
+                            CLASS_0_INCORRECTLY_IMPLEMENTS_INTERFACE_1
+                    };
                     let mut diag = tsox_frontend::ast::Diagnostic::new(
                         file,
                         error_loc,
-                        tsox_core::diagnostics::messages_generated::
-                            CLASS_0_INCORRECTLY_IMPLEMENTS_INTERFACE_1,
+                        generic_message,
                         vec![class_name.clone(), iface_name],
                     );
                     let mut child: Option<tsox_frontend::ast::Diagnostic> = None;
