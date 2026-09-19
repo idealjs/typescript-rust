@@ -21,7 +21,9 @@ impl Checker {
             }
         }
 
-        let is_array_like = self.is_array_type(t) || matches!(&t.data, TypeData::EvolvingArray(_));
+        // Go getTupleBaseType：元组的结构化成员经 Array<元素并集> 基类型解析
+        let is_array_like = self.is_array_type(t)
+            || matches!(&t.data, TypeData::EvolvingArray(_) | TypeData::Tuple(_));
         if is_array_like && let Some(array_sym) = self.globals.get("Array") {
             if let Some(declared) = self
                 .type_alias_links

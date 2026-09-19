@@ -125,6 +125,41 @@ impl Checker {
                 return self.is_tuple_type_related_to(&source, &target, relation);
             }
 
+            // Go propertiesRelatedTo 元组目标分支：源非数组/元组/演进数组时，
+            // 变长（rest/variadic）目标直接拒绝；固定长度目标要求源 length
+            // 可赋给长度字面量（接口的 length: number 不可赋给 N）
+            if self.is_tuple_type(&target)
+                && !self.is_array_type(&source)
+                && !self.is_tuple_type(&source)
+                && !source
+                    .object_flags
+                    .contains(crate::checker::types::ObjectFlags::EvolvingArray)
+                && !source.flags.contains(TypeFlags::Any)
+                && let crate::checker::types::TypeData::Tuple(tt) = &target.data
+            {
+                if tt
+                    .combined_flags
+                    .intersects(ElementFlags::Rest | ElementFlags::Variadic)
+                {
+                    return false;
+                }
+                let Some(length_sym) = self.get_property_of_type(&source, "length") else {
+                    return false;
+                };
+                let source_length = self.get_type_of_symbol(&length_sym);
+                if source_length.flags.contains(TypeFlags::Any) {
+                    // 落结构比较
+                } else if let crate::checker::types::TypeData::Literal(lit) = &source_length.data
+                    && let crate::checker::types::LiteralValue::Number(n) = lit.value
+                {
+                    if tt.fixed_length as f64 > n.0 {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
+
             if let Some(result) = self.generic_type_reference_related_to(&source, &target, relation) {
                 if result.is_true() {
                     return true;

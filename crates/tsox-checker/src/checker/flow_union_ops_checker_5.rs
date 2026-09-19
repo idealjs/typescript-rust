@@ -375,6 +375,23 @@ impl Checker {
                 return Some(member);
             }
         }
+        // Go getPropertyOfTypeEx：原始类型成员走对应全局接口的声明类型
+        //（apparent type 即接口声明型；String/Number 等符号的声明型在此惰性补建）
+        if let Some(interface_name) = self.primitive_interface_name(t)
+            && let Some(sym) = self.globals.get(interface_name).cloned()
+        {
+            let declared = self
+                .type_alias_links
+                .get(&sym)
+                .and_then(|l| l.declared_type.clone())
+                .unwrap_or_else(|| self.resolve_interface_type(&sym, None));
+            if let Some(member) = declared
+                .as_structured()
+                .and_then(|s| s.members.get(name).cloned())
+            {
+                return Some(member);
+            }
+        }
         if let Some(sym) = self.get_property_of_type_cached(t, name) {
             return Some(sym);
         }

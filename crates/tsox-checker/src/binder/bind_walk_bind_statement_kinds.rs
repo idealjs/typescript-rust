@@ -191,6 +191,45 @@ impl Binder {
                     }
                 }
             }
+            SyntaxKind::ConditionalExpression => {
+                // Go bindConditionalExpression：条件真/假分支各自挂条件流，
+                // 分支内引用经真/假守卫收窄（x ? x : [] 的真分支 x 去 null）
+                let NodeData::ConditionalExpression(ce) = &node.data else {
+                    return false;
+                };
+                let condition = Arc::clone(&ce.condition);
+                let when_true = Arc::clone(&ce.when_true);
+                let when_false = Arc::clone(&ce.when_false);
+                self.bind(&condition);
+                if let Some(current) = self.current_flow.take() {
+                    let true_flow =
+                        self.create_flow_condition(FlowFlags::TRUE_CONDITION, &current, &condition);
+                    let false_flow = self.create_flow_condition(
+                        FlowFlags::FALSE_CONDITION,
+                        &current,
+                        &condition,
+                    );
+                    self.current_flow = Some(true_flow);
+                    self.bind(&when_true);
+                    let after_true = self.current_flow.take();
+                    self.current_flow = Some(false_flow);
+                    self.bind(&when_false);
+                    let after_false = self.current_flow.take();
+                    let mut label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
+                    if let Some(at) = after_true {
+                        label.add_antecedent(at);
+                    }
+                    if let Some(af) = after_false {
+                        label.add_antecedent(af);
+                    }
+                    self.current_flow =
+                        Some(label.finish(self.unreachable_flow.as_ref().unwrap()));
+                } else {
+                    self.bind(&when_true);
+                    self.bind(&when_false);
+                }
+                return true;
+            }
             SyntaxKind::PostfixUnaryExpression => {
                 if let NodeData::PostfixUnaryExpression(post) = &node.data
                     && !self.strict_eval_diag_exists(
