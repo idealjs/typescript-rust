@@ -43,6 +43,7 @@ pub(crate) mod expressions_parser_4;
 pub(crate) mod expressions_parser_5;
 pub(crate) mod expressions_parser_6;
 pub(crate) mod expressions_parser_7;
+pub(crate) mod expressions_parser_8;
 pub(crate) mod impl_chunk_parser;
 pub(crate) mod impl_chunk_parser_2;
 pub(crate) mod impl_chunk_parser_3;

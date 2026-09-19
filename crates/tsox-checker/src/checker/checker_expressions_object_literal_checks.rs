@@ -75,6 +75,7 @@ impl Checker {
                     .as_ref()
                     .is_some_and(|f| f.has_parse_diagnostics)
             {
+                self.check_grammar_object_literal_member_modifiers(&data.properties.nodes);
                 {
                     // Go checkGrammarObjectLiteralExpression：按声明顺序
                     // 记录首个 kind，后续按组合报 2300/1117/1118/1119，
@@ -337,3 +338,4 @@ impl Checker {
         }
     }
 }
+
