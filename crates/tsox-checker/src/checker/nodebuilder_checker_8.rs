@@ -21,11 +21,11 @@ impl Checker {
         }
         ordered.extend(nulls);
         ordered.extend(undefs);
-        let parts: Vec<String> = ordered
+        let parts: Vec<String> = self
+            .type_list_strings(&ordered, flags)
             .into_iter()
-            .map(|ty| {
-                let s = self.type_to_string_ex(ty, flags);
-
+            .zip(ordered.iter())
+            .map(|(s, ty)| {
                 if self.needs_parens_in_union(ty) {
                     format!("({})", s)
                 } else {
@@ -42,10 +42,11 @@ impl Checker {
         flags: TypeFormatFlags,
     ) -> String {
         let types = t.types().unwrap_or(&[]);
-        let parts: Vec<String> = types
-            .iter()
-            .map(|ty| {
-                let s = self.type_to_string_ex(ty, flags);
+        let parts: Vec<String> = self
+            .type_list_strings(&types.iter().collect::<Vec<_>>(), flags)
+            .into_iter()
+            .zip(types.iter())
+            .map(|(s, ty)| {
                 if self.needs_parens_in_union(ty) {
                     format!("({})", s)
                 } else {
@@ -119,15 +120,26 @@ impl Checker {
         if tuple.element_infos.is_empty() {
             return format!("{readonly_prefix}[]");
         }
+        let indexed: Vec<(usize, &Arc<Type>)> = tuple
+            .element_infos
+            .iter()
+            .enumerate()
+            .filter_map(|(i, elem)| elem.type_.as_ref().map(|t| (i, t)))
+            .collect();
+        let rendered = self.type_list_strings(
+            &indexed.iter().map(|(_, t)| *t).collect::<Vec<_>>(),
+            flags,
+        );
+        let mut elem_strs: Vec<Option<String>> = vec![None; tuple.element_infos.len()];
+        for ((i, _), s) in indexed.iter().zip(rendered) {
+            elem_strs[*i] = Some(s);
+        }
         let parts: Vec<String> = tuple
             .element_infos
             .iter()
-            .map(|elem| {
-                let ty_str = elem
-                    .type_
-                    .as_ref()
-                    .map(|ty| self.type_to_string_ex(ty, flags))
-                    .unwrap_or_else(|| "any".to_string());
+            .enumerate()
+            .map(|(i, elem)| {
+                let ty_str = elem_strs[i].clone().unwrap_or_else(|| "any".to_string());
                 let label = elem.label.clone().or_else(|| {
                     elem.labeled_declaration
                         .as_ref()
@@ -228,11 +240,10 @@ impl Checker {
             return qualified;
         }
 
-        let args: Vec<String> = obj_data
-            .type_arguments
-            .iter()
-            .map(|ty| self.type_to_string_ex(ty, flags))
-            .collect();
+        let args = self.type_list_strings(
+            &obj_data.type_arguments.iter().collect::<Vec<_>>(),
+            flags,
+        );
         format!("{}<{}>", qualified, args.join(", "))
     }
 

@@ -23,6 +23,7 @@ impl Checker {
             NodeData::ConstructorTypeNode(_) => self.get_type_from_constructor_type_node(node),
             _ => self.error_type(),
         };
+        self.attach_alias_for_type_node(node, &result);
         self.cache_type_overwrite_error(node, result.clone());
         result
     }

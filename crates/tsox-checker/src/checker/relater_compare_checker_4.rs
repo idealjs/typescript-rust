@@ -4,43 +4,37 @@ use crate::checker::relater_compare::*;
 use tsox_frontend::ast::SyntaxKind;
 
 impl Checker {
-    // Go findMostOverlappyType：以 keyof 交集的 unit 数量选最佳匹配的联合成分
     pub fn find_most_overlappy_type(
         &mut self,
         source: &Arc<Type>,
         union_target: &Arc<Type>,
     ) -> Option<Arc<Type>> {
         let ui = union_target.as_union_or_intersection()?;
-        let non_instantiable_primitive = TYPE_FLAGS_PRIMITIVE
-            | TypeFlags::TypeParameter
-            | TypeFlags::IndexedAccess
-            | TypeFlags::Conditional;
-        if source.flags.intersects(non_instantiable_primitive) {
+        let excluded = TypeFlags::from_bits_truncate(
+            TYPE_FLAGS_PRIMITIVE.bits()
+                | TypeFlags::Index.bits()
+                | TypeFlags::TemplateLiteral.bits()
+                | TypeFlags::StringMapping.bits(),
+        );
+        if source.flags.intersects(excluded) {
             return None;
         }
         let mut best: Option<Arc<Type>> = None;
         let mut matching_count = 0usize;
+        let source_idx = self.get_index_type(source);
+        let source_ids = unit_member_ids(&source_idx);
         for t in &ui.types {
-            if t.flags.intersects(non_instantiable_primitive) {
+            if t.flags.intersects(excluded) {
                 continue;
             }
-            let source_idx = self.get_index_type(source);
             let target_idx = self.get_index_type(t);
-            if source_idx.flags.contains(TypeFlags::Index)
-                && source_idx.flags == target_idx.flags
+            if Arc::ptr_eq(&source_idx, &target_idx)
+                && source_idx.flags.contains(TypeFlags::Index)
             {
                 return Some(Arc::clone(t));
             }
-            let source_keys = self.string_literal_values(&source_idx);
-            let target_keys = self.string_literal_values(&target_idx);
-            let length = source_keys
-                .iter()
-                .filter(|k| target_keys.contains(k))
-                .count();
-            if !source_keys.is_empty() && length == source_keys.len() && length == target_keys.len()
-            {
-                return Some(Arc::clone(t));
-            }
+            let target_ids = unit_member_ids(&target_idx);
+            let length = source_ids.intersection(&target_ids).count();
             if length >= matching_count && length > 0 {
                 best = Some(Arc::clone(t));
                 matching_count = length;
@@ -435,4 +429,20 @@ impl Checker {
     ) -> Option<Box<TypePredicate>> {
         None
     }
+}
+
+fn unit_member_ids(t: &Arc<Type>) -> std::collections::HashSet<crate::checker::types::TypeId> {
+    let mut set = std::collections::HashSet::new();
+    if crate::checker::utilities::is_unit_type(t) {
+        set.insert(t.id);
+    } else if t.flags.contains(TypeFlags::Union) {
+        if let Some(ui) = t.as_union_or_intersection() {
+            for c in &ui.types {
+                if crate::checker::utilities::is_unit_type(c) {
+                    set.insert(c.id);
+                }
+            }
+        }
+    }
+    set
 }
