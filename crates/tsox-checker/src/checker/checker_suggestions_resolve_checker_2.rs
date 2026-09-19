@@ -302,7 +302,7 @@ impl Checker {
                     let _ = path_so_far;
                     Err((
                         Arc::clone(right),
-                        Self::namespace_full_path(&symbol),
+                        self.namespace_full_path(&symbol),
                         self.node_source_text(right)
                             .unwrap_or_else(|| text.to_string()),
                     ))

@@ -123,22 +123,46 @@ impl Checker {
         None
     }
 
-    pub(crate) fn namespace_full_path(symbol: &Arc<Symbol>) -> String {
-        // Go getFullyQualifiedName：沿符号 parent 链拼点分限定名，根为模块
-        // 文件符号时输出带引号 specifier（"mod".Ns 形态）
+    pub(crate) fn namespace_full_path(&self, symbol: &Arc<Symbol>) -> String {
+        // Go getFullyQualifiedName：沿符号 parent 链拼点分限定名；模块文件
+        // 符号输出带引号 specifier（"mod".Ns），脚本文件无文件符号父级
         if let Some(parent) = symbol.parent() {
-            return format!("{}.{}", Self::namespace_full_path(&parent), symbol.name);
+            if self.file_symbol_kind(&parent) != FileSymbolKind::Script {
+                return format!("{}.{}", self.namespace_full_path(&parent), symbol.name);
+            }
+            return symbol.name.clone();
         }
-        if symbol
-            .declarations
-            .iter()
-            .any(|d| d.kind == SyntaxKind::SourceFile)
-        {
-            return format!(
+        match self.file_symbol_kind(symbol) {
+            FileSymbolKind::Module => format!(
                 "\"{}\"",
                 crate::checker::nodebuilder::module_specifier_of_name(&symbol.name)
-            );
+            ),
+            _ => symbol.name.clone(),
         }
-        symbol.name.clone()
     }
+
+    fn file_symbol_kind(&self, symbol: &Arc<Symbol>) -> FileSymbolKind {
+        let Some(decl) = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::SourceFile)
+        else {
+            return FileSymbolKind::Other;
+        };
+        let Some(sf) = self.get_source_file_of_node(decl) else {
+            return FileSymbolKind::Other;
+        };
+        if sf.external_module_indicator.is_some() || sf.common_js_module_indicator.is_some() {
+            FileSymbolKind::Module
+        } else {
+            FileSymbolKind::Script
+        }
+    }
+}
+
+#[derive(PartialEq)]
+enum FileSymbolKind {
+    Module,
+    Script,
+    Other,
 }

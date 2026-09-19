@@ -243,6 +243,9 @@ impl Checker {
                                         let bt_str = self.type_to_string(&base_t);
                                         self.relater_error_chain = member_entries;
                                         self.relater_chain_active = true;
+                                        // Go reportErrorResults：包装对象对基元的
+                                        // 提示行先于头部入链（渲染为更深层）
+                                        self.try_elaborate_primitive_and_object(&prop_t, &base_t);
                                         self.push_relation_head_with_tp_note(
                                             &prop_t,
                                             &base_t,
@@ -539,6 +542,7 @@ impl Checker {
                     let bt_str = self.type_to_string(&base_type);
                     self.relater_error_chain = captured;
                     self.relater_chain_active = true;
+                    self.try_elaborate_primitive_and_object(&prop_type, &base_type);
                     self.push_relation_head_with_tp_note(
                         &prop_type,
                         &base_type,

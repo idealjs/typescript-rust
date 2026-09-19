@@ -42,6 +42,23 @@ impl Checker {
             return format!("{qualifier}{member}");
         }
 
+        // 别名优先于结构展示（Go typeToTypeNodeHelper 复用 typeAlias 符号）；
+        // 条件类型另有分支：先尝试解析再回落别名
+        if let Some(alias) = &t.alias
+            && let Some(sym) = &alias.symbol
+            && !matches!(&t.data, TypeData::Conditional(_))
+        {
+            let args: Vec<String> = alias
+                .type_arguments
+                .iter()
+                .map(|a| self.type_to_string_ex(a, flags))
+                .collect();
+            if args.is_empty() {
+                return sym.name.clone();
+            }
+            return format!("{}<{}>", sym.name, args.join(", "));
+        }
+
         if let Some(val) = t.literal_value() {
             return self.literal_value_to_string(val);
         }

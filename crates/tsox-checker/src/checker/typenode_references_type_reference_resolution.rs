@@ -199,7 +199,7 @@ impl Checker {
                 .collect();
             let declared_is_conditional = matches!(&declared.data, TypeData::Conditional(_));
             let found = if tp_types.is_empty() || arg_types.is_empty() {
-                declared
+                Arc::clone(&declared)
             } else {
                 self.substitute_infer_type_parameters(&declared, &tp_types, &arg_types)
             };
@@ -213,14 +213,19 @@ impl Checker {
                     if c.resolved_true_type.get().is_none() && c.resolved_false_type.get().is_none()
             );
             if !declared_is_conditional || found_is_deferred_conditional {
-                let alias = crate::checker::types::TypeAlias::new(
-                    Some(Arc::clone(symbol)),
-                    arg_types,
-                );
-                let ptr = Arc::as_ptr(&found) as *mut crate::checker::types::Type;
-                unsafe {
-                    if (*ptr).alias.is_none() {
-                        (*ptr).alias = Some(Box::new(alias));
+                // Go instantiateTypeWithAlias：泛型别名实例化传播 alias（声明体
+                // 解析窗口内做成员级 couldContainTypeVariables 探测会重入，
+                // 以「带类型参数」为近似条件）
+                if !tp_types.is_empty() {
+                    let alias = crate::checker::types::TypeAlias::new(
+                        Some(Arc::clone(symbol)),
+                        arg_types,
+                    );
+                    let ptr = Arc::as_ptr(&found) as *mut crate::checker::types::Type;
+                    unsafe {
+                        if (*ptr).alias.is_none() {
+                            (*ptr).alias = Some(Box::new(alias));
+                        }
                     }
                 }
             }
@@ -234,4 +239,5 @@ impl Checker {
         }
         resolved
     }
+
 }

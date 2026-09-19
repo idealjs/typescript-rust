@@ -250,6 +250,15 @@ impl Checker {
                 );
             }
         }
+        // Go reportRelationError：源/目标显示名相同时改用「同名不同型」变体
+        let head = if head.key == msg::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1.key
+            && head_args.len() == 2
+            && head_args[0] == head_args[1]
+        {
+            msg::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_TWO_DIFFERENT_TYPES_WITH_THIS_NAME_EXIST_BUT_THEY_ARE_UNRELATED
+        } else {
+            head
+        };
         self.relater_report_error(head, head_args);
     }
 

@@ -75,6 +75,18 @@ impl Checker {
             }
         }
         self.mark_structured_members_instantiated(&instance, symbol, class_tps, &tp_types, arg_types);
+        // 实例化类实例型记录显式实参（Go 类实例引用携带 target+args，
+        // 消息显示按带参形态）
+        {
+            let ptr = Arc::as_ptr(&instance) as *mut crate::checker::types::Type;
+            unsafe {
+                if let crate::checker::types::TypeData::Object(obj) = &mut (*ptr).data
+                    && obj.type_arguments.is_empty()
+                {
+                    obj.type_arguments = arg_types.to_vec();
+                }
+            }
+        }
         instance
     }
 
