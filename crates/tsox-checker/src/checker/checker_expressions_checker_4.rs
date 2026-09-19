@@ -33,6 +33,10 @@ impl Checker {
             return;
         }
 
+        // Go isExportAssignmentExpressionName：沿 PropertyAccess/QualifiedName
+        // 上溯到顶层后判 ExportAssignment 表达式位置
+        let is_export_assignment_name = Self::is_export_assignment_expression_name(node);
+
         if let Some(symbol) = self.resolve_identifier(node) {
             if name == "arguments"
                 && self.arguments_symbol.is_some()
@@ -72,11 +76,6 @@ impl Checker {
                     return;
                 }
             }
-
-            let is_export_assignment_name = node
-                .parent()
-                .as_ref()
-                .is_some_and(|p| p.kind == SyntaxKind::ExportAssignment);
 
             // Go resolveEntityName 尾段：值位引用 type-only 别名报 TS1362/1363
             //（getTypeOnlyAliasDeclarationEx 沿别名链回溯，export-star 中转亦可命中）
@@ -149,8 +148,10 @@ impl Checker {
 
             // Go checkAndReportErrorForUsingTypeAsValue：值位按 Value 含义解析失败
             // 而全含义解析到类型符号（interface/type alias 等）报 TS2693；
+            // export = 表达式名由 checkExportAssignment 裁决，不在此报；
             // bundled lib 的同名 var+interface 合并解析有分叉，先不做此检查
-            if !base.flags.intersects(SymbolFlags::VALUE)
+            if !is_export_assignment_name
+                && !base.flags.intersects(SymbolFlags::VALUE)
                 && base.flags.intersects(SymbolFlags::TYPE)
                 && self
                     .current_file
@@ -178,9 +179,14 @@ impl Checker {
             let in_bundled_lib = self
                 .get_source_file_of_node(node)
                 .is_some_and(|f| crate::bundled::is_bundled(&f.file_name));
+            // Go 2693 仅在 onFailedToResolveSymbol（值位解析失败）后报告；
+            // 未解析出目标的别名对应 unknownSymbol（全含义），不作值不报错
             if !in_bundled_lib
                 && !is_export_assignment_name
                 && !base.flags.intersects(SymbolFlags::VALUE)
+                && self
+                    .resolve_identifier_with_meaning(node, SymbolFlags::VALUE)
+                    .is_none()
             {
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     self.current_file.clone(),
@@ -218,6 +224,7 @@ impl Checker {
                     .map(|s| self.resolve_alias_base(s));
                 if let Some(sym) = type_hit
                     && !in_bundled_lib
+                    && !is_export_assignment_name
                     && !sym.flags.intersects(SymbolFlags::VALUE)
                 {
                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
@@ -384,4 +391,22 @@ fn is_type_position_use_site(node: &Arc<Node>) -> bool {
         }
     }
     false
+}
+
+impl Checker {
+    // Go isExportAssignmentExpressionName（utilities.go）
+    fn is_export_assignment_expression_name(node: &Arc<Node>) -> bool {
+        let mut current = Some(Arc::clone(node));
+        while let Some(c) = &current
+            && matches!(
+                c.parent().map(|p| p.kind),
+                Some(SyntaxKind::PropertyAccessExpression) | Some(SyntaxKind::QualifiedName)
+            )
+        {
+            current = c.parent();
+        }
+        current
+            .and_then(|c| c.parent())
+            .is_some_and(|p| p.kind == SyntaxKind::ExportAssignment)
+    }
 }

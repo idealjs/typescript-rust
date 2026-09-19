@@ -48,11 +48,12 @@ impl Parser {
 
         let mut name = segments.pop().expect("at least one segment");
         let mut inner_body = body;
-        let outermost = segments.is_empty();
 
         loop {
             let decl_pos = if segments.is_empty() { pos } else { name.pos() };
-            let mods = if segments.is_empty() && outermost {
+            // Go parser parseNamespaceDeclaration：点分名展开为嵌套声明，
+            // 仅内层段补 export，最外层保留用户修饰符
+            let mods = if segments.is_empty() {
                 modifiers.clone()
             } else {
                 let phantom_pos = name.pos();
