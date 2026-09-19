@@ -229,7 +229,7 @@ impl Parser {
             self.parse_identifier()
         };
         while self.parse_optional(SyntaxKind::DotToken) {
-            let right = self.parse_identifier();
+            let right = self.parse_right_side_of_dot();
             let end = right.end();
             left = Arc::new(Node::with_loc(
                 SyntaxKind::QualifiedName,

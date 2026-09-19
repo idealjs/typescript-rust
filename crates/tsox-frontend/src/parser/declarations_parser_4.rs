@@ -38,15 +38,7 @@ impl Parser {
         } else {
             // Go createIdentifierWithDiagnostic：保留字与普通 token 分别报
             // TS1003 两种变体，给缺失名且不消费当前 token
-            if is_reserved_word_kind(self.token) {
-                self.parse_error_at_current_token(
-                    tsox_core::diagnostics::IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_THAT_CANNOT_BE_USED_HERE,
-                    &[self.scanner.token_text()],
-                );
-            } else {
-                self.parse_error_at_current_token(tsox_core::diagnostics::IDENTIFIER_EXPECTED, &[]);
-            }
-            self.missing_identifier_expression()
+            self.identifier_expected_error_and_missing()
         }
     }
 
