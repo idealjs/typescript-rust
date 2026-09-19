@@ -481,15 +481,79 @@ impl Checker {
         false
     }
 
-    pub fn check_grammar_class_declaration_heritage_clauses(
-        &mut self,
-        _node: &Arc<Node>,
-        _file: &Arc<tsox_frontend::ast::SourceFile>,
-    ) -> bool {
+    pub fn check_grammar_class_declaration_heritage_clauses(&mut self, node: &Arc<Node>) -> bool {
+        use tsox_core::diagnostics::messages_generated as msg;
+        let heritage = match &node.data {
+            NodeData::ClassDeclaration(d) => d.heritage_clauses.as_ref(),
+            NodeData::ClassExpression(d) => d.heritage_clauses.as_ref(),
+            _ => return false,
+        };
+        let Some(clauses) = heritage else {
+            return false;
+        };
+        let mut seen_extends = false;
+        let mut seen_implements = false;
+        for clause in clauses.iter() {
+            let NodeData::HeritageClause(h) = &clause.data else {
+                continue;
+            };
+            if h.token == SyntaxKind::ExtendsKeyword {
+                if seen_extends {
+                    return self.grammar_error_on_node(clause, &msg::X_EXTENDS_CLAUSE_ALREADY_SEEN);
+                }
+                if seen_implements {
+                    return self
+                        .grammar_error_on_node(clause, &msg::X_EXTENDS_CLAUSE_MUST_PRECEDE_IMPLEMENTS_CLAUSE);
+                }
+                if h.types.nodes.len() > 1 {
+                    return self.grammar_error_on_node(
+                        &h.types.nodes[1],
+                        &msg::CLASSES_CAN_ONLY_EXTEND_A_SINGLE_CLASS,
+                    );
+                }
+                seen_extends = true;
+            } else if h.token == SyntaxKind::ImplementsKeyword {
+                if seen_implements {
+                    return self
+                        .grammar_error_on_node(clause, &msg::X_IMPLEMENTS_CLAUSE_ALREADY_SEEN);
+                }
+                seen_implements = true;
+            }
+        }
         false
     }
 
-    pub fn check_grammar_interface_declaration(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_interface_declaration(&mut self, node: &Arc<Node>) -> bool {
+        use tsox_core::diagnostics::messages_generated as msg;
+        let heritage = match &node.data {
+            NodeData::InterfaceDeclaration(d) => d.heritage_clauses.as_ref(),
+            _ => return false,
+        };
+        let Some(clauses) = heritage else {
+            return false;
+        };
+        let mut seen_extends = false;
+        for clause in clauses.iter() {
+            let NodeData::HeritageClause(h) = &clause.data else {
+                continue;
+            };
+            match h.token {
+                SyntaxKind::ExtendsKeyword => {
+                    if seen_extends {
+                        return self
+                            .grammar_error_on_node(clause, &msg::X_EXTENDS_CLAUSE_ALREADY_SEEN);
+                    }
+                    seen_extends = true;
+                }
+                SyntaxKind::ImplementsKeyword => {
+                    return self.grammar_error_on_node(
+                        clause,
+                        &msg::INTERFACE_DECLARATION_CANNOT_HAVE_IMPLEMENTS_CLAUSE,
+                    );
+                }
+                _ => {}
+            }
+        }
         false
     }
 

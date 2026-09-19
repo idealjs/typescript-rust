@@ -284,7 +284,9 @@ impl Checker {
                 self.check_class_declaration(node);
             }
             SyntaxKind::InterfaceDeclaration => {
-                self.check_grammar_modifiers(node);
+                if !self.check_grammar_modifiers(node) {
+                    self.check_grammar_interface_declaration(node);
+                }
 
                 if let tsox_frontend::ast::NodeData::InterfaceDeclaration(data) = &node.data {
                     self.check_reserved_type_name(

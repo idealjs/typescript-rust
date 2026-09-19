@@ -16,36 +16,25 @@ impl Parser {
         is_interface: bool,
     ) -> Option<Arc<NodeList>> {
         let mut clauses = Vec::new();
-        let mut pos = self.token_pos();
-        if self.parse_optional(SyntaxKind::ExtendsKeyword) {
-            let element = if is_interface {
+        while matches!(
+            self.token,
+            SyntaxKind::ExtendsKeyword | SyntaxKind::ImplementsKeyword
+        ) {
+            let pos = self.token_pos();
+            let kind = self.token;
+            self.next_token();
+            let element = if is_interface && kind == SyntaxKind::ExtendsKeyword {
                 Parser::parse_type_heritage_clause_element
             } else {
                 Parser::parse_heritage_clause_element
             };
-            let types = self.parse_delimited_list(ParsingContext::HeritageClauseElement, element);
+            let types =
+                self.parse_delimited_list(ParsingContext::HeritageClauseElement, element);
             let end = self.node_pos();
             clauses.push(Arc::new(Node::with_loc(
                 SyntaxKind::HeritageClause,
                 NodeData::HeritageClause(HeritageClauseData {
-                    token: SyntaxKind::ExtendsKeyword,
-                    types: Arc::new(types),
-                }),
-                TextRange::new(pos, end),
-            )));
-        }
-        if self.token == SyntaxKind::ImplementsKeyword {
-            pos = self.token_pos();
-            self.next_token();
-            let types = self.parse_delimited_list(
-                ParsingContext::HeritageClauseElement,
-                Parser::parse_heritage_clause_element,
-            );
-            let end = self.node_pos();
-            clauses.push(Arc::new(Node::with_loc(
-                SyntaxKind::HeritageClause,
-                NodeData::HeritageClause(HeritageClauseData {
-                    token: SyntaxKind::ImplementsKeyword,
+                    token: kind,
                     types: Arc::new(types),
                 }),
                 TextRange::new(pos, end),

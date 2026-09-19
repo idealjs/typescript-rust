@@ -5,6 +5,7 @@ use crate::checker::checker_statements::*;
 impl Checker {
     pub fn check_class_declaration(&mut self, node: &Arc<Node>) {
         self.check_grammar_modifiers(node);
+        self.check_grammar_class_declaration_heritage_clauses(node);
 
         if let tsox_frontend::ast::NodeData::ClassDeclaration(data) = &node.data {
             if let Some(name) = &data.name {
@@ -29,8 +30,28 @@ impl Checker {
 
         if let tsox_frontend::ast::NodeData::ClassDeclaration(data) = &node.data {
             if let Some(heritage) = &data.heritage_clauses {
+                let mut seen_extends = false;
+                let mut seen_implements = false;
                 for clause in heritage.iter() {
-                    self.check_heritage_clause(clause);
+                    let duplicate_kind = match &clause.data {
+                        tsox_frontend::ast::NodeData::HeritageClause(h) => match h.token {
+                            SyntaxKind::ExtendsKeyword if seen_extends => true,
+                            SyntaxKind::ImplementsKeyword if seen_implements => true,
+                            SyntaxKind::ExtendsKeyword => {
+                                seen_extends = true;
+                                false
+                            }
+                            SyntaxKind::ImplementsKeyword => {
+                                seen_implements = true;
+                                false
+                            }
+                            _ => false,
+                        },
+                        _ => false,
+                    };
+                    if !duplicate_kind {
+                        self.check_heritage_clause(clause);
+                    }
                 }
             }
 

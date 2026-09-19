@@ -53,7 +53,7 @@ impl Parser {
                         ));
                     } else if self.token == SyntaxKind::OpenBracketToken {
                         self.next_token();
-                        let argument = self.parse_expression();
+                        let argument = self.parse_element_access_argument();
                         self.expect(SyntaxKind::CloseBracketToken);
                         let end = self.node_pos();
                         expr = Arc::new(Node::with_loc(
@@ -97,7 +97,7 @@ impl Parser {
                 SyntaxKind::OpenBracketToken if !self.decorator_context => {
                     let pos = expr.pos();
                     self.next_token();
-                    let argument = self.parse_expression();
+                    let argument = self.parse_element_access_argument();
                     self.expect(SyntaxKind::CloseBracketToken);
                     let end = self.node_pos();
                     expr = Arc::new(Node::with_loc(
@@ -258,6 +258,27 @@ impl Parser {
         self.token = saved_token;
         self.diagnostics.truncate(diag_len);
         None
+    }
+
+    pub(crate) fn parse_element_access_argument(&mut self) -> Arc<Node> {
+        if self.token == SyntaxKind::CloseBracketToken {
+            let pos = self.scanner.full_start_pos();
+            self.parse_error_at(
+                pos,
+                pos,
+                tsox_core::diagnostics::AN_ELEMENT_ACCESS_EXPRESSION_SHOULD_TAKE_AN_ARGUMENT,
+                &[],
+            );
+            Arc::new(Node::with_loc(
+                SyntaxKind::Identifier,
+                NodeData::Identifier(IdentifierData {
+                    text: String::new(),
+                }),
+                TextRange::new(pos, pos),
+            ))
+        } else {
+            self.allow_in(|p| p.parse_expression())
+        }
     }
 
     pub(crate) fn parse_argument_list(&mut self) -> Arc<NodeList> {

@@ -114,7 +114,11 @@ impl Checker {
                         vec![data.name.text().to_string(), "any".to_string()],
                     ));
                 }
-                if is_const && !in_for_in_of && !is_ambient {
+                if is_const
+                    && !in_for_in_of
+                    && !is_ambient
+                    && !tsox_frontend::ast::node_data_generated::is_binding_pattern(&data.name)
+                {
                     let file = self.current_file.clone();
                     let name_loc = data.name.loc;
                     let already = self.diagnostics.get_all().iter().any(|d| {
