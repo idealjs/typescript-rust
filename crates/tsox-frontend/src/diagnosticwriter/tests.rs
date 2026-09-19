@@ -70,6 +70,8 @@ fn pretty_format_has_squiggle() {
         vec![],
     );
     let s = format_diagnostic_pretty(&diag, None);
-    assert!(s.contains("test.ts:1:5 - error TS-1: oops"));
+    assert!(s.contains(
+        "\x1b[96mtest.ts\x1b[0m:\x1b[93m1\x1b[0m:\x1b[93m5\x1b[0m - \x1b[91merror\x1b[0m\x1b[90m TS-1: \x1b[0moops"
+    ));
     assert!(s.contains("~"));
 }

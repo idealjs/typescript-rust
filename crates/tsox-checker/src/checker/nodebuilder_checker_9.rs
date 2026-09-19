@@ -94,12 +94,6 @@ impl Checker {
                     format!("\"{name}\"")
                 };
             let prop_type = self.get_type_of_symbol(prop);
-            // 可选成员的 "?:" 已表达 undefined：显示剥掉烘焙的 undefined 成分
-            let prop_type = if prop.flags.contains(SymbolFlags::Optional) {
-                self.strip_optional_undefined(&prop_type)
-            } else {
-                prop_type
-            };
             // Go shouldUsePlaceholderForProperty：反向映射属性的三条件省略 +
             // 打印栈追踪（嵌套时对非匿名源立即截断为 ...）
             let use_placeholder = self.should_use_placeholder_for_property(prop);
