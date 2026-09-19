@@ -33,12 +33,17 @@ impl Checker {
     ) -> bool {
         use tsox_core::diagnostics::messages_generated as msg;
         let signatures = self.get_signatures_of_type(source, kind);
+        let saved_chain = std::mem::take(&mut self.relater_error_chain);
+        let was_active = self.relater_chain_active;
+        self.relater_chain_active = false;
         let has_matching_return = signatures.iter().any(|sig| {
             self.get_return_type_of_signature(sig).is_some_and(|rt| {
                 !(rt.flags.contains(TypeFlags::Any) || rt.flags.contains(TypeFlags::Never))
                     && self.is_type_related_to(&rt, target, relation)
             })
         });
+        self.relater_error_chain = saved_chain;
+        self.relater_chain_active = was_active;
         if !has_matching_return {
             return false;
         }

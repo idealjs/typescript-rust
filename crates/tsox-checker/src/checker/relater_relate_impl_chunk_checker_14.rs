@@ -216,9 +216,13 @@ impl Checker {
         if t.flags.contains(TypeFlags::TypeParameter) {
             return true;
         }
-        t.types()
-            .map(|ts| ts.iter().any(type_contains_type_parameter))
-            .is_some()
+        if t.flags.intersects(crate::checker::types::TYPE_FLAGS_UNION_OR_INTERSECTION)
+            && !t.flags.intersects(crate::checker::types::TYPE_FLAGS_PRIMITIVE)
+            && let Some(ts) = t.types()
+        {
+            return ts.iter().all(|m| m.flags.contains(TypeFlags::TypeParameter));
+        }
+        false
     }
 
     pub fn try_get_indexed_access_type(

@@ -109,14 +109,16 @@ impl Checker {
             }
             if related.is_false() {
                 if self.relater_chain_active {
-                    let ts = self.type_to_string(&target_type);
-                    let ss = self.type_to_string(&source_type);
-                    self.push_relation_head_with_tp_note(
-                        &target_type,
-                        &source_type,
-                        tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                        vec![ts, ss],
-                    );
+                    if !callbacks {
+                        let ts = self.type_to_string(&target_type);
+                        let ss = self.type_to_string(&source_type);
+                        self.push_relation_head_with_tp_note(
+                            &target_type,
+                            &source_type,
+                            tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                            vec![ts, ss],
+                        );
+                    }
                     let sn = source.parameters.get(i).map(|p| p.name.clone());
                     let tn = target.parameters.get(i).map(|p| p.name.clone());
                     self.relater_report_error(
