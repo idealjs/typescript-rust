@@ -621,7 +621,7 @@ impl Checker {
 
 /// 列表 end 前反向跳过空白/注释后是 ',' 则返回其位置（Go NodeList
 /// HasTrailingComma 的文本近似：trailing comma 会被收进列表 loc）
-fn trailing_comma_before(text: &str, end: usize) -> Option<usize> {
+pub(crate) fn trailing_comma_before(text: &str, end: usize) -> Option<usize> {
     let bytes = text.as_bytes();
     let mut i = end.min(bytes.len());
     while i > 0 {

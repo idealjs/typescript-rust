@@ -8,7 +8,24 @@ impl Checker {
         if node.name().is_some_and(|n| n.kind == SyntaxKind::Identifier) {
             self.check_cjs_reserved_top_level_name(node, &node.name().unwrap());
         }
-        self.check_grammar_modifiers(node);
+        self.check_exports_on_merged_declarations(node);
+        // Go checkModuleDeclaration：非 ambient 上下文的引号模块名报 TS1035
+        if !self.check_grammar_modifiers(node) {
+            let in_ambient = node.has_syntactic_modifier(ModifierFlags::Ambient)
+                || self.ambient_context_depth > 0
+                || self
+                    .current_file
+                    .as_ref()
+                    .is_some_and(|f| f.is_declaration_file);
+            if !in_ambient && node.name().is_some_and(|n| n.kind == SyntaxKind::StringLiteral) {
+                let name = node.name().unwrap();
+                self.grammar_error_on_node(
+                    &name,
+                    &tsox_core::diagnostics::messages_generated::
+                        ONLY_AMBIENT_MODULES_CAN_USE_QUOTED_NAMES,
+                );
+            }
+        }
         self.check_exports_on_merged_declarations(node);
 
         // Go checkModuleDeclaration：global 增强诊断
