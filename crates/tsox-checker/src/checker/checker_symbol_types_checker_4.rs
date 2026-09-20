@@ -32,6 +32,7 @@ impl Checker {
         self.pop_scope();
         if construct_sigs.is_empty() {
             let mut inherited: Option<(Arc<Node>, Arc<Node>, Arc<Node>)> = None;
+            let mut inherited_via_ast = false;
             let mut cursor = Arc::clone(node);
 
             for _ in 0..1000 {
@@ -56,6 +57,7 @@ impl Checker {
                 cursor = base_node;
             }
             if let Some((ctor_decl, base_node, heritage_expr)) = inherited {
+                inherited_via_ast = true;
                 if let tsox_frontend::ast::NodeData::ConstructorDeclaration(data) = &ctor_decl.data
                 {
                     let params = Arc::clone(&data.parameters);
@@ -119,6 +121,9 @@ impl Checker {
                     }
                     construct_sigs.push(sig);
                 }
+            }
+            if !inherited_via_ast {
+                self.inherit_base_constructor_signatures(node, &instance_type, &mut construct_sigs);
             }
         }
         if construct_sigs.is_empty() {
