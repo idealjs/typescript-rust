@@ -202,30 +202,6 @@ impl Parser {
         self.expect(SyntaxKind::CloseParenToken);
         let end = self.node_pos();
 
-        if self.token == SyntaxKind::EqualsGreaterThanToken {
-            let arrow_token = self.create_token_node();
-            self.next_token();
-            let body = if self.token == SyntaxKind::OpenBraceToken {
-                self.parse_block_ex(true)
-            } else {
-                self.parse_assignment_expression()
-            };
-            let end = body.end();
-            return Arc::new(Node::with_loc(
-                SyntaxKind::ArrowFunction,
-                NodeData::ArrowFunction(ArrowFunctionData {
-                    modifiers: None,
-                    type_parameters: None,
-                    parameters: Arc::new(NodeList::default()),
-                    type_node: None,
-                    equals_greater_than_token: arrow_token,
-                    body,
-                    full_signature: None,
-                }),
-                TextRange::new(pos, end),
-            ));
-        }
-
         Arc::new(Node::with_loc(
             SyntaxKind::ParenthesizedExpression,
             NodeData::ParenthesizedExpression(ParenthesizedExpressionData { expression: expr }),

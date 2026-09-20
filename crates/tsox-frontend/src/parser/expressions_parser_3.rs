@@ -160,16 +160,25 @@ impl Parser {
         let pos = self.token_pos();
         let parameters = self.parse_parameter_list();
         let type_node = self.parse_optional_return_type();
+        let last_token = self.token;
         let equals_greater_than_token = self.create_token_node();
         self.expect(SyntaxKind::EqualsGreaterThanToken);
         let saved_yield = self.yield_context;
         let saved_await = self.await_context;
         self.yield_context = false;
         self.await_context = false;
-        let body = if self.token == SyntaxKind::OpenBraceToken {
-            self.parse_block_ex(true)
+        // Go parseParenthesizedArrowFunctionExpression：'=>' 缺失且当前非
+        // '{' 时 body 取单个标识符（不走赋值表达式，避免 '.' 等被当成员访问）
+        let body = if last_token == SyntaxKind::EqualsGreaterThanToken
+            || last_token == SyntaxKind::OpenBraceToken
+        {
+            if self.token == SyntaxKind::OpenBraceToken {
+                self.parse_block_ex(true)
+            } else {
+                self.parse_assignment_expression()
+            }
         } else {
-            self.parse_assignment_expression()
+            self.parse_identifier()
         };
         self.yield_context = saved_yield;
         self.await_context = saved_await;

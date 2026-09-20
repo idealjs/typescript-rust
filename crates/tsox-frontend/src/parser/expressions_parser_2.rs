@@ -81,11 +81,29 @@ impl Parser {
         {
             return false;
         }
+        // Go TSTrue 提前判定："()" 后跟 =>/:/{（缺 => 的恢复路径）、
+        // "(..."（rest 参数）、"(xxx:"（类型注解参数）都按箭头解析
+        if second == SyntaxKind::CloseParenToken {
+            let third = scanner.scan();
+            return matches!(
+                third,
+                SyntaxKind::EqualsGreaterThanToken
+                    | SyntaxKind::ColonToken
+                    | SyntaxKind::OpenBraceToken
+            );
+        }
+        if second == SyntaxKind::DotDotDotToken {
+            return true;
+        }
+        if second != SyntaxKind::OpenBracketToken && second != SyntaxKind::OpenBraceToken {
+            let third = scanner.scan();
+            if third == SyntaxKind::ColonToken {
+                return true;
+            }
+        }
         let mut depth = 1usize;
-        let mut scanned_tokens = 0usize;
         let mut token = second;
         loop {
-            scanned_tokens += 1;
             match token {
                 SyntaxKind::EndOfFile => return false,
                 SyntaxKind::OpenParenToken
@@ -102,7 +120,7 @@ impl Parser {
                             return Self::scanner_reaches_arrow_before_line_end(&mut scanner);
                         }
 
-                        if next == SyntaxKind::OpenBraceToken && scanned_tokens == 1 {
+                        if next == SyntaxKind::OpenBraceToken && token == second {
                             return true;
                         }
                         return false;
@@ -224,16 +242,25 @@ impl Parser {
         let pos = self.token_pos();
         let parameters = self.parse_parameter_list();
         let type_node = self.parse_optional_return_type();
+        let last_token = self.token;
         let equals_greater_than_token = self.create_token_node();
         self.expect(SyntaxKind::EqualsGreaterThanToken);
         let saved_await = self.await_context;
         let saved_yield = self.yield_context;
         self.await_context = true;
         self.yield_context = false;
-        let body = if self.token == SyntaxKind::OpenBraceToken {
-            self.parse_block_ex(true)
+        // Go parseParenthesizedArrowFunctionExpression：'=>' 缺失且当前非
+        // '{' 时 body 取单个标识符（不走赋值表达式，避免 '.' 等被当成员访问）
+        let body = if last_token == SyntaxKind::EqualsGreaterThanToken
+            || last_token == SyntaxKind::OpenBraceToken
+        {
+            if self.token == SyntaxKind::OpenBraceToken {
+                self.parse_block_ex(true)
+            } else {
+                self.parse_assignment_expression()
+            }
         } else {
-            self.parse_assignment_expression()
+            self.parse_identifier()
         };
         self.await_context = saved_await;
         self.yield_context = saved_yield;

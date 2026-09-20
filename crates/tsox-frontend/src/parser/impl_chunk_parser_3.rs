@@ -232,6 +232,16 @@ impl Parser {
                     self.expect(SyntaxKind::CommaToken);
                 }
 
+                // Go：对象字面量/导入属性以 ';' 分隔时（expect 已报错），
+                // 消费 ';' 继续，避免成员列表中断带出连锁误报
+                if (context == ParsingContext::ObjectLiteralMembers
+                    || context == ParsingContext::ImportAttributes)
+                    && self.token == SyntaxKind::SemicolonToken
+                    && !self.has_preceding_line_break()
+                {
+                    self.next_token();
+                }
+
                 if element_start == self.token_pos() {
                     self.next_token();
                 }
