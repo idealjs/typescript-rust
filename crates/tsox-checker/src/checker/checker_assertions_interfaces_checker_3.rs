@@ -114,17 +114,21 @@ impl Checker {
                 continue;
             }
             // Go 的 exports 表不含 `export as namespace` 别名（binder 入
-            // locals）与 bind 期挂入的 JS 赋值增广成员（Go 在 check 期后合）
-            let excluded_from_exports = !sym.declarations.is_empty()
+            // file.GlobalExports，与模块内同名 namespace 不合并）；bind 期挂入的
+            // JS 赋值增广成员 Go 在 check 期后合
+            let umd_global = sym
+                .declarations
+                .iter()
+                .any(|d| d.kind == SyntaxKind::NamespaceExportDeclaration);
+            let js_assignment_only = !sym.declarations.is_empty()
                 && sym.declarations.iter().all(|d| {
-                    d.kind == SyntaxKind::NamespaceExportDeclaration
-                        || matches!(
-                            d.kind,
-                            SyntaxKind::BinaryExpression | SyntaxKind::CallExpression
-                        ) && crate::binder::get_assignment_declaration_kind(d)
-                            != crate::binder::bind_js_assignment_declarations::JsDeclarationKind::None
+                    matches!(
+                        d.kind,
+                        SyntaxKind::BinaryExpression | SyntaxKind::CallExpression
+                    ) && crate::binder::get_assignment_declaration_kind(d)
+                        != crate::binder::bind_js_assignment_declarations::JsDeclarationKind::None
                 });
-            if excluded_from_exports {
+            if umd_global || js_assignment_only {
                 continue;
             }
             // Go getSymbolFlags：别名链断（unknownSymbol）返回全标志
