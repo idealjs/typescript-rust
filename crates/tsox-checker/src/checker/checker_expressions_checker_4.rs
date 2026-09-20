@@ -158,16 +158,21 @@ impl Checker {
                     .current_file
                     .as_ref()
                     .is_some_and(|f| !f.file_name.starts_with("bundled://"))
-                && self
-                    .resolve_identifier_with_meaning(node, SymbolFlags::VALUE)
-                    .is_none()
+                && !self.value_meaning_resolves(node)
             {
+                let message =
+                    if Self::is_es2015_or_later_constructor_name(name) {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_ES2015_OR_LATER
+                    } else {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE
+                    };
                 let file = self.current_file.clone();
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,
                     node.loc,
-                    tsox_core::diagnostics::messages_generated::
-                        X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE,
+                    message,
                     vec![name.to_string()],
                 ));
                 return;
@@ -186,15 +191,20 @@ impl Checker {
                 && !is_export_assignment_name
                 && !base.flags.intersects(SymbolFlags::VALUE)
                 && base.flags.intersects(SymbolFlags::TYPE)
-                && self
-                    .resolve_identifier_with_meaning(node, SymbolFlags::VALUE)
-                    .is_none()
+                && !self.value_meaning_resolves(node)
             {
+                let message =
+                    if Self::is_es2015_or_later_constructor_name(name) {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_ES2015_OR_LATER
+                    } else {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE
+                    };
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     self.current_file.clone(),
                     node.loc,
-                    tsox_core::diagnostics::messages_generated::
-                        X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE,
+                    message,
                     vec![name.to_string()],
                 ));
             }
@@ -229,11 +239,18 @@ impl Checker {
                     && !is_export_assignment_name
                     && !sym.flags.intersects(SymbolFlags::VALUE)
                 {
+                    let message =
+                        if Self::is_es2015_or_later_constructor_name(name) {
+                            tsox_core::diagnostics::messages_generated::
+                                X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_ES2015_OR_LATER
+                        } else {
+                            tsox_core::diagnostics::messages_generated::
+                                X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE
+                        };
                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                         file.clone(),
                         node.loc,
-                        tsox_core::diagnostics::messages_generated::
-                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE,
+                        message,
                         vec![name.to_string()],
                     ));
                     true
@@ -334,6 +351,20 @@ impl Checker {
             )
         };
         self.diagnostics.add(diagnostic);
+    }
+}
+
+impl Checker {
+    fn value_meaning_resolves(&self, node: &Arc<Node>) -> bool {
+        self.resolve_identifier_with_meaning(node, SymbolFlags::VALUE)
+            .is_some_and(|s| s.flags.intersects(SymbolFlags::VALUE))
+    }
+
+    pub(crate) fn is_es2015_or_later_constructor_name(name: &str) -> bool {
+        matches!(
+            name,
+            "Promise" | "Symbol" | "Map" | "WeakMap" | "Set" | "WeakSet"
+        )
     }
 }
 
