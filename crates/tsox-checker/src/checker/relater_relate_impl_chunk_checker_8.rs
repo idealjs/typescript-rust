@@ -63,6 +63,20 @@ impl Checker {
             None => return false,
         };
 
+        // Go propertiesRelatedTo/signaturesRelatedTo/indexSignaturesRelatedTo
+        // 的 identity 分派：属性数一致 + 成分直比，签名/索引签名走各自
+        // identical 变体，跳过可赋值导向的弱类型/缺属性启发
+        if relation == RelationKind::Identity {
+            return self.properties_identical_to(source, target)
+                && self
+                    .signatures_related_to(source, target, SignatureKind::Call, relation)
+                    .is_true()
+                && self
+                    .signatures_related_to(source, target, SignatureKind::Construct, relation)
+                    .is_true()
+                && self.index_signatures_identical_to(source, target).is_true();
+        }
+
         if relation != RelationKind::Comparable
             && self.relater_intersection_target_depth == 0
             && !source_struct.properties.is_empty()

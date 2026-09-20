@@ -52,6 +52,25 @@ impl Checker {
         None
     }
 
+    pub(crate) fn each_type_related_to_some_type(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        if source.flags.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
+            && let Some(si) = source.as_union_or_intersection()
+        {
+            for s in &si.types {
+                if !self.type_related_to_some_type(s, target, relation) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        self.type_related_to_some_type(source, target, relation)
+    }
+
     pub(crate) fn some_type_related_to_type(
         &mut self,
         source: &Arc<Type>,
