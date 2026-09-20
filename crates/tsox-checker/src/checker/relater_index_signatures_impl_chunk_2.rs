@@ -64,7 +64,7 @@ impl Checker {
         let props = self.get_properties_of_type(source);
         let mut result = Ternary::True;
         for prop in props {
-            let literal_key = self.get_literal_type_from_property(&prop, target_key);
+            let literal_key = self.get_literal_type_from_property(&prop);
             if !self.is_applicable_index_type(&literal_key, target_key) {
                 continue;
             }
@@ -129,16 +129,28 @@ impl Checker {
         false
     }
 
-    pub fn get_literal_type_from_property(
-        &mut self,
-        prop: &Arc<Symbol>,
-        target_key: &Arc<Type>,
-    ) -> Arc<Type> {
-        if target_key.flags.contains(TypeFlags::Number) {
-            if let Ok(n) = prop.name.parse::<i64>() {
-                return self.get_number_literal_type(tsox_core::jsnum::Number::from(n));
-            }
+    pub fn get_literal_type_from_property(&mut self, prop: &Arc<Symbol>) -> Arc<Type> {
+        let non_public =
+            crate::checker::exports::get_declaration_modifier_flags_from_symbol(prop)
+                .intersects(tsox_frontend::ast::ModifierFlags::NonPublicAccessibilityModifier);
+        if non_public {
+            return self.never_type();
         }
-        self.get_string_literal_type(&prop.name)
+        let t = if let Some(decl) = prop.value_declaration.as_ref() {
+            tsox_frontend::ast::utilities::get_name_of_declaration(decl)
+                .and_then(|name| self.get_literal_type_from_property_name(&name))
+                .unwrap_or_else(|| self.get_string_literal_type(&prop.name))
+        } else {
+            self.get_string_literal_type(&prop.name)
+        };
+        if t.flags.intersects(
+            TypeFlags::StringLiteral
+                | TypeFlags::NumberLiteral
+                | TypeFlags::UniqueESSymbol,
+        ) {
+            t
+        } else {
+            self.never_type()
+        }
     }
 }

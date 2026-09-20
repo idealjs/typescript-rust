@@ -27,11 +27,13 @@ fn relation_cache_key_distinguishes_relation_kinds() {
         source_id: 0x1000,
         target_id: 0x2000,
         relation: RelationKind::Assignable,
+        intersection_target: false,
     };
     let k2 = RelationCacheKey {
         source_id: 0x1000,
         target_id: 0x2000,
         relation: RelationKind::Subtype,
+        intersection_target: false,
     };
     assert_ne!(k1, k2);
 
@@ -49,11 +51,13 @@ fn relation_cache_key_distinguishes_type_pointers() {
         source_id: 0x1000,
         target_id: 0x2000,
         relation: RelationKind::Assignable,
+        intersection_target: false,
     };
     let k2 = RelationCacheKey {
         source_id: 0x3000,
         target_id: 0x2000,
         relation: RelationKind::Assignable,
+        intersection_target: false,
     };
     assert_ne!(k1, k2);
 }

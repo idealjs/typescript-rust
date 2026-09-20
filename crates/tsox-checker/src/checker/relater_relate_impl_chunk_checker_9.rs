@@ -30,7 +30,26 @@ impl Checker {
                 (Some(so), Some(to)) => self.is_type_identical_to(so, to),
                 _ => Arc::ptr_eq(source, target),
             },
-            _ => source.flags == target.flags,
+            _ => {
+                if source.flags.contains(TypeFlags::Object) && target.flags.contains(TypeFlags::Object)
+                {
+                    return self
+                        .compare_types(
+                            Arc::clone(source),
+                            Arc::clone(target),
+                            crate::checker::relater::RelationKind::Identity,
+                            false,
+                        )
+                        .is_true();
+                }
+                source.flags == target.flags
+                    && (target.symbol.is_none()
+                        || source
+                            .symbol
+                            .as_ref()
+                            .zip(target.symbol.as_ref())
+                            .is_some_and(|(ss, ts)| Arc::ptr_eq(ss, ts)))
+            }
         }
     }
 
