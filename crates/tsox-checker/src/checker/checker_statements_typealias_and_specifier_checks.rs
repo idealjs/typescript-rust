@@ -42,6 +42,12 @@ impl Checker {
 
         if node.kind == SyntaxKind::TypeAliasDeclaration {
             self.check_grammar_modifiers(node);
+            if let Some(name) = node.name() {
+                self.check_reserved_type_name(
+                    &name,
+                    &tsox_core::diagnostics::messages_generated::TYPE_ALIAS_NAME_CANNOT_BE_0,
+                );
+            }
             if let Some(parent) = node.parent()
                 && !self.container_allows_block_scoped_variable(&parent)
                 && let Some(name) = node.name()
