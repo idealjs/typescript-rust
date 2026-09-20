@@ -294,11 +294,13 @@ impl Checker {
             }
             let declared = self.get_type_of_symbol(&symbol);
             let narrowed =
-                if symbol.flags.intersects(
-                    SymbolFlags::FunctionScopedVariable
-                        | SymbolFlags::BlockScopedVariable
-                        | SymbolFlags::Alias,
-                ) {
+                if self.type_resolution_stack.is_empty()
+                    && symbol.flags.intersects(
+                        SymbolFlags::FunctionScopedVariable
+                            | SymbolFlags::BlockScopedVariable
+                            | SymbolFlags::Alias,
+                    )
+                {
                     let flow = self.program.symbol_map().flow_node_of(node).map(Arc::clone);
                     let narrowable = self.get_narrowable_type_for_reference(&declared, node);
                     self.get_narrowed_type_of_symbol_with_declared(

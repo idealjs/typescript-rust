@@ -12,6 +12,15 @@ impl Checker {
         {
             return self.get_any_type();
         }
+        // 声明型解析进行中不可重入取同符号类型（Go 该状态不可达：接口成员
+        // 重建等求值路径不会出现在 getDeclaredType 之下）；静默返回占位，
+        // 不开 Type 帧也不报环
+        if self.is_resolving(
+            Arc::as_ptr(symbol) as *const Symbol,
+            crate::checker::TypeResolutionProperty::DeclaredType,
+        ) {
+            return self.error_type();
+        }
         // js export=（`module.exports = <表达式>`，BinaryExpression 声明）：
         // 符号类型 = 右侧表达式类型（具名导入经 tryGetMemberInModuleExports
         // AndProperties 取该类型的属性）
