@@ -94,6 +94,12 @@ impl Checker {
                 && self.is_never_intersection(callee_type)
             {
                 "never".to_string()
+            } else if callee_type.flags.contains(TypeFlags::TypeParameter) {
+                match self.get_constraint_of_type_parameter(callee_type) {
+                    Some(c) if !c.flags.contains(TypeFlags::Unknown) => self.type_to_string(&c),
+                    _ if self.strict_null_checks => "unknown".to_string(),
+                    _ => "{}".to_string(),
+                }
             } else {
                 match self.primitive_apparent_name(callee_type) {
                     Some(name) => name.to_string(),

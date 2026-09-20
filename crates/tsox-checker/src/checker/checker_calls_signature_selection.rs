@@ -92,18 +92,17 @@ impl Checker {
                     return None;
                 }
             }
-        } else if let Some(structured) = callee_type.as_structured() {
-            if is_new {
-                structured.construct_signatures()
-            } else {
-                structured.call_signatures()
-            }
         } else {
-            if !is_new && self.report_get_accessor_call(callee_expr) {
+            let resolved = self.get_signatures_of_type(callee_type, sig_kind);
+            if resolved.is_empty() {
+                if !is_new && self.report_get_accessor_call(callee_expr) {
+                    return None;
+                }
+                self.report_invocation_error(callee_expr, callee_type, is_new);
                 return None;
             }
-            self.report_invocation_error(callee_expr, callee_type, is_new);
-            return None;
+            union_signatures = resolved;
+            &union_signatures
         };
         Some(signatures.to_vec())
     }

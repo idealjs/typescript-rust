@@ -428,13 +428,38 @@ impl Checker {
             }
         }
         // 类型参数（含多态 this）成员经约束解析（tsc resolveStructuredTypeMembers 语义）
-        if let crate::checker::types::TypeData::TypeParameter(tp) = &t.data
-            && let Some(constraint) = tp.constraint.clone()
-        {
-            let member = self.get_property_of_type(&constraint, name);
-            if member.is_some() {
-                return member;
+        if let crate::checker::types::TypeData::TypeParameter(tp) = &t.data {
+            if let Some(constraint) = tp.constraint.clone()
+                && !constraint.flags.contains(TypeFlags::Unknown)
+            {
+                let member = self.get_property_of_type(&constraint, name);
+                if member.is_some() {
+                    return member;
+                }
             }
+            if self.strict_null_checks {
+                return None;
+            }
+        }
+        let call_sigs = self.get_signatures_of_type(t, SignatureKind::Call);
+        let construct_sigs = if call_sigs.is_empty() {
+            self.get_signatures_of_type(t, SignatureKind::Construct)
+        } else {
+            Vec::new()
+        };
+        let augment_type = if self.any_function_type.get().is_some_and(|f| Arc::ptr_eq(f, t)) {
+            self.global_function_type_of("Function")
+        } else if !call_sigs.is_empty() {
+            self.global_callable_function_type()
+        } else if !construct_sigs.is_empty() {
+            self.global_newable_function_type()
+        } else {
+            None
+        };
+        if let Some(ft) = augment_type
+            && let Some(member) = self.get_property_of_type(&ft, name)
+        {
+            return Some(member);
         }
         // Go getPropertyOfTypeEx：普通成员未命中时回退全局 Object 接口成员
         //（对象字面量查 toString 等由此命中，缺失属性报告因此不含 Object 原型成员）
