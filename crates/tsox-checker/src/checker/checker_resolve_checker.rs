@@ -83,7 +83,10 @@ impl Checker {
                             && sym
                                 .declarations
                                 .iter()
-                                .any(|d| d.kind == SyntaxKind::ExportSpecifier);
+                                .any(|d| {
+                                    d.kind == SyntaxKind::ExportSpecifier
+                                        || d.kind == SyntaxKind::NamespaceExport
+                                });
                         if !is_export_specifier {
                             return self.follow_alias(sym);
                         }
@@ -196,10 +199,23 @@ impl Checker {
                             .flags
                             .intersects(SymbolFlags::MODULE | SymbolFlags::ENUM)
                             && let Some(sym) = a_sym.exports.get(name)
-                            && (sym.flags.intersects(meaning)
-                                || self.alias_chain_hits_meaning(&sym, meaning))
                         {
-                            return self.follow_alias(sym);
+                            // Go resolver：模块导出含纯 alias 的 export specifier
+                            //（export * as ns 亦同）不视为作用域内名字
+                            let is_export_specifier = sym.flags == SymbolFlags::Alias
+                                && sym
+                                    .declarations
+                                    .iter()
+                                    .any(|d| {
+                                        d.kind == SyntaxKind::ExportSpecifier
+                                            || d.kind == SyntaxKind::NamespaceExport
+                                    });
+                            if !is_export_specifier
+                                && (sym.flags.intersects(meaning)
+                                    || self.alias_chain_hits_meaning(&sym, meaning))
+                            {
+                                return self.follow_alias(sym);
+                            }
                         }
 
                         if a_sym.flags.intersects(SymbolFlags::MODULE) {
