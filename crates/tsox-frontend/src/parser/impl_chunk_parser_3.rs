@@ -86,7 +86,6 @@ impl Parser {
                 );
             }
             ParsingContext::ObjectLiteralMembers => {
-                eprintln!("[1136] UNCONDITIONAL TRACE");
                 self.parse_error_at_current_token(
                     tsox_core::diagnostics::PROPERTY_ASSIGNMENT_EXPECTED,
                     &[],
