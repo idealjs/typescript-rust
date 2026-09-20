@@ -4,6 +4,25 @@
 
 - git commit 只在用户明确指示时执行（如「提交一下」）；文档或代码修改后只落盘，不主动提交
 - 主分支（main）不频繁小步提交，提交时机与粒度由用户决定
+- 合并 subagent 分支一律用 rebase 方式：把分支提交 rebase 到目标分支后 fast-forward（或等价的 rebase-merge），不产生 merge commit
+
+### subagent 语料修复循环（主 agent 编排）
+
+```mermaid
+flowchart TD
+    A[从 corpus_results.csv 挑选任务<br>生成精确用例 key 清单] --> B[下发 subagent 修复<br>只修清单内用例<br>禁止自行挑选或自由修复]
+    B --> C[主 agent 汇总收集各分支产出<br>正确性裁决收敛主 agent]
+    C --> D["全量运行约 15 分钟<br>(ulimit -v 8388608; TSOX_SUBMODULE_LIMIT=0 cargo test --release --no-fail-fast > fullrun.log 2>&1)"]
+    D --> E[python3 tools/corpus_csv_export.py fullrun.log<br>更新 corpus_results.csv 与 corpus_skips.csv<br>均仅记缺陷行]
+    E --> F[检查 corpus_results.diff 与 corpus_skips.diff<br>机械 diff,不做 AI 判读]
+    F --> G{"收敛判据:FAIL 总数 = 0?<br>(每轮准入门槛:新增回归必须为 0)"}
+    G -- 否 --> A
+    G -- 是 --> H[循环结束,汇总报告]
+```
+
+收敛指标：以 `corpus_results.csv` 的 FAIL 总数为准。FAIL = 0 即收敛、循环结束。每轮准入门槛：新增回归必须为 0 且 FAIL 数下降，否则该轮作废重修。SKIP 必须与 Go 保持一致：SKIP 集合超出 Go 的部分按缺陷对待，纳入修复循环，不计入合法收敛状态。
+
+SKIP 差异表：`python3 tools/corpus_csv_export.py` 每轮同时产出 `corpus_skips.csv`（超出 Go 合法 SKIP 基准的用例，基准记录在 `tools/skip_baseline.txt`，缺失时全部 SKIP 视为差异）。SKIP 差异与 FAIL 同流程修复：挑选 key 下发 subagent、循环消解，直至 `corpus_skips.csv` 为空。
 
 ## 代码规范
 
@@ -62,6 +81,8 @@
 - 全量语料的内存护栏脚本 `tools/fourslash_shard.py`（分片 + 单线程 + RSS 采样 + 断点续跑），批量回归异常排查时启用
 
 超限的表现是进程被提前杀死或输出不完整；此时按内存/死循环根因排查（受控探针测斜率、变体二分）。
+
+- 批量/全量测试运行后，执行 `python3 tools/corpus_csv_export.py fullrun.log` 更新仓库根 `corpus_results.csv`：只记 FAIL 用例，表头 `key,seconds`，key 为 `compiler/<用例名>`，按 key 字典序；脚本自动将上一轮存为 `corpus_results.prev.csv` 并生成 `corpus_results.diff`
 
 ## 文档规范
 

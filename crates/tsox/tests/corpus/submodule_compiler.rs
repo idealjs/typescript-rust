@@ -899,7 +899,6 @@ fn submodule_compiler_cases() {
                     .file_name()
                     .and_then(|n| n.to_str())
                     .unwrap_or("<bad-name>");
-                log.line(&format!("[w{wid}] #{}/{selected_total} START {name}", i + 1));
                 let t0 = std::time::Instant::now();
                 let (outcome, failed_configs, detail) = run_case(
                     case_path,
