@@ -541,11 +541,20 @@ impl Checker {
                 !matches!(d.kind, SyntaxKind::FunctionDeclaration | SyntaxKind::MethodDeclaration)
                     || body_of(d).is_some()
             };
+            // Go binder 不把本模块 ExportSpecifier 并入导出符号声明集，
+            // 计数只含本地声明；specifier 归并是本地绑定形态的差异
+            let is_specifier = |d: &Arc<Node>| {
+                matches!(
+                    d.kind,
+                    SyntaxKind::ExportSpecifier | SyntaxKind::NamespaceExport
+                )
+            };
             let exported_declarations_count = symbol
                 .declarations
                 .iter()
                 .filter(|d| {
-                    is_not_overload(d)
+                    !is_specifier(d)
+                        && is_not_overload(d)
                         && !matches!(
                             d.kind,
                             SyntaxKind::GetAccessor | SyntaxKind::SetAccessor
@@ -557,13 +566,14 @@ impl Checker {
                 continue;
             }
             if exported_declarations_count > 1
-                && !symbol.declarations.iter().all(|d| {
+                && !symbol.declarations.iter().filter(|d| !is_specifier(d)).all(|d| {
                     crate::binder::get_assignment_declaration_kind(d)
                         == crate::binder::bind_js_assignment_declarations::JsDeclarationKind::ExportsProperty
                 })
             {
                 for declaration in symbol.declarations.iter() {
-                    if is_not_overload(declaration)
+                    if !is_specifier(declaration)
+                        && is_not_overload(declaration)
                         && let Some(loc) = declaration_name_loc(declaration)
                     {
                         let file = self.current_file.clone();
