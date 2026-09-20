@@ -95,14 +95,15 @@ impl Parser {
         if second == SyntaxKind::DotDotDotToken {
             return true;
         }
+        let mut token = second;
         if second != SyntaxKind::OpenBracketToken && second != SyntaxKind::OpenBraceToken {
             let third = scanner.scan();
             if third == SyntaxKind::ColonToken {
                 return true;
             }
+            token = third;
         }
         let mut depth = 1usize;
-        let mut token = second;
         loop {
             match token {
                 SyntaxKind::EndOfFile => return false,
@@ -120,7 +121,7 @@ impl Parser {
                             return Self::scanner_reaches_arrow_before_line_end(&mut scanner);
                         }
 
-                        if next == SyntaxKind::OpenBraceToken && token == second {
+                        if next == SyntaxKind::OpenBraceToken {
                             return true;
                         }
                         return false;
