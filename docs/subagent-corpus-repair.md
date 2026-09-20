@@ -1,4 +1,4 @@
-> 版本：v1.0 · 2026-09-20
+> 版本：v1.1 · 2026-09-20
 
 # corpus 家族修复的多 subagent 工作流
 
@@ -33,7 +33,8 @@ flowchart TD
 - worktree 绝对路径与分支名，禁止触碰其他 worktree 与主仓
 - assigned_cases.txt 为唯一工作清单，修完即止
 - 长命令后台化与轮询纪律：预计超过 3 分钟的命令禁止阻塞等待
-- 资源上限：cargo 构建 -j 4、家族批量 TSOX_SUBMODULE_JOBS=2、lib 测试 RUST_TEST_THREADS=1，全部包 ulimit -v 8388608
+- 资源上限：构建 CARGO_BUILD_JOBS 封顶、清单批量 TSOX_SUBMODULE_JOBS 限 1 到 2、lib 测试 RUST_TEST_THREADS=1，全部包 ulimit -v 8388608
+- 全量与批量测试必须 release 构建（cargo test --release）：release 相对 debug 有 5 倍执行提速，debug 跑全量时间不可接受。单例调试允许 debug
 - 提交纪律：验证单元（5 到 20 例）家族批量净绿即提交，message 风格 fix(corpus): 家族 根因 手法，N 例转绿
 - 交接日志 progress_notes.md 的读写约定
 - 代码规范引用 AGENTS.md：禁解释性注释、300 行拆分、不新增内联测试
