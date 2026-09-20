@@ -110,11 +110,14 @@ impl Checker {
             if related.is_false() {
                 if self.relater_chain_active {
                     if !callbacks {
+                        let display_target = self
+                            .rebind_non_nullable_union_target(&target_type, &source_type)
+                            .unwrap_or_else(|| source_type.clone());
                         let ts = self.type_to_string(&target_type);
-                        let ss = self.type_to_string(&source_type);
+                        let ss = self.type_to_string(&display_target);
                         self.push_relation_head_with_tp_note(
                             &target_type,
-                            &source_type,
+                            &display_target,
                             tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
                             vec![ts, ss],
                         );
