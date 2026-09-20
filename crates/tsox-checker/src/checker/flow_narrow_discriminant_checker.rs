@@ -202,7 +202,13 @@ impl Checker {
         let NodeData::SwitchStatement(switch_data) = &switch_stmt.data else {
             return Arc::clone(type_);
         };
-        let discriminant = &switch_data.expression;
+        // Go getTypeAtSwitchClause：判别式跳过括号（switch ((v.type))）
+        let mut discriminant = Arc::clone(&switch_data.expression);
+        while discriminant.kind == SyntaxKind::ParenthesizedExpression
+            && let Some(inner) = discriminant.expression()
+        {
+            discriminant = Arc::clone(&inner);
+        }
 
         let (clause_start, clause_end) = match flow.clause_range {
             Some(r) => r,
@@ -220,16 +226,16 @@ impl Checker {
         };
         let range = (clause_start, clause_end);
 
-        if self.expr_matches_target(discriminant, target) {
+        if self.expr_matches_target(&discriminant, target) {
             return self.narrow_by_switch_on_discriminant(type_, switch_stmt, range);
         }
 
         if let FlowRef::Symbol(symbol) = target {
             if let Some(access) = self
-                .discriminant_alias_access(discriminant, symbol)
+                .discriminant_alias_access(&discriminant, symbol)
                 .or_else(|| {
-                    self.is_property_access_on_symbol(discriminant, symbol)
-                        .then(|| Arc::clone(discriminant))
+                    self.is_property_access_on_symbol(&discriminant, symbol)
+                        .then(|| Arc::clone(&discriminant))
                 })
             {
                 return self.narrow_by_switch_on_discriminant_property(
