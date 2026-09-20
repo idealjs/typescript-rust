@@ -30,6 +30,8 @@ pub enum DiagnosticKind {
 
     NumericSeparatorNotAllowed,
 
+    MultipleConsecutiveNumericSeparators,
+
     RegexMessage(tsox_core::diagnostics::Message),
     RegexMessageWithArg(tsox_core::diagnostics::Message, char),
 
@@ -44,6 +46,10 @@ pub enum DiagnosticKind {
     BigIntMustBeInteger,
 
     DigitExpected,
+
+    BinaryDigitExpected,
+
+    OctalDigitExpected,
 }
 
 pub type TokenFlags = u32;

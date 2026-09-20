@@ -65,6 +65,10 @@ impl Checker {
                     && !in_for_in_of
                     && !is_ambient
                     && !tsox_frontend::ast::node_data_generated::is_binding_pattern(&data.name)
+                    && !self
+                        .current_file
+                        .as_ref()
+                        .is_some_and(|f| f.has_parse_diagnostics)
                 {
                     let file = self.current_file.clone();
                     let name_loc = data.name.loc;
