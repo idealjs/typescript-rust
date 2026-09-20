@@ -264,14 +264,34 @@ impl Checker {
         ))
     }
 
-    pub fn collect_return_types_from_node(&mut self, node: &Arc<Node>, types: &mut Vec<Arc<Type>>) {
+    pub fn collect_return_types_from_node(
+        &mut self,
+        fn_node: Option<&Arc<Node>>,
+        node: &Arc<Node>,
+        types: &mut Vec<Arc<Type>>,
+        has_return_with_no_expression: &mut bool,
+        has_return_of_type_never: &mut bool,
+    ) {
         use tsox_frontend::ast::node_data_generated::for_each_child;
         match node.kind {
             SyntaxKind::ReturnStatement => {
                 if let tsox_frontend::ast::NodeData::ReturnStatement(data) = &node.data {
-                    if let Some(expr) = &data.expression {
-                        let t = self.get_type_of_node(expr);
-                        types.push(t);
+                    match &data.expression {
+                        None => {
+                            *has_return_with_no_expression = true;
+                        }
+                        Some(expr) => {
+                            let expr = Self::skip_parentheses(expr);
+                            if self.is_bare_recursive_call(fn_node, &expr) {
+                                *has_return_of_type_never = true;
+                                return;
+                            }
+                            let t = self.get_type_of_node(&expr);
+                            if t.flags.contains(TypeFlags::Never) {
+                                *has_return_of_type_never = true;
+                            }
+                            types.push(t);
+                        }
                     }
                 }
                 return;
@@ -288,13 +308,59 @@ impl Checker {
             _ => {}
         }
         for_each_child(node, |child| {
-            self.collect_return_types_from_node(child, types);
+            self.collect_return_types_from_node(
+                fn_node,
+                child,
+                types,
+                has_return_with_no_expression,
+                has_return_of_type_never,
+            );
             false
         });
     }
 
+    fn is_bare_recursive_call(&self, fn_node: Option<&Arc<Node>>, expr: &Arc<Node>) -> bool {
+        if expr.kind != SyntaxKind::CallExpression {
+            return false;
+        }
+        let NodeData::CallExpression(call) = &expr.data else {
+            return false;
+        };
+        let callee = &call.expression;
+        if callee.kind != SyntaxKind::Identifier {
+            return false;
+        }
+        let Some(fn_node) = fn_node else {
+            return false;
+        };
+        if matches!(
+            fn_node.kind,
+            SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction
+        ) {
+            return false;
+        }
+        let (Some(fn_sym), Some(callee_sym)) = (
+            self.program.symbol_map().symbol_of(fn_node),
+            self.program.symbol_map().symbol_of(callee),
+        ) else {
+            return false;
+        };
+        Arc::ptr_eq(fn_sym, callee_sym)
+    }
+
+    pub fn may_return_never(fn_node: &Arc<Node>) -> bool {
+        match fn_node.kind {
+            SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => true,
+            SyntaxKind::MethodDeclaration => fn_node
+                .parent()
+                .is_some_and(|p| p.kind == SyntaxKind::ObjectLiteralExpression),
+            _ => false,
+        }
+    }
+
     pub fn infer_function_return_type(
         &mut self,
+        fn_node: Option<&Arc<Node>>,
         body: Option<&Arc<Node>>,
         type_node: Option<&Arc<Node>>,
     ) -> Arc<Type> {
@@ -311,13 +377,27 @@ impl Checker {
             return self.get_widened_type(&t);
         }
         let mut types: Vec<Arc<Type>> = Vec::new();
-        self.collect_return_types_from_node(body, &mut types);
+        let mut has_return_with_no_expression = !self.function_body_definitely_returns(body);
+        let mut has_return_of_type_never = false;
+        self.collect_return_types_from_node(
+            fn_node,
+            body,
+            &mut types,
+            &mut has_return_with_no_expression,
+            &mut has_return_of_type_never,
+        );
         if types.is_empty() {
+            let never_returning = !has_return_with_no_expression
+                && (has_return_of_type_never
+                    || fn_node.is_some_and(Self::may_return_never));
+            if never_returning {
+                return self.never_type();
+            }
             return self.void_type();
         }
         // Go checkAndAggregateReturnExpressionTypes：strictNullChecks 下体尾
         // 可达（隐式 return undefined）时并入 undefined
-        if self.strict_null_checks && !self.function_body_definitely_returns(body) {
+        if self.strict_null_checks && has_return_with_no_expression {
             let undef = self.undefined_type();
             if !types.iter().any(|t| t.flags.contains(TypeFlags::Undefined)) {
                 types.push(undef);

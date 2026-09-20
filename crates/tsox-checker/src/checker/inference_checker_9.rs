@@ -51,27 +51,31 @@ impl Checker {
                             .contra_candidates
                             .iter()
                             .any(|t| self.is_type_assignable_to(cov, t));
-                        let no_conflicting_constraints = context.inferences.iter().all(|other| {
-                            let other_tp = &other.type_parameter;
-                            let constraint = self.get_constraint_of_type_parameter(other_tp);
-                            let is_constrained = constraint.as_ref().map_or(false, |c| {
-                                if let Some(c_cons) = c.as_union_or_intersection() {
-                                    c_cons.types.iter().any(|ct| {
-                                        crate::checker::utilities::type_parameters_match(
-                                            ct,
-                                            &inference.type_parameter,
-                                        )
+                        let no_conflicting_constraints = context.inferences.iter().enumerate().all(
+                            |(j, other)| {
+                                let other_tp = &other.type_parameter;
+                                let constraint = self.get_constraint_of_type_parameter(other_tp);
+                                let is_constrained = constraint.as_ref().is_some_and(|c| {
+                                    crate::checker::utilities::type_parameters_match(
+                                        c,
+                                        &inference.type_parameter,
+                                    ) || c.as_union_or_intersection().is_some_and(|u| {
+                                        u.types.iter().any(|ct| {
+                                            crate::checker::utilities::type_parameters_match(
+                                                ct,
+                                                &inference.type_parameter,
+                                            )
+                                        })
                                     })
-                                } else {
-                                    false
-                                }
-                            });
-                            !is_constrained
-                                || other
-                                    .candidates
-                                    .iter()
-                                    .all(|t| self.is_type_assignable_to(t, cov))
-                        });
+                                });
+                                let bypass = j != index && !is_constrained;
+                                bypass
+                                    || other
+                                        .candidates
+                                        .iter()
+                                        .all(|t| self.is_type_assignable_to(t, cov))
+                            },
+                        );
                         cov_not_never_or_any
                             && cov_assignable_to_contra
                             && no_conflicting_constraints

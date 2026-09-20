@@ -5,21 +5,60 @@ use crate::checker::typenode_references::*;
 impl Checker {
     pub(crate) fn resolve_type_parameter_reference(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
         let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol;
-        for map in self.type_argument_stack.iter().rev() {
+        let mut hit_depth = usize::MAX;
+        let mut hit: Option<Arc<Type>> = None;
+        for (depth, map) in self.type_argument_stack.iter().rev().enumerate() {
             if let Some(t) = map.get(&key) {
-                return Arc::clone(t);
+                hit_depth = depth;
+                hit = Some(Arc::clone(t));
+                break;
             }
         }
-        // 符号实例漂移回退：多树副本下帧键与解析符号不同实例，按名字+容器名
-        // 等价命中（同一声明的语义副本）
-        for map in self.type_argument_stack.iter().rev() {
-            for (k, v) in map.iter() {
-                if self.type_param_symbols_equivalent(unsafe { &**k }, symbol) {
-                    return Arc::clone(v);
+        if hit.is_none() {
+            // 符号实例漂移回退：多树副本下帧键与解析符号不同实例，按名字+容器名
+            // 等价命中（同一声明的语义副本）
+            'outer: for (depth, map) in self.type_argument_stack.iter().rev().enumerate() {
+                for (k, v) in map.iter() {
+                    if self.type_param_symbols_equivalent(unsafe { &**k }, symbol) {
+                        hit_depth = depth;
+                        hit = Some(Arc::clone(v));
+                        break 'outer;
+                    }
                 }
             }
         }
 
+        // Go 组合 mapper 语义：帧命中值为类型参数且更底层帧仍有绑定时逐层
+        // 追踪到底（别名帧 TOuter→TInner 与当前替换帧 TInner→Arg 的组合）
+        if let Some(mut t) = hit {
+            let mut depth = hit_depth;
+            for _ in 0..self.type_argument_stack.len() {
+                if !t.flags.contains(crate::checker::types::TypeFlags::TypeParameter) {
+                    break;
+                }
+                let Some(next_sym) = t.symbol.as_ref() else {
+                    break;
+                };
+                let next_key = Arc::as_ptr(next_sym) as *const tsox_frontend::ast::Symbol;
+                let mut next: Option<Arc<Type>> = None;
+                let mut scanned = 0;
+                for map in self.type_argument_stack.iter().rev().skip(depth + 1) {
+                    scanned += 1;
+                    if let Some(u) = map.get(&next_key) {
+                        next = Some(Arc::clone(u));
+                        break;
+                    }
+                }
+                match next {
+                    Some(u) => {
+                        depth += scanned;
+                        t = u;
+                    }
+                    None => break,
+                }
+            }
+            return t;
+        }
 
         for frame in self.type_argument_name_frames.iter().rev() {
             for (frame_sym, t) in frame.iter().rev() {

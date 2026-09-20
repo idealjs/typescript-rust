@@ -156,7 +156,7 @@ impl Checker {
         let return_type = if is_generator && type_node.is_none() && body.is_some() {
             self.infer_generator_return_type(body.unwrap(), is_async_fn)
         } else {
-            self.infer_function_return_type(body, type_node)
+            self.infer_function_return_type(Some(node), body, type_node)
         };
         if is_arrow {
             self.pop_arrow_function_scope();

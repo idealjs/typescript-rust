@@ -298,6 +298,7 @@ pub(crate) mod relater_probing_substitute_infer_mapped;
 pub(crate) mod relater_probing_substitute_infer_object;
 pub(crate) mod relater_probing_substitute_infer_variants;
 pub(crate) mod relater_relate;
+pub(crate) mod relater_relate_base_signature;
 pub(crate) mod relater_relate_impl_chunk;
 pub(crate) mod relater_relate_impl_chunk_checker;
 pub(crate) mod relater_relate_impl_chunk_checker_10;

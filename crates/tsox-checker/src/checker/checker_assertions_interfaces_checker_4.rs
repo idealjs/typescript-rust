@@ -9,7 +9,7 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         match &member.data {
             tsox_frontend::ast::NodeData::GetAccessorDeclaration(d) => {
-                Some(self.infer_function_return_type(d.body.as_ref(), d.type_node.as_ref()))
+                Some(self.infer_function_return_type(Some(member), d.body.as_ref(), d.type_node.as_ref()))
             }
             tsox_frontend::ast::NodeData::SetAccessorDeclaration(d) => {
                 let tn = d.parameters.iter().next().and_then(|p| match &p.data {

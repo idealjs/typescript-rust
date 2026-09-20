@@ -296,12 +296,16 @@ impl Checker {
         let source_sigs = self.get_signatures_of_type(source, SignatureKind::Call);
         let target_sigs = self.get_signatures_of_type(target, SignatureKind::Call);
         if source_sigs.len() == 1 && target_sigs.len() == 1 {
-            self.infer_from_signature(state, &source_sigs[0], &target_sigs[0]);
+            let s = self.get_base_signature(&source_sigs[0]);
+            let t = self.get_erased_signature(&target_sigs[0]);
+            self.infer_from_signature(state, &s, &t);
         }
         let source_ctors = self.get_signatures_of_type(source, SignatureKind::Construct);
         let target_ctors = self.get_signatures_of_type(target, SignatureKind::Construct);
         if source_ctors.len() == 1 && target_ctors.len() == 1 {
-            self.infer_from_signature(state, &source_ctors[0], &target_ctors[0]);
+            let s = self.get_base_signature(&source_ctors[0]);
+            let t = self.get_erased_signature(&target_ctors[0]);
+            self.infer_from_signature(state, &s, &t);
         }
     }
 
@@ -638,7 +642,16 @@ impl Checker {
                 );
             }
         }
-        let return_type = self.infer_function_return_type(body, type_node);
+        let is_generator = match &node.data {
+            tsox_frontend::ast::NodeData::FunctionExpression(d) => d.asterisk_token.is_some(),
+            _ => false,
+        };
+        let is_async_fn = node.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Async);
+        let return_type = if is_generator && type_node.is_none() && body.is_some() {
+            self.infer_generator_return_type(body.unwrap(), is_async_fn)
+        } else {
+            self.infer_function_return_type(Some(node), body, type_node)
+        };
         if is_arrow {
             self.pop_arrow_function_scope();
         } else {
@@ -797,6 +810,11 @@ impl Checker {
                     }
                 } else {
                     let mut arg_type = self.get_type_of_node(&args[i]);
+                    if let Some(inst) =
+                        self.instantiate_generic_call_arg_type(&arg_type, &param_type, context)
+                    {
+                        arg_type = inst;
+                    }
                     // Go checkExpressionWithContextualType 尾部：字面量是其
                     // 上下文型（含类型参数约束）的成员时剥 fresh 标记，
                     // 候选保留字面量（createColor('rgb', …) → T='rgb'）

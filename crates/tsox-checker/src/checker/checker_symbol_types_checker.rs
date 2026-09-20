@@ -175,7 +175,7 @@ impl Checker {
             let return_type = match data.type_node.as_ref() {
                 Some(tn) => self.get_type_from_type_node(tn),
                 // 无注解方法：从函数体推断返回类型（无 return 的 body 是 void，非 any）
-                None => self.infer_method_return_type(&data.body),
+                None => self.infer_method_return_type(&decl, &data.body),
             };
             let sig = self.build_signature_from_function_like_type_node(
                 &data.parameters,
@@ -271,8 +271,12 @@ impl Checker {
     }
 
     // 方法体返回类型推断：走通用 infer_function_return_type（无 return 的 body 推断为 void）
-    pub(crate) fn infer_method_return_type(&mut self, body: &Option<Arc<Node>>) -> Arc<Type> {
-        self.infer_function_return_type(body.as_ref(), None)
+    pub(crate) fn infer_method_return_type(
+        &mut self,
+        decl: &Arc<Node>,
+        body: &Option<Arc<Node>>,
+    ) -> Arc<Type> {
+        self.infer_function_return_type(Some(decl), body.as_ref(), None)
     }
 
     pub(crate) fn attach_function_expando_type(

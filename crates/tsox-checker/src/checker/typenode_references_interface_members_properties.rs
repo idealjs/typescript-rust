@@ -258,7 +258,7 @@ impl Checker {
                 }) {
                     self.void_type()
                 } else if data.body.is_some() {
-                    self.infer_method_return_type(&data.body)
+                    self.infer_method_return_type(member, &data.body)
                 } else {
                     self.get_any_type()
                 }

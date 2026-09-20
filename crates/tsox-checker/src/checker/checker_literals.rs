@@ -322,7 +322,8 @@ impl Checker {
             && let NodeData::GetAccessorDeclaration(gd) = &g.data
             && let Some(body) = &gd.body
         {
-            let inferred = self.infer_method_return_type(&Some(Arc::clone(body)));
+            let accessor = g.clone();
+            let inferred = self.infer_method_return_type(&accessor, &Some(Arc::clone(body)));
             return self.get_widened_type(&inferred);
         }
         self.get_any_type()
