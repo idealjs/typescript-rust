@@ -317,6 +317,7 @@ impl Checker {
                 if let tsox_frontend::ast::NodeData::TaggedTemplateExpression(data) = &node.data {
                     self.check_expression(&data.tag);
                     self.check_expression(&data.template);
+                    self.check_tagged_template_arity(node);
                 }
             }
             SyntaxKind::JsxElement

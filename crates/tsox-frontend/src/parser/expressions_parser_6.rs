@@ -165,10 +165,16 @@ impl Parser {
             ))
         } else {
             // Go createIdentifierWithDiagnostic：报 Expression expected 后返回
-            // 零宽 missing，不消费当前 token（由外层 expect/列表恢复推进）
-            let pos = self.token_pos();
-            let end = self.token_end();
-            self.parse_error_at(pos, end, tsox_core::diagnostics::EXPRESSION_EXPECTED, &[]);
+            // 零宽 missing，不消费当前 token（由外层 expect/列表恢复推进）；
+            // EOF 时报错取零宽 fullStart（与后续 expect 的 token 位错开，
+            // 避免位置去重吞掉两条诊断）
+            if self.token == SyntaxKind::EndOfFile {
+                let p = self.node_pos();
+                self.parse_error_at(p, p, tsox_core::diagnostics::EXPRESSION_EXPECTED, &[]);
+            } else {
+                self.parse_error_at_current_token(tsox_core::diagnostics::EXPRESSION_EXPECTED, &[]);
+            }
+            let pos = self.node_pos();
             Arc::new(Node::with_loc(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData {
