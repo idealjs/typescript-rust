@@ -344,15 +344,13 @@ impl Checker {
                     symbol = Arc::clone(merged);
                 }
                 // Go 分表语义：exports 与 locals 各有独立 ValueDeclaration，
-                // 仅同导出性的首个声明参与二级声明类型一致性比较
+                // 仅同导出性的首个声明（任意 variable-like 形态，含参数）
+                // 参与二级声明类型一致性比较
                 let node_exported = self.effective_export_default_flags(node).0;
                 let primary = symbol
                     .declarations
                     .iter()
-                    .find(|d| {
-                        d.kind == SyntaxKind::VariableDeclaration
-                            && self.effective_export_default_flags(d).0 == node_exported
-                    })
+                    .find(|d| self.effective_export_default_flags(d).0 == node_exported)
                     .cloned();
                 if let Some(primary) = primary
                     && !Arc::ptr_eq(&primary, node)
