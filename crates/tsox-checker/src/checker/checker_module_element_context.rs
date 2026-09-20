@@ -192,7 +192,21 @@ impl Checker {
                     })
             }
         };
-        if resolved.is_none() {
+        if let Some(path) = &resolved {
+            // Go resolveExternalModule：文件解析成功但目标无模块指示（脚本
+            // 文件，sourceFile.Symbol 为 nil）时报 TS2306
+            if let Some(sf) = self.program.get_source_file(path)
+                && sf.external_module_indicator.is_none()
+                && sf.common_js_module_indicator.is_none()
+            {
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    Some(file),
+                    module_name.loc,
+                    msgs::FILE_0_IS_NOT_A_MODULE,
+                    vec![path.clone()],
+                ));
+            }
+        } else {
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                 Some(file),
                 module_name.loc,

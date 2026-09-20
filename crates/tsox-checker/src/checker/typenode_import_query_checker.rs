@@ -42,9 +42,6 @@ impl Checker {
         alias: &Arc<Symbol>,
     ) -> Option<Arc<Symbol>> {
         // import X = require("./m") 形式：目标 = 模块的 export= 符号
-        if std::env::var_os("TSOX_DEBUG_QI").is_some() && alias.name == "C" {
-            eprintln!("[req-alias] C decls={:?}", alias.declarations.iter().map(|d| d.kind).collect::<Vec<_>>());
-        }
         if let Some(decl) = alias
             .declarations
             .iter()
@@ -52,7 +49,65 @@ impl Checker {
         {
             if let tsox_frontend::ast::NodeData::ImportEqualsDeclaration(data) = &decl.data {
                 let spec = self.module_specifier_of_external_ref(&data.module_reference)?;
-                let module_sym = self.resolve_module_file_symbol_relative(&spec)?;
+                let spec_loc = match &data.module_reference.data {
+                    NodeData::ExternalModuleReference(ext) => ext.expression.loc,
+                    _ => data.module_reference.loc,
+                };
+                let module_sym = match self.resolve_module_file_symbol_relative(&spec) {
+                    Some(sym) => {
+                        // Go resolveExternalModule：目标文件无模块指示（脚本）
+                        // 报 TS2306，参数为解析后文件名
+                        let not_module_file = self
+                            .program
+                            .source_files()
+                            .iter()
+                            .find(|f| {
+                                f.external_module_indicator.is_none()
+                                    && f.common_js_module_indicator.is_none()
+                                    && sym
+                                        .declarations
+                                        .iter()
+                                        .any(|d| Arc::ptr_eq(d, &f.node))
+                            })
+                            .map(|f| f.file_name.clone());
+                        if let Some(file_name) = not_module_file
+                            && !self
+                                .diagnostics
+                                .get_all()
+                                .iter()
+                                .any(|d| d.code == 2306 && d.loc == spec_loc)
+                        {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                spec_loc,
+                                tsox_core::diagnostics::messages_generated::FILE_0_IS_NOT_A_MODULE,
+                                vec![file_name],
+                            ));
+                        }
+                        sym
+                    }
+                    None => {
+                        // Go resolveExternalModuleName：import= require 别名
+                        // 解析失败在说明符处报模块解析错误（2307 系）
+                        let trimmed = spec.trim_matches(['"', '\'', '`']).to_string();
+                        let (message, args) =
+                            tsox_frontend::parser::cannot_resolve_module_error(
+                                &self.compiler_options,
+                                &trimmed,
+                            );
+                        if !self.diagnostics.get_all().iter().any(|d| {
+                            d.code == message.code && d.loc == spec_loc
+                        }) {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                spec_loc,
+                                message.clone(),
+                                args,
+                            ));
+                        }
+                        return None;
+                    }
+                };
                 return self.resolve_import_alias_target_of_module(&module_sym);
             }
         }
@@ -88,10 +143,11 @@ impl Checker {
         while !matches!(import_decl.data, NodeData::ImportDeclaration(_)) {
             import_decl = import_decl.parent()?;
         }
-        let module_spec = match &import_decl.data {
-            NodeData::ImportDeclaration(d) => d.module_specifier.text().to_string(),
+        let module_spec_node = match &import_decl.data {
+            NodeData::ImportDeclaration(d) => Arc::clone(&d.module_specifier),
             _ => return None,
         };
+        let module_spec = module_spec_node.text().to_string();
         let module_sym = self.resolve_module_file_symbol(&module_spec).or_else(|| {
             let trimmed = module_spec.trim_matches(['"', '\'', '`']).to_string();
             let cur = self.current_file.clone()?;
@@ -103,7 +159,30 @@ impl Checker {
             let sf = self.program.get_source_file(&path)?;
             self.program.symbol_map().symbol_of(&sf.node).cloned()
         });
-        let module_sym = module_sym?;
+        let module_sym = match module_sym {
+            Some(sym) => sym,
+            // Go getTargetOfNamespaceImport → resolveExternalModuleName：
+            // 模块解析失败在说明符处报 2307 系
+            None => {
+                let trimmed = module_spec.trim_matches(['"', '\'', '`']).to_string();
+                let (message, args) =
+                    tsox_frontend::parser::cannot_resolve_module_error(&self.compiler_options, &trimmed);
+                if !self
+                    .diagnostics
+                    .get_all()
+                    .iter()
+                    .any(|d| d.code == message.code && d.loc == module_spec_node.loc)
+                {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        module_spec_node.loc,
+                        message.clone(),
+                        args,
+                    ));
+                }
+                return None;
+            }
+        };
         // import * as N：别名目标即模块符号
         if member_name.is_none() {
             return Some(module_sym);
