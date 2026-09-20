@@ -101,16 +101,11 @@ impl Checker {
     }
 
     pub(crate) fn property_name_from_index(&mut self, t: &Arc<Type>) -> Option<String> {
-        use crate::checker::types::{TypeData, TypeFlags};
-        if t.flags
-            .intersects(TypeFlags::StringLiteral | TypeFlags::NumberLiteral)
+        if crate::checker::utilities_token_is_identifier_or_keyword::is_type_usable_as_property_name(t)
         {
-            if let TypeData::Literal(l) = &t.data {
-                return match &l.value {
-                    crate::checker::types::LiteralValue::String(s) => Some(s.clone()),
-                    crate::checker::types::LiteralValue::Number(n) => Some(n.to_string()),
-                    _ => None,
-                };
+            let name = crate::checker::utilities_token_is_identifier_or_keyword::get_property_name_from_type(t);
+            if !name.is_empty() {
+                return Some(name);
             }
         }
         None

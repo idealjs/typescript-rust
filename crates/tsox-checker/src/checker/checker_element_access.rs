@@ -6,29 +6,30 @@ use crate::checker::checker::*;
 
 impl Checker {
     pub(crate) fn get_type_of_element_access(&mut self, node: &Arc<Node>) -> Arc<Type> {
-        let (obj_expr, arg_expr) = match &node.data {
-            tsox_frontend::ast::NodeData::ElementAccessExpression(data) => {
-                (&data.expression, &data.argument_expression)
-            }
+        let (obj_expr, arg_expr, question_dot) = match &node.data {
+            tsox_frontend::ast::NodeData::ElementAccessExpression(data) => (
+                &data.expression,
+                &data.argument_expression,
+                data.question_dot_token.is_some(),
+            ),
             _ => return self.get_any_type(),
         };
 
+        let obj_precheck = self.get_type_of_node(obj_expr);
+        let obj_checked = if question_dot {
+            obj_precheck
+        } else {
+            self.check_non_null_type(&obj_precheck, obj_expr)
+        };
+        if crate::checker::utilities::is_type_error(&obj_checked) {
+            return obj_checked;
+        }
         {
-            // Go checkElementAccessExpression：对象侧为 any/错误类型时
-            // 跳过索引类型约束检查（TS2538）
-            let obj_precheck = self.get_type_of_node(obj_expr);
-            let skip_index_check = obj_precheck.flags.intersects(TypeFlags::Any);
+            let skip_index_check = obj_checked.flags.intersects(TypeFlags::Any);
             let arg_type = self.get_type_of_node(arg_expr);
 
-            let is_type_param_or_union_of = if skip_index_check {
-                true
-            } else {
-                arg_type.is_type_parameter()
-                    || (arg_type.is_union()
-                        && arg_type
-                            .types()
-                            .is_some_and(|ts| ts.iter().all(|t| t.is_type_parameter())))
-            };
+            let is_type_param_or_union_of = skip_index_check
+                || arg_type.is_type_parameter()
                 || (arg_type.is_union()
                     && arg_type
                         .types()
@@ -66,7 +67,7 @@ impl Checker {
                 }
             }
         }
-        let obj_type = self.get_type_of_node(obj_expr);
+        let obj_type = obj_checked;
         let effective_arg = self.effective_index_arg_type(arg_expr);
 
         if obj_type.flags.contains(TypeFlags::Union)
@@ -132,7 +133,7 @@ impl Checker {
         if want_string {
             has(true)
         } else {
-            has(false) || self.is_array_type(m) || has(true)
+            has(false) || self.is_array_type(m) || self.is_tuple_type(m) || has(true)
         }
     }
 
@@ -165,7 +166,10 @@ impl Checker {
             return self.get_array_element_type(obj_type);
         }
 
-        if let Some(member_name) = self.literal_element_access_name(arg_expr) {
+        let prop_name = self
+            .property_name_from_index(&effective_arg)
+            .or_else(|| self.literal_element_access_name(arg_expr));
+        if let Some(member_name) = prop_name {
             if let Some(sym) = self.get_property_of_type(obj_type, &member_name) {
                 if let Some(substituted) = self.instantiate_array_member_type(obj_type, &sym) {
                     return self.flow_type_of_access_expression(node, Some(&sym), substituted);
@@ -216,6 +220,9 @@ impl Checker {
                     }
                 }
             }
+        }
+        if let Some(val_type) = self.primitive_interface_index_value(obj_type) {
+            return self.flow_type_of_access_expression(node, None, val_type);
         }
 
         self.report_element_access_implicit_any(node, obj_type, arg_expr, effective_arg);
