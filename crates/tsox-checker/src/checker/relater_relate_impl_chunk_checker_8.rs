@@ -8,6 +8,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
+        source_is_primitive: bool,
     ) -> bool {
         // 未解析的接口壳（自引用重建实例，members 空）：先解析成完整实例再比较
         // （tsc type reference 的成员延迟解析语义）
@@ -28,7 +29,7 @@ impl Checker {
                     .as_structured()
                     .is_some_and(|s| !s.members.entries.is_empty())
             {
-                return self.is_object_type_related_to(source, &resolved, relation);
+                return self.is_object_type_related_to(source, &resolved, relation, source_is_primitive);
             }
         }
         // 源侧接口实例同样可能带退化构建窗口的残缺成员表（部分基类尚为壳时
@@ -51,7 +52,7 @@ impl Checker {
                     .as_structured()
                     .is_some_and(|s| s.members.entries.len() > src_members)
             {
-                return self.is_object_type_related_to(&resolved, target, relation);
+                return self.is_object_type_related_to(&resolved, target, relation, source_is_primitive);
             }
         }
         let source_struct = match source.as_structured() {
@@ -223,13 +224,18 @@ impl Checker {
                 }
             };
 
-            if target_prop.name.starts_with('[')
-                || (!source_declares_locally
-                    && self
-                        .global_interface_member_symbol("Object", &target_prop.name)
-                        .is_some())
-            {
+            if target_prop.name.starts_with('[') {
                 continue;
+            }
+            // 源未本地声明且目标是 Object 原型成员名时，按 Go getPropertyOfType
+            // 的解析结果（全局 Object 接口成员）参与真实类型比较而非跳过
+            //（{} → Boolean 的 valueOf: boolean 冲突由此报出）
+            let mut source_prop = source_prop;
+            if !source_declares_locally
+                && let Some(obj_member) = self
+                    .global_interface_member_symbol("Object", &target_prop.name)
+            {
+                source_prop = obj_member;
             }
 
             {
@@ -294,6 +300,16 @@ impl Checker {
                     );
                     return false;
                 }
+            }
+
+            // Go isPropertyRelatedTo：strictSubtype 下 readonly 源对 mutable
+            // 目标不成立（mutable→readonly 成立），关系有序化使 union 子型
+            // 归约与声明顺序无关
+            if relation == RelationKind::StrictSubtype
+                && self.symbol_is_readonly(&source_prop)
+                && !self.symbol_is_readonly(target_prop)
+            {
+                return false;
             }
 
             let source_type = if source_is_bare_array {
@@ -400,7 +416,7 @@ impl Checker {
             return false;
         }
 
-        if !self.is_index_signatures_related_to(source, target, relation) {
+        if !self.is_index_signatures_related_to(source, target, relation, source_is_primitive) {
             return false;
         }
 

@@ -188,7 +188,7 @@ impl Checker {
 
     pub(crate) fn fold_object_literal_spread(
         &mut self,
-        prop_pairs: &mut Vec<(String, Arc<Type>, Option<Arc<Node>>)>,
+        prop_pairs: &mut Vec<(String, Arc<Type>, Vec<Arc<Node>>)>,
         spread_acc: &mut Option<Arc<Type>>,
         expression: &Arc<Node>,
         prop: &Arc<Node>,
@@ -527,16 +527,14 @@ impl Checker {
 
     pub(crate) fn object_literal_type_from_pairs(
         &mut self,
-        prop_pairs: Vec<(String, Arc<Type>, Option<Arc<Node>>)>,
+        prop_pairs: Vec<(String, Arc<Type>, Vec<Arc<Node>>)>,
         literal_symbol: Option<Arc<Symbol>>,
     ) -> Arc<Type> {
         let mut members = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::with_capacity(prop_pairs.len());
-        for (name, t, decl) in prop_pairs {
+        for (name, t, decls) in prop_pairs {
             let mut sym = Symbol::new(SymbolFlags::Property, name.clone());
-            if let Some(d) = decl {
-                sym.declarations.push(d);
-            }
+            sym.declarations.extend(decls);
             let symbol = Arc::new(sym);
             self.value_symbol_links.insert(
                 &symbol,

@@ -9,17 +9,6 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
     ) -> bool {
-        if std::env::var_os("TSOX_DEBUG_RELATE").is_some() {
-            let t_name = self.type_to_string(target);
-            if t_name.contains("IPromise") {
-                eprintln!(
-                    "[relate] src={} target={} rel={:?}",
-                    self.type_to_string(source),
-                    t_name,
-                    relation
-                );
-            }
-        }
         if relation == RelationKind::Comparable
             && !target.flags.contains(TypeFlags::Never)
             && self.is_simple_type_related_to(target, source, relation)
@@ -103,7 +92,9 @@ impl Checker {
         {
             let saved_chain_active = self.relater_chain_active;
             self.relater_chain_active = false;
+            let saved_primitive = std::mem::replace(&mut self.relater_pending_primitive_source, true);
             let r = self.is_type_related_to(&boxed, target, relation);
+            self.relater_pending_primitive_source = saved_primitive;
             self.relater_chain_active = saved_chain_active;
             return r;
         }
@@ -142,7 +133,10 @@ impl Checker {
             }
 
             if self.is_array_type(&source) && self.is_array_type(&target) {
-                return self.is_array_type_related_to(&source, &target, relation);
+                let source_is_primitive = std::mem::take(&mut self.relater_pending_primitive_source);
+                let r = self.is_array_type_related_to(&source, &target, relation, source_is_primitive);
+                self.relater_pending_primitive_source = source_is_primitive;
+                return r;
             }
 
             if self.is_tuple_type(&source) && self.is_tuple_type(&target) {
@@ -184,14 +178,26 @@ impl Checker {
                 }
             }
 
+            let chain_len_before = self.relater_error_chain.len();
             if let Some(result) = self.generic_type_reference_related_to(&source, &target, relation) {
-                if result.is_true() {
-                    return true;
+                if result.is_false() {
+                    let was_active = self.relater_chain_active;
+                    self.relater_chain_active = false;
+                    let source_is_primitive = std::mem::take(&mut self.relater_pending_primitive_source);
+                    let structural =
+                        self.is_object_type_related_to(&source, &target, relation, source_is_primitive);
+                    self.relater_pending_primitive_source = source_is_primitive;
+                    self.relater_chain_active = was_active;
+                    if structural {
+                        self.relater_error_chain.truncate(chain_len_before);
+                    }
+                    return structural;
                 }
-                // False 不提前返回：方差是加速判定，错误细化须走结构比较
-                //（Int<string> 与 Int<number> 经属性 val 报 TYPES_OF_PROPERTY）
             }
-            return self.is_object_type_related_to(&source, &target, relation);
+            let source_is_primitive = std::mem::take(&mut self.relater_pending_primitive_source);
+            let r = self.is_object_type_related_to(&source, &target, relation, source_is_primitive);
+            self.relater_pending_primitive_source = source_is_primitive;
+            return r;
         }
 
         if relation != RelationKind::Identity
@@ -438,12 +444,13 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
+        source_is_primitive: bool,
     ) -> bool {
         let source_args = self.get_type_arguments(source);
         let target_args = self.get_type_arguments(target);
 
         if source_args.is_empty() || target_args.is_empty() {
-            return self.is_object_type_related_to(source, target, relation);
+            return self.is_object_type_related_to(source, target, relation, source_is_primitive);
         }
 
         // readonly → 可变按赋值/子类型关系拒绝（可变 → readonly 放行，

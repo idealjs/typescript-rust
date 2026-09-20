@@ -363,6 +363,11 @@ impl Checker {
     }
 
     pub fn get_min_type_argument_count(&self, type_parameters: &[Arc<Type>]) -> usize {
+        for (i, tp) in type_parameters.iter().enumerate() {
+            if self.get_default_from_type_parameter(tp).is_some() {
+                return i;
+            }
+        }
         type_parameters.len()
     }
 

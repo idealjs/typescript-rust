@@ -227,11 +227,35 @@ impl Checker {
             target.flags
         };
         if target_flags_view.contains(TypeFlags::TypeParameter) {
+            let generalized: Option<Arc<Type>> = if !target.flags.contains(TypeFlags::Never)
+                && (crate::checker::is_fresh_literal_type(source)
+                    || source
+                        .flags
+                        .intersects(crate::checker::types::TYPE_FLAGS_LITERAL))
+                && !self.type_could_have_top_level_singleton_types(target)
+            {
+                Some(self.get_base_type_of_literal_type_for_display(source))
+            } else {
+                None
+            };
+            let generalized_source = generalized.as_ref().unwrap_or(source);
             let constraint = self.get_base_constraint_of_type(target);
             let constraint_ok = constraint
                 .as_ref()
-                .is_some_and(|c| self.is_type_assignable_to(source, c));
+                .is_some_and(|c| self.is_type_assignable_to(generalized_source, c));
             if constraint_ok {
+                let c = constraint.unwrap();
+                let s = self.type_to_string(generalized_source);
+                let t = self.type_to_string(target);
+                let c_str = self.type_to_string(&c);
+                self.relater_report_error(
+                    msg::X_0_IS_ASSIGNABLE_TO_THE_CONSTRAINT_OF_TYPE_1_BUT_1_COULD_BE_INSTANTIATED_WITH_A_DIFFERENT_SUBTYPE_OF_CONSTRAINT_2,
+                    vec![s, t, c_str],
+                );
+            } else if constraint
+                .as_ref()
+                .is_some_and(|c| self.is_type_assignable_to(source, c))
+            {
                 let c = constraint.unwrap();
                 let s = self.type_to_string(source);
                 let t = self.type_to_string(target);
@@ -243,7 +267,7 @@ impl Checker {
             } else {
                 self.relater_error_chain.clear();
                 let t = self.type_to_string(target);
-                let s = self.type_to_string(source);
+                let s = self.type_to_string(generalized_source);
                 self.relater_report_error(
                     msg::X_0_COULD_BE_INSTANTIATED_WITH_AN_ARBITRARY_TYPE_WHICH_COULD_BE_UNRELATED_TO_1,
                     vec![t, s],

@@ -11,6 +11,7 @@ impl Checker {
     ) {
         let mut target = Arc::clone(node);
         let mut source_type = Arc::clone(source_type);
+        let mut shorthand_initializer: Option<Arc<Node>> = None;
         if let NodeData::ShorthandPropertyAssignment(data) = &node.data {
             if let Some(initializer) = &data.object_assignment_initializer {
                 self.check_expression(initializer);
@@ -20,6 +21,7 @@ impl Checker {
                 {
                     source_type = self.remove_undefined_from_union(&source_type);
                 }
+                shorthand_initializer = Some(Arc::clone(initializer));
             }
             target = Arc::clone(&data.name);
         }
@@ -41,6 +43,22 @@ impl Checker {
             }
             _ => {
                 self.check_reference_assignment(&target, &source_type);
+            }
+        }
+        // 简写绑定默认值 { x = expr }：expr 另行对目标声明型比较
+        //（Go 对默认表达式带目标上下文型检查；与源比较先后同基线顺序）
+        if let Some(initializer) = shorthand_initializer {
+            let target_type = self.get_type_of_node(&target);
+            let init_type = self.get_type_of_node(&initializer);
+            if !self.is_type_assignable_to(&init_type, &target_type) {
+                self.check_type_assignable_to_and_optionally_elaborate(
+                    &init_type,
+                    &target_type,
+                    Some(&target),
+                    Some(&target),
+                    None,
+                    None,
+                );
             }
         }
     }

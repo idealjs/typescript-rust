@@ -33,16 +33,8 @@ impl Checker {
         let comparable = self.is_type_comparable_to(&expr_base, &target_type)
             || self.is_type_comparable_to(&target_type, &expr_base);
         if !comparable {
-            let source_str = self.type_to_string(&expr_base);
-            let target_str = self.type_to_string(&target_type);
-            let file = self.current_file.clone();
-            let diag = tsox_frontend::ast::Diagnostic::new(
-                file,
-                node.loc,
-                tsox_core::diagnostics::messages_generated::
-                    CONVERSION_OF_TYPE_0_TO_TYPE_1_MAY_BE_A_MISTAKE_BECAUSE_NEITHER_TYPE_SUFFICIENTLY_OVERLAPS_WITH_THE_OTHER_IF_THIS_WAS_INTENTIONAL_CONVERT_THE_EXPRESSION_TO_UNKNOWN_FIRST,
-                vec![source_str, target_str],
-            );
+            let conversion = tsox_core::diagnostics::messages_generated::
+                CONVERSION_OF_TYPE_0_TO_TYPE_1_MAY_BE_A_MISTAKE_BECAUSE_NEITHER_TYPE_SUFFICIENTLY_OVERLAPS_WITH_THE_OTHER_IF_THIS_WAS_INTENTIONAL_CONVERT_THE_EXPRESSION_TO_UNKNOWN_FIRST;
 
             if let Some((prop_loc, prop_name, elem_target_str)) =
                 self.assertion_excess_detail(&expr, &expr_base, &target_type)
@@ -58,7 +50,15 @@ impl Checker {
                 ));
                 return;
             }
-            self.diagnostics.add(diag);
+            let _ = self.check_type_related_to_and_optionally_elaborate(
+                &expr_base,
+                &target_type,
+                crate::checker::relater_relation::RelationKind::Comparable,
+                Some(node),
+                Some(expr),
+                Some(&conversion),
+                None,
+            );
         }
     }
 

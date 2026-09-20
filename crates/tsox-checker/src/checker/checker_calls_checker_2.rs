@@ -32,6 +32,17 @@ impl Checker {
         } else {
             TYPE_0_HAS_NO_CALL_SIGNATURES
         };
+        let error_target: Arc<Node> =
+            if tsox_frontend::ast::node_data_generated::is_property_access_expression(callee_expr)
+                && callee_expr
+                    .parent()
+                    .is_some_and(|p| p.kind == SyntaxKind::CallExpression)
+            {
+                callee_expr.name().cloned().unwrap_or_else(|| Arc::clone(callee_expr))
+            } else {
+                Arc::clone(callee_expr)
+            };
+        let error_loc = error_target.loc;
         let chain = if callee_type.flags.contains(TypeFlags::Union)
             && let Some(u) = callee_type.as_union_or_intersection()
         {
@@ -76,14 +87,14 @@ impl Checker {
             };
             let mut outer = tsox_frontend::ast::Diagnostic::new(
                 self.current_file.clone(),
-                callee_expr.loc,
+                error_loc,
                 msg,
                 vec![union_str],
             );
             if let Some(first) = first_without.filter(|_| has_signatures) {
                 outer.message_chain = vec![tsox_frontend::ast::Diagnostic::new(
                     self.current_file.clone(),
-                    callee_expr.loc,
+                    error_loc,
                     no_sigs,
                     vec![first],
                 )];
@@ -108,14 +119,14 @@ impl Checker {
             };
             vec![tsox_frontend::ast::Diagnostic::new(
                 self.current_file.clone(),
-                callee_expr.loc,
+                error_loc,
                 no_sigs,
                 vec![apparent_str],
             )]
         };
         let mut diag = tsox_frontend::ast::Diagnostic::new(
             self.current_file.clone(),
-            callee_expr.loc,
+            error_loc,
             head,
             vec![],
         );

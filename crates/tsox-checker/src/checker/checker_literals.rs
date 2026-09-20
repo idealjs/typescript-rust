@@ -102,16 +102,16 @@ impl Checker {
     ) -> Arc<Type> {
         let mut t = self.get_type_of_node(initializer);
         let contextual = self.get_contextual_type(literal, ContextFlags::empty());
-        if let Some(ctx) = &contextual
-            && let Some(prop_ctx) = self.get_type_of_property_of_contextual_type(ctx, name)
-            && crate::checker::is_fresh_literal_type(&t)
-        {
-            if !self.is_literal_of_contextual_type(&t, &prop_ctx) {
-                t = self.get_widened_literal_type(&t);
-            } else {
-                t = self.get_regular_type_of_literal_type(&t);
-            }
+        let prop_ctx = contextual
+            .as_ref()
+            .and_then(|c| self.get_type_of_property_of_contextual_type(c, name));
+        let literal_of_ctx = prop_ctx
+            .as_ref()
+            .is_some_and(|pc| self.is_literal_of_contextual_type(&t, pc));
+        if !literal_of_ctx {
+            t = self.get_widened_literal_type(&t);
         }
+        t = self.get_regular_type_of_literal_type(&t);
         if let Some(sym) = self.program.symbol_map().symbol_of(prop) {
             let container = contextual.as_ref().and_then(|c| c.symbol.clone());
             let links = self.value_symbol_links.get_or_default(&sym);
@@ -127,12 +127,41 @@ impl Checker {
             _ => return self.get_any_type(),
         };
 
-        let mut prop_pairs: Vec<(String, Arc<Type>, Option<Arc<Node>>)> = Vec::new();
+        let mut prop_pairs: Vec<(String, Arc<Type>, Vec<Arc<Node>>)> = Vec::new();
         let mut fell_back_to_any = false;
         let mut spread_acc: Option<Arc<Type>> = None;
         let mut spread_error = false;
         let literal_symbol = self.program.symbol_map().symbol_of(node).map(Arc::clone);
         for prop in properties.iter() {
+            let is_accessor = matches!(
+                &prop.data,
+                NodeData::GetAccessorDeclaration(_) | NodeData::SetAccessorDeclaration(_)
+            );
+            if is_accessor {
+                let name = self.get_property_name_from_node(
+                    &prop.name().expect("accessor member has name"),
+                );
+                if name.is_empty() {
+                    fell_back_to_any = true;
+                    break;
+                }
+                match prop_pairs.iter_mut().find(|(n, _, decls)| {
+                    n == &name
+                        && decls.iter().any(|d| {
+                            matches!(
+                                d.data,
+                                NodeData::GetAccessorDeclaration(_)
+                                    | NodeData::SetAccessorDeclaration(_)
+                            )
+                        })
+                }) {
+                    Some((_, _, decls)) => decls.push(Arc::clone(prop)),
+                    None => {
+                        prop_pairs.push((name, self.get_any_type(), vec![Arc::clone(prop)]));
+                    }
+                }
+                continue;
+            }
             match &prop.data {
                 NodeData::PropertyAssignment(data) => {
                     let name = self.get_property_name_from_node(&data.name);
@@ -142,7 +171,7 @@ impl Checker {
                     }
 
                     let t = self.property_assignment_type(prop, &data.initializer, node, &name);
-                    prop_pairs.push((name, t, Some(Arc::clone(prop))));
+                    prop_pairs.push((name, t, vec![Arc::clone(prop)]));
                 }
                 NodeData::ShorthandPropertyAssignment(data) => {
                     let name = self.get_property_name_from_node(&data.name);
@@ -159,7 +188,7 @@ impl Checker {
                             .get_or_default(&sym)
                             .resolved_type = Some(t.clone());
                     }
-                    prop_pairs.push((name, t, Some(Arc::clone(prop))));
+                    prop_pairs.push((name, t, vec![Arc::clone(prop)]));
                 }
                 NodeData::MethodDeclaration(data) => {
                     let name = self.get_property_name_from_node(&data.name);
@@ -179,7 +208,7 @@ impl Checker {
                         }
                         None => self.get_type_of_function_like(prop),
                     };
-                    prop_pairs.push((name, t, Some(Arc::clone(prop))));
+                    prop_pairs.push((name, t, vec![Arc::clone(prop)]));
                 }
                 NodeData::SpreadAssignment(data) => {
                     if !self.fold_object_literal_spread(
@@ -232,7 +261,60 @@ impl Checker {
             return self.get_any_type();
         }
 
+        // Go getTypeOfAccessors 解析序：getter 注解 → setter 参数注解 →
+        // getter 体返回推断（加宽）
+        for idx in 0..prop_pairs.len() {
+            if !prop_pairs[idx].2.iter().any(|d| {
+                matches!(
+                    d.data,
+                    NodeData::GetAccessorDeclaration(_) | NodeData::SetAccessorDeclaration(_)
+                )
+            }) {
+                continue;
+            }
+            let name = prop_pairs[idx].0.clone();
+            let t = self.object_literal_accessor_type(node, &name);
+            prop_pairs[idx].1 = t;
+        }
+
         self.object_literal_type_from_pairs(prop_pairs, literal_symbol)
+    }
+
+    fn object_literal_accessor_type(&mut self, node: &Arc<Node>, name: &str) -> Arc<Type> {
+        let properties = match &node.data {
+            NodeData::ObjectLiteralExpression(data) => &data.properties,
+            _ => return self.get_any_type(),
+        };
+        let getter = properties.iter().find(|p| {
+            p.kind == SyntaxKind::GetAccessor
+                && self.get_property_name_from_node(&p.name().expect("accessor has name")) == name
+        });
+        let setter = properties.iter().find(|p| {
+            p.kind == SyntaxKind::SetAccessor
+                && self.get_property_name_from_node(&p.name().expect("accessor has name")) == name
+        });
+        if let Some(g) = getter
+            && let NodeData::GetAccessorDeclaration(gd) = &g.data
+            && let Some(tn) = &gd.type_node
+        {
+            return self.get_type_from_type_node(tn);
+        }
+        if let Some(s) = setter
+            && let NodeData::SetAccessorDeclaration(sd) = &s.data
+            && let Some(param) = sd.parameters.iter().next()
+            && let NodeData::ParameterDeclaration(pd) = &param.data
+            && let Some(tn) = &pd.type_node
+        {
+            return self.get_type_from_type_node(tn);
+        }
+        if let Some(g) = getter
+            && let NodeData::GetAccessorDeclaration(gd) = &g.data
+            && let Some(body) = &gd.body
+        {
+            let inferred = self.infer_method_return_type(&Some(Arc::clone(body)));
+            return self.get_widened_type(&inferred);
+        }
+        self.get_any_type()
     }
 
     pub(crate) fn get_excess_property_name(

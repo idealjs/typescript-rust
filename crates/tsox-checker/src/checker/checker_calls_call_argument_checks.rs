@@ -30,49 +30,176 @@ impl Checker {
         sig: &Arc<Signature>,
         is_new: bool,
         callee_type: &Arc<Type>,
-    ) {
+    ) -> bool {
         let provided = Self::explicit_type_argument_count(node);
 
         let (min, max) = if is_new {
             self.get_return_type_of_signature(&sig)
                 .and_then(|rt| rt.symbol.clone())
-                .map(|class_sym| self.declared_type_parameter_arity_range(&class_sym))
-                .unwrap_or_else(|| self.signature_type_parameter_arity_range(sig))
+                .map(|class_sym| {
+                    let first_decl_count =
+                        self.first_declared_type_parameter_count(&class_sym);
+                    if first_decl_count == 0 {
+                        sig.type_parameters.len()
+                    } else {
+                        first_decl_count
+                    }
+                })
+                .unwrap_or_else(|| sig.type_parameters.len())
+                .to_string()
+        } else if self.callee_has_overload_arity_split(callee_type) {
+            if provided != 0 && !callee_type.flags.contains(TypeFlags::Any) {
+                return self.check_overload_type_argument_arity(node, callee_type, provided);
+            }
+            return true;
         } else {
-            self.signature_type_parameter_arity_range(sig)
-        };
-        if provided != 0
-            && (provided < min || provided > max)
-            && !callee_type.flags.contains(TypeFlags::Any)
-        {
-            let expected = if min < max {
-                format!("{min}-{max}")
+            let min_count = Self::declared_min_type_argument_count(sig);
+            let max_count = sig.type_parameters.len();
+            if min_count < max_count {
+                format!("{min_count}-{max_count}")
             } else {
-                min.to_string()
-            };
-            let loc = match &node.data {
-                tsox_frontend::ast::NodeData::CallExpression(d) => d
-                    .type_arguments
-                    .as_ref()
-                    .and_then(|t| t.iter().next())
-                    .map(|t| t.loc)
-                    .unwrap_or(node.loc),
-                tsox_frontend::ast::NodeData::NewExpression(d) => d
-                    .type_arguments
-                    .as_ref()
-                    .and_then(|t| t.iter().next())
-                    .map(|t| t.loc)
-                    .unwrap_or(node.loc),
-                _ => node.loc,
-            };
-            let file = self.current_file.clone();
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                file,
-                loc,
-                tsox_core::diagnostics::messages_generated::EXPECTED_0_TYPE_ARGUMENTS_BUT_GOT_1,
-                vec![expected, provided.to_string()],
-            ));
+                max_count.to_string()
+            }
+        };
+        let mismatch = provided != 0 && expected.parse::<usize>() != Ok(provided)
+            && !(expected.contains('-')
+                && (|| {
+                    let (lo, hi) = expected.split_once('-')?;
+                    Some(
+                        provided >= lo.parse::<usize>().ok()?
+                            && provided <= hi.parse::<usize>().ok()?,
+                    )
+                })()
+                .unwrap_or(false))
+            && !callee_type.flags.contains(TypeFlags::Any);
+        if mismatch {
+            self.report_type_argument_count_mismatch(node, provided, expected);
         }
+        !mismatch
+    }
+
+    fn callee_has_overload_arity_split(&self, callee_type: &Arc<Type>) -> bool {
+        let sigs = self.get_signatures_of_type(
+            callee_type,
+            crate::checker::types_type_id::SignatureKind::Call,
+        );
+        if sigs.len() <= 1 {
+            return false;
+        }
+        let counts: Vec<(usize, usize)> = sigs
+            .iter()
+            .map(|s| (Self::declared_min_type_argument_count(s), s.type_parameters.len()))
+            .collect();
+        counts.iter().any(|c| *c != counts[0])
+    }
+
+    // Go getTypeArgumentArityError 重载分支：below/above 最近计数，
+    // 两者齐备报 2743，否则按最近侧计数报 2558
+    fn check_overload_type_argument_arity(
+        &mut self,
+        node: &Arc<Node>,
+        callee_type: &Arc<Type>,
+        arg_count: usize,
+    ) -> bool {
+        let sigs = self.get_signatures_of_type(
+            callee_type,
+            crate::checker::types_type_id::SignatureKind::Call,
+        );
+        let mut below: Option<usize> = None;
+        let mut above: Option<usize> = None;
+        for sig in &sigs {
+            let min_count = Self::declared_min_type_argument_count(sig);
+            let max_count = sig.type_parameters.len();
+            if min_count > arg_count {
+                above = Some(above.map_or(min_count, |a| a.min(min_count)));
+            } else if max_count < arg_count {
+                below = Some(below.map_or(max_count, |b| b.max(max_count)));
+            }
+        }
+        let loc = match &node.data {
+            tsox_frontend::ast::NodeData::CallExpression(d) => d
+                .type_arguments
+                .as_ref()
+                .and_then(|t| t.iter().next())
+                .map(|t| t.loc)
+                .unwrap_or(node.loc),
+            tsox_frontend::ast::NodeData::NewExpression(d) => d
+                .type_arguments
+                .as_ref()
+                .and_then(|t| t.iter().next())
+                .map(|t| t.loc)
+                .unwrap_or(node.loc),
+            _ => node.loc,
+        };
+        let file = self.current_file.clone();
+        match (below, above) {
+            (Some(b), Some(a)) => {
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    loc,
+                    tsox_core::diagnostics::messages_generated::
+                        NO_OVERLOAD_EXPECTS_0_TYPE_ARGUMENTS_BUT_OVERLOADS_DO_EXIST_THAT_EXPECT_EITHER_1_OR_2_TYPE_ARGUMENTS,
+                    vec![arg_count.to_string(), b.to_string(), a.to_string()],
+                ));
+                false
+            }
+            _ => {
+                let expected = below.or(above).unwrap_or_default().to_string();
+                self.report_type_argument_count_mismatch(node, arg_count, expected);
+                false
+            }
+        }
+    }
+
+    // 声明级最小实参数：default 子句前的非默认形参个数（resolved 默认惰性，
+    // 语义位取声明节点）
+    fn declared_min_type_argument_count(sig: &Arc<Signature>) -> usize {
+        let Some(decl) = &sig.declaration else {
+            return sig.type_parameters.len();
+        };
+        let tps = match &decl.data {
+            tsox_frontend::ast::NodeData::FunctionDeclaration(d) => &d.type_parameters,
+            tsox_frontend::ast::NodeData::MethodDeclaration(d) => &d.type_parameters,
+            tsox_frontend::ast::NodeData::FunctionTypeNode(d) => &d.type_parameters,
+            tsox_frontend::ast::NodeData::ConstructorDeclaration(d) => &d.type_parameters,
+            _ => return sig.type_parameters.len(),
+        };
+        let Some(tps) = tps else {
+            return 0;
+        };
+        for (i, tp) in tps.iter().enumerate() {
+            if let tsox_frontend::ast::NodeData::TypeParameterDeclaration(tpd) = &tp.data
+                && tpd.default_type.is_some()
+            {
+                return i;
+            }
+        }
+        tps.len()
+    }
+
+    fn report_type_argument_count_mismatch(&mut self, node: &Arc<Node>, provided: usize, expected: String) {
+        let loc = match &node.data {
+            tsox_frontend::ast::NodeData::CallExpression(d) => d
+                .type_arguments
+                .as_ref()
+                .and_then(|t| t.iter().next())
+                .map(|t| t.loc)
+                .unwrap_or(node.loc),
+            tsox_frontend::ast::NodeData::NewExpression(d) => d
+                .type_arguments
+                .as_ref()
+                .and_then(|t| t.iter().next())
+                .map(|t| t.loc)
+                .unwrap_or(node.loc),
+            _ => node.loc,
+        };
+        let file = self.current_file.clone();
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            file,
+            loc,
+            tsox_core::diagnostics::messages_generated::EXPECTED_0_TYPE_ARGUMENTS_BUT_GOT_1,
+            vec![expected.to_string(), provided.to_string()],
+        ));
     }
 
     fn signature_type_parameter_arity_range(&self, sig: &Arc<Signature>) -> (usize, usize) {

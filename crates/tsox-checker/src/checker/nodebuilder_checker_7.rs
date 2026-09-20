@@ -69,6 +69,31 @@ impl Checker {
             return sym.name.clone();
         }
 
+        // Go typeToTypeNode：alias 可达时先于 union/intersection/类型参数/类接口
+        // 按别名引用呈现（命名空间限定 + 类型实参；Array 单实参写 []）
+        if let Some(alias) = &t.alias
+            && let Some(sym) = &alias.symbol
+        {
+            let args: Vec<String> = alias
+                .type_arguments
+                .iter()
+                .map(|a| self.type_to_string_ex(a, flags))
+                .collect();
+            if args.len() == 1 && sym.name == "Array" {
+                let elem =
+                    self.maybe_parenthesize_array_element_ex(&alias.type_arguments[0], flags);
+                return format!("{elem}[]");
+            }
+            let qualified = self
+                .namespace_qualifier_of(sym)
+                .map(|q| format!("{q}.{}", sym.name))
+                .unwrap_or_else(|| sym.name.clone());
+            if args.is_empty() {
+                return qualified;
+            }
+            return format!("{}<{}>", qualified, args.join(", "));
+        }
+
         if t.is_union() {
             return self.union_to_string(t, flags);
         }

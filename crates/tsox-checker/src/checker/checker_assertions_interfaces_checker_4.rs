@@ -61,7 +61,8 @@ impl Checker {
             && !self.is_type_assignable_to(nv, sv)
         {
             // Go checkIndexConstraintForIndexSignature：错误锚点取本类型符号
-            // 内声明的那个索引签名（number 优先，其次 string），都非本地则不报
+            // 内声明的那个索引签名（number 优先，其次 string），都非本地且没
+            // 有任何单一基类型同时持有两者时锚定接口声明名
             let parent_in_type = |d: &Arc<Node>| -> bool {
                 d.parent().is_some_and(|p| {
                     t.symbol
@@ -75,6 +76,24 @@ impl Checker {
                 ni.declaration.as_ref().map(|d| d.loc)
             } else if str_local {
                 si.declaration.as_ref().map(|d| d.loc)
+            } else if declaration.kind == SyntaxKind::InterfaceDeclaration {
+                let base_has_both = self.interface_base_types(declaration).iter().any(|base| {
+                    let infos = self.get_index_infos_of_type(base);
+                    infos.iter().any(|i| {
+                        i.key_type
+                            .as_ref()
+                            .is_some_and(|k| k.flags.contains(TypeFlags::String))
+                    }) && infos.iter().any(|i| {
+                        i.key_type
+                            .as_ref()
+                            .is_some_and(|k| k.flags.contains(TypeFlags::Number))
+                    })
+                });
+                if base_has_both {
+                    None
+                } else {
+                    declaration.name().map(|n| n.loc)
+                }
             } else {
                 None
             };
@@ -285,5 +304,31 @@ impl Checker {
                 );
             }
         }
+    }
+
+    fn interface_base_types(&mut self, declaration: &Arc<Node>) -> Vec<Arc<Type>> {
+        let tsox_frontend::ast::NodeData::InterfaceDeclaration(d) = &declaration.data else {
+            return Vec::new();
+        };
+        let Some(clauses) = &d.heritage_clauses else {
+            return Vec::new();
+        };
+        let mut result = Vec::new();
+        for clause in clauses.iter() {
+            let tsox_frontend::ast::NodeData::HeritageClause(hc) = &clause.data else {
+                continue;
+            };
+            for h in hc.types.iter() {
+                match &h.data {
+                    tsox_frontend::ast::NodeData::TypeReferenceNode(_) => {
+                        result.push(self.get_type_from_type_node(h));
+                    }
+                    tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(ed) => {
+                        result.push(self.get_type_of_node(&ed.expression));
+                    }
+                    _ => {}
+                }
+            }        }
+        result
     }
 }

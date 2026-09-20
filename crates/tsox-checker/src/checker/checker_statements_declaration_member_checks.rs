@@ -232,26 +232,36 @@ impl Checker {
                     self.return_type_stack.last().and_then(|opt| opt.clone()),
                 );
                 if let Some(expected) = expected {
-                    let actual = self.get_type_of_node(expr);
+                    // Go checkReturnExpression：返回表达式（剥括号）为条件表达式时
+                    // 按分支逐个对返回型比较，错误锚定分支节点，不再整体比较
+                    let unwrapped = Checker::skip_parentheses(expr);
+                    if matches!(
+                        &unwrapped.data,
+                        tsox_frontend::ast::NodeData::ConditionalExpression(_)
+                    ) {
+                        self.check_return_expression_against_type(&expected, node, expr, false, true);
+                    } else {
+                        let actual = self.get_type_of_node(expr);
 
-                    if !actual.flags.contains(TypeFlags::Any)
-                        && !self.is_type_assignable_to(&actual, &expected)
-                    {
-                        let display_type = if crate::checker::is_literal_type(&actual) {
-                            self.get_base_type_of_literal_type(&actual)
-                        } else {
-                            actual.clone()
-                        };
-                        let ok = self.check_type_related_to_and_optionally_elaborate(
-                            &display_type,
-                            &expected,
-                            crate::checker::relater::RelationKind::Assignable,
-                            Some(node),
-                            Some(expr),
-                            None,
-                            None,
-                        );
-                        if ok {}
+                        if !actual.flags.contains(TypeFlags::Any)
+                            && !self.is_type_assignable_to(&actual, &expected)
+                        {
+                            let display_type = if crate::checker::is_literal_type(&actual) {
+                                self.get_base_type_of_literal_type(&actual)
+                            } else {
+                                actual.clone()
+                            };
+                            let ok = self.check_type_related_to_and_optionally_elaborate(
+                                &display_type,
+                                &expected,
+                                crate::checker::relater::RelationKind::Assignable,
+                                Some(node),
+                                Some(expr),
+                                None,
+                                None,
+                            );
+                            if ok {}
+                        }
                     }
                 }
             } else {

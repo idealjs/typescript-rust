@@ -37,19 +37,15 @@ impl Checker {
                     if let Some(expected) =
                         self.return_type_stack.last().and_then(|opt| opt.clone())
                     {
-                        let actual = self.get_type_of_node(&body);
-                        if !actual.flags.contains(TypeFlags::Any)
-                            && !self.is_type_assignable_to(&actual, &expected)
-                        {
-                            let actual_str = self.type_to_string(&actual);
-                            let expected_str = self.type_to_string(&expected);
-                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                                self.current_file.clone(),
-                                body.loc,
-                                TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                                vec![actual_str, expected_str],
-                            ));
-                        }
+                        // Go checkArrowFunction：表达式体经 checkReturnExpression
+                        //（条件表达式按分支比较，错误锚定分支）
+                        self.check_return_expression_against_type(
+                            &expected,
+                            node,
+                            &body,
+                            false,
+                            false,
+                        );
                     }
                 }
             }

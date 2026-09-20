@@ -283,28 +283,34 @@ impl Checker {
     }
 
     pub fn type_could_have_top_level_singleton_types(&mut self, t: &Arc<Type>) -> bool {
-        if t.flags.intersects(
-            TypeFlags::StringLiteral
-                | TypeFlags::NumberLiteral
-                | TypeFlags::BigIntLiteral
-                | TypeFlags::BooleanLiteral
-                | TypeFlags::UniqueESSymbol
-                | TypeFlags::EnumLiteral
-                | TypeFlags::TypeParameter
-                | TypeFlags::IndexedAccess
-                | TypeFlags::Conditional,
-        ) || crate::checker::is_fresh_literal_type(t)
-        {
-            return true;
+        if t.flags.contains(TypeFlags::Boolean) {
+            return false;
         }
-        if t.flags.contains(TypeFlags::Union) {
+        if t.flags.intersects(TypeFlags::Union | TypeFlags::Intersection) {
             if let Some(members) = t.types() {
                 return members
                     .iter()
                     .any(|m| self.type_could_have_top_level_singleton_types(m));
             }
+            return false;
         }
-        false
+        if t.flags.intersects(
+            TypeFlags::TypeParameter | TypeFlags::IndexedAccess | TypeFlags::Conditional,
+        ) {
+            let constraint = if t.flags.contains(TypeFlags::TypeParameter) {
+                self.get_constraint_of_type_parameter(t)
+            } else {
+                self.get_base_constraint_of_type(t)
+            };
+            if let Some(c) = constraint
+                && !Arc::ptr_eq(&c, t)
+            {
+                return self.type_could_have_top_level_singleton_types(&c);
+            }
+        }
+        t.flags.intersects(
+            TYPE_FLAGS_UNIT | TypeFlags::TemplateLiteral | TypeFlags::StringMapping,
+        )
     }
 
     pub fn get_alias_variances(&mut self, _symbol: &Arc<Symbol>) -> Vec<VarianceFlags> {

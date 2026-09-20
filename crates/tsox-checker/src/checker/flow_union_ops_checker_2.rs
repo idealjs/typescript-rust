@@ -175,6 +175,9 @@ impl Checker {
         if self.is_type_assignable_to(type_, value_type) {
             return Arc::clone(type_);
         }
+        // Go getNarrowedTypeWorker 兜底序：candidate→t 可赋取 candidate，
+        // t→candidate 可赋取 t（never 可赋给一切，谓词真分支保 never），
+        // 否则交集
         if self.is_type_assignable_to(value_type, type_) {
             return Arc::clone(value_type);
         }

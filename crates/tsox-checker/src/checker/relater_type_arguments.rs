@@ -84,6 +84,19 @@ impl Checker {
                 }
             };
             if related.is_false() {
+                if relation != RelationKind::Identity {
+                    let (a, b) = if variance == VarianceFlags::Contravariant {
+                        (self.type_to_string(t), self.type_to_string(s))
+                    } else {
+                        (self.type_to_string(s), self.type_to_string(t))
+                    };
+                    let message = if relation == RelationKind::Comparable {
+                        tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_COMPARABLE_TO_TYPE_1
+                    } else {
+                        tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1
+                    };
+                    self.relater_report_error(message, vec![a, b]);
+                }
                 return Ternary::False;
             }
             result = result.and(related);
@@ -126,23 +139,33 @@ impl Checker {
         if !source.flags.contains(TypeFlags::Object) || !target.flags.contains(TypeFlags::Object) {
             return None;
         }
-        if !source.object_flags.contains(ObjectFlags::Reference)
-            || !target.object_flags.contains(ObjectFlags::Reference)
-        {
-            return None;
-        }
 
         if is_tuple_type(source) || is_tuple_type(target) {
             return None;
         }
-        let source_target = source.target()?;
-        let target_target = target.target()?;
-        let same_target = Arc::ptr_eq(source_target, target_target)
-            || match (&source_target.symbol, &target_target.symbol) {
-                (Some(ss), Some(ts)) => ss.id() == ts.id(),
+        let same_generic_origin = 'origin: {
+            if let (Some(st), Some(tt)) = (source.target(), target.target()) {
+                if Arc::ptr_eq(&st, &tt) {
+                    break 'origin true;
+                }
+                if let (Some(ss), Some(ts)) = (&st.symbol, &tt.symbol) {
+                    if ss.id() == ts.id() {
+                        break 'origin true;
+                    }
+                }
+            }
+            match (&source.symbol, &target.symbol) {
+                (Some(ss), Some(ts)) => {
+                    ss.id() == ts.id()
+                        && ss.flags.intersects(
+                            tsox_frontend::ast::SymbolFlags::Interface
+                                | tsox_frontend::ast::SymbolFlags::Class,
+                        )
+                }
                 _ => false,
-            };
-        if !same_target {
+            }
+        };
+        if !same_generic_origin {
             return None;
         }
 
@@ -154,12 +177,21 @@ impl Checker {
             return Some(Ternary::True);
         }
 
-        let variances = self.get_variances(source_target);
-        if variances.is_empty() {
-            return Some(Ternary::Maybe);
-        }
         let source_args = self.get_type_arguments(source);
         let target_args = self.get_type_arguments(target);
+        if source_args.is_empty() && target_args.is_empty() {
+            return Some(Ternary::True);
+        }
+        if source_args.len() != target_args.len() {
+            return None;
+        }
+        let variances = source
+            .target()
+            .and_then(|t| {
+                let v = self.get_variances(&t);
+                (!v.is_empty()).then_some(v)
+            })
+            .unwrap_or_else(|| vec![VarianceFlags::Covariant; source_args.len()]);
         Some(self.type_arguments_related_to(&source_args, &target_args, &variances, relation))
     }
 

@@ -262,7 +262,7 @@ impl Checker {
                 }
                 name.map(|n| n.loc).unwrap_or(node.loc)
             }
-            NodeData::ImportEqualsDeclaration(d) => d.name.loc,
+            NodeData::ImportEqualsDeclaration(_) => node.loc,
             NodeData::NamespaceImport(d) => d.name.loc,
             NodeData::ImportClause(d) => {
                 if let Some(n) = &d.name {

@@ -44,7 +44,7 @@ impl Checker {
         signatures.extend(base_data.construct_signatures().iter().cloned());
         let merged = Arc::new(Type {
             flags: TypeFlags::Object,
-            object_flags: ObjectFlags::Anonymous,
+            object_flags: ObjectFlags::Anonymous | ObjectFlags::Interface,
             id: crate::checker::types::next_type_id(),
             symbol: None,
             alias: None,

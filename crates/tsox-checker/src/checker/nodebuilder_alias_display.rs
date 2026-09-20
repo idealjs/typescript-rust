@@ -25,13 +25,13 @@ impl Checker {
         None
     }
 
-    pub(crate) fn attach_alias_for_type_node(&self, node: &Arc<Node>, result: &Arc<Type>) {
+    pub(crate) fn attach_alias_for_type_node(&mut self, node: &Arc<Node>, result: &Arc<Type>) {
         let attachable = match &result.data {
             TypeData::Union(_) | TypeData::Intersection(_) | TypeData::Mapped(_) => true,
             TypeData::Conditional(c) => {
                 c.resolved_true_type.get().is_none() && c.resolved_false_type.get().is_none()
             }
-            TypeData::Object(_) => result.symbol.is_none(),
+            TypeData::Object(_) => true,
             _ => false,
         };
         if !attachable {
@@ -40,11 +40,23 @@ impl Checker {
         let Some(alias_sym) = self.alias_symbol_for_type_node(node) else {
             return;
         };
+        let args = match &result.data {
+            TypeData::Mapped(_) | TypeData::Conditional(_) => {
+                let (tp_symbols, _) = self.collect_alias_type_params_and_body(&alias_sym);
+                tp_symbols
+                    .iter()
+                    .map(|tp| self.get_type_parameter_from_symbol(tp))
+                    .collect()
+            }
+            _ => Vec::new(),
+        };
         let ptr = Arc::as_ptr(result) as *mut crate::checker::types::Type;
         unsafe {
             if (*ptr).alias.is_none() {
-                (*ptr).alias =
-                    Some(Box::new(crate::checker::types::TypeAlias::new(Some(alias_sym), Vec::new())));
+                (*ptr).alias = Some(Box::new(crate::checker::types::TypeAlias::new(
+                    Some(alias_sym),
+                    args,
+                )));
             }
         }
     }

@@ -105,9 +105,45 @@ impl Checker {
         {
             return Arc::clone(type_);
         }
+        // Go getNarrowedType(checkDerived=true)：instanceof 按名义派生链收窄
+        // 而非结构可赋值（结构同型的两个类互不派生，不可互相剔除）
         match kind {
-            NarrowKind::TrueBranch => self.narrow_to_subtype(type_, &instance_type),
-            NarrowKind::FalseBranch => self.remove_subtype_from_union(type_, &instance_type),
+            NarrowKind::TrueBranch => {
+                if type_.flags.intersects(TypeFlags::Any | TypeFlags::Unknown) {
+                    return Arc::clone(&instance_type);
+                }
+                if Arc::ptr_eq(type_, &instance_type) {
+                    return Arc::clone(&instance_type);
+                }
+                let candidates = self.constituent_types(&instance_type);
+                let constituents = self.constituent_types(type_);
+                let mapped: Vec<Arc<Type>> = constituents
+                    .into_iter()
+                    .map(|t| {
+                        for n in &candidates {
+                            if self.is_type_derived_from(&t, n) {
+                                return t;
+                            }
+                            if self.is_type_derived_from(n, &t) {
+                                return Arc::clone(n);
+                            }
+                        }
+                        self.never_type()
+                    })
+                    .collect();
+                self.rebuild_union_or_never(type_, mapped)
+            }
+            NarrowKind::FalseBranch => {
+                if Arc::ptr_eq(type_, &instance_type) {
+                    return self.never_type();
+                }
+                let constituents = self.constituent_types(type_);
+                let remaining: Vec<Arc<Type>> = constituents
+                    .into_iter()
+                    .filter(|t| !self.is_type_derived_from(t, &instance_type))
+                    .collect();
+                self.rebuild_union_or_never(type_, remaining)
+            }
         }
     }
 

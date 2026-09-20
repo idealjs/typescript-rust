@@ -21,6 +21,9 @@ impl Checker {
         let mut index_types: Vec<Arc<Type>> = Vec::new();
         let mut index_readonly = false;
         let mut read_partial = false;
+        // Go createUnionOrIntersectionProperty：intersection 初始 readonly，
+        // 任一成分非 readonly 清除；union 任一成分 readonly 置位
+        let mut check_readonly = !is_union;
         for current in types.iter() {
             let t = self.get_apparent_type(current);
             if self.is_error_type(&t) || t.flags.contains(TypeFlags::Never) {
@@ -29,6 +32,11 @@ impl Checker {
             let prop = self.get_property_of_type(&t, name);
             match prop {
                 Some(prop) => {
+                    if is_union && self.symbol_is_readonly(&prop) {
+                        check_readonly = true;
+                    } else if !is_union && !self.symbol_is_readonly(&prop) {
+                        check_readonly = false;
+                    }
                     if single_prop.is_none() {
                         single_prop = Some(Arc::clone(&prop));
                         prop_flags = if prop
@@ -109,7 +117,7 @@ impl Checker {
 
         let mut result = Symbol::new(prop_flags | optional_flag, name.to_string());
         result.check_flags = CheckFlags::SyntheticProperty;
-        if index_readonly {
+        if check_readonly || index_readonly {
             result.check_flags |= CheckFlags::Readonly;
         }
         result.declarations = declarations;

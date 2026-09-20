@@ -53,7 +53,8 @@ pub fn format_diagnostic_pretty(diag: &Diagnostic, locale: Option<&Locale>) -> S
     let cat_color = match diag.category {
         Category::Error => "91",
         Category::Warning => "93",
-        _ => "96",
+        Category::Suggestion => "90",
+        Category::Message => "94",
     };
     let mut out = String::new();
     if let Some(file) = &diag.file {

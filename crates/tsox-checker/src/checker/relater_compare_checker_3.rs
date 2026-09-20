@@ -61,14 +61,23 @@ impl Checker {
 
         self.try_elaborate_primitive_and_object(source, target);
 
+        // Go isRelatedToEx 目标重绑定同样作用于错误报告：gate 与兜底显示
+        // 都基于剔除可空成分后的目标（display override 仍优先）；identity
+        // 关系不走该路径
+        let rebound_target = if relation == RelationKind::Identity {
+            Arc::clone(target)
+        } else {
+            self.rebind_non_nullable_union_target(source, target)
+                .unwrap_or_else(|| Arc::clone(target))
+        };
         let displayed_target = self
             .display_target_override
             .clone()
-            .unwrap_or_else(|| Arc::clone(target));
+            .unwrap_or_else(|| Arc::clone(&rebound_target));
         let source_str = self.type_to_string(source);
         let target_str = self.type_to_string(&displayed_target);
         let (mut head_source, mut head_target) = if self
-            .type_could_have_top_level_singleton_types(target)
+            .type_could_have_top_level_singleton_types(&rebound_target)
         {
             (source_str.clone(), target_str.clone())
         } else if crate::checker::is_fresh_literal_type(source)
@@ -96,10 +105,15 @@ impl Checker {
                     head_source = fq_source;
                     head_target = fq_target;
                     tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1
+                } else if relation == RelationKind::Comparable {
+                    tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_COMPARABLE_TO_TYPE_1
                 } else {
                     tsox_core::diagnostics::messages_generated::
                         TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_TWO_DIFFERENT_TYPES_WITH_THIS_NAME_EXIST_BUT_THEY_ARE_UNRELATED
                 }
+            }
+            None if relation == RelationKind::Comparable => {
+                tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_COMPARABLE_TO_TYPE_1
             }
             None => tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
         };
@@ -190,6 +204,35 @@ impl Checker {
         self.relater_chain_active = was_active;
         self.relater_error_chain = saved_chain;
         false
+    }
+
+    // Go isRelatedToEx 前段：definitely non-nullable 源 + union 目标仅含一个
+    // 非 nullable 成员时目标重绑定为该成员（关系判定与错误报告共用）
+    pub(crate) fn rebind_non_nullable_union_target(
+        &self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        if !source.flags.intersects(TYPE_FLAGS_DEFINITELY_NON_NULLABLE)
+            || !target.flags.contains(TypeFlags::Union)
+        {
+            return None;
+        }
+        let types = target.types()?;
+        if types.len() != 2 && types.len() != 3 {
+            return None;
+        }
+        let mut candidate: Option<Arc<Type>> = None;
+        for m in types {
+            if m.flags.intersects(TYPE_FLAGS_NULLABLE) {
+                continue;
+            }
+            if candidate.is_some() {
+                return None;
+            }
+            candidate = Some(Arc::clone(m));
+        }
+        candidate
     }
 
     pub(crate) fn get_base_type_of_literal_type_for_display(&mut self, t: &Arc<Type>) -> Arc<Type> {

@@ -99,6 +99,7 @@ pub struct Checker {
     pub pending_jsx_2875: Option<(tsox_core::core::text::TextRange, String)>,
     pub relater_error_chain: Vec<RelaterChainEntry>,
     pub relater_chain_active: bool,
+    pub relater_pending_primitive_source: bool,
     pub relater_depth: u32,
     pub deferred_constraint_depth: u32,
     pub relation_count: u32,

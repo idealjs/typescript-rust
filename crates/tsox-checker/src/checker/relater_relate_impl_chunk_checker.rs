@@ -139,6 +139,18 @@ impl Checker {
         let source = substitution_base_or_self(&source);
         let target = substitution_base_or_self(&target);
 
+        // Go isRelatedToEx：definitely non-nullable 源对「可空成分 + 单个非
+        // nullable 成员」的 union 目标，先剔除可空成分再进入比较；identity
+        // 关系在 Go 中于重绑定前提前返回，不参与
+        let target = if relation == RelationKind::Identity {
+            target
+        } else {
+            match self.rebind_non_nullable_union_target(&source, &target) {
+                Some(candidate) => candidate,
+                None => target,
+            }
+        };
+
         {
             let sp = source.id;
             let tp = target.id;

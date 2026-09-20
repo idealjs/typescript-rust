@@ -143,6 +143,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
+        source_is_primitive: bool,
     ) -> bool {
         use tsox_core::diagnostics::messages_generated as msg;
         if source.flags.contains(TypeFlags::Any) {
@@ -173,7 +174,10 @@ impl Checker {
                 .as_ref()
                 .is_some_and(|v| v.flags.contains(TypeFlags::Any));
 
-            if relation != RelationKind::StrictSubtype && target_has_string_index && target_value_any
+            if relation != RelationKind::StrictSubtype
+                && !source_is_primitive
+                && target_has_string_index
+                && target_value_any
             {
                 continue;
             }
