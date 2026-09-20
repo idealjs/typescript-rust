@@ -68,7 +68,11 @@ impl Checker {
                 continue;
             }
             let file = self.current_file.clone();
-            let name_text = name.text().to_string();
+            let name_text = if name.text().is_empty() {
+                "(Missing)".to_string()
+            } else {
+                name.text().to_string()
+            };
             let diagnostic = if pd.dot_dot_dot_token.is_some() {
                 tsox_frontend::ast::Diagnostic::new(
                     file,

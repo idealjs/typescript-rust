@@ -62,7 +62,7 @@ impl Checker {
         signatures.extend(construct_signatures);
                 Arc::new(Type {
             flags: TypeFlags::Object,
-            object_flags: ObjectFlags::Anonymous,
+            object_flags: ObjectFlags::Anonymous | ObjectFlags::Interface,
             id: crate::checker::types::next_type_id(),
             symbol,
             alias: None,

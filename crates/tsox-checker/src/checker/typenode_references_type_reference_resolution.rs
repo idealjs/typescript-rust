@@ -179,12 +179,18 @@ impl Checker {
                     if c.resolved_true_type.get().is_none() && c.resolved_false_type.get().is_none()
             );
             if !declared_is_conditional || found_is_deferred_conditional {
-                // Go instantiateTypeWithAlias：泛型别名实例化传播 alias（声明体
-                // 解析窗口内做成员级 couldContainTypeVariables 探测会重入，
-                // 以「带类型参数」为近似条件）
-                if !tp_types.is_empty() {
+                // Go instantiateTypeWithAlias：泛型别名实例化仅当声明体本身
+                // 携带 alias（对象字面量/union/intersection/mapped/挂起条件/
+                // deferred 引用体）时传播实例化后的 alias；indexed access 等
+                // 无 alias 声明体（Go getAliasForTypeNode 不附着）不传播
+                if !tp_types.is_empty()
+                    && declared
+                        .alias
+                        .as_ref()
+                        .is_some_and(|a| a.symbol.is_some())
+                {
                     let alias = crate::checker::types::TypeAlias::new(
-                        Some(Arc::clone(symbol)),
+                        declared.alias.as_ref().and_then(|a| a.symbol.clone()),
                         arg_types,
                     );
                     let ptr = Arc::as_ptr(&found) as *mut crate::checker::types::Type;

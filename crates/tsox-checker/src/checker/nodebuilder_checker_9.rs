@@ -600,7 +600,9 @@ impl Checker {
             );
         }
 
-        if sym.flags.contains(SymbolFlags::ValueModule) {
+        if sym.flags.contains(SymbolFlags::ValueModule)
+            && !t.object_flags.contains(ObjectFlags::Interface)
+        {
             if sym
                 .declarations
                 .iter()

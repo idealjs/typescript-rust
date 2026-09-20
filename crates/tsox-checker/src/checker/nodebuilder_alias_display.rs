@@ -31,7 +31,7 @@ impl Checker {
             TypeData::Conditional(c) => {
                 c.resolved_true_type.get().is_none() && c.resolved_false_type.get().is_none()
             }
-            TypeData::Object(_) => result.symbol.is_none(),
+            TypeData::Object(_) => true,
             _ => false,
         };
         if !attachable {
