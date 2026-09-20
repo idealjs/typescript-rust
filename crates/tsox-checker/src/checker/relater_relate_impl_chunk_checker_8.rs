@@ -181,13 +181,18 @@ impl Checker {
                 }
             };
 
-            if target_prop.name.starts_with('[')
-                || (!source_declares_locally
-                    && self
-                        .global_interface_member_symbol("Object", &target_prop.name)
-                        .is_some())
-            {
+            if target_prop.name.starts_with('[') {
                 continue;
+            }
+            // 源未本地声明且目标是 Object 原型成员名时，按 Go getPropertyOfType
+            // 的解析结果（全局 Object 接口成员）参与真实类型比较而非跳过
+            //（{} → Boolean 的 valueOf: boolean 冲突由此报出）
+            let mut source_prop = source_prop;
+            if !source_declares_locally
+                && let Some(obj_member) = self
+                    .global_interface_member_symbol("Object", &target_prop.name)
+            {
+                source_prop = obj_member;
             }
 
             {
