@@ -72,6 +72,40 @@ impl Checker {
         result.unwrap_or_else(|| Arc::clone(t))
     }
 
+    pub(crate) fn mapped_source_related_to_type_param_target(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> Option<bool> {
+        let m = match &source.data {
+            TypeData::Mapped(m) => m,
+            _ => return None,
+        };
+        if !source.object_flags.contains(ObjectFlags::Mapped) || m.name_type.is_some() {
+            return None;
+        }
+        let key_type = self.get_index_type(target);
+        let constraint_type = m.constraint_type.clone()?;
+        if !self.is_type_related_to(&key_type, &constraint_type, relation) {
+            return None;
+        }
+        let has_optional = m.declaration.as_ref().and_then(|d| match &d.data {
+            NodeData::MappedTypeNode(md) => md
+                .question_token
+                .as_ref()
+                .map(|t| t.kind == SyntaxKind::QuestionToken),
+            _ => None,
+        });
+        if has_optional == Some(true) {
+            return None;
+        }
+        let type_param = m.type_parameter.clone()?;
+        let template = self.get_template_type_from_mapped_type(source)?;
+        let indexed = self.get_indexed_access_type(target, &type_param);
+        Some(self.is_type_related_to(&template, &indexed, relation))
+    }
+
     fn conditional_parts_intersection_empty(
         &mut self,
         a: &Arc<Type>,
