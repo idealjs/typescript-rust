@@ -8,6 +8,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
+        source_is_primitive: bool,
     ) -> bool {
         // 未解析的接口壳（自引用重建实例，members 空）：先解析成完整实例再比较
         // （tsc type reference 的成员延迟解析语义）
@@ -28,7 +29,7 @@ impl Checker {
                     .as_structured()
                     .is_some_and(|s| !s.members.entries.is_empty())
             {
-                return self.is_object_type_related_to(source, &resolved, relation);
+                return self.is_object_type_related_to(source, &resolved, relation, source_is_primitive);
             }
         }
         // 源侧接口实例同样可能带退化构建窗口的残缺成员表（部分基类尚为壳时
@@ -51,7 +52,7 @@ impl Checker {
                     .as_structured()
                     .is_some_and(|s| s.members.entries.len() > src_members)
             {
-                return self.is_object_type_related_to(&resolved, target, relation);
+                return self.is_object_type_related_to(&resolved, target, relation, source_is_primitive);
             }
         }
         let source_struct = match source.as_structured() {
@@ -357,7 +358,7 @@ impl Checker {
             return false;
         }
 
-        if !self.is_index_signatures_related_to(source, target, relation) {
+        if !self.is_index_signatures_related_to(source, target, relation, source_is_primitive) {
             return false;
         }
 
