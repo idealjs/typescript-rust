@@ -82,7 +82,11 @@ impl Checker {
                 );
             let non_any: Vec<&Arc<Type>> = members
                 .iter()
-                .filter(|m| !m.flags.contains(TypeFlags::Any))
+                .filter(|m| {
+                    !m.flags.contains(TypeFlags::Any)
+                        && !(question_dot
+                            && m.flags.intersects(TypeFlags::Null | TypeFlags::Undefined))
+                })
                 .collect();
             if dynamic
                 && !non_any.is_empty()
@@ -99,6 +103,9 @@ impl Checker {
             let mut elem_types: Vec<Arc<Type>> = Vec::new();
             for m in &members {
                 if m.flags.contains(TypeFlags::Any) {
+                    continue;
+                }
+                if question_dot && m.flags.intersects(TypeFlags::Null | TypeFlags::Undefined) {
                     continue;
                 }
                 let t = self.element_access_result_type(node, m, arg_expr, &effective_arg);
@@ -177,6 +184,13 @@ impl Checker {
                 }
                 let prop_type = self.get_type_of_symbol(&sym);
                 return self.flow_type_of_access_expression(node, Some(&sym), prop_type);
+            }
+        }
+
+        if matches!(&obj_type.data, crate::checker::types::TypeData::Mapped(_)) {
+            let mapped_result = self.get_indexed_access_type(obj_type, &effective_arg);
+            if !mapped_result.flags.contains(TypeFlags::Any) {
+                return self.flow_type_of_access_expression(node, None, mapped_result);
             }
         }
 
