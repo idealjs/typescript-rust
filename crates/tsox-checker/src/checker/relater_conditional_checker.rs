@@ -204,6 +204,10 @@ impl Checker {
         if take_true {
             self.pop_scope();
         }
+        let branch = match ct.mapper.as_ref() {
+            Some(m) => m.map(&branch),
+            None => branch,
+        };
         if pushes_creation {
             self.type_argument_stack.pop();
         }
@@ -218,17 +222,8 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
     ) -> Option<Arc<Type>> {
-        let root = match &t.data {
-            TypeData::Conditional(ct) => ct.root.as_ref()?,
-            _ => return None,
-        };
-        if !Self::conditional_distribution_independent(root) {
-            return None;
-        }
-        let (true_branch, false_branch) = (
-            self.get_forced_branch_type_of_conditional_type(t, true),
-            self.get_forced_branch_type_of_conditional_type(t, false),
-        );
+        let true_branch = self.get_inferred_true_type_of_conditional(t);
+        let false_branch = self.get_forced_branch_type_of_conditional_type(t, false);
         match (true_branch, false_branch) {
             (Some(tb), Some(fb)) => {
                 if tb.flags.contains(TypeFlags::Any) {
@@ -291,5 +286,14 @@ impl Checker {
             }
         }
         None
+    }
+
+    fn get_inferred_true_type_of_conditional(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        if let TypeData::Conditional(ct) = &t.data {
+            if let Some(rt) = ct.resolved_inferred_true_type.get() {
+                return Some(rt.clone());
+            }
+        }
+        self.get_forced_branch_type_of_conditional_type(t, true)
     }
 }

@@ -106,6 +106,13 @@ impl Checker {
         let source = substitution_base_or_self(&source);
         let target = substitution_base_or_self(&target);
 
+        let source = self.get_simplified_type_for_relation(&source, false);
+        let target = self.get_simplified_type_for_relation(&target, true);
+
+        if Arc::ptr_eq(&source, &target) {
+            return true;
+        }
+
         {
             let sp = source.id;
             let tp = target.id;
@@ -244,85 +251,8 @@ impl Checker {
                 RelationKind::Identity | RelationKind::StrictSubtype
             )
             && !self.relater_overflow
-            && source.flags.contains(TypeFlags::Conditional)
         {
-            let truly_deferred = match &source.data {
-                TypeData::Conditional(ct) => {
-                    ct.resolved_true_type.get().is_none() && ct.resolved_false_type.get().is_none()
-                }
-                _ => false,
-            };
-
-            if truly_deferred
-                && self.deferred_constraint_depth < 100
-                && let Some(constraint) = self.deferred_default_constraint_of_conditional(&source)
-            {
-                self.deferred_constraint_depth += 1;
-                let r = self.is_type_related_to(&constraint, &target, relation);
-                self.deferred_constraint_depth -= 1;
-                if r {
-                    result = true;
-                }
-            }
-        }
-
-        if !result
-            && !matches!(
-                relation,
-                RelationKind::Identity | RelationKind::StrictSubtype
-            )
-            && !self.relater_overflow
-            && target.flags.contains(TypeFlags::Conditional)
-            && let TypeData::Conditional(tct) = &target.data
-        {
-            let root_ok = tct.root.as_ref().is_some_and(|r| {
-                r.infer_type_parameters.is_empty() && Self::conditional_distribution_independent(r)
-            });
-            let source_same_root = match (
-                &source.data,
-                tct.root.as_ref().and_then(|r| r.node.as_ref()),
-            ) {
-                (TypeData::Conditional(sc), Some(node)) => sc
-                    .root
-                    .as_ref()
-                    .and_then(|r| r.node.as_ref())
-                    .map(|n| n.id() == node.id())
-                    .unwrap_or(false),
-                _ => false,
-            };
-            if root_ok
-                && !source_same_root
-                && let (Some(check), Some(extends)) =
-                    (tct.check_type.clone(), tct.extends_type.clone())
-            {
-                let skip_true = {
-                    let pc = self.get_permissive_instantiation(&check);
-                    let pe = self.get_permissive_instantiation(&extends);
-                    !self.is_type_assignable_to(&pc, &pe)
-                };
-                if skip_true {
-                    result = true;
-                } else if let Some(true_branch) =
-                    self.get_forced_branch_type_of_conditional_type(&target, true)
-                {
-                    if self.is_type_related_to(&source, &true_branch, relation) {
-                        let skip_false = {
-                            let rc = self.get_restrictive_instantiation(&check);
-                            let re = self.get_restrictive_instantiation(&extends);
-                            self.is_type_assignable_to(&rc, &re)
-                        };
-                        if skip_false {
-                            result = true;
-                        } else if let Some(false_branch) =
-                            self.get_forced_branch_type_of_conditional_type(&target, false)
-                        {
-                            if self.is_type_related_to(&source, &false_branch, relation) {
-                                result = true;
-                            }
-                        }
-                    }
-                }
-            }
+            result = self.conditional_fallback_related(&source, &target, relation);
         }
         self.relation_cache.insert(key, result);
         result
