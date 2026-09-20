@@ -22,7 +22,10 @@ pub use references::{
 pub use reparser::reparse_tags;
 
 pub(crate) use crate::ast::*;
-pub(crate) use crate::scanner::{Scanner, token_to_string};
+pub(crate) use crate::scanner::{
+    Scanner, TOKEN_FLAGS_EXTENDED_UNICODE_ESCAPE, TOKEN_FLAGS_UNICODE_ESCAPE,
+    token_flags_intersects, token_to_string,
+};
 pub(crate) use std::sync::Arc;
 pub(crate) use tsox_core::core::text::TextRange;
 pub(crate) use tsox_core::diagnostics;

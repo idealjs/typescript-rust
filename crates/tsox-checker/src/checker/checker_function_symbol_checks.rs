@@ -223,12 +223,17 @@ impl Checker {
         }
     }
 
+    /// Go NodeIsPresent：零宽节点（parse 恢复产物）视为缺失 body
     fn node_body_is_present(&self, node: &Arc<Node>) -> bool {
-        match &node.data {
-            NodeData::FunctionDeclaration(d) => d.body.is_some(),
-            NodeData::MethodDeclaration(d) => d.body.is_some(),
-            NodeData::ConstructorDeclaration(d) => d.body.is_some(),
-            _ => false,
+        let body = match &node.data {
+            NodeData::FunctionDeclaration(d) => d.body.as_ref(),
+            NodeData::MethodDeclaration(d) => d.body.as_ref(),
+            NodeData::ConstructorDeclaration(d) => d.body.as_ref(),
+            _ => return false,
+        };
+        match body {
+            Some(b) => b.loc.pos() < b.loc.end(),
+            None => false,
         }
     }
 

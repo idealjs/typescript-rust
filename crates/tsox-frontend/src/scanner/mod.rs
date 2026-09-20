@@ -39,6 +39,7 @@ pub(crate) mod regexp_escapes_reg_exp_parser_2;
 pub(crate) mod regexp_pattern;
 pub(crate) mod regexp_property_escape;
 pub(crate) mod regexp_reg_exp_flag_modifiers;
+pub(crate) mod scan_number_literal;
 #[cfg(test)]
 pub(crate) mod tests;
 pub(crate) mod unicode_properties;

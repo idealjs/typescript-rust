@@ -63,6 +63,16 @@ impl Checker {
                     self.check_expression(&data.expression);
                     self.check_truthiness_of_type(&data.expression);
                     self.check_statement(&data.then_statement);
+                    if data.then_statement.kind == SyntaxKind::EmptyStatement {
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            file,
+                            data.then_statement.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                THE_BODY_OF_AN_IF_STATEMENT_CANNOT_BE_THE_EMPTY_STATEMENT,
+                            vec![],
+                        ));
+                    }
                     if let Some(else_stmt) = &data.else_statement {
                         self.check_statement(else_stmt);
                     }
@@ -321,8 +331,23 @@ impl Checker {
                     if let tsox_frontend::ast::NodeData::CaseBlock(case_block) =
                         &data.case_block.data
                     {
+                        // Go checkSwitchStatement：第二个 default 报 TS1113 后停
+                        let mut first_default: Option<Arc<Node>> = None;
+                        let mut has_duplicate_default = false;
                         self.push_scope(&data.case_block);
                         for case in case_block.clauses.iter() {
+                            if case.kind == SyntaxKind::DefaultClause && !has_duplicate_default {
+                                if first_default.is_none() {
+                                    first_default = Some(Arc::clone(case));
+                                } else {
+                                    self.grammar_error_on_node(
+                                        case,
+                                        &tsox_core::diagnostics::messages_generated::
+                                            A_DEFAULT_CLAUSE_CANNOT_APPEAR_MORE_THAN_ONCE_IN_A_SWITCH_STATEMENT,
+                                    );
+                                    has_duplicate_default = true;
+                                }
+                            }
                             self.check_case_clause(case, &expression_type);
                         }
                         self.pop_scope();

@@ -111,6 +111,10 @@ impl Checker {
                     }
                 }
                 self.check_call_arguments(node, false);
+                if matches!(&node.data, tsox_frontend::ast::NodeData::CallExpression(d) if d.expression.kind == SyntaxKind::ImportKeyword)
+                {
+                    self.check_grammar_import_call_expression(node);
+                }
                 self.check_dynamic_import_extension_rules(node);
             }
             SyntaxKind::NewExpression => {
@@ -317,6 +321,7 @@ impl Checker {
                 if let tsox_frontend::ast::NodeData::TaggedTemplateExpression(data) = &node.data {
                     self.check_expression(&data.tag);
                     self.check_expression(&data.template);
+                    self.check_tagged_template_arity(node);
                 }
             }
             SyntaxKind::JsxElement

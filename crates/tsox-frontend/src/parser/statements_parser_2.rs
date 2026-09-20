@@ -64,21 +64,11 @@ impl Parser {
         let pos = self.token_pos();
         self.expect(SyntaxKind::CatchKeyword);
         let variable_declaration = if self.parse_optional(SyntaxKind::OpenParenToken) {
-            let var_pos = self.token_pos();
-            let name = self.parse_identifier_or_pattern();
-            let type_node = self.parse_optional_type_annotation();
-            let var_end = self.token_pos();
+            // Go parseCatchClause：走完整 parseVariableDeclaration（含初始化器，
+            // `catch (e = 1)` 由 checker 报 TS1197 而非解析失败）
+            let decl = self.parse_variable_declaration();
             self.expect(SyntaxKind::CloseParenToken);
-            Some(Arc::new(Node::with_loc(
-                SyntaxKind::VariableDeclaration,
-                NodeData::VariableDeclaration(VariableDeclarationData {
-                    name,
-                    exclamation_token: None,
-                    type_node,
-                    initializer: None,
-                }),
-                TextRange::new(var_pos, var_end),
-            )))
+            Some(decl)
         } else {
             None
         };
@@ -222,7 +212,7 @@ impl Parser {
     /// Go parseBlock(ignoreMissingOpenBrace=true)：函数体等允许无 `{` 继续解析
     pub(crate) fn parse_block_ex(&mut self, ignore_missing_open_brace: bool) -> Arc<Node> {
         let pos = self.token_pos();
-        let open_brace_parsed = self.expect_with_advance(SyntaxKind::OpenBraceToken);
+        let open_brace_parsed = self.expect(SyntaxKind::OpenBraceToken);
         if !open_brace_parsed && !ignore_missing_open_brace {
             return Arc::new(Node::with_loc(
                 SyntaxKind::Block,

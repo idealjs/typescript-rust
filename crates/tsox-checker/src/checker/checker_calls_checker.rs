@@ -3,6 +3,70 @@
 use crate::checker::checker_calls::*;
 
 impl Checker {
+    /// Go resolveCallExpression（tagged template）：实参 = 模板 + 各 span 表达式，
+    /// 超出形参数报 TS2554，错误位取首个多余实参到末实参
+    pub(crate) fn check_tagged_template_arity(&mut self, node: &Arc<Node>) {
+        let tsox_frontend::ast::NodeData::TaggedTemplateExpression(data) = &node.data else {
+            return;
+        };
+        let spans = match &data.template.data {
+            tsox_frontend::ast::NodeData::TemplateExpression(t) => &t.template_spans,
+            _ => return,
+        };
+        let arg_count = 1 + spans.nodes.len();
+        let tag = Arc::clone(&data.tag);
+        let tag_type = self.get_type_of_node(&tag);
+        let Some(structured) = tag_type.as_structured() else {
+            return;
+        };
+        let Some(sig) = structured.call_signatures().first().cloned() else {
+            return;
+        };
+        let min_count = self.get_min_argument_count(&sig);
+        let max_count = self.get_parameter_count(&sig);
+        let has_rest = self.has_effective_rest_parameter(&sig);
+        if has_rest || arg_count <= max_count {
+            return;
+        }
+        let parameter_range = if min_count >= max_count {
+            max_count.to_string()
+        } else {
+            format!("{min_count}-{max_count}")
+        };
+        let span_expr_loc = |idx: usize| -> Option<tsox_core::core::text::TextRange> {
+            spans.nodes.get(idx).and_then(|s| match &s.data {
+                tsox_frontend::ast::NodeData::TemplateSpan(sd) => Some(sd.expression.loc),
+                _ => None,
+            })
+        };
+        // Go getArgumentArityError：pos=首个多余实参（SkipTrivia 后），零宽时 end+1
+        let raw_start = span_expr_loc(max_count.saturating_sub(1))
+            .map(|l| l.pos())
+            .unwrap_or_else(|| node.loc.pos());
+        let end = spans
+            .nodes
+            .last()
+            .and_then(|s| match &s.data {
+                tsox_frontend::ast::NodeData::TemplateSpan(sd) => Some(sd.expression.loc.end()),
+                _ => None,
+            })
+            .unwrap_or_else(|| node.loc.end());
+        let end = if end == raw_start { end + 1 } else { end };
+        let start = self
+            .current_file
+            .as_ref()
+            .map(|f| skip_trivia_call_range(&f.text, raw_start))
+            .unwrap_or(raw_start);
+        let end = if end < start { start } else { end };
+        let file = self.current_file.clone();
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            file,
+            tsox_core::core::text::TextRange::new(start, end),
+            EXPECTED_0_ARGUMENTS_BUT_GOT_1,
+            vec![parameter_range, arg_count.to_string()],
+        ));
+    }
+
     pub(crate) fn report_get_accessor_call(&mut self, callee_expr: &Arc<Node>) -> bool {
         let tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) = &callee_expr.data else {
             return false;
@@ -318,4 +382,28 @@ impl Checker {
         }
         self.check_call_arguments_against(node, &callee_type, &arguments, callee_expr, is_new);
     }
+}
+
+fn skip_trivia_call_range(text: &str, pos: usize) -> usize {
+    let bytes = text.as_bytes();
+    let mut i = pos.min(bytes.len());
+    while i < bytes.len() {
+        match bytes[i] {
+            b' ' | b'\t' | b'\x0b' | b'\x0c' | b'\r' | b'\n' => i += 1,
+            b'/' if i + 1 < bytes.len() && bytes[i + 1] == b'/' => {
+                while i < bytes.len() && bytes[i] != b'\n' {
+                    i += 1;
+                }
+            }
+            b'/' if i + 1 < bytes.len() && bytes[i + 1] == b'*' => {
+                i += 2;
+                while i + 1 < bytes.len() && !(bytes[i] == b'*' && bytes[i + 1] == b'/') {
+                    i += 1;
+                }
+                i = (i + 2).min(bytes.len());
+            }
+            _ => break,
+        }
+    }
+    i
 }

@@ -202,6 +202,17 @@ impl Parser {
     }
 
     pub(crate) fn next_token(&mut self) -> SyntaxKind {
+        if is_keyword_kind(self.token)
+            && token_flags_intersects(
+                self.scanner.token_flags(),
+                TOKEN_FLAGS_UNICODE_ESCAPE | TOKEN_FLAGS_EXTENDED_UNICODE_ESCAPE,
+            )
+        {
+            self.parse_error_at_current_token(
+                tsox_core::diagnostics::KEYWORDS_CANNOT_CONTAIN_ESCAPE_CHARACTERS,
+                &[],
+            );
+        }
         self.token = self.scanner.scan();
         self.drain_scanner_errors();
         self.token
@@ -277,6 +288,15 @@ impl Parser {
             }
             crate::scanner::DiagnosticKind::DigitExpected => {
                 tsox_core::diagnostics::DIGIT_EXPECTED
+            }
+            crate::scanner::DiagnosticKind::BinaryDigitExpected => {
+                tsox_core::diagnostics::BINARY_DIGIT_EXPECTED
+            }
+            crate::scanner::DiagnosticKind::OctalDigitExpected => {
+                tsox_core::diagnostics::OCTAL_DIGIT_EXPECTED
+            }
+            crate::scanner::DiagnosticKind::MultipleConsecutiveNumericSeparators => {
+                tsox_core::diagnostics::MULTIPLE_CONSECUTIVE_NUMERIC_SEPARATORS_ARE_NOT_PERMITTED
             }
         };
         let args: Vec<String> = match err.kind {

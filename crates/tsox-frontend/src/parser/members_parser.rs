@@ -24,11 +24,27 @@ impl Parser {
         let mut spans = Vec::new();
         loop {
             let expression = self.allow_in(|p| p.parse_expression());
+            let mut is_middle = false;
             let literal = if self.token == SyntaxKind::CloseBraceToken {
                 self.next_template_token_ex(is_tagged);
-                self.create_token_node()
+                let node = self.create_token_node();
+                is_middle = node.kind == SyntaxKind::TemplateMiddle;
+                self.next_token();
+                node
             } else {
-                break;
+                // Go parseLiteralOfTemplateSpan：'}' 缺失报 TS1005 并给
+                // 零宽 tail（不消费），模板链在此截断
+                self.parse_error_at_current_token(tsox_core::diagnostics::X_0_EXPECTED, &["}"]);
+                let p = self.node_pos();
+                Arc::new(Node::with_loc(
+                    SyntaxKind::TemplateTail,
+                    NodeData::TemplateTail(TemplateTailData {
+                        text: String::new(),
+                        raw_text: String::new(),
+                        template_flags: 0,
+                    }),
+                    TextRange::new(p, p),
+                ))
             };
             let span_pos = expression.pos();
             let span_end = literal.end();
@@ -40,13 +56,9 @@ impl Parser {
                 }),
                 TextRange::new(span_pos, span_end),
             )));
-            if self.token == SyntaxKind::NoSubstitutionTemplateLiteral
-                || self.token == SyntaxKind::TemplateTail
-            {
-                self.next_token();
+            if !is_middle {
                 break;
             }
-            self.next_token();
         }
         let end = self.node_pos();
         Arc::new(Node::with_loc(

@@ -104,6 +104,9 @@ impl Checker {
 
         if let Some(params) = &parameters {
             let is_ctor_impl = matches!(node.kind, SyntaxKind::Constructor) && body.is_some();
+            // Go checkGrammarFunctionLikeDeclaration：方法/构造函数/访问器
+            // 参数表走同一文法检查（TS1015 等）
+            self.check_grammar_parameter_list(params);
             self.check_parameter_property_modifiers(params, is_ctor_impl);
 
             if matches!(

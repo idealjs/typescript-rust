@@ -165,10 +165,16 @@ impl Parser {
             ))
         } else {
             // Go createIdentifierWithDiagnostic：报 Expression expected 后返回
-            // 零宽 missing，不消费当前 token（由外层 expect/列表恢复推进）
-            let pos = self.token_pos();
-            let end = self.token_end();
-            self.parse_error_at(pos, end, tsox_core::diagnostics::EXPRESSION_EXPECTED, &[]);
+            // 零宽 missing，不消费当前 token（由外层 expect/列表恢复推进）；
+            // EOF 时报错取零宽 fullStart（与后续 expect 的 token 位错开，
+            // 避免位置去重吞掉两条诊断）
+            if self.token == SyntaxKind::EndOfFile {
+                let p = self.node_pos();
+                self.parse_error_at(p, p, tsox_core::diagnostics::EXPRESSION_EXPECTED, &[]);
+            } else {
+                self.parse_error_at_current_token(tsox_core::diagnostics::EXPRESSION_EXPECTED, &[]);
+            }
+            let pos = self.node_pos();
             Arc::new(Node::with_loc(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData {
@@ -201,30 +207,6 @@ impl Parser {
         let expr = self.allow_in(|p| p.parse_expression());
         self.expect(SyntaxKind::CloseParenToken);
         let end = self.node_pos();
-
-        if self.token == SyntaxKind::EqualsGreaterThanToken {
-            let arrow_token = self.create_token_node();
-            self.next_token();
-            let body = if self.token == SyntaxKind::OpenBraceToken {
-                self.parse_block_ex(true)
-            } else {
-                self.parse_assignment_expression()
-            };
-            let end = body.end();
-            return Arc::new(Node::with_loc(
-                SyntaxKind::ArrowFunction,
-                NodeData::ArrowFunction(ArrowFunctionData {
-                    modifiers: None,
-                    type_parameters: None,
-                    parameters: Arc::new(NodeList::default()),
-                    type_node: None,
-                    equals_greater_than_token: arrow_token,
-                    body,
-                    full_signature: None,
-                }),
-                TextRange::new(pos, end),
-            ));
-        }
 
         Arc::new(Node::with_loc(
             SyntaxKind::ParenthesizedExpression,

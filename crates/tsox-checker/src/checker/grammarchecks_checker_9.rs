@@ -313,7 +313,40 @@ impl Checker {
         false
     }
 
-    pub fn check_grammar_import_call_expression(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_import_call_expression(&mut self, node: &Arc<Node>) -> bool {
+        use tsox_core::diagnostics::messages_generated as msg;
+        let NodeData::CallExpression(data) = &node.data else {
+            return false;
+        };
+        if data.expression.kind != SyntaxKind::ImportKeyword {
+            return false;
+        }
+        // Go：module 为 node16..nodenext/esnext/preserve 时允许
+        //（import attributes 的尾逗号），其余报 TS1009
+        use tsox_core::core::compiler_options::ModuleKind;
+        let mk = self.compiler_options.module;
+        let allowed = matches!(
+            mk,
+            ModuleKind::ESNext
+                | ModuleKind::Preserve
+                | ModuleKind::Node16
+                | ModuleKind::Node18
+                | ModuleKind::Node20
+                | ModuleKind::NodeNext
+        );
+        if allowed {
+            return false;
+        }
+        let args = &data.arguments;
+        if !args.nodes.is_empty() && args.loc.end() > 0 {
+            if let Some(f) = self.current_file.as_ref()
+                && let Some(comma) =
+                    crate::checker::grammarchecks_checker_8::trailing_comma_before(&f.text, args.loc.end())
+            {
+                return self
+                    .grammar_error_at_pos(&args.nodes[0], comma, 1, &msg::TRAILING_COMMA_NOT_ALLOWED);
+            }
+        }
         false
     }
 }

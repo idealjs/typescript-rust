@@ -86,7 +86,6 @@ impl Parser {
                 );
             }
             ParsingContext::ObjectLiteralMembers => {
-                eprintln!("[1136] UNCONDITIONAL TRACE");
                 self.parse_error_at_current_token(
                     tsox_core::diagnostics::PROPERTY_ASSIGNMENT_EXPECTED,
                     &[],
@@ -230,6 +229,16 @@ impl Parser {
                     );
                 } else {
                     self.expect(SyntaxKind::CommaToken);
+                }
+
+                // Go：对象字面量/导入属性以 ';' 分隔时（expect 已报错），
+                // 消费 ';' 继续，避免成员列表中断带出连锁误报
+                if (context == ParsingContext::ObjectLiteralMembers
+                    || context == ParsingContext::ImportAttributes)
+                    && self.token == SyntaxKind::SemicolonToken
+                    && !self.has_preceding_line_break()
+                {
+                    self.next_token();
                 }
 
                 if element_start == self.token_pos() {

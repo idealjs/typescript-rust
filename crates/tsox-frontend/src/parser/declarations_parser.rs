@@ -130,7 +130,11 @@ impl Parser {
             .as_ref()
             .map(|m| m.flags().contains(ModifierFlags::Async))
             .unwrap_or(false);
-        let name = if self.is_binding_identifier() {
+        let name = if modifiers
+            .as_ref()
+            .is_none_or(|m| !m.flags().contains(ModifierFlags::Default))
+            || self.is_binding_identifier()
+        {
             Some(self.parse_binding_identifier_with_private_diagnostic(None))
         } else {
             None
@@ -140,9 +144,11 @@ impl Parser {
         let type_node = self.parse_optional_return_type();
         let body = if self.token == SyntaxKind::OpenBraceToken {
             Some(self.parse_function_block(is_generator, is_async))
-        } else {
+        } else if self.can_parse_semicolon() {
             self.parse_semicolon();
             None
+        } else {
+            Some(self.parse_function_block(is_generator, is_async))
         };
         let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
         Arc::new(Node::with_loc(

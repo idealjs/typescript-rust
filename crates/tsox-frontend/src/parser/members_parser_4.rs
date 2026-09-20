@@ -141,6 +141,66 @@ impl Parser {
             }
         }
 
+        if !(is_identifier_or_keyword(self.token)
+            || matches!(
+                self.token,
+                SyntaxKind::StringLiteral
+                    | SyntaxKind::NumericLiteral
+                    | SyntaxKind::BigIntLiteral
+                    | SyntaxKind::AsteriskToken
+                    | SyntaxKind::OpenBracketToken
+            )) && modifiers.is_some()
+        {
+            // Go parseClassElementWorker：modifiers 后成员无法开始，
+            // 按 missing-name 属性声明恢复（TS1146 + TS1005 链）
+            let name_pos = self.node_pos();
+            self.parse_error_at(
+                name_pos,
+                name_pos,
+                tsox_core::diagnostics::DECLARATION_EXPECTED,
+                &[],
+            );
+            let name = Arc::new(Node::with_loc(
+                SyntaxKind::Identifier,
+                NodeData::Identifier(IdentifierData {
+                    text: String::new(),
+                }),
+                TextRange::new(name_pos, name_pos),
+            ));
+            let postfix_token = if !self.has_preceding_line_break() {
+                self.parse_optional_token(SyntaxKind::ExclamationToken)
+            } else {
+                None
+            };
+            let type_node = self.parse_optional_type_annotation();
+            let initializer = if self.token == SyntaxKind::EqualsToken {
+                self.next_token();
+                let saved_yield = self.yield_context;
+                let saved_await = self.await_context;
+                self.yield_context = false;
+                self.await_context = false;
+                let init = self.parse_assignment_expression();
+                self.yield_context = saved_yield;
+                self.await_context = saved_await;
+                Some(init)
+            } else {
+                None
+            };
+            self.parse_semicolon_after_property_name(&name, type_node.as_ref(), initializer.as_ref());
+            let end = self.node_pos();
+            return Arc::new(Node::with_loc(
+                SyntaxKind::PropertyDeclaration,
+                NodeData::PropertyDeclaration(PropertyDeclarationData {
+                    modifiers,
+                    name,
+                    postfix_token,
+                    type_node,
+                    initializer,
+                }),
+                TextRange::new(pos, end),
+            ));
+        }
+
         let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
         let name = self.parse_property_name();
         let postfix_token = self

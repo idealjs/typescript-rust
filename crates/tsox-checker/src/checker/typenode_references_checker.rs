@@ -213,17 +213,10 @@ impl Checker {
                 if let Some(t) = self.bigint_literal_types.get(text).cloned() {
                     return t;
                 }
-                let (neg, digits) = if let Some(rest) = text.strip_prefix('-') {
-                    (true, rest.trim_end_matches('n'))
-                } else {
-                    (false, text.trim_end_matches('n'))
-                };
                 let t = Arc::new(Type::new(
                     TypeFlags::BigIntLiteral,
                     TypeData::Literal(LiteralTypeData {
-                        value: LiteralValue::BigInt(tsox_core::jsnum::PseudoBigInt::new(
-                            digits, neg,
-                        )),
+                        value: LiteralValue::BigInt(tsox_core::jsnum::PseudoBigInt::parse(&text)),
                         fresh_type: std::sync::OnceLock::new(),
                         regular_type: std::sync::OnceLock::new(),
                     }),
