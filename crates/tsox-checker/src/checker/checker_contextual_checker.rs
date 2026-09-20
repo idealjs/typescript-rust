@@ -114,7 +114,8 @@ impl Checker {
                 let loc = self
                     .find_object_literal_property_name_node(expr, &excess)
                     .unwrap_or(expr.loc);
-                let tgt_str = self.type_to_string(target);
+                let filtered_target = self.excess_check_error_target(target);
+                let tgt_str = self.type_to_string(&filtered_target);
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     self.current_file.clone(),
                     loc,

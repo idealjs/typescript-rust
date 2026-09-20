@@ -105,7 +105,7 @@ impl Checker {
         false
     }
 
-    fn excess_check_error_target(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn excess_check_error_target(&mut self, t: &Arc<Type>) -> Arc<Type> {
         if t.flags.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
             && let Some(types) = t.types()
         {
