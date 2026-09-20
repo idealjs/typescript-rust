@@ -246,7 +246,10 @@ impl Checker {
                 }
             }
             let flow = self.program.symbol_map().flow_node_of(node).map(Arc::clone);
-            let narrowed = self.get_narrowed_type_of_symbol(&symbol, flow.as_ref());
+            let declared = self.get_type_of_symbol(&symbol);
+            let narrowable = self.get_narrowable_type_for_reference(&declared, node);
+            let narrowed =
+                self.get_narrowed_type_of_symbol_with_declared(&symbol, flow.as_ref(), narrowable);
 
             if narrowed.object_flags.contains(ObjectFlags::EvolvingArray)
                 && self.is_evolving_array_operation_target(node)
@@ -257,6 +260,11 @@ impl Checker {
             let final_type = self.finalize_evolving_array_type(&narrowed);
 
             let target_kind = get_assignment_target_kind(node);
+            if target_kind == AssignmentKind::None
+                && let Some(declared) = self.definite_assignment_violation_type(node, &symbol)
+            {
+                return declared;
+            }
             let compound_like =
                 target_kind == AssignmentKind::Definite && is_in_compound_like_assignment(node);
             if compound_like || target_kind == AssignmentKind::Compound {
