@@ -92,6 +92,9 @@ impl Checker {
         let mut declarations: Vec<Arc<Node>> = Vec::new();
         let mut prop_types: Vec<Arc<Type>> = Vec::new();
         let mut first_parent: Option<Arc<Symbol>> = None;
+        let mut non_uniform = false;
+        let mut has_literal = false;
+        let mut first_type: Option<Arc<Type>> = None;
         for prop in &found {
             for d in &prop.declarations {
                 if !declarations.iter().any(|x| Arc::ptr_eq(x, d)) {
@@ -103,12 +106,31 @@ impl Checker {
                     .parent_symbol_of_declaration_chain(prop)
                     .or_else(|| prop.parent().clone());
             }
-            prop_types.push(self.get_type_of_symbol(prop));
+            let t = self.get_type_of_symbol(prop);
+            if let Some(ft) = &first_type {
+                if ft.id != t.id {
+                    non_uniform = true;
+                }
+            } else {
+                first_type = Some(Arc::clone(&t));
+            }
+            if crate::checker::utilities_token_is_identifier_or_keyword::is_literal_type(&t)
+                || t.flags.contains(TypeFlags::TemplateLiteral)
+            {
+                has_literal = true;
+            }
+            prop_types.push(t);
         }
         prop_types.extend(index_types);
 
         let mut result = Symbol::new(prop_flags | optional_flag, name.to_string());
         result.check_flags = CheckFlags::SyntheticProperty;
+        if non_uniform {
+            result.check_flags |= CheckFlags::HasNonUniformType;
+        }
+        if has_literal {
+            result.check_flags |= CheckFlags::HasLiteralType;
+        }
         if index_readonly {
             result.check_flags |= CheckFlags::Readonly;
         }
