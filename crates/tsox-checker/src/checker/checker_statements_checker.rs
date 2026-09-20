@@ -332,14 +332,12 @@ impl Checker {
             }
 
             SyntaxKind::FunctionDeclaration => {
-                self.check_exports_on_merged_declarations(node);
                 self.check_function_declaration(node);
             }
             SyntaxKind::ClassDeclaration => {
                 self.check_class_declaration(node);
             }
             SyntaxKind::InterfaceDeclaration => {
-                self.check_exports_on_merged_declarations(node);
                 if !self.check_grammar_modifiers(node) {
                     self.check_grammar_interface_declaration(node);
                 }
@@ -391,9 +389,6 @@ impl Checker {
                 }
                 if node.kind == SyntaxKind::ImportDeclaration {
                     self.check_import_declaration_grammar(node);
-                }
-                if node.kind == SyntaxKind::TypeAliasDeclaration {
-                    self.check_exports_on_merged_declarations(node);
                 }
                 if node.kind == SyntaxKind::ImportEqualsDeclaration {
                     // Go checkImportEqualsDeclaration：先跑修饰符文法
@@ -451,7 +446,6 @@ impl Checker {
                 self.check_node_next_extension_rules(node);
             }
             SyntaxKind::EnumDeclaration => {
-                self.check_exports_on_merged_declarations(node);
                 self.check_enum_declaration(node);
             }
             SyntaxKind::ExportAssignment => {

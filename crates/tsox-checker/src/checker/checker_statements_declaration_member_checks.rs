@@ -4,7 +4,6 @@ use crate::checker::checker_statements::*;
 
 impl Checker {
     pub fn check_class_declaration(&mut self, node: &Arc<Node>) {
-        self.check_exports_on_merged_declarations(node);
         self.check_grammar_modifiers(node);
         self.check_grammar_class_declaration_heritage_clauses(node);
         self.check_exports_on_merged_declarations(node);
