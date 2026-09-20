@@ -218,7 +218,7 @@ impl Checker {
         }
         t.types()
             .map(|ts| ts.iter().any(type_contains_type_parameter))
-            .is_some()
+            .unwrap_or(false)
     }
 
     pub fn try_get_indexed_access_type(

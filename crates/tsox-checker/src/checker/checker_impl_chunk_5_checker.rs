@@ -512,6 +512,70 @@ impl Checker {
         }))
     }
 
+    pub fn get_regular_type_of_object_literal(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        if !(crate::checker::is_object_literal_type(t)
+            && t.object_flags.contains(ObjectFlags::FreshLiteral))
+        {
+            return Arc::clone(t);
+        }
+        let key = crate::checker::types_cached_type_kind::CachedTypeKey {
+            kind: crate::checker::types_cached_type_kind::CachedTypeKind::RegularObjectLiteral,
+            type_id: t.id,
+        };
+        if let Some(cached) = self.cached_types.get(&key) {
+            return Arc::clone(cached);
+        }
+        let obj = match &t.data {
+            TypeData::Object(o) => o.clone(),
+            _ => return Arc::clone(t),
+        };
+        let mut members = SymbolTable::new();
+        let mut props: Vec<Arc<Symbol>> = Vec::with_capacity(obj.structured.properties.len());
+        for prop in &obj.structured.properties {
+            let original = self.get_type_of_symbol(prop);
+            let updated = self.get_regular_type_of_object_literal(&original);
+            if Arc::ptr_eq(&original, &updated) {
+                members.insert(prop.name.clone(), Arc::clone(prop));
+                props.push(Arc::clone(prop));
+                continue;
+            }
+            let mut new_sym = Symbol::new(prop.flags, prop.name.clone());
+            new_sym.declarations = prop.declarations.clone();
+            new_sym.value_declaration = prop.value_declaration.clone();
+            new_sym.check_flags = prop.check_flags;
+            let new_sym = Arc::new(new_sym);
+            self.value_symbol_links.insert(
+                &new_sym,
+                ValueSymbolLinks {
+                    resolved_type: Some(updated),
+                    ..Default::default()
+                },
+            );
+            members.insert(new_sym.name.clone(), Arc::clone(&new_sym));
+            props.push(new_sym);
+        }
+        let regular = Arc::new(Type {
+            flags: t.flags,
+            object_flags: ObjectFlags::Anonymous | (t.object_flags - ObjectFlags::FreshLiteral),
+            id: crate::checker::types::next_type_id(),
+            symbol: t.symbol.clone(),
+            alias: None,
+            data: TypeData::Object(ObjectTypeData {
+                structured: StructuredTypeData {
+                    members,
+                    properties: props,
+                    index_infos: obj.structured.index_infos.clone(),
+                    ..Default::default()
+                },
+                target: None,
+                mapper: None,
+                type_arguments: Vec::new(),
+            }),
+        });
+        self.cached_types.insert(key, Arc::clone(&regular));
+        regular
+    }
+
     pub fn widen_initializer_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
         if crate::checker::is_object_literal_type(t) {
             return self.widen_object_literal_type(t);

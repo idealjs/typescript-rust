@@ -329,7 +329,7 @@ impl Checker {
         name: &str,
     ) -> Option<Arc<Symbol>> {
         if t.is_union() || t.is_intersection() {
-            return self.get_union_or_intersection_property(t, name);
+            return self.get_property_of_union_or_intersection_type(t, name);
         }
         // Go globalThisSymbol.Exports 即 globals 表：typeof globalThis 的成员
         // 直接取 globals

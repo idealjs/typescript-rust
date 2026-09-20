@@ -4,8 +4,25 @@ use crate::checker::flow_union_ops::*;
 use tsox_frontend::ast::CheckFlags;
 
 impl Checker {
-    /// Go getPropertyOfUnionOrIntersectionType：在联合/交集各成分中查同名属性，
-    /// 多成分命中时合成带 containingType 的属性符号（声明合并、类型取并/交）
+    /// Go getPropertyOfUnionOrIntersectionType：raw 合成属性之上过滤 ReadPartial
+    /// （联合读取侧不存在于全部成分的属性不可见）
+    pub(crate) fn get_property_of_union_or_intersection_type(
+        &mut self,
+        containing_type: &Arc<Type>,
+        name: &str,
+    ) -> Option<Arc<Symbol>> {
+        let prop = self.get_union_or_intersection_property(containing_type, name)?;
+        if prop
+            .check_flags
+            .contains(tsox_frontend::ast::CheckFlags::ReadPartial)
+        {
+            return None;
+        }
+        Some(prop)
+    }
+
+    /// Go getUnionOrIntersectionProperty（raw）：部分存在的属性合成带
+    /// ReadPartial/WritePartial 的符号，由调用方决定是否过滤
     pub(crate) fn get_union_or_intersection_property(
         &mut self,
         containing_type: &Arc<Type>,
@@ -21,6 +38,7 @@ impl Checker {
         let mut index_types: Vec<Arc<Type>> = Vec::new();
         let mut index_readonly = false;
         let mut read_partial = false;
+        let mut write_partial = false;
         for current in types.iter() {
             let t = self.get_apparent_type(current);
             if self.is_error_type(&t) || t.flags.contains(TypeFlags::Never) {
@@ -62,6 +80,7 @@ impl Checker {
                         && let Some(info) = self.get_applicable_index_info(&t, &name_literal)
                     {
                         index_readonly |= info.is_readonly;
+                        write_partial = true;
                         let vt = if self.is_tuple_type(&t) {
                             self.tuple_rest_or_undefined(&t)
                         } else {
@@ -73,6 +92,7 @@ impl Checker {
                     } else if t.object_flags.contains(ObjectFlags::ObjectLiteral)
                         && !t.object_flags.contains(ObjectFlags::ContainsSpread)
                     {
+                        write_partial = true;
                         index_types.push(self.undefined_type());
                     } else {
                         read_partial = true;
@@ -82,10 +102,7 @@ impl Checker {
         }
 
         let single = single_prop?;
-        if read_partial {
-            return None;
-        }
-        if found.len() == 1 && index_types.is_empty() {
+        if found.len() == 1 && index_types.is_empty() && !read_partial && !write_partial {
             return Some(single);
         }
 
@@ -130,6 +147,12 @@ impl Checker {
         }
         if has_literal {
             result.check_flags |= CheckFlags::HasLiteralType;
+        }
+        if read_partial {
+            result.check_flags |= CheckFlags::ReadPartial;
+        }
+        if write_partial {
+            result.check_flags |= CheckFlags::WritePartial;
         }
         if index_readonly {
             result.check_flags |= CheckFlags::Readonly;
