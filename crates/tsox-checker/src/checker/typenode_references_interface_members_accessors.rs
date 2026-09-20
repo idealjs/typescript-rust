@@ -113,7 +113,7 @@ impl Checker {
         if is_static_modifier(&data.modifiers) {
             return;
         }
-        let name = self.get_property_name_from_node(&data.name);
+        let name = self.member_declaration_name(&data.name);
         if name.is_empty() {
             return;
         }
@@ -166,7 +166,7 @@ impl Checker {
         if is_static_modifier(&data.modifiers) {
             return;
         }
-        let name = self.get_property_name_from_node(&data.name);
+        let name = self.member_declaration_name(&data.name);
         if name.is_empty() {
             return;
         }

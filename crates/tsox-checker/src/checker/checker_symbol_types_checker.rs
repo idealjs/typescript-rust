@@ -269,10 +269,21 @@ impl Checker {
                 for d in &sym.declarations {
                     let mname = match &d.data {
                         tsox_frontend::ast::NodeData::BinaryExpression(b) => match &b.left.data {
-                            tsox_frontend::ast::NodeData::ElementAccessExpression(eae) => self
-                                .node_source_text(&eae.argument_expression)
-                                .map(|t| format!("[{t}]"))
-                                .unwrap_or_default(),
+                            tsox_frontend::ast::NodeData::ElementAccessExpression(eae) => {
+                                let arg = &eae.argument_expression;
+                                if !tsox_frontend::ast::is_entity_name_expression(arg) {
+                                    String::new()
+                                } else {
+                                    let t = self.with_declaring_file_context(d, |c| {
+                                        c.get_type_of_node(arg)
+                                    });
+                                    if crate::checker::utilities_token_is_identifier_or_keyword::is_type_usable_as_property_name(&t) {
+                                        crate::checker::utilities_token_is_identifier_or_keyword::get_property_name_from_type(&t)
+                                    } else {
+                                        String::new()
+                                    }
+                                }
+                            }
                             _ => String::new(),
                         },
                         _ => String::new(),
@@ -305,7 +316,7 @@ impl Checker {
             };
             let rhs_type = self.with_declaring_file_context(&node, |c| {
                 let t = c.get_type_of_node(&bin.right);
-                c.get_widened_type(&t)
+                c.get_regular_type_of_literal_type(&t)
             });
             let prop = Arc::new(tsox_frontend::ast::Symbol::new(
                 SymbolFlags::Property,

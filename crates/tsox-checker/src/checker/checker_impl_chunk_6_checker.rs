@@ -40,7 +40,14 @@ impl Checker {
                 }
                 self.string_type()
             }
-            SyntaxKind::NoSubstitutionTemplateLiteral => self.string_type(),
+            SyntaxKind::NoSubstitutionTemplateLiteral => {
+                if let tsox_frontend::ast::NodeData::NoSubstitutionTemplateLiteral(data) = &node.data
+                {
+                    let lit = self.infer_string_literal_type(&data.text);
+                    return self.get_fresh_type_of_literal_type(&lit);
+                }
+                self.string_type()
+            }
             SyntaxKind::TrueKeyword => self.get_fresh_type_of_literal_type(&self.true_type()),
             SyntaxKind::FalseKeyword => self.get_fresh_type_of_literal_type(&self.false_type()),
             SyntaxKind::NullKeyword => self.nullish_widening_type(self.null_type()),
@@ -65,7 +72,8 @@ impl Checker {
                 self.get_any_type()
             }
             SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => {
-                self.get_type_of_function_like(node)
+                let base = self.get_type_of_function_like(node);
+                self.attach_expando_to_function_expression_type(node, base)
             }
             SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => {
                 self.get_type_of_class_declaration(node)

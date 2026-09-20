@@ -249,7 +249,13 @@ impl Checker {
     }
 
     pub(crate) fn fill_members_into(&mut self, sink: MemberSink, members: &Arc<NodeList>) {
+        let mut implied_index: Option<crate::checker::IndexInfo> = None;
         for member in members.iter() {
+            if implied_index.is_none() {
+                implied_index = self.implied_index_info_of_computed_member(member, unsafe {
+                    &*sink.index_infos
+                });
+            }
             let (tbl, props) = unsafe { (&mut *sink.members, &mut *sink.props) };
             match &member.data {
                 NodeData::PropertySignatureDeclaration(_) => {
@@ -281,6 +287,10 @@ impl Checker {
                 }
                 _ => {}
             }
+        }
+        if let Some(info) = implied_index {
+            let infos = unsafe { &mut *sink.index_infos };
+            infos.push(Arc::new(info));
         }
     }
 }

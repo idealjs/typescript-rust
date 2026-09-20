@@ -11,6 +11,8 @@ pub use crate::checker::typenode_references_checker_4::*;
 #[allow(unused_imports)]
 pub use crate::checker::typenode_references_checker_5::*;
 #[allow(unused_imports)]
+pub use crate::checker::typenode_references_computed_index::*;
+#[allow(unused_imports)]
 pub use crate::checker::typenode_references_checker_6::*;
 #[allow(unused_imports)]
 pub use crate::checker::typenode_references_checker_7::*;

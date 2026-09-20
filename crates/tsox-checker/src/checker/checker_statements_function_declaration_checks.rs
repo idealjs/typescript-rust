@@ -77,25 +77,6 @@ impl Checker {
             tsox_frontend::ast::NodeData::FunctionDeclaration(data) => {
                 data.name.as_ref().and_then(|n| self.resolve_identifier(n))
             }
-            // 函数表达式/箭头函数经变量声明获得 expando 容器
-            // （const getProps = function(){}/() => {} 的属性赋值语义）
-            tsox_frontend::ast::NodeData::FunctionExpression(data) => data
-                .name
-                .as_ref()
-                .and_then(|n| self.resolve_identifier(n))
-                .or_else(|| {
-                    node.parent()
-                        .as_ref()
-                        .filter(|p| p.kind == SyntaxKind::VariableDeclaration)
-                        .and_then(|p| p.name())
-                        .and_then(|n| self.resolve_identifier(&n))
-                }),
-            tsox_frontend::ast::NodeData::ArrowFunction(_) => node
-                .parent()
-                .as_ref()
-                .filter(|p| p.kind == SyntaxKind::VariableDeclaration)
-                .and_then(|p| p.name())
-                .and_then(|n| self.resolve_identifier(&n)),
             _ => None,
         };
         let fn_type = match &fn_symbol {

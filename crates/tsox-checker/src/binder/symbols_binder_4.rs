@@ -85,7 +85,7 @@ impl Binder {
             NodeData::PropertySignatureDeclaration(data) => self.member_name_text(&data.name),
             NodeData::PropertyAssignment(data) => self.member_name_text(&data.name),
             NodeData::ShorthandPropertyAssignment(data) => self.node_text(&data.name),
-            NodeData::EnumMember(data) => self.node_text(&data.name),
+            NodeData::EnumMember(data) => self.member_name_text(&data.name),
             NodeData::GetAccessorDeclaration(data) => self.member_name_text(&data.name),
             NodeData::SetAccessorDeclaration(data) => self.member_name_text(&data.name),
             NodeData::PropertyDeclaration(data) => self.member_name_text(&data.name),
@@ -165,14 +165,9 @@ impl Binder {
         //（字符串保留引号，数字归一化），否则不同计算名会全部坍缩为空名
         if name.kind == SyntaxKind::ComputedPropertyName
             && let NodeData::ComputedPropertyName(cd) = &name.data
-            && matches!(
-                cd.expression.kind,
-                SyntaxKind::StringLiteral
-                    | SyntaxKind::NumericLiteral
-                    | SyntaxKind::NoSubstitutionTemplateLiteral
-            )
+            && let Some(literal) = computed_member_literal_name(&cd.expression)
         {
-            return self.member_name_text(&cd.expression);
+            return literal;
         }
         // Go scanner 对十进制数字字面量 tokenValue 归一化
         // （jsnum.FromString().String()），符号名以归一化形态入表（0.0 与 0 同名）
@@ -216,6 +211,37 @@ pub(crate) fn well_known_symbol_member_name(expr: &Arc<Node>) -> Option<String> 
         }
     }
     None
+}
+
+pub(crate) fn computed_member_literal_name(expression: &Arc<Node>) -> Option<String> {
+    if let NodeData::PrefixUnaryExpression(pu) = &expression.data
+        && matches!(pu.operator, SyntaxKind::PlusToken | SyntaxKind::MinusToken)
+        && pu.operand.kind == SyntaxKind::NumericLiteral
+    {
+        let op = if pu.operator == SyntaxKind::PlusToken { "+" } else { "-" };
+        let operand_text = match &pu.operand.data {
+            NodeData::NumericLiteral(d) => d.text.clone(),
+            _ => String::new(),
+        };
+        return Some(format!("{op}{operand_text}"));
+    }
+    match expression.kind {
+        SyntaxKind::StringLiteral
+        | SyntaxKind::NumericLiteral
+        | SyntaxKind::NoSubstitutionTemplateLiteral => Some(literal_member_text(expression)),
+        _ => None,
+    }
+}
+
+fn literal_member_text(node: &Arc<Node>) -> String {
+    match &node.data {
+        NodeData::StringLiteral(d) => d.text.clone(),
+        NodeData::NoSubstitutionTemplateLiteral(d) => d.text.clone(),
+        NodeData::NumericLiteral(d) => {
+            tsox_core::jsnum::Number::from_string(&d.text).to_string()
+        }
+        _ => String::new(),
+    }
 }
 
 pub(crate) fn module_declaration_has_with_clause(
