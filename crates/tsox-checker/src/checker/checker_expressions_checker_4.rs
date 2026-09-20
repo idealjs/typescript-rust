@@ -158,16 +158,21 @@ impl Checker {
                     .current_file
                     .as_ref()
                     .is_some_and(|f| !f.file_name.starts_with("bundled://"))
-                && self
-                    .resolve_identifier_with_meaning(node, SymbolFlags::VALUE)
-                    .is_none()
+                && !self.value_meaning_resolves(node)
             {
+                let message =
+                    if Self::is_es2015_or_later_constructor_name(name) {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_ES2015_OR_LATER
+                    } else {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE
+                    };
                 let file = self.current_file.clone();
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,
                     node.loc,
-                    tsox_core::diagnostics::messages_generated::
-                        X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE,
+                    message,
                     vec![name.to_string()],
                 ));
                 return;
@@ -186,15 +191,20 @@ impl Checker {
                 && !is_export_assignment_name
                 && !base.flags.intersects(SymbolFlags::VALUE)
                 && base.flags.intersects(SymbolFlags::TYPE)
-                && self
-                    .resolve_identifier_with_meaning(node, SymbolFlags::VALUE)
-                    .is_none()
+                && !self.value_meaning_resolves(node)
             {
+                let message =
+                    if Self::is_es2015_or_later_constructor_name(name) {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_ES2015_OR_LATER
+                    } else {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE
+                    };
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     self.current_file.clone(),
                     node.loc,
-                    tsox_core::diagnostics::messages_generated::
-                        X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE,
+                    message,
                     vec![name.to_string()],
                 ));
             }
@@ -229,11 +239,18 @@ impl Checker {
                     && !is_export_assignment_name
                     && !sym.flags.intersects(SymbolFlags::VALUE)
                 {
+                    let message =
+                        if Self::is_es2015_or_later_constructor_name(name) {
+                            tsox_core::diagnostics::messages_generated::
+                                X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_ES2015_OR_LATER
+                        } else {
+                            tsox_core::diagnostics::messages_generated::
+                                X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE
+                        };
                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                         file.clone(),
                         node.loc,
-                        tsox_core::diagnostics::messages_generated::
-                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE,
+                        message,
                         vec![name.to_string()],
                     ));
                     true
@@ -337,6 +354,20 @@ impl Checker {
     }
 }
 
+impl Checker {
+    fn value_meaning_resolves(&self, node: &Arc<Node>) -> bool {
+        self.resolve_identifier_with_meaning(node, SymbolFlags::VALUE)
+            .is_some_and(|s| s.flags.intersects(SymbolFlags::VALUE))
+    }
+
+    pub(crate) fn is_es2015_or_later_constructor_name(name: &str) -> bool {
+        matches!(
+            name,
+            "Promise" | "Symbol" | "Map" | "WeakMap" | "Set" | "WeakSet"
+        )
+    }
+}
+
 fn is_type_position_use_site(node: &Arc<Node>) -> bool {
     let mut cur = node.parent();
     while let Some(p) = cur {
@@ -366,5 +397,38 @@ impl Checker {
         current
             .and_then(|c| c.parent())
             .is_some_and(|p| p.kind == SyntaxKind::ExportAssignment)
+    }
+}
+
+impl Checker {
+    // Go checkAndReportErrorForUsingTypeAsValue 原生类型 heritage 分支：
+    // interface extends 报 2840，class extends 报 2863，class implements 报 2862
+    pub(crate) fn primitive_heritage_message(
+        node: &Arc<Node>,
+        name: &str,
+    ) -> Option<tsox_core::diagnostics::Message> {
+        let primitive = matches!(name, "any" | "string" | "number" | "boolean" | "never" | "unknown");
+        if !primitive {
+            return None;
+        }
+        let heritage = node.parent().filter(|p| p.kind == SyntaxKind::HeritageClause)?;
+        let container = heritage.parent()?;
+        let extends = matches!(
+            &heritage.data,
+            tsox_frontend::ast::NodeData::HeritageClause(h) if h.token == SyntaxKind::ExtendsKeyword
+        );
+        use tsox_core::diagnostics::messages_generated as mg;
+        match container.kind {
+            SyntaxKind::InterfaceDeclaration if extends => {
+                Some(mg::AN_INTERFACE_CANNOT_EXTEND_A_PRIMITIVE_TYPE_LIKE_0_IT_CAN_ONLY_EXTEND_OTHER_NAMED_OBJECT_TYPES)
+            }
+            SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression if extends => {
+                Some(mg::A_CLASS_CANNOT_EXTEND_A_PRIMITIVE_TYPE_LIKE_0_CLASSES_CAN_ONLY_EXTEND_CONSTRUCTABLE_VALUES)
+            }
+            SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => {
+                Some(mg::A_CLASS_CANNOT_IMPLEMENT_A_PRIMITIVE_TYPE_LIKE_0_IT_CAN_ONLY_IMPLEMENT_OTHER_NAMED_OBJECT_TYPES)
+            }
+            _ => None,
+        }
     }
 }

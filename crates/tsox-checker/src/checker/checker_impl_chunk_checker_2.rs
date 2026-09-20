@@ -208,8 +208,6 @@ impl Checker {
             }
         }
 
-        self.ensure_host_globals();
-
         self.merge_module_augmentations();
 
         self.add_undefined_to_globals_or_error_on_redeclaration();

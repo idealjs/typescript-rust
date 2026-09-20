@@ -50,6 +50,42 @@ impl Checker {
                 let file = c
                     .get_source_file_of_node(&target)
                     .or_else(|| c.current_file.clone());
+                let name = target.text().to_string();
+                let is_primitive = matches!(
+                    name.as_str(),
+                    "any" | "string" | "number" | "boolean" | "never" | "unknown"
+                );
+                let type_only_hit = !is_primitive
+                    && c
+                        .resolve_identifier_with_meaning(
+                            &target,
+                            tsox_frontend::ast::SymbolFlags::TYPE,
+                        )
+                        .map(|s| {
+                            let base = c.resolve_alias_base(s);
+                            !base
+                                .flags
+                                .intersects(tsox_frontend::ast::SymbolFlags::VALUE)
+                        })
+                        .unwrap_or(false);
+                if is_primitive || type_only_hit {
+                    let message = if !is_primitive
+                        && Checker::is_es2015_or_later_constructor_name(&name)
+                    {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_ES2015_OR_LATER
+                    } else {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE
+                    };
+                    c.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        target.loc,
+                        message,
+                        vec![name],
+                    ));
+                    return;
+                }
                 c.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,
                     target.loc,
@@ -83,6 +119,38 @@ impl Checker {
                 },
             }
         };
+
+        let query_base = if symbol.flags == tsox_frontend::ast::SymbolFlags::Alias {
+            self.resolve_alias_base(Arc::clone(&symbol))
+        } else {
+            Arc::clone(&symbol)
+        };
+        if !query_base
+            .flags
+            .intersects(tsox_frontend::ast::SymbolFlags::VALUE)
+            && query_base
+                .flags
+                .intersects(tsox_frontend::ast::SymbolFlags::TYPE)
+        {
+            let name = d.expr_name.text().to_string();
+            let message = if Checker::is_es2015_or_later_constructor_name(&name) {
+                tsox_core::diagnostics::messages_generated::
+                    X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_ES2015_OR_LATER
+            } else {
+                tsox_core::diagnostics::messages_generated::
+                    X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE
+            };
+            let file = self
+                .get_source_file_of_node(&d.expr_name)
+                .or_else(|| self.current_file.clone());
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                file,
+                d.expr_name.loc,
+                message,
+                vec![name],
+            ));
+            return self.error_type();
+        }
 
         if symbol.flags == tsox_frontend::ast::SymbolFlags::Alias {
             if d.expr_name.kind == SyntaxKind::Identifier {

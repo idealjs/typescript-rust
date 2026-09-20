@@ -92,11 +92,35 @@ impl Checker {
                         .text()
                         .trim_matches(['"', '\'', '`'])
                         .to_string();
-                    return self
-                        .resolve_module_file_symbol(&spec)
-                        .and_then(|module_sym| {
-                            self.resolve_import_alias_target_of_module(&module_sym)
-                        });
+                    let module_sym = self.resolve_module_file_symbol(&spec)?;
+                    // Go resolveExternalModule：目标文件无模块指示（脚本）
+                    // 报 TS2306（别名未被使用时由此路径上报），参数为解析后
+                    // 文件名
+                    let not_module_file = self
+                        .program
+                        .source_files()
+                        .iter()
+                        .find(|f| {
+                            f.external_module_indicator.is_none()
+                                && f.common_js_module_indicator.is_none()
+                                && module_sym.declarations.iter().any(|dd| Arc::ptr_eq(dd, &f.node))
+                        })
+                        .map(|f| f.file_name.clone());
+                    if let Some(file_name) = not_module_file
+                        && !self
+                            .diagnostics
+                            .get_all()
+                            .iter()
+                            .any(|dd| dd.code == 2306 && dd.loc == ext.expression.loc)
+                    {
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            ext.expression.loc,
+                            tsox_core::diagnostics::messages_generated::FILE_0_IS_NOT_A_MODULE,
+                            vec![file_name],
+                        ));
+                    }
+                    return self.resolve_import_alias_target_of_module(&module_sym);
                 }
                 self.resolve_qualified_symbol_traced(&d.module_reference).ok()
             }

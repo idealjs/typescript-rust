@@ -23,7 +23,17 @@ impl Binder {
         var_hoist_container: &Option<Arc<Node>>,
     ) {
         if let Some(container) = &self.container {
-            if container.kind == SyntaxKind::ModuleDeclaration {
+            // Go bindBlockScopedDeclaration：块作用域声明的目标由
+            // blockScopeContainer 决定（catch/嵌套块内 let/const 入块容器
+            // locals），仅 blockScopeContainer 即模块/文件容器时走
+            // declareModuleMember
+            let reroute_block_scoped = var_hoist_container.is_none()
+                && symbol.flags.contains(SymbolFlags::BlockScopedVariable)
+                && self
+                    .block_scope_container
+                    .as_ref()
+                    .is_some_and(|b| b.id() != container.id());
+            if container.kind == SyntaxKind::ModuleDeclaration && !reroute_block_scoped {
                 let has_export = self.module_member_is_exported(node);
 
                 let alias_no_local = has_export
