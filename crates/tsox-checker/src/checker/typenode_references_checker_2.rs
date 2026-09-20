@@ -12,6 +12,12 @@ impl Checker {
             _ => return self.error_type(),
         };
 
+        // Go resolveEntityName：missing（零宽）实体名直接返回 nil，
+        // 不进 2304/2749 补救链
+        if type_name.loc.pos() >= type_name.loc.end() {
+            return self.error_type();
+        }
+
         if type_name.kind == SyntaxKind::Identifier && type_name.text() == "intrinsic" {
             return self.error_type();
         }

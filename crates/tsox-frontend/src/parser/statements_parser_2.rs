@@ -222,7 +222,7 @@ impl Parser {
     /// Go parseBlock(ignoreMissingOpenBrace=true)：函数体等允许无 `{` 继续解析
     pub(crate) fn parse_block_ex(&mut self, ignore_missing_open_brace: bool) -> Arc<Node> {
         let pos = self.token_pos();
-        let open_brace_parsed = self.expect_with_advance(SyntaxKind::OpenBraceToken);
+        let open_brace_parsed = self.expect(SyntaxKind::OpenBraceToken);
         if !open_brace_parsed && !ignore_missing_open_brace {
             return Arc::new(Node::with_loc(
                 SyntaxKind::Block,

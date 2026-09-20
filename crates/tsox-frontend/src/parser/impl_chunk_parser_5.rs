@@ -86,7 +86,12 @@ impl Parser {
     pub(crate) fn next_token_is_identifier_on_same_line(&self) -> bool {
         let mut s = self.scanner.clone();
         s.scan();
-        !s.has_preceding_line_break() && is_identifier_or_keyword(s.token())
+        let token = s.token();
+        !s.has_preceding_line_break()
+            && !(token == SyntaxKind::YieldKeyword && self.yield_context)
+            && !(token == SyntaxKind::AwaitKeyword && self.await_context)
+            && !is_reserved_word_kind(token)
+            && (token == SyntaxKind::Identifier || is_keyword(token))
     }
 
     pub(crate) fn next_token_is_identifier_or_string_literal_on_same_line(&self) -> bool {

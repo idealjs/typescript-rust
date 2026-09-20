@@ -19,9 +19,16 @@ impl Parser {
                 self.look_ahead_class_member_start()
                     || (self.token == SyntaxKind::SemicolonToken && !in_error_recovery)
             }
-            ParsingContext::EnumMembers | ParsingContext::ObjectLiteralMembers => {
-                !self.is_list_terminator(context)
+            ParsingContext::EnumMembers => {
+                self.token == SyntaxKind::OpenBracketToken || self.is_literal_property_name()
             }
+            ParsingContext::ObjectLiteralMembers => match self.token {
+                SyntaxKind::OpenBracketToken
+                | SyntaxKind::AsteriskToken
+                | SyntaxKind::DotDotDotToken
+                | SyntaxKind::DotToken => true,
+                _ => self.is_literal_property_name(),
+            },
             ParsingContext::RestProperties => self.is_literal_property_name(),
             ParsingContext::ObjectBindingElements => {
                 self.token == SyntaxKind::OpenBracketToken

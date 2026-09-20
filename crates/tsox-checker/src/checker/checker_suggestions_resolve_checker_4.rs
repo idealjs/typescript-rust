@@ -41,12 +41,14 @@ impl Checker {
         if fns.first().is_none_or(|first| !Arc::ptr_eq(first, node)) {
             return;
         }
-        let bodied = fns
-            .iter()
-            .filter(|f| {
-                matches!(&f.data, tsox_frontend::ast::NodeData::FunctionDeclaration(d) if d.body.is_some())
-            })
-            .count();
+        // Go NodeIsPresent：零宽 body（parse 恢复产物）视为缺失
+        fn body_present(f: &Arc<Node>) -> bool {
+            matches!(&f.data, tsox_frontend::ast::NodeData::FunctionDeclaration(d) if d
+                .body
+                .as_ref()
+                .is_some_and(|b| b.loc.pos() < b.loc.end()))
+        }
+        let bodied = fns.iter().filter(|f| body_present(f)).count();
         let file = self.current_file.clone();
         if bodied >= 2 && !is_ambient {
             for f in &fns {
@@ -68,15 +70,12 @@ impl Checker {
         };
         let canonical = fns
             .iter()
-            .find(|f| {
-                matches!(&f.data, tsox_frontend::ast::NodeData::FunctionDeclaration(d) if d.body.is_some())
-            })
+            .find(|f| body_present(f))
             .or_else(|| fns.first());
         if let Some(canonical) = canonical {
             let canonical_ambient = is_ambient_decl(canonical);
             for f in &fns {
-                let has_body = matches!(&f.data, tsox_frontend::ast::NodeData::FunctionDeclaration(d) if d.body.is_some());
-                if !has_body && is_ambient_decl(f) != canonical_ambient {
+                if !body_present(f) && is_ambient_decl(f) != canonical_ambient {
                     if let tsox_frontend::ast::NodeData::FunctionDeclaration(d) = &f.data
                         && let Some(fname) = &d.name
                     {

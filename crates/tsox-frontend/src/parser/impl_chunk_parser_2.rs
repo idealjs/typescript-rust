@@ -52,29 +52,18 @@ impl Parser {
         self.parse_error_at_range(self.token_range(), message, args);
     }
 
-    pub(crate) fn expect(&mut self, expected: SyntaxKind) {
+    /// Go parseExpected：匹配则消费返回 true；不匹配报错返回 false，不消费
+    pub(crate) fn expect(&mut self, expected: SyntaxKind) -> bool {
         if self.token == expected {
             self.next_token();
+            true
         } else {
             self.parse_error_at_current_token(
                 tsox_core::diagnostics::X_0_EXPECTED,
                 &[token_to_string(expected)],
             );
+            false
         }
-    }
-
-    /// Go parseExpectedWithDiagnostic(shouldAdvance=true)：失败时报错并消费当前 token
-    pub(crate) fn expect_with_advance(&mut self, expected: SyntaxKind) -> bool {
-        if self.token == expected {
-            self.next_token();
-            return true;
-        }
-        self.parse_error_at_current_token(
-            tsox_core::diagnostics::X_0_EXPECTED,
-            &[token_to_string(expected)],
-        );
-        self.next_token();
-        false
     }
 
     pub(crate) fn expect_without_advancing(&mut self, expected: SyntaxKind) -> bool {
