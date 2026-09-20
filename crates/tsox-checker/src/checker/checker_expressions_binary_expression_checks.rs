@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker_expressions::*;
+use crate::checker::utilities_is_optional_symbol::is_literal_expression_of_object;
 
 impl Checker {
     pub fn check_binary_expression(&mut self, node: &Arc<Node>) {
@@ -280,6 +281,36 @@ impl Checker {
                     | ExclamationEqualsEqualsToken
             );
             if is_equality_op {
+                let in_js = self
+                    .current_file
+                    .as_ref()
+                    .is_some_and(|f| f.file_name.ends_with(".js") || f.file_name.ends_with(".jsx"));
+                if !in_js
+                    || matches!(
+                        data.operator_token.kind,
+                        EqualsEqualsEqualsToken | ExclamationEqualsEqualsToken
+                    )
+                {
+                    let object_literal_operand = is_literal_expression_of_object(&data.left)
+                        || is_literal_expression_of_object(&data.right);
+                    if object_literal_operand {
+                        let result = if matches!(
+                            data.operator_token.kind,
+                            EqualsEqualsToken | EqualsEqualsEqualsToken
+                        ) {
+                            "false"
+                        } else {
+                            "true"
+                        };
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            node.loc,
+                            THIS_CONDITION_WILL_ALWAYS_RETURN_0_SINCE_JAVASCRIPT_COMPARES_OBJECTS_BY_REFERENCE_NOT_VALUE,
+                            vec![result.to_string()],
+                        ));
+                    }
+                }
+
                 let left_type = self.get_type_of_node(&data.left);
                 let right_type = self.get_type_of_node(&data.right);
 
