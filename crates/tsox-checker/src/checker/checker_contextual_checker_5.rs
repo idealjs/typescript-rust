@@ -70,10 +70,56 @@ impl Checker {
             &declaration.data,
             tsox_frontend::ast::NodeData::VariableDeclaration(vd) if vd.exclamation_token.is_some()
         );
+        let ambient_context = |n: &Arc<Node>| -> bool {
+            let mut cur = Some(Arc::clone(n));
+            while let Some(c) = cur {
+                if c.has_syntactic_modifier(ModifierFlags::Ambient) {
+                    return true;
+                }
+                cur = c.parent();
+            }
+            false
+        };
+        let in_type_node = |n: &Arc<Node>| -> bool {
+            let mut cur = n.parent();
+            while let Some(a) = cur {
+                if matches!(
+                    a.kind,
+                    SyntaxKind::InterfaceDeclaration
+                        | SyntaxKind::TypeAliasDeclaration
+                        | SyntaxKind::TypeLiteral
+                ) {
+                    return true;
+                }
+                cur = a.parent();
+            }
+            false
+        };
+        let file_is_declaration = self
+            .current_file
+            .as_ref()
+            .is_some_and(|f| f.is_declaration_file);
+        let spread_destructuring_target = node.parent().is_some_and(|p| {
+            p.kind == SyntaxKind::SpreadElement
+                && p.parent().is_some_and(|lit| {
+                    lit.kind == SyntaxKind::ObjectLiteralExpression
+                        && lit.parent().is_some_and(|gp| match &gp.data {
+                            tsox_frontend::ast::NodeData::BinaryExpression(b) => {
+                                Arc::ptr_eq(&b.left, &lit)
+                            }
+                            _ => gp.kind == SyntaxKind::ForOfStatement,
+                        })
+                })
+        });
         if self
             .get_combined_modifier_flags(declaration)
             .contains(ModifierFlags::Ambient)
             || has_exclamation
+            || ambient_context(declaration)
+            || ambient_context(node)
+            || file_is_declaration
+            || in_type_node(node)
+            || spread_destructuring_target
         {
             return;
         }
