@@ -47,14 +47,14 @@ impl Checker {
             }
 
             let mut source_sig: Option<Arc<Signature>> = None;
-            if !check_mode.contains(SignatureCheckMode::Callback)
+            if !check_mode.intersects(SIGNATURE_CHECK_MODE_CALLBACK)
                 && !self.is_instantiated_generic_parameter(&source, i)
             {
                 let non_nullable = self.get_non_nullable_type_of(&source_type);
                 source_sig = self.get_single_call_signature(&non_nullable);
             }
             let mut target_sig: Option<Arc<Signature>> = None;
-            if !check_mode.contains(SignatureCheckMode::Callback)
+            if !check_mode.intersects(SIGNATURE_CHECK_MODE_CALLBACK)
                 && !self.is_instantiated_generic_parameter(&target, i)
             {
                 let non_nullable = self.get_non_nullable_type_of(&target_type);
@@ -90,7 +90,7 @@ impl Checker {
                     relation,
                 );
             } else {
-                if !check_mode.contains(SignatureCheckMode::Callback) && !strict_variance {
+                if !check_mode.intersects(SIGNATURE_CHECK_MODE_CALLBACK) && !strict_variance {
                     related = self.compare_types(
                         source_type.clone(),
                         target_type.clone(),

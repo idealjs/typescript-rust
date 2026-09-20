@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker_classes::*;
+use crate::checker::{RelationKind, SignatureCheckMode, SignatureKind};
 
 impl Checker {
     pub(crate) fn is_property_assigned_in_constructor(
@@ -149,53 +150,34 @@ impl Checker {
         overload: &Arc<Node>,
         implementation: &Arc<Node>,
     ) -> bool {
-        let Some((ov_params, ov_return)) = Self::function_like_params_and_return(overload)
-            .map(|(p, r)| (Arc::clone(p), r.cloned()))
-        else {
+        let (Some(impl_sig), Some(ov_sig)) = (
+            self.signature_of_declaration_node(implementation),
+            self.signature_of_declaration_node(overload),
+        ) else {
             return true;
         };
-        let Some((im_params, im_return)) = Self::function_like_params_and_return(implementation)
-            .map(|(p, r)| (Arc::clone(p), r.cloned()))
-        else {
-            return true;
-        };
-
-        let return_ok = match (ov_return, im_return) {
-            (Some(ovn), Some(imn)) => {
-                let ov_t = self.get_type_from_type_node(&ovn);
-                let im_t = self.get_type_from_type_node(&imn);
-                ov_t.flags.contains(TypeFlags::Void)
-                    || self.is_type_assignable_to(&ov_t, &im_t)
-                    || self.is_type_assignable_to(&im_t, &ov_t)
-            }
-            _ => true,
-        };
-        if !return_ok {
-            return false;
+        let erased_impl = self.get_erased_signature(&impl_sig);
+        let erased_ov = self.get_erased_signature(&ov_sig);
+        let source_ret = self
+            .get_return_type_of_signature(&erased_impl)
+            .unwrap_or_else(|| self.get_any_type());
+        let target_ret = self
+            .get_return_type_of_signature(&erased_ov)
+            .unwrap_or_else(|| self.get_any_type());
+        if target_ret.flags.contains(TypeFlags::Void)
+            || self.is_type_assignable_to(&target_ret, &source_ret)
+            || self.is_type_assignable_to(&source_ret, &target_ret)
+        {
+            return self
+                .compare_signatures_related(
+                    &erased_impl,
+                    &erased_ov,
+                    SignatureCheckMode::IgnoreReturnTypes,
+                    RelationKind::Assignable,
+                )
+                .is_true();
         }
-
-        let n = ov_params.len().min(im_params.len());
-        for i in 0..n {
-            let ov_tn = match &ov_params.nodes[i].data {
-                tsox_frontend::ast::NodeData::ParameterDeclaration(p) => p.type_node.as_ref(),
-                _ => None,
-            };
-            let im_tn = match &im_params.nodes[i].data {
-                tsox_frontend::ast::NodeData::ParameterDeclaration(p) => p.type_node.as_ref(),
-                _ => None,
-            };
-            let (Some(o), Some(m)) = (ov_tn, im_tn) else {
-                continue;
-            };
-            let ov_t = self.get_type_from_type_node(&o);
-            let im_t = self.get_type_from_type_node(&m);
-            if !self.is_type_assignable_to(&ov_t, &im_t)
-                && !self.is_type_assignable_to(&im_t, &ov_t)
-            {
-                return false;
-            }
-        }
-        true
+        false
     }
 
     pub(crate) fn check_class_member_overloads(&mut self, members: &NodeList) {
@@ -253,21 +235,69 @@ impl Checker {
                     let overload = Arc::clone(&members.nodes[i]);
                     if !self
                         .overload_signature_compatible_with_implementation(&overload, &impl_node)
-                        && let Some(name_node) =
-                            tsox_frontend::ast::utilities::get_name_of_declaration(&overload)
                     {
+                        // Go checkFunctionOrAccessorPropertyDeclarationImplementation：
+                        // 首个不兼容重载报 2394（构造子落在整个声明）并中止
                         let file = self.current_file.clone();
-                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                            file,
-                            name_node.loc,
+                        let mut diag = tsox_frontend::ast::Diagnostic::new(
+                            file.clone(),
+                            overload.loc,
                             tsox_core::diagnostics::messages_generated::
                                 THIS_OVERLOAD_SIGNATURE_IS_NOT_COMPATIBLE_WITH_ITS_IMPLEMENTATION_SIGNATURE,
                             Vec::new(),
+                        );
+                        diag.related_information.push(tsox_frontend::ast::Diagnostic::new(
+                            file,
+                            impl_node.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                THE_IMPLEMENTATION_SIGNATURE_IS_DECLARED_HERE,
+                            Vec::new(),
                         ));
+                        self.diagnostics.add(diag);
+                        break;
                     }
                 }
             }
         }
+    }
+
+    // Go getSignatureFromDeclaration：直接从声明构建签名（构造子挂类符号
+    // 的构造签名表按声明匹配）
+    fn signature_of_declaration_node(&mut self, node: &Arc<Node>) -> Option<Arc<Signature>> {
+        if node.kind == SyntaxKind::Constructor {
+            let class_node = node.parent()?;
+            let owner_symbol = self.program.symbol_map().symbol_of(&class_node).cloned()?;
+            let t = self.get_type_of_symbol(&owner_symbol);
+            let sigs = self.get_signatures_of_type(&t, SignatureKind::Construct);
+            return sigs.into_iter().find(|sig| {
+                sig.declaration
+                    .as_ref()
+                    .is_some_and(|d| Arc::ptr_eq(d, node))
+            });
+        }
+        let (parameters, type_node) = match &node.data {
+            tsox_frontend::ast::NodeData::FunctionDeclaration(d) => {
+                (&d.parameters, d.type_node.as_ref())
+            }
+            tsox_frontend::ast::NodeData::MethodDeclaration(d) => {
+                (&d.parameters, d.type_node.as_ref())
+            }
+            tsox_frontend::ast::NodeData::MethodSignatureDeclaration(d) => {
+                (&d.parameters, d.type_node.as_ref())
+            }
+            _ => return None,
+        };
+        let return_type = match type_node {
+            Some(tn) => self.get_type_from_type_node(tn),
+            None => self.get_any_type(),
+        };
+        Some(self.build_signature_from_function_like_type_node(
+            parameters,
+            return_type,
+            false,
+            None,
+            Some(Arc::clone(node)),
+        ))
     }
 
     pub(crate) fn report_implementation_expected_error(&mut self, members: &NodeList, idx: usize) {
