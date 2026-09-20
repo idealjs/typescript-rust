@@ -129,6 +129,9 @@ impl Checker {
 
         let mut prop_pairs: Vec<(String, Arc<Type>, Option<Arc<Node>>)> = Vec::new();
         let mut fell_back_to_any = false;
+        let mut spread_acc: Option<Arc<Type>> = None;
+        let mut spread_error = false;
+        let literal_symbol = self.program.symbol_map().symbol_of(node).map(Arc::clone);
         for prop in properties.iter() {
             match &prop.data {
                 NodeData::PropertyAssignment(data) => {
@@ -178,9 +181,29 @@ impl Checker {
                     };
                     prop_pairs.push((name, t, Some(Arc::clone(prop))));
                 }
-                NodeData::SpreadAssignment(_) => {
-                    fell_back_to_any = true;
-                    break;
+                NodeData::SpreadAssignment(data) => {
+                    if !self.fold_object_literal_spread(
+                        &mut prop_pairs,
+                        &mut spread_acc,
+                        &data.expression,
+                        prop,
+                        literal_symbol.clone(),
+                    ) {
+                        spread_error = true;
+                        break;
+                    }
+                }
+                NodeData::SpreadElement(data) => {
+                    if !self.fold_object_literal_spread(
+                        &mut prop_pairs,
+                        &mut spread_acc,
+                        &data.expression,
+                        prop,
+                        literal_symbol.clone(),
+                    ) {
+                        spread_error = true;
+                        break;
+                    }
                 }
                 _ => {
                     fell_back_to_any = true;
@@ -188,46 +211,28 @@ impl Checker {
                 }
             }
         }
+        if spread_error {
+            return self.error_type();
+        }
+        if let Some(spread) = spread_acc {
+            if !prop_pairs.is_empty() {
+                let segment =
+                    self.object_literal_type_from_pairs(prop_pairs, literal_symbol.clone());
+                return self.get_spread_type(
+                    &spread,
+                    &segment,
+                    literal_symbol,
+                    ObjectFlags::None,
+                    false,
+                );
+            }
+            return spread;
+        }
         if fell_back_to_any {
             return self.get_any_type();
         }
 
-        let mut members = SymbolTable::new();
-        let mut props: Vec<Arc<Symbol>> = Vec::with_capacity(prop_pairs.len());
-        for (name, t, decl) in prop_pairs {
-            let mut sym = Symbol::new(SymbolFlags::Property, name.clone());
-            if let Some(d) = decl {
-                sym.declarations.push(d);
-            }
-            let symbol = Arc::new(sym);
-            members.insert(name, Arc::clone(&symbol));
-            self.value_symbol_links.insert(
-                &symbol,
-                ValueSymbolLinks {
-                    resolved_type: Some(t),
-                    ..Default::default()
-                },
-            );
-            props.push(symbol);
-        }
-        // Go checkObjectLiteral createObjectLiteralType：newAnonymousType(node.Symbol())
-        // 挂 binder 对象字面量符号（SymbolFlagsObjectLiteral），索引签名推断依赖它
-        let literal_symbol = self.program.symbol_map().symbol_of(node).map(Arc::clone);
-        Arc::new(Type {
-            flags: TypeFlags::Object,
-            object_flags: ObjectFlags::Anonymous | ObjectFlags::ObjectLiteral,
-            id: crate::checker::types::next_type_id(),
-            symbol: literal_symbol,
-            alias: None,
-            data: TypeData::Object(ObjectTypeData {
-                structured: StructuredTypeData {
-                    members,
-                    properties: props,
-                    ..Default::default()
-                },
-                ..Default::default()
-            }),
-        })
+        self.object_literal_type_from_pairs(prop_pairs, literal_symbol)
     }
 
     pub(crate) fn get_excess_property_name(
