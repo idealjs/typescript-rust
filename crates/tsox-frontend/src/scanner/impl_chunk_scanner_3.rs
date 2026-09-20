@@ -52,8 +52,8 @@ impl Scanner {
         self.token_end = self.pos;
         if has_escape {
             cooked.push_str(&self.text[segment_start..self.pos]);
-            self.identifier_value = Some(cooked);
-            self.token = SyntaxKind::Identifier;
+            self.identifier_value = Some(cooked.clone());
+            self.token = string_to_keyword(&cooked).unwrap_or(SyntaxKind::Identifier);
         } else {
             let text = &self.text[start..self.pos];
             self.token = string_to_keyword(text).unwrap_or(SyntaxKind::Identifier);
@@ -124,6 +124,7 @@ impl Scanner {
                     }
                 }
             }
+            self.token_flags |= TOKEN_FLAGS_UNICODE_ESCAPE;
         }
         let code = u32::from_str_radix(&digits, 16).ok()?;
         char::from_u32(code)

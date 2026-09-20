@@ -195,6 +195,13 @@ impl Checker {
             return;
         }
         if self.function_scope_count == 0 && self.arrow_function_scope_count == 0 {
+            if self
+                .current_file
+                .as_ref()
+                .is_some_and(|f| f.has_parse_diagnostics)
+            {
+                return;
+            }
             let file = self.current_file.clone();
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,
