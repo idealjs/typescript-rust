@@ -75,13 +75,19 @@ impl Checker {
                     }
                     expanded_leaves.push(Arc::clone(m));
                 }
+                // Go resolveUnionTypeMembers：Function 接口成分贡献 unknown 签名
                 let all_callable = !expanded_leaves.is_empty()
                     && expanded_leaves.iter().all(|m| {
                         m.as_structured()
                             .is_some_and(|s| !s.call_signatures().is_empty())
+                            || self.is_global_function_type(m)
                     });
                 if all_callable {
                     for m in &expanded_leaves {
+                        if self.is_global_function_type(m) {
+                            union_signatures.push(self.untyped_call_signature());
+                            continue;
+                        }
                         if let Some(s) = m.as_structured() {
                             union_signatures.extend(s.call_signatures().iter().cloned());
                         }
@@ -93,7 +99,16 @@ impl Checker {
                 }
             }
         } else if let Some(structured) = callee_type.as_structured() {
-            if is_new {
+            // Go isUntypedFunctionCall：Function 类型可赋值时按 untyped 调用
+            if !is_new
+                && structured.call_signatures().is_empty()
+                && structured.construct_signatures().is_empty()
+                && self.is_global_function_type(callee_type)
+            {
+                let any_sig = self.untyped_call_signature();
+                union_signatures.push(any_sig);
+                &union_signatures
+            } else if is_new {
                 structured.construct_signatures()
             } else {
                 structured.call_signatures()
@@ -170,5 +185,28 @@ impl Checker {
         }
         self.report_invocation_error(callee_expr, callee_type, is_new);
         return;
+    }
+}
+
+impl Checker {
+    // Go unknownSignature：无参任意返回的合成调用签名
+    fn untyped_call_signature(&mut self) -> Arc<Signature> {
+        self.build_signature_from_function_like_type_node(
+            &Arc::new(NodeList::default()),
+            self.get_any_type(),
+            false,
+            None,
+            None,
+        )
+    }
+
+    // Go t == globalFunctionType 判定
+    fn is_global_function_type(&self, t: &Arc<Type>) -> bool {
+        t.flags.contains(TypeFlags::Object)
+            && self
+                .globals
+                .get("Function")
+                .zip(t.symbol.as_ref())
+                .is_some_and(|(function_sym, sym)| Arc::ptr_eq(function_sym, sym))
     }
 }

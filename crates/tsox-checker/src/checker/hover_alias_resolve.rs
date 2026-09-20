@@ -75,8 +75,19 @@ impl Checker {
                         self.resolve_module_spec_from(&file_module, &text)?
                     }
                     // 无 from 的 export {X}：目标是本模块的本地声明（members），
-                    // 不得回到 exports 表（会命中别名自身）
+                    // 不得回到 exports 表（会命中别名自身）；import 绑定在
+                    // 文件 locals（Go resolveEntityName 的容器链）
                     None => {
+                        if let Some(sf) = file_module
+                            .declarations
+                            .iter()
+                            .find(|d| d.kind == SyntaxKind::SourceFile)
+                            && let Some(locals) =
+                                self.program.symbol_map().locals.get(&sf.id())
+                            && let Some(hit) = locals.get(&name)
+                        {
+                            return Some(Arc::clone(hit));
+                        }
                         return file_module.members.get(&name).cloned();
                     }
                 };

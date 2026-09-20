@@ -192,7 +192,15 @@ impl Checker {
         {
             if let Some(links) = self.value_symbol_links.get(symbol) {
                 if let Some(ref t) = links.resolved_type {
-                    if crate::checker::utilities::is_type_error(t) {
+                    // Go getTypeOfVariableOrParameterOrProperty：缓存型（含
+                    // errorType）直接返回；环仅在重入（push 失败或窗口内再入）
+                    // 时上报，合法的非法注解（如 namespace 作类型）不误报
+                    if crate::checker::utilities::is_type_error(t)
+                        && self.is_resolving(
+                            Arc::as_ptr(symbol) as *const Symbol,
+                            TypeResolutionProperty::Type,
+                        )
+                    {
                         return self.report_circularity_error(symbol);
                     }
                     return Arc::clone(t);

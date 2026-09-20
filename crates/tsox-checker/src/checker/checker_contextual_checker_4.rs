@@ -99,42 +99,19 @@ impl Checker {
         };
         // 类节点 pos 含装饰器：用法在该类计算名/装饰器内时不算声明先于使用（Go 类分支）
         if !class_decorator_or_computed && decl_name_pos <= node.pos() {
-            let inside_own_initializer = {
-                let mut cur = declaration.parent();
-                let mut found = false;
-                while let Some(a) = cur {
-                    if matches!(&a.data, tsox_frontend::ast::NodeData::VariableDeclaration(vdd)
-                        if vdd.initializer.as_ref().is_some_and(|init| init.loc.contains(node.loc.pos())))
-                    {
-                        found = true;
-                        break;
-                    }
-                    if matches!(
-                        a.kind,
-                        SyntaxKind::BindingElement
-                            | SyntaxKind::ArrayBindingPattern
-                            | SyntaxKind::ObjectBindingPattern
-                    ) {
-                        cur = a.parent();
-                        continue;
-                    }
-                    break;
+            let immediately_used = match declaration.kind {
+                SyntaxKind::VariableDeclaration => {
+                    self.is_immediately_used_in_initializer_of(&declaration, node)
                 }
-                found
+                SyntaxKind::BindingElement => match ancestor_of_kind(node, SyntaxKind::BindingElement)
+                {
+                    Some(err) => Arc::ptr_eq(&err, &declaration),
+                    None => ancestor_of_kind(&declaration, SyntaxKind::VariableDeclaration)
+                        .is_some_and(|vd| self.is_immediately_used_in_initializer_of(&vd, node)),
+                },
+                _ => false,
             };
-            // Go isImmediatelyUsedInInitializerOfBlockScopedVariable 尾分支：
-            // for-in/of 声明的用法落在语句表达式内视同初始化式
-            let inside_for_in_of_expression = declaration
-                .parent()
-                .as_ref()
-                .and_then(|l| l.parent())
-                .is_some_and(|stmt| {
-                    matches!(stmt.kind, SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement)
-                        && stmt
-                            .expression()
-                            .is_some_and(|e| e.loc.contains(node.loc.pos()))
-                });
-            if !inside_own_initializer && !inside_for_in_of_expression {
+            if !immediately_used {
                 return;
             }
         }
@@ -172,4 +149,68 @@ impl Checker {
             ));
         }
     }
+
+    fn is_immediately_used_in_initializer_of(
+        &self,
+        var_decl: &Arc<Node>,
+        usage: &Arc<Node>,
+    ) -> bool {
+        let Some(list) = var_decl.parent() else {
+            return false;
+        };
+        let Some(stmt) = list.parent() else {
+            return false;
+        };
+        if matches!(
+            stmt.kind,
+            SyntaxKind::VariableStatement | SyntaxKind::ForStatement | SyntaxKind::ForOfStatement
+        ) && self.is_same_scope_descendent_of(usage, var_decl)
+        {
+            return true;
+        }
+        matches!(stmt.kind, SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement)
+            && stmt
+                .expression()
+                .is_some_and(|e| self.is_same_scope_descendent_of(usage, &e))
+    }
+
+    fn is_same_scope_descendent_of(&self, initial: &Arc<Node>, target: &Arc<Node>) -> bool {
+        let mut cur = Some(Arc::clone(initial));
+        while let Some(n) = cur {
+            if Arc::ptr_eq(&n, target) {
+                return true;
+            }
+            if tsox_frontend::ast::is_function_like_kind(n.kind)
+                && (is_async_or_generator_function(&n)
+                    || !crate::checker::checker_prop_access_checker_4::is_immediately_invoked(&n))
+            {
+                return false;
+            }
+            cur = n.parent();
+        }
+        false
+    }
+}
+
+fn is_async_or_generator_function(n: &Arc<Node>) -> bool {
+    let (modifiers, asterisk) = match &n.data {
+        tsox_frontend::ast::NodeData::FunctionExpression(d) => (&d.modifiers, &d.asterisk_token),
+        tsox_frontend::ast::NodeData::ArrowFunction(d) => (&d.modifiers, &None),
+        _ => return false,
+    };
+    asterisk.is_some()
+        || modifiers
+            .as_ref()
+            .is_some_and(|m| m.modifier_flags.contains(ModifierFlags::Async))
+}
+
+fn ancestor_of_kind(start: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> {
+    let mut cur = Some(Arc::clone(start));
+    while let Some(n) = cur {
+        if n.kind == kind {
+            return Some(n);
+        }
+        cur = n.parent();
+    }
+    None
 }

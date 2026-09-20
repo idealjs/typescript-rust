@@ -178,6 +178,7 @@ impl Checker {
             }
 
             self.check_binding_pattern_computed_names(&data.name);
+            self.check_binding_pattern_element_initializers(&data.name);
 
             if data.name.kind == SyntaxKind::ObjectBindingPattern
                 && self.in_ctor_body_stack.last() == Some(&true)
@@ -442,6 +443,27 @@ impl Checker {
                 SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
             ) {
                 self.check_binding_pattern_element_types(&data.name);
+            }
+        }
+    }
+
+    pub(crate) fn check_binding_pattern_element_initializers(&mut self, pattern: &Arc<Node>) {
+        let tsox_frontend::ast::NodeData::BindingPattern(bp) = &pattern.data else {
+            return;
+        };
+        for element in bp.elements.iter() {
+            if let tsox_frontend::ast::NodeData::BindingElement(be) = &element.data {
+                if let Some(default) = &be.initializer {
+                    self.check_expression(default);
+                }
+                if let Some(inner) = &be.name
+                    && matches!(
+                        inner.kind,
+                        SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+                    )
+                {
+                    self.check_binding_pattern_element_initializers(inner);
+                }
             }
         }
     }

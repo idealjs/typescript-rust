@@ -133,6 +133,21 @@ impl Checker {
             }
         }
 
+        // Go checkModuleDeclaration：identifier 名且用 module 关键字报 TS1540
+        if let tsox_frontend::ast::NodeData::ModuleDeclaration(data) = &node.data
+            && data.name.kind == SyntaxKind::Identifier
+            && data.keyword == SyntaxKind::ModuleKeyword
+        {
+            let file = self.current_file.clone();
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                file,
+                data.name.loc,
+                tsox_core::diagnostics::messages_generated::
+                    A_NAMESPACE_DECLARATION_SHOULD_NOT_BE_DECLARED_USING_THE_MODULE_KEYWORD_PLEASE_USE_THE_NAMESPACE_KEYWORD_INSTEAD,
+                vec![],
+            ));
+        }
+
         if let tsox_frontend::ast::NodeData::ModuleDeclaration(data) = &node.data
             && data.name.kind == SyntaxKind::StringLiteral
             && self.current_file.as_ref().is_some_and(|f| {
@@ -141,7 +156,8 @@ impl Checker {
         {
             let module_name = data.name.text().trim_matches(['"', '\'']).to_string();
             let resolvable = self.resolve_module_file_symbol(&module_name).is_some();
-            if !resolvable {
+            let container_ambient = self.augmentation_container_is_ambient(node);
+            if !resolvable && !container_ambient {
                 let file = self.current_file.clone();
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                         file,
@@ -206,6 +222,23 @@ impl Checker {
         self.pop_scope();
         if is_ambient {
             self.ambient_context_depth -= 1;
+        }
+    }
+
+    fn augmentation_container_is_ambient(&self, node: &Arc<Node>) -> bool {
+        let file_is_declaration = self
+            .current_file
+            .as_ref()
+            .is_some_and(|f| f.is_declaration_file);
+        match node.parent() {
+            Some(p) if p.kind == SyntaxKind::ModuleBlock => {
+                p.parent().is_some_and(|outer| {
+                    outer.has_syntactic_modifier(ModifierFlags::Ambient)
+                        || self.ambient_context_depth > 0
+                        || file_is_declaration
+                })
+            }
+            _ => file_is_declaration,
         }
     }
 }

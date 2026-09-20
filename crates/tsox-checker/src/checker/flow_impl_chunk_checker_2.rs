@@ -13,7 +13,7 @@ impl Checker {
         query: &mut FlowQuery,
     ) -> Arc<Type> {
         if flow.flags.contains(FlowFlags::UNREACHABLE) {
-            return self.never_type();
+            return self.convert_auto_to_any(declared);
         }
 
         if flow.flags.contains(FlowFlags::START) {
@@ -212,5 +212,16 @@ impl Checker {
             return Vec::new();
         }
         vec![Arc::clone(type_)]
+    }
+    pub(crate) fn convert_auto_to_any(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        if Arc::ptr_eq(t, &self.auto_type()) {
+            return self.get_any_type();
+        }
+        if let Some(auto_arr) = self.auto_array_type.get()
+            && Arc::ptr_eq(t, auto_arr)
+        {
+            return self.create_array_type(self.get_any_type());
+        }
+        Arc::clone(t)
     }
 }

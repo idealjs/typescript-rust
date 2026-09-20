@@ -87,24 +87,15 @@ impl Checker {
         }
 
         let sym_map = self.program.symbol_map();
-        let mut entries: Vec<(Option<Arc<Symbol>>, String, Option<Arc<Node>>)> = Vec::new();
+        let mut entries: Vec<(Option<Arc<Symbol>>, Arc<Node>)> = Vec::new();
         for decl in symbol.declarations.iter() {
             if let NodeData::EnumDeclaration(data) = &decl.data {
                 for member_node in data.members.iter() {
-                    let NodeData::EnumMember(member) = &member_node.data else {
+                    if !matches!(&member_node.data, NodeData::EnumMember(_)) {
                         continue;
-                    };
-                    let member_name = match &member.name.data {
-                        NodeData::ComputedPropertyName(cd) => {
-                            crate::binder::symbols_binder_4::computed_member_literal_name(
-                                &cd.expression,
-                            )
-                            .unwrap_or_default()
-                        }
-                        _ => member.name.text().to_string(),
-                    };
+                    }
                     let member_sym = sym_map.symbol_of(member_node).map(Arc::clone);
-                    entries.push((member_sym, member_name, member.initializer.clone()));
+                    entries.push((member_sym, Arc::clone(member_node)));
                 }
             }
         }
@@ -113,23 +104,28 @@ impl Checker {
         } else {
             let mut member_types: Vec<Arc<Type>> = Vec::new();
             let mut next_value: Option<f64> = Some(0.0);
-            for (member_sym, member_name, initializer) in &entries {
+            for (member_sym, member_node) in &entries {
+                let initializer = match &member_node.data {
+                    NodeData::EnumMember(m) => m.initializer.as_ref(),
+                    _ => None,
+                };
                 let base = match initializer {
-                    Some(init) => {
-                        let t = self.get_type_of_node(init);
-
-                        if t.flags.contains(TypeFlags::NumberLiteral) {
-                            if let TypeData::Literal(LiteralTypeData {
-                                value: LiteralValue::Number(n),
-                                ..
-                            }) = &t.data
-                            {
+                    Some(_) => {
+                        let value = self.get_enum_member_value(member_node).value;
+                        match value {
+                            Some(tsox_frontend::evaluator::EvalValue::Number(n)) => {
                                 next_value = Some(n.0 + 1.0);
+                                self.get_number_literal_type(n)
                             }
-                        } else if t.flags.contains(TypeFlags::StringLiteral) {
-                            next_value = None;
+                            Some(tsox_frontend::evaluator::EvalValue::String(s)) => {
+                                next_value = None;
+                                self.get_string_literal_type(&s)
+                            }
+                            _ => {
+                                next_value = None;
+                                self.get_any_type()
+                            }
                         }
-                        t
                     }
                     None => match next_value {
                         Some(v) => {
@@ -195,7 +191,6 @@ impl Checker {
                     }
                     base
                 };
-                let _ = member_name;
                 member_types.push(member_type);
             }
             match member_types.len() {

@@ -5,7 +5,7 @@ use crate::binder::symbols::*;
 impl Binder {
     pub(crate) fn get_declaration_name(&self, node: &Arc<Node>) -> String {
         match &node.data {
-            NodeData::VariableDeclaration(data) => self.node_text(&data.name),
+            NodeData::VariableDeclaration(data) => self.binding_declaration_name(&data.name),
             NodeData::VariableStatement(_) => String::new(),
             NodeData::FunctionDeclaration(data) => data
                 .name
@@ -136,6 +136,21 @@ impl Binder {
             }
             _ => String::new(),
         }
+    }
+
+    // Go getDeclarationName：绑定模式名取源文本（[A, V] 等），同名模式
+    // 才会合并，空名坍缩会误报导出重复
+    fn binding_declaration_name(&self, name: &Arc<Node>) -> String {
+        if matches!(
+            name.kind,
+            SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+        ) && let Some(sf) = self.current_source_file.as_ref()
+            && name.loc.end() <= sf.text.len()
+            && name.loc.pos() <= name.loc.end()
+        {
+            return sf.text[name.loc.pos()..name.loc.end()].to_string();
+        }
+        self.node_text(name)
     }
 
     pub(crate) fn node_text(&self, node: &Arc<Node>) -> String {

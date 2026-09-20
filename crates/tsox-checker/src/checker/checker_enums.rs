@@ -173,10 +173,12 @@ impl Checker {
             },
             _ => return EvalResult::none(),
         };
+        let mut entity_fn =
+            |expr: &Arc<Node>, loc: Option<&Arc<Node>>| self.evaluate_entity(expr, loc);
         let result = tsox_frontend::evaluator::evaluate_expression(
             &initializer,
             Some(member),
-            noop_entity_fn,
+            &mut entity_fn,
         );
         let (is_const_enum, ambient) = self.enum_member_diagnostics_context(member);
         match &result.value {

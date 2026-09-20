@@ -268,15 +268,4 @@ impl Checker {
             .get(name)
             .is_some_and(|s| s.flags.intersects(type_meaning))
     }
-
-    pub(crate) fn namespace_usable_as_value(&mut self, namespace: &Arc<Symbol>) -> bool {
-        let state_instantiated = namespace
-            .declarations
-            .iter()
-            .filter(|d| d.kind == SyntaxKind::ModuleDeclaration)
-            .any(|d| {
-                module_is_instantiated(d, self.compiler_options.should_preserve_const_enums())
-            });
-        state_instantiated || self.namespace_has_value_side(namespace)
-    }
 }

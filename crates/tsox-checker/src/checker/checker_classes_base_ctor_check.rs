@@ -26,9 +26,9 @@ impl Checker {
         } else {
             Arc::clone(&value_type)
         };
-        let has_construct_signatures = signatures_in
-            .as_structured()
-            .is_some_and(|s| !s.construct_signatures().is_empty());
+        let has_construct_signatures = !self
+            .get_signatures_of_type(&signatures_in, SignatureKind::Construct)
+            .is_empty();
         if has_construct_signatures {
             return;
         }
@@ -132,6 +132,64 @@ impl Checker {
                     A_MIXIN_CLASS_MUST_HAVE_A_CONSTRUCTOR_WITH_A_SINGLE_REST_PARAMETER_OF_TYPE_ANY,
                 vec![],
             ));
+        }
+    }
+
+    // Go getDefaultConstructSignatures：无自有构造器时从基构造类型继承构造
+    // 签名（类型变量经约束解析，交集聚合），返回类型改写为本类实例类型
+    pub(crate) fn inherit_base_constructor_signatures(
+        &mut self,
+        class_node: &Arc<Node>,
+        instance_type: &Arc<Type>,
+        out: &mut Vec<Arc<Signature>>,
+    ) {
+        use crate::checker::checker_classes_ctor_super_calls::{
+            class_extends_heritage_element, expression_with_type_arguments_expression,
+        };
+        use crate::checker::types::Signature;
+        use std::sync::OnceLock;
+        let Some(heritage_element) = class_extends_heritage_element(class_node) else {
+            return;
+        };
+        let expr = expression_with_type_arguments_expression(&heritage_element);
+        if expr.kind == SyntaxKind::NullKeyword {
+            return;
+        }
+        let value_type = self.get_type_of_node(&expr);
+        if value_type.flags.contains(TypeFlags::Any) || self.is_error_type(&value_type) {
+            return;
+        }
+        let base_type = if value_type.is_type_parameter() {
+            self.get_constraint_of_type_parameter(&value_type)
+                .unwrap_or_else(|| Arc::clone(&value_type))
+        } else {
+            Arc::clone(&value_type)
+        };
+        let derived_is_abstract = class_node.has_syntactic_modifier(ModifierFlags::Abstract);
+        for sig in self.get_signatures_of_type(&base_type, SignatureKind::Construct) {
+            let mut flags = sig.flags;
+            if derived_is_abstract {
+                flags |= SignatureFlags::Abstract;
+            } else {
+                flags.remove(SignatureFlags::Abstract);
+            }
+            let inherited = Signature {
+                id: sig.id,
+                flags,
+                min_argument_count: sig.min_argument_count,
+                resolved_min_argument_count: sig.resolved_min_argument_count,
+                declaration: sig.declaration.clone(),
+                type_parameters: sig.type_parameters.clone(),
+                parameters: sig.parameters.clone(),
+                this_parameter: sig.this_parameter.clone(),
+                resolved_return_type: OnceLock::from(Arc::clone(instance_type)),
+                resolved_type_predicate: sig.resolved_type_predicate.clone(),
+                target: Some(Arc::clone(&sig)),
+                mapper: sig.mapper.clone(),
+                isolated_signature_type: OnceLock::new(),
+                instantiated_parameter_types: sig.instantiated_parameter_types.clone(),
+            };
+            out.push(Arc::new(inherited));
         }
     }
 }

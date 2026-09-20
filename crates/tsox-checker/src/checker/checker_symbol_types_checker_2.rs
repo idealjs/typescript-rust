@@ -13,6 +13,41 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
     ) -> Option<Arc<Type>> {
+        // Go getTypeOfVariableOrParameterOrPropertyWorker：变量类符号类型解析
+        // 进 type resolution 栈，同符号重入即环（reportCircularityError）
+        let uses_frame = symbol.declarations.iter().any(|d| {
+            matches!(
+                d.kind,
+                SyntaxKind::Parameter
+                    | SyntaxKind::PropertyDeclaration
+                    | SyntaxKind::PropertySignature
+                    | SyntaxKind::VariableDeclaration
+                    | SyntaxKind::BindingElement
+                    | SyntaxKind::ExportAssignment
+                    | SyntaxKind::EnumMember
+                    | SyntaxKind::JsxAttribute
+            )
+        });
+        if !uses_frame {
+            return self.resolve_symbol_declared_type_on_demand_inner(symbol);
+        }
+        if !self.push_type_resolution(
+            Arc::as_ptr(symbol) as *const Symbol,
+            crate::checker::TypeResolutionProperty::Type,
+        ) {
+            return Some(self.report_circularity_error(symbol));
+        }
+        let result = self.resolve_symbol_declared_type_on_demand_inner(symbol);
+        if !self.pop_type_resolution() {
+            return Some(self.report_circularity_error(symbol));
+        }
+        result
+    }
+
+    fn resolve_symbol_declared_type_on_demand_inner(
+        &mut self,
+        symbol: &Arc<Symbol>,
+    ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
         // 合并符号（UMD 全局 export as namespace + declare global 变量）声明
         // 列表混有非变量声明：优先取变量/属性/参数类声明

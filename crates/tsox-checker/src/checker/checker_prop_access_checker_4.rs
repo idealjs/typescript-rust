@@ -465,7 +465,7 @@ fn is_property_initializer(property: &Arc<Node>, candidate: &Arc<Node>) -> bool 
 }
 
 // Go GetImmediatelyInvokedFunctionExpression：函数体经括号包裹后紧跟调用视为 IIFE
-fn is_immediately_invoked(func: &Arc<Node>) -> bool {
+pub(crate) fn is_immediately_invoked(func: &Arc<Node>) -> bool {
     let mut wrapper = Arc::clone(func);
     while let Some(p) = wrapper.parent()
         && p.kind == SyntaxKind::ParenthesizedExpression

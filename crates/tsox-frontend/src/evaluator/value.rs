@@ -3,6 +3,8 @@ use std::sync::Arc;
 use tsox_core::jsnum::Number;
 use tsox_core::jsnum::PseudoBigInt;
 
+pub type EvaluateEntity<'a> = &'a mut dyn FnMut(&Arc<Node>, Option<&Arc<Node>>) -> EvalResult;
+
 #[derive(Clone, Debug, Default)]
 pub struct EvalResult {
     pub value: Option<EvalValue>,
@@ -70,4 +72,3 @@ impl EvalValue {
     }
 }
 
-pub type EvaluateEntity = fn(&Arc<Node>, Option<&Arc<Node>>) -> EvalResult;

@@ -176,17 +176,46 @@ impl Checker {
             .iter()
             .find(|d| d.kind == SyntaxKind::ExportSpecifier)
         {
+            let no_from = decl.parent().is_some_and(|clause| {
+                clause.parent().is_some_and(|export_decl| {
+                    !matches!(
+                        &export_decl.data,
+                        NodeData::ExportDeclaration(d) if d.module_specifier.is_some()
+                    )
+                })
+            });
+            let target_name = if no_from {
+                match &decl.data {
+                    NodeData::ExportSpecifier(es) => es
+                        .property_name
+                        .as_ref()
+                        .unwrap_or(&es.name)
+                        .text()
+                        .trim_matches(['"', '\'', '`'])
+                        .to_string(),
+                    _ => symbol.name.clone(),
+                }
+            } else {
+                symbol.name.clone()
+            };
             let mut cur = Arc::clone(decl);
             for _ in 0..6 {
                 let Some(parent) = cur.parent() else { break };
                 if parent.kind == SyntaxKind::SourceFile {
                     if let Some(locals) = self.program.symbol_map().locals.get(&parent.id())
-                        && let Some(target) = locals.get(&symbol.name).cloned()
+                        && let Some(target) = locals.get(&target_name).cloned()
                     {
                         return Some(target);
                     }
                     if let Some(sf_sym) = self.program.symbol_map().symbol_of(&parent)
-                        && let Some(target) = sf_sym.exports.get(&symbol.name).cloned()
+                        && let Some(target) = sf_sym.exports.get(&target_name).cloned()
+                        && !(no_from && Arc::ptr_eq(&target, &symbol))
+                    {
+                        return Some(target);
+                    }
+                    if no_from
+                        && let Some(sf_sym) = self.program.symbol_map().symbol_of(&parent)
+                        && let Some(target) = sf_sym.members.get(&target_name).cloned()
                     {
                         return Some(target);
                     }
