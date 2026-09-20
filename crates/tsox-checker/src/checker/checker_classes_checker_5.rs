@@ -149,17 +149,25 @@ impl Checker {
                                 &sym,
                                 &name,
                             );
-                            if sym.flags == SymbolFlags::Interface {
-                                let name = ewa.expression.text().to_string();
-                                let file = self.current_file.clone();
-                                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                                    file,
-                                    ewa.expression.loc,
-                                    tsox_core::diagnostics::messages_generated::
-                                        CANNOT_EXTEND_AN_INTERFACE_0_DID_YOU_MEAN_IMPLEMENTS,
-                                    vec![name],
-                                ));
-                            }
+                        }
+                    }
+                    if matches!(
+                        ewa.expression.kind,
+                        SyntaxKind::Identifier | SyntaxKind::PropertyAccessExpression
+                    ) {
+                        if let Some(sym) = self
+                            .resolve_entity_name_class_symbol(&ewa.expression)
+                            .filter(|s| s.flags == SymbolFlags::Interface)
+                        {
+                            let name = entity_name_text(&ewa.expression);
+                            let file = self.current_file.clone();
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                file,
+                                ewa.expression.loc,
+                                tsox_core::diagnostics::messages_generated::
+                                    CANNOT_EXTEND_AN_INTERFACE_0_DID_YOU_MEAN_IMPLEMENTS,
+                                vec![name],
+                            ));
                         }
                     }
 
@@ -639,5 +647,15 @@ impl Checker {
     #[allow(dead_code)]
     pub(crate) fn build_class_instance_type(&mut self, members: &Arc<NodeList>) -> Arc<Type> {
         self.build_interface_type_from_members(members)
+    }
+}
+
+fn entity_name_text(node: &Arc<Node>) -> String {
+    match &node.data {
+        tsox_frontend::ast::NodeData::Identifier(id) => id.text.clone(),
+        tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) => {
+            format!("{}.{}", entity_name_text(&pa.expression), pa.name.text())
+        }
+        _ => String::new(),
     }
 }
