@@ -132,7 +132,7 @@ impl Checker {
             .get_combined_modifier_flags(&declaration)
             .contains(ModifierFlags::Ambient)
             || has_exclamation
-            || ambient_context(declaration)
+            || ambient_context(&declaration)
             || ambient_context(node)
             || file_is_declaration
             || in_type_node(node)

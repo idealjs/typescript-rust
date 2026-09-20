@@ -33,7 +33,7 @@ impl Checker {
     ) -> bool {
         let provided = Self::explicit_type_argument_count(node);
 
-        let (min, max) = if is_new {
+        let expected = if is_new {
             self.get_return_type_of_signature(&sig)
                 .and_then(|rt| rt.symbol.clone())
                 .map(|class_sym| {

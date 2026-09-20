@@ -157,7 +157,7 @@ impl Checker {
             if self.is_empty_object_type(t) {
                 return TYPEOF_FACTS_ALL & !TYPEOF_EQ_NULLABLE;
             }
-            if self.is_function_object_type(t) {
+            if self.is_function_like_object_type(t) {
                 return TYPEOF_EQ_FUNCTION
                     | TYPEOF_EQ_HOST_OBJECT
                     | TYPEOF_NE_STRING
@@ -253,7 +253,7 @@ impl Checker {
             && structured.properties.is_empty()
     }
 
-    pub(crate) fn is_function_object_type(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_function_like_object_type(&mut self, t: &Arc<Type>) -> bool {
         if t.object_flags.contains(ObjectFlags::EvolvingArray) {
             return false;
         }

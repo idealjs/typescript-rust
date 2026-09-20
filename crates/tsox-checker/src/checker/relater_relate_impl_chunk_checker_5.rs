@@ -215,7 +215,7 @@ impl Checker {
         }
         if crate::checker::is_object_literal_type(source)
             && source.object_flags.contains(crate::checker::types::ObjectFlags::FreshLiteral)
-            && !self.is_index_signatures_related_to(source, target, relation)
+            && !self.is_index_signatures_related_to(source, target, relation, false)
         {
             return false;
         }

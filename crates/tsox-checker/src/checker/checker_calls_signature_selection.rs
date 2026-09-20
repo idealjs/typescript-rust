@@ -97,7 +97,7 @@ impl Checker {
                     self.report_invocation_error(callee_expr, callee_type, is_new);
                     return None;
                 }
-            }
+            }        } else {
             // Go isUntypedFunctionCall：无任何签名且为全局 Function 型时按
             // untyped 调用，不报不可调用
             if !is_new
@@ -109,7 +109,6 @@ impl Checker {
                 union_signatures.push(self.untyped_call_signature());
                 return Some(union_signatures);
             }
-        } else {
             let resolved = self.get_signatures_of_type(callee_type, sig_kind);
             if resolved.is_empty() {
                 let other_kind = if is_new {

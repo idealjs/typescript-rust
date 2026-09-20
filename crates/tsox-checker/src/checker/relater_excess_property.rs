@@ -307,15 +307,4 @@ impl Checker {
         !self.is_generic_type(&t)
     }
 
-    fn is_empty_object_type(&self, t: &Arc<Type>) -> bool {
-        if !t.flags.contains(TypeFlags::Object) {
-            return false;
-        }
-        let Some(structured) = t.as_structured() else {
-            return false;
-        };
-        structured.properties.is_empty()
-            && structured.signatures.is_empty()
-            && structured.index_infos.is_empty()
-    }
 }

@@ -356,27 +356,6 @@ impl Checker {
         })
     }
 
-    fn is_spreadable_property(&mut self, prop: &Arc<Symbol>) -> bool {
-        if prop.check_flags.contains(tsox_frontend::ast::CheckFlags::ReadPartial)
-            && prop.flags.contains(SymbolFlags::Optional)
-        {
-            let t = self.get_type_of_symbol(prop);
-            return !self.type_is_nullish(&t);
-        }
-        true
-    }
-
-    fn type_is_nullish(&self, t: &Arc<Type>) -> bool {
-        let nullable = TypeFlags::from_bits_truncate(
-            TypeFlags::Null.bits() | TypeFlags::Undefined.bits(),
-        );
-        if t.flags.contains(TypeFlags::Union)
-            && let Some(ui) = t.as_union_or_intersection()
-        {
-            return ui.types.iter().all(|m| m.flags.intersects(nullable));
-        }
-        t.flags.intersects(nullable)
-    }
 
     fn get_spread_symbol(&mut self, prop: &Arc<Symbol>, readonly: bool) -> Arc<Symbol> {
         let is_setonly_accessor = prop.flags.contains(SymbolFlags::SetAccessor)

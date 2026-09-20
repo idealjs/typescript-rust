@@ -894,7 +894,7 @@ impl Checker {
         }
     }
 
-    fn is_spreadable_property(&self, prop: &Arc<Symbol>) -> bool {
+    pub(crate) fn is_spreadable_property(&self, prop: &Arc<Symbol>) -> bool {
         let no_private_ident = !prop.declarations.iter().any(|d| {
             matches!(
                 &d.data,
