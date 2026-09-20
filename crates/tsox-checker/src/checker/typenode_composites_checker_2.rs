@@ -80,6 +80,16 @@ impl Checker {
                         .modifiers()
                         .as_ref()
                         .is_some_and(|m| m.flags().contains(ModifierFlags::Readonly));
+                    // Go resolveStructuredTypeMembers：同键索引签名去重（重
+                    // 复声明由 2374 检查报错，类型只保留一个）
+                    let key_id = key_type.as_ref().map(|k| k.id);
+                    if key_id.is_some_and(|id| {
+                        index_infos
+                            .iter()
+                            .any(|info| info.key_type.as_ref().is_some_and(|k| k.id == id))
+                    }) {
+                        continue;
+                    }
                     index_infos.push(Arc::new(crate::checker::IndexInfo {
                         key_type,
                         value_type,
