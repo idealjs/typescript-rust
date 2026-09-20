@@ -327,17 +327,6 @@ impl Binder {
                     .map(|d| self.module_member_is_exported(d))
                     .any(|d_exported| d_exported != node_exported)
             });
-        if std::env::var_os("TSOX_DEBUG_NS").is_some() && name == "B" {
-            eprintln!(
-                "[ns] kind={:?} includes={:?} existing={:?} parent_sym={} parent_flags={:?} container={:?}",
-                node.kind, includes,
-                existing.as_ref().map(|e| e.flags),
-                self.parent_symbol.as_ref().map(|p| p.name.clone()).unwrap_or_default(),
-                self.parent_symbol.as_ref().map(|p| p.flags),
-                self.container.as_ref().map(|c| c.kind)
-            );
-        }
-
         if let Some(existing) = existing {
             // Go declareSymbol 冲突路径：excludes 互斥表（bindWorker 配对），
             // 冲突时报所有既有声明 + 当前声明，且不合并符号、不替换表内既有符号
