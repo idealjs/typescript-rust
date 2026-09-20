@@ -102,16 +102,16 @@ impl Checker {
     ) -> Arc<Type> {
         let mut t = self.get_type_of_node(initializer);
         let contextual = self.get_contextual_type(literal, ContextFlags::empty());
-        if let Some(ctx) = &contextual
-            && let Some(prop_ctx) = self.get_type_of_property_of_contextual_type(ctx, name)
-            && crate::checker::is_fresh_literal_type(&t)
-        {
-            if !self.is_literal_of_contextual_type(&t, &prop_ctx) {
-                t = self.get_widened_literal_type(&t);
-            } else {
-                t = self.get_regular_type_of_literal_type(&t);
-            }
+        let prop_ctx = contextual
+            .as_ref()
+            .and_then(|c| self.get_type_of_property_of_contextual_type(c, name));
+        let literal_of_ctx = prop_ctx
+            .as_ref()
+            .is_some_and(|pc| self.is_literal_of_contextual_type(&t, pc));
+        if !literal_of_ctx {
+            t = self.get_widened_literal_type(&t);
         }
+        t = self.get_regular_type_of_literal_type(&t);
         if let Some(sym) = self.program.symbol_map().symbol_of(prop) {
             let container = contextual.as_ref().and_then(|c| c.symbol.clone());
             let links = self.value_symbol_links.get_or_default(&sym);

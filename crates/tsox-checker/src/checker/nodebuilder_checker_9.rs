@@ -85,14 +85,19 @@ impl Checker {
                 prop.name.clone()
             };
 
-            // Go nodebuilder：成员名按 isIdentifierText 决定是否加引号
-            let name =
-                if crate::checker::checker_get_excluded_symbol_flags::is_valid_identifier_text(&name)
-                {
-                    name
-                } else {
-                    format!("\"{name}\"")
-                };
+            // Go nodebuilder classifyPropertyName：identifier 原样/数值名非 stringNamed 不加引号
+            let string_named = !prop.declarations.is_empty()
+                && prop
+                    .declarations
+                    .iter()
+                    .all(|d| d.name().is_some_and(|n| n.kind == SyntaxKind::StringLiteral));
+            let name = if crate::checker::checker_get_excluded_symbol_flags::is_valid_identifier_text(&name)
+                || (!string_named && crate::checker::nodecopy_property_name::is_numeric_literal_name(&name))
+            {
+                name
+            } else {
+                format!("\"{name}\"")
+            };
             let prop_type = self.get_type_of_symbol(prop);
             // Go shouldUsePlaceholderForProperty：反向映射属性的三条件省略 +
             // 打印栈追踪（嵌套时对非匿名源立即截断为 ...）
@@ -685,7 +690,15 @@ impl Checker {
 
     pub(crate) fn needs_parens_in_union(&mut self, t: &Arc<Type>) -> bool {
         if let Some(structured) = t.as_structured() {
-            if structured.call_signature_count > 0 && t.symbol.is_none() {
+            let anonymous_symbol = t
+                .symbol
+                .as_ref()
+                .is_none_or(|s| s.name.starts_with('\u{FE}'));
+            if anonymous_symbol
+                && structured.signatures.len() == 1
+                && structured.properties.is_empty()
+                && structured.index_infos.is_empty()
+            {
                 return true;
             }
         }

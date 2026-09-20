@@ -42,7 +42,7 @@ fn is_identifier_text(text: &str) -> bool {
     chars.all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '$')
 }
 
-fn is_numeric_literal_name(name: &str) -> bool {
+pub fn is_numeric_literal_name(name: &str) -> bool {
     !name.is_empty() && name.chars().all(|c| c.is_ascii_digit() || c == '.')
 }
 

@@ -211,10 +211,49 @@ impl Checker {
                         .unwrap_or_else(|| self.get_any_type());
                 }
 
-                if self.this_container_stack.last() == Some(&ThisContainerKind::StaticMember)
-                    && let Some(class) = self.enclosing_class_stack.last().cloned()
-                {
-                    return self.get_type_of_class_declaration(&class);
+                if let Some(class) = self.enclosing_class_stack.last().cloned() {
+                    let is_static_member =
+                        self.this_container_stack.last() == Some(&ThisContainerKind::StaticMember);
+                    if let Some(heritage) =
+                        crate::checker::checker_classes_ctor_super_calls::class_extends_heritage_element(&class)
+                    {
+                        if crate::checker::checker_classes_ctor_super_calls::class_decl_extends_null(&class)
+                            && !is_static_member
+                        {
+                            return self.null_type();
+                        }
+                        let base_expr = crate::checker::checker_classes_ctor_super_calls::expression_with_type_arguments_expression(&heritage);
+                        let base_symbol = (base_expr.kind == SyntaxKind::Identifier)
+                            .then(|| self.resolve_identifier(&base_expr))
+                            .flatten();
+                        if let Some(sym) = base_symbol
+                            && sym.flags.intersects(SymbolFlags::Class | SymbolFlags::Interface)
+                        {
+                            let t = if is_static_member {
+                                sym.declarations
+                                    .iter()
+                                    .find(|d| {
+                                        matches!(
+                                            d.kind,
+                                            SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
+                                        )
+                                    })
+                                    .map(|d| self.get_type_of_class_declaration(d))
+                                    .unwrap_or_else(|| self.get_declared_type_of_symbol(&sym))
+                            } else {
+                                self.get_declared_type_of_symbol(&sym)
+                            };
+                            if !t.flags.contains(TypeFlags::Any) {
+                                return t;
+                            }
+                        }
+                        if is_static_member {
+                            let t = self.get_type_of_node(&base_expr);
+                            if !t.flags.contains(TypeFlags::Any) {
+                                return t;
+                            }
+                        }
+                    }
                 }
                 let r = self
                     .this_type_stack
