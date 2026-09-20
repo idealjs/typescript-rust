@@ -299,7 +299,11 @@ impl Checker {
             {
                 return self.object_literal_to_string(t, structured, flags);
             }
-            if t.symbol.is_none() {
+            if t
+                .symbol
+                .as_ref()
+                .is_none_or(|s| s.name.starts_with('\u{FE}'))
+            {
                 return "{}".to_string();
             }
         }

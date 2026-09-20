@@ -215,14 +215,6 @@ impl Checker {
             return self.error_type();
         }
 
-        if std::env::var_os("TSOX_DEBUG_NS").is_some() && symbol.name == "B" {
-            eprintln!(
-                "[tr] B flags={:?} class={} iface={:?}",
-                symbol.flags,
-                symbol.flags.contains(SymbolFlags::Class),
-                symbol.flags.contains(SymbolFlags::Interface)
-            );
-        }
         if symbol.flags.contains(SymbolFlags::TypeParameter) {
             return self.resolve_type_parameter_reference(&symbol);
         }

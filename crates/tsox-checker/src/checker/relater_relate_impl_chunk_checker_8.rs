@@ -147,6 +147,24 @@ impl Checker {
             }
         }
 
+        // Go structuredSourceRelatedToStructuredTarget：目标为对象字面量类型时，
+        // 源的每个属性都必须在目标上存在（fresh {} 目标令 {a}/元组/数组侧
+        // strictSubtype 不成立，`x || {}` 联合因此不被缩减）
+        if crate::checker::utilities_token_is_identifier_or_keyword::is_object_literal_type(target)
+            && (self.is_tuple_type(source)
+                || self.is_array_type(source)
+                || !source_struct.properties.is_empty())
+        {
+            if self.is_tuple_type(source) || self.is_array_type(source) {
+                return false;
+            }
+            for source_prop in &source_struct.properties {
+                if target_struct.members.get(&source_prop.name).is_none() {
+                    return false;
+                }
+            }
+        }
+
         let mut missing_props: Vec<String> = Vec::new();
         let mut missing_prop_syms: Vec<Option<Arc<tsox_frontend::ast::Symbol>>> = Vec::new();
 

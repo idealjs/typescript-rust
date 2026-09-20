@@ -94,9 +94,22 @@ impl Checker {
                 self.report_element_access_implicit_any(node, &obj_type, arg_expr, &effective_arg);
                 return self.get_any_type();
             }
+            let literal_name = self.literal_element_access_name(arg_expr);
             let mut elem_types: Vec<Arc<Type>> = Vec::new();
             for m in &members {
                 if m.flags.contains(TypeFlags::Any) {
+                    continue;
+                }
+                // Go createUnionOrIntersectionProperty：联合成分缺该名属性且为
+                // 对象字面量（无 spread）时贡献 undefined，不报 nia
+                if let Some(name) = &literal_name
+                    && m.object_flags.contains(crate::checker::types::ObjectFlags::ObjectLiteral)
+                    && !m
+                        .object_flags
+                        .contains(crate::checker::types::ObjectFlags::ContainsSpread)
+                    && self.get_property_of_type(m, name).is_none()
+                {
+                    elem_types.push(self.undefined_type());
                     continue;
                 }
                 let t = self.element_access_result_type(node, m, arg_expr, &effective_arg);

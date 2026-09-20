@@ -368,7 +368,9 @@ impl Checker {
                 if Arc::ptr_eq(source, target) {
                     continue;
                 }
-                if self.is_type_assignable_to(source, target) {
+                // Go removeSubtypes：strictSubtypeRelation 判缩减（assignable 会
+                // 把 {a} 对 {} 误判为可缩减，fresh {} 目标须挡住）
+                if self.is_type_strict_subtype_of(source, target) {
                     keep[i] = false;
                     break;
                 }

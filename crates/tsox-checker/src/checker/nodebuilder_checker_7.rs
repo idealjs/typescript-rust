@@ -355,8 +355,13 @@ impl Checker {
             {
                 return self.object_literal_to_string(t, structured, flags);
             }
-            // 空匿名对象字面量形态（Go createTypeNodeFromObjectType 无成员 TypeLiteral）
-            if t.symbol.is_none() {
+            // 空匿名对象字面量形态（Go createTypeNodeFromObjectType 无成员 TypeLiteral）：
+            // 内部名匿名符号（þobject 等）同按 {} 展示
+            if t
+                .symbol
+                .as_ref()
+                .is_none_or(|s| s.name.starts_with('\u{FE}'))
+            {
                 return "{}".to_string();
             }
         }
