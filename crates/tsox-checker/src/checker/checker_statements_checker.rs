@@ -63,6 +63,16 @@ impl Checker {
                     self.check_expression(&data.expression);
                     self.check_truthiness_of_type(&data.expression);
                     self.check_statement(&data.then_statement);
+                    if data.then_statement.kind == SyntaxKind::EmptyStatement {
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            file,
+                            data.then_statement.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                THE_BODY_OF_AN_IF_STATEMENT_CANNOT_BE_THE_EMPTY_STATEMENT,
+                            vec![],
+                        ));
+                    }
                     if let Some(else_stmt) = &data.else_statement {
                         self.check_statement(else_stmt);
                     }
