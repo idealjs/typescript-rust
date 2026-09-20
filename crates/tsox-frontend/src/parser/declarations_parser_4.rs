@@ -99,6 +99,19 @@ impl Parser {
             let default_pos = self.token_pos();
             let default_end = self.token_end();
             self.next_token();
+            if self.token == SyntaxKind::AsyncKeyword
+                && self.look_ahead_token() == SyntaxKind::FunctionKeyword
+            {
+                let async_pos = self.token_pos();
+                let async_end = self.token_end();
+                self.next_token();
+                let modifiers = self.make_modifier_list(vec![
+                    (SyntaxKind::ExportKeyword, pos, export_end),
+                    (SyntaxKind::DefaultKeyword, default_pos, default_end),
+                    (SyntaxKind::AsyncKeyword, async_pos, async_end),
+                ]);
+                return self.parse_function_declaration_with_modifiers(Some(modifiers));
+            }
             if self.token == SyntaxKind::FunctionKeyword {
                 let modifiers = self.make_modifier_list(vec![
                     (SyntaxKind::ExportKeyword, pos, export_end),
