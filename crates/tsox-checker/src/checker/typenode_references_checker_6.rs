@@ -94,7 +94,15 @@ impl Checker {
                     let NodeData::EnumMember(member) = &member_node.data else {
                         continue;
                     };
-                    let member_name = member.name.text().to_string();
+                    let member_name = match &member.name.data {
+                        NodeData::ComputedPropertyName(cd) => {
+                            crate::binder::symbols_binder_4::computed_member_literal_name(
+                                &cd.expression,
+                            )
+                            .unwrap_or_default()
+                        }
+                        _ => member.name.text().to_string(),
+                    };
                     let member_sym = sym_map.symbol_of(member_node).map(Arc::clone);
                     entries.push((member_sym, member_name, member.initializer.clone()));
                 }

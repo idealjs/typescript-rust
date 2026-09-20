@@ -400,10 +400,14 @@ impl Checker {
         if let Some(structured) = t.as_structured()
             && structured.members.get(name).is_none()
         {
+            let numeric = name.parse::<f64>().is_ok();
             for info in &structured.index_infos {
                 let Some(key) = &info.key_type else { continue };
-                let numeric = name.parse::<f64>().is_ok();
-                let applicable = key.flags.contains(TypeFlags::Number) && numeric;
+                let applicable = if numeric {
+                    key.flags.contains(TypeFlags::Number)
+                } else {
+                    key.flags.contains(TypeFlags::String)
+                };
                 if !applicable {
                     continue;
                 }

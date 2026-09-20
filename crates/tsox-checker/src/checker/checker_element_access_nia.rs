@@ -74,12 +74,13 @@ impl Checker {
         ) {
             return;
         }
-        let literal_name = self.literal_element_access_name(arg_expr);
+        let prop_name = self.property_name_from_index(arg_type);
+        let has_prop_name = prop_name.is_some();
         let is_object_literal = obj_type
             .object_flags
             .contains(crate::checker::types::ObjectFlags::ObjectLiteral);
         if is_object_literal {
-            if let Some(name) = literal_name {
+            if let Some(name) = prop_name.clone() {
                 let args = vec![name, self.type_to_string(obj_type)];
                 self.emit_index_diagnostic(
                     node.loc,
@@ -92,7 +93,50 @@ impl Checker {
                 return;
             }
         }
-        if self.type_has_number_index(obj_type) {
+        let apparent = self.primitive_apparent_object_type(obj_type);
+        let object_display = self.type_to_string(&apparent);
+        let is_global_this = apparent.symbol.as_ref().is_some_and(|s| {
+            self.global_this_symbol
+                .as_ref()
+                .is_some_and(|g| Arc::ptr_eq(g, s))
+        });
+        if is_global_this
+            && has_prop_name
+            && self
+                .globals
+                .get(prop_name.as_deref().unwrap())
+                .is_some_and(|sym| {
+                    sym.flags.intersects(
+                        tsox_frontend::ast::SymbolFlags::BlockScopedVariable
+                            | tsox_frontend::ast::SymbolFlags::Class
+                            | tsox_frontend::ast::SymbolFlags::ENUM,
+                    )
+                })
+        {
+            self.emit_index_diagnostic(
+                node.loc,
+                tsox_core::diagnostics::messages_generated::PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+                vec![prop_name.unwrap(), object_display],
+            );
+            return;
+        }
+        if has_prop_name
+            && self.type_has_static_property(prop_name.as_deref().unwrap(), &apparent)
+        {
+            let arg_text = self.node_source_text(arg_expr).unwrap_or_default();
+            self.emit_index_diagnostic(
+                node.loc,
+                tsox_core::diagnostics::messages_generated::
+                    PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1_DID_YOU_MEAN_TO_ACCESS_THE_STATIC_MEMBER_2_INSTEAD,
+                vec![
+                    prop_name.clone().unwrap(),
+                    object_display.clone(),
+                    format!("{object_display}[{arg_text}]"),
+                ],
+            );
+            return;
+        }
+        if self.type_has_number_index(&apparent) {
             self.emit_index_diagnostic(
                 arg_expr.loc,
                 tsox_core::diagnostics::messages_generated::
@@ -101,7 +145,26 @@ impl Checker {
             );
             return;
         }
-        let object_display = self.type_to_string(obj_type);
+        if has_prop_name {
+            let name = prop_name.as_deref().unwrap();
+            if let Some(sugg) = self.suggest_property_spelling(name, &apparent) {
+                self.emit_index_diagnostic(
+                    arg_expr.loc,
+                    tsox_core::diagnostics::messages_generated::PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1_DID_YOU_MEAN_2,
+                    vec![name.to_string(), object_display.clone(), sugg],
+                );
+                return;
+            }
+        }
+        if let Some(sugg) = self.suggest_index_signature_call(&apparent, node, arg_type) {
+            self.emit_index_diagnostic(
+                node.loc,
+                tsox_core::diagnostics::messages_generated::
+                    ELEMENT_IMPLICITLY_HAS_AN_ANY_TYPE_BECAUSE_TYPE_0_HAS_NO_INDEX_SIGNATURE_DID_YOU_MEAN_TO_CALL_1,
+                vec![object_display, sugg],
+            );
+            return;
+        }
         let chain = self.index_diagnostic_chain(arg_type, &object_display);
         let index_display = self.type_to_string(arg_type);
         let mut diag = Diagnostic::new(
@@ -125,6 +188,155 @@ impl Checker {
     ) {
         self.diagnostics
             .add(Diagnostic::new(self.current_file.clone(), loc, message, args));
+    }
+
+    // Go getReducedApparentType 的原始类型近似：primitive 取对应全局接口声明型
+    pub(crate) fn primitive_apparent_object_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        let Some(interface_name) = self.primitive_interface_name(t) else {
+            return t.clone();
+        };
+        let Some(sym) = self.globals.get(interface_name).cloned() else {
+            return t.clone();
+        };
+        self.type_alias_links
+            .get(&sym)
+            .and_then(|l| l.declared_type.clone())
+            .unwrap_or_else(|| self.resolve_interface_type(&sym, None))
+    }
+
+    pub(crate) fn primitive_interface_index_value(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        let apparent = self.primitive_apparent_object_type(t);
+        let structured = apparent.as_structured()?;
+        structured
+            .index_infos
+            .iter()
+            .find_map(|info| info.value_type.clone())
+    }
+
+    // Go getSuggestionForNonexistentProperty
+    fn suggest_property_spelling(&self, name: &str, t: &Arc<Type>) -> Option<String> {
+        let st = t.as_structured()?;
+        let rune_len = name.chars().count();
+        let maximum_length_difference = 2.max((rune_len as f64 * 0.34) as usize);
+        let mut best_distance = (rune_len as f64 * 0.4).floor() + 0.9;
+        let mut best: Option<String> = None;
+        let mut members: Vec<&String> = st.members.entries.keys().collect();
+        members.sort();
+        for cand in members {
+            let cand = cand.as_str();
+            if cand.is_empty()
+                || cand.starts_with('"')
+                || cand.starts_with('\'')
+                || cand.starts_with('`')
+                || cand.starts_with('\u{FE}')
+            {
+                continue;
+            }
+            let cand_len = cand.chars().count();
+            if cand_len < 3 && !cand.eq_ignore_ascii_case(name) {
+                continue;
+            }
+            if rune_len.max(cand_len) - rune_len.min(cand_len) > maximum_length_difference {
+                continue;
+            }
+            if cand == name {
+                continue;
+            }
+            let Some(d) =
+                crate::checker::checker_attach_explicit_type_arguments::levenshtein_with_max(
+                    name,
+                    cand,
+                    best_distance,
+                )
+            else {
+                continue;
+            };
+            if d < best_distance {
+                best_distance = d;
+                best = Some(cand.to_string());
+            }
+        }
+        best
+    }
+
+    // Go getSuggestionForNonexistentIndexSignature
+    fn suggest_index_signature_call(
+        &mut self,
+        apparent: &Arc<Type>,
+        node: &Arc<Node>,
+        keyed: &Arc<Type>,
+    ) -> Option<String> {
+        if !keyed.flags.intersects(
+            TypeFlags::String
+                | TypeFlags::StringLiteral
+                | TypeFlags::StringMapping
+                | TypeFlags::Number
+                | TypeFlags::NumberLiteral,
+        ) {
+            return None;
+        }
+        let suggested = if crate::checker::checker_object_literal_is_destructuring_target::is_assignment_target(node)
+        {
+            "set"
+        } else {
+            "get"
+        };
+        let prop = self.get_property_of_type(apparent, suggested)?;
+        let t = self.get_type_of_symbol(&prop);
+        let sig = self.get_single_call_signature(&t)?;
+        if self.get_min_argument_count(&sig) < 1 {
+            return None;
+        }
+        let param0 = self.get_type_at_position(&sig, 0);
+        if !self.is_type_assignable_to(keyed, &param0) {
+            return None;
+        }
+        let base = match &node.data {
+            tsox_frontend::ast::NodeData::ElementAccessExpression(d) => {
+                self.try_reference_to_string(&d.expression)
+            }
+            _ => String::new(),
+        };
+        Some(if base.is_empty() {
+            suggested.to_string()
+        } else {
+            format!("{base}.{suggested}")
+        })
+    }
+
+    // Go tryGetPropertyAccessOrIdentifierToString
+    fn try_reference_to_string(&self, e: &Arc<Node>) -> String {
+        match e.kind {
+            SyntaxKind::Identifier => e.text().to_string(),
+            SyntaxKind::PropertyAccessExpression => {
+                if let tsox_frontend::ast::NodeData::PropertyAccessExpression(d) = &e.data {
+                    let base = self.try_reference_to_string(&d.expression);
+                    if !base.is_empty() {
+                        return format!("{base}.{}", d.name.text());
+                    }
+                }
+                String::new()
+            }
+            SyntaxKind::ElementAccessExpression => {
+                if let tsox_frontend::ast::NodeData::ElementAccessExpression(d) = &e.data {
+                    let base = self.try_reference_to_string(&d.expression);
+                    let arg = &d.argument_expression;
+                    if !base.is_empty()
+                        && matches!(
+                            arg.kind,
+                            SyntaxKind::Identifier
+                                | SyntaxKind::StringLiteral
+                                | SyntaxKind::NumericLiteral
+                                | SyntaxKind::PrivateIdentifier
+                        )
+                    {
+                        return format!("{base}.{}", arg.text());
+                    }
+                }
+                String::new()
+            }
+            _ => String::new(),
+        }
     }
 
     fn index_diagnostic_chain(

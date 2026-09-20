@@ -320,10 +320,6 @@ impl Checker {
             return Arc::clone(t);
         }
 
-        if t.flags.contains(TypeFlags::UniqueESSymbol) {
-            return self.es_symbol_type();
-        }
-
         // Go getWidenedTypeWithContext：对象字面量含 fresh literal / nullable 属性时逐属性 widen
         // （如作为函数返回类型的 { myProp: "test" } → { myProp: string }）
         if t.flags.contains(TypeFlags::Object)

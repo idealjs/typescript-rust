@@ -21,7 +21,21 @@ impl Checker {
 
         let mut call_signatures: Vec<Arc<Signature>> = Vec::new();
         let mut construct_signatures: Vec<Arc<Signature>> = Vec::new();
+        let mut implied_index: Option<crate::checker::IndexInfo> = None;
         for member in members.iter() {
+            if implied_index.is_none()
+                && matches!(
+                    &member.data,
+                    NodeData::PropertySignatureDeclaration(_)
+                        | NodeData::MethodSignatureDeclaration(_)
+                        | NodeData::PropertyDeclaration(_)
+                        | NodeData::MethodDeclaration(_)
+                        | NodeData::GetAccessorDeclaration(_)
+                        | NodeData::SetAccessorDeclaration(_)
+                )
+            {
+                implied_index = self.implied_index_info_of_computed_member(member, &index_infos);
+            }
             match &member.data {
                 NodeData::PropertySignatureDeclaration(_) => {
                     self.add_property_signature_member(member, &mut symbol_table, &mut props);
@@ -55,6 +69,15 @@ impl Checker {
                 }
                 _ => {}
             }
+        }
+        if let Some(info) = implied_index
+            && !index_infos.iter().any(|i| {
+                i.key_type
+                    .as_ref()
+                    .is_some_and(|k| Some(k.flags) == info.key_type.as_ref().map(|kk| kk.flags))
+            })
+        {
+            index_infos.push(Arc::new(info));
         }
 
         let call_signature_count = call_signatures.len();

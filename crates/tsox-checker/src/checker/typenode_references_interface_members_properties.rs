@@ -12,7 +12,7 @@ impl Checker {
         let NodeData::PropertySignatureDeclaration(data) = &member.data else {
             unreachable!()
         };
-        let name = self.get_property_name_from_node(&data.name);
+        let name = self.member_declaration_name(&data.name);
         // 空串字面量名 `"": any` 是合法属性；仅计算属性取名失败才跳过
         if name.is_empty() && matches!(&data.name.data, NodeData::ComputedPropertyName(_)) {
             return;
@@ -69,7 +69,7 @@ impl Checker {
         let NodeData::MethodSignatureDeclaration(data) = &member.data else {
             unreachable!()
         };
-        let name = self.get_property_name_from_node(&data.name);
+        let name = self.member_declaration_name(&data.name);
         // 空串字面量名 `"": any` 是合法属性；仅计算属性取名失败才跳过
         if name.is_empty() && matches!(&data.name.data, NodeData::ComputedPropertyName(_)) {
             return;
@@ -146,7 +146,7 @@ impl Checker {
         if is_static_modifier(&data.modifiers) {
             return;
         }
-        let name = self.get_property_name_from_node(&data.name);
+        let name = self.member_declaration_name(&data.name);
         // 空串字面量名 `"": any` 是合法属性；仅计算属性取名失败才跳过
         if name.is_empty() && matches!(&data.name.data, NodeData::ComputedPropertyName(_)) {
             return;
@@ -243,7 +243,7 @@ impl Checker {
         if is_static_modifier(&data.modifiers) {
             return;
         }
-        let name = self.get_property_name_from_node(&data.name);
+        let name = self.member_declaration_name(&data.name);
         // 空串字面量名 `"": any` 是合法属性；仅计算属性取名失败才跳过
         if name.is_empty() && matches!(&data.name.data, NodeData::ComputedPropertyName(_)) {
             return;

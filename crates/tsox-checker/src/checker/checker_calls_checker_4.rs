@@ -227,6 +227,19 @@ impl Checker {
                 {
                     rt = crate::checker::flow_narrow_calls::substitute_this_type(self, &rt, receiver);
                 }
+                if rt
+                    .flags
+                    .intersects(TypeFlags::ESSymbol | TypeFlags::UniqueESSymbol)
+                    && self.is_symbol_or_symbol_for_call(node)
+                {
+                    let target = node
+                        .parent()
+                        .map(|p| {
+                            crate::checker::checker_es_symbol::walk_up_parenthesized_expressions(&p)
+                        })
+                        .unwrap_or_else(|| Arc::clone(node));
+                    return self.get_es_symbol_like_type_for_node(&target);
+                }
                 if !sig.type_parameters.is_empty() {
                     let args: Vec<Arc<Node>> = callee.1.iter().cloned().collect();
                     let inferred = match &explicit_type_args {

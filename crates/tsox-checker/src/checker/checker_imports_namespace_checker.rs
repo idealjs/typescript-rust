@@ -98,7 +98,9 @@ impl Checker {
         match &node.data {
             NodeData::Identifier(id) => id.text.clone(),
             NodeData::StringLiteral(s) => s.text.clone(),
-            NodeData::NumericLiteral(n) => n.text.clone(),
+            NodeData::NumericLiteral(n) => {
+                tsox_core::jsnum::Number::from_string(&n.text).to_string()
+            }
             NodeData::ComputedPropertyName(cd) => {
                 // `Symbol.<知名符号>` 计算成员用内部名 `__@<name>`
                 //（与 binder member_name_text 一致，两侧命中同一键）
@@ -107,13 +109,40 @@ impl Checker {
                 {
                     return internal;
                 }
-                // Go：其余计算名在类型层无可用键（unique symbol 走 Identifier
-                // 路径），返回空名使成员跳过——源文本键会产生伪属性
-                //（如 `Symbol.nonsense` 报错后仍占位，触发多余缺属性诊断）
+                // 字面量计算名按字面量名入表（与 binder member_name_text
+                // 共用 computed_member_literal_name，保持两侧同键）
+                if let Some(literal) =
+                    crate::binder::symbols_binder_4::computed_member_literal_name(&cd.expression)
+                {
+                    return literal;
+                }
                 String::new()
             }
             _ => node.text().to_string(),
         }
+    }
+
+    /// 成员声明位的名字（Go lateBindMember 语义）：早绑定名之外，
+    /// 计算名为实体名表达式且其类型可用作属性名（string/number 字面量、
+    /// unique symbol）时，以类型推导的名字入表
+    pub(crate) fn member_declaration_name(&mut self, name: &Arc<Node>) -> String {
+        let early = self.get_property_name_from_node(name);
+        if !early.is_empty() || !matches!(name.data, NodeData::ComputedPropertyName(_)) {
+            return early;
+        }
+        let NodeData::ComputedPropertyName(cd) = &name.data else {
+            unreachable!();
+        };
+        if !tsox_frontend::ast::is_entity_name_expression(&cd.expression) {
+            return early;
+        }
+        let t = self.get_type_of_node(&cd.expression);
+        if crate::checker::utilities_token_is_identifier_or_keyword::is_type_usable_as_property_name(
+            &t,
+        ) {
+            return crate::checker::utilities_token_is_identifier_or_keyword::get_property_name_from_type(&t);
+        }
+        early
     }
 
     pub(crate) fn get_constituent_property(

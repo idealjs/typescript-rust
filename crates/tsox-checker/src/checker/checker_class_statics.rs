@@ -55,7 +55,7 @@ impl Checker {
                 let Some(name_node) = member.name() else {
                     continue;
                 };
-                let name = name_node.text().to_string();
+                let name = self.member_declaration_name(&name_node);
                 if name.is_empty() || members.get(&name).is_some() {
                     continue;
                 }
@@ -115,6 +115,7 @@ impl Checker {
         // 类内 static 索引签名挂构造侧类型（Go getTypeOfSymbol 静态分支）
         let mut index_infos: Vec<Arc<crate::checker::IndexInfo>> = Vec::new();
         if let Some(member_list) = &class_members {
+            let mut implied_index: Option<crate::checker::IndexInfo> = None;
             for member in member_list.iter() {
                 if member.kind == SyntaxKind::IndexSignature
                     && member.has_syntactic_modifier(ModifierFlags::Static)
@@ -123,6 +124,15 @@ impl Checker {
                     self.add_index_signature_member(member, &mut infos);
                     index_infos.extend(infos);
                 }
+                if implied_index.is_none()
+                    && member.has_syntactic_modifier(ModifierFlags::Static)
+                {
+                    implied_index =
+                        self.implied_index_info_of_computed_member(member, &index_infos);
+                }
+            }
+            if let Some(info) = implied_index {
+                index_infos.push(Arc::new(info));
             }
         }
 

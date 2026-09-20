@@ -138,14 +138,9 @@ impl Checker {
                 if let tsox_frontend::ast::NodeData::ElementAccessExpression(data) = &node.data {
                     self.check_expression(&data.expression);
                     self.check_expression(&data.argument_expression);
-
-                    if data.question_dot_token.is_none() {
-                        let obj_type = self.get_type_of_node(&data.expression);
-                        self.report_possibly_null_or_undefined(&data.expression, &obj_type, false);
-                    }
                 }
-                // Go checkElementAccessExpression：求取表达式类型以触发
-                // 索引键类型检查（TS2538）
+                // Go checkIndexedAccess：checkNonNullExpression 与索引键检查（TS2538）
+                // 都由 get_type_of_element_access 触发
                 self.get_type_of_node(node);
             }
             SyntaxKind::ConditionalExpression => {
