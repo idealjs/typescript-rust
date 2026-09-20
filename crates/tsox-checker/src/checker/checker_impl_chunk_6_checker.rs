@@ -399,7 +399,13 @@ impl Checker {
                 if Arc::ptr_eq(source, target) {
                     continue;
                 }
-                if self.is_type_assignable_to(source, target) {
+                // Go removeSubtypes 用 strictSubtypeRelation（readonly 有序化：
+                // {a} ⊑ {readonly a} 单向成立，归约结果与声明顺序无关）
+                if self.is_type_related_to(
+                    source,
+                    target,
+                    crate::checker::RelationKind::StrictSubtype,
+                ) {
                     keep[i] = false;
                     break;
                 }

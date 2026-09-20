@@ -259,6 +259,16 @@ impl Checker {
                 }
             }
 
+            // Go isPropertyRelatedTo：strictSubtype 下 readonly 源对 mutable
+            // 目标不成立（mutable→readonly 成立），关系有序化使 union 子型
+            // 归约与声明顺序无关
+            if relation == RelationKind::StrictSubtype
+                && self.symbol_is_readonly(&source_prop)
+                && !self.symbol_is_readonly(target_prop)
+            {
+                return false;
+            }
+
             let source_type = if source_is_bare_array {
                 self.instantiate_array_member_type(source, &source_prop)
                     .unwrap_or_else(|| self.get_type_of_symbol(&source_prop))
