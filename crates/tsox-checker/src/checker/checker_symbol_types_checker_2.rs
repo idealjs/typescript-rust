@@ -292,8 +292,10 @@ impl Checker {
                         return checker.auto_array_type();
                     }
                     let raw = checker.get_type_of_node(&init);
+                    let owned =
+                        checker.widen_unique_symbol_for_declaration(&decl, &raw);
                     let widened_literal =
-                        checker.get_widened_literal_type_for_initializer(&decl, &raw);
+                        checker.get_widened_literal_type_for_initializer(&decl, &owned);
                     let regularized = checker.get_regular_type_of_literal_type(&widened_literal);
                     checker.widen_initializer_type(&regularized)
                 });

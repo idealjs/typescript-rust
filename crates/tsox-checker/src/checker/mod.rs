@@ -46,6 +46,7 @@ pub(crate) mod checker_calls_checker_4;
 pub(crate) mod checker_calls_signature_selection;
 pub(crate) mod checker_checker;
 pub(crate) mod checker_checker_checker;
+pub(crate) mod checker_es_symbol;
 pub(crate) mod checker_classes;
 pub(crate) mod checker_parameter_implicit_any;
 pub(crate) mod checker_classes_accessor_member_checks;

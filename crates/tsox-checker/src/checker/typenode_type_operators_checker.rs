@@ -15,7 +15,13 @@ impl Checker {
                 }
                 SyntaxKind::UniqueKeyword => {
                     if data.type_node.kind == SyntaxKind::SymbolKeyword {
-                        self.es_symbol_type()
+                        let target = node
+                            .parent()
+                            .map(|p| {
+                                crate::checker::checker_es_symbol::walk_up_parenthesized_types(&p)
+                            })
+                            .unwrap_or_else(|| Arc::clone(node));
+                        self.get_es_symbol_like_type_for_node(&target)
                     } else {
                         self.error_type()
                     }

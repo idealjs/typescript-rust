@@ -51,6 +51,7 @@ impl Checker {
                             | TypeFlags::Number
                             | TypeFlags::NumberLiteral
                             | TypeFlags::ESSymbol
+                            | TypeFlags::UniqueESSymbol
                             | TypeFlags::EnumLiteral
                             | TypeFlags::StringMapping,
                     ) {
