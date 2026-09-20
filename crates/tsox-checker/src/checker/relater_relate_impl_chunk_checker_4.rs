@@ -26,12 +26,27 @@ impl Checker {
         {
             return true;
         }
-        if self.is_simple_type_related_to(source, target, relation) {
+        // Go isTypeRelatedTo：identity 关系跳过简单类型快捷通道，
+        // 结构化/可实例化类型走完整结构比较
+        if relation != RelationKind::Identity
+            && self.is_simple_type_related_to(source, target, relation)
+        {
             return true;
         }
 
         let s = source.flags;
         let t = target.flags;
+
+        // Go isRelatedToEx identity 分支：归一化后 flags 必须一致，
+        // singleton 型直接通过，其余跳过全部快捷通道
+        if relation == RelationKind::Identity {
+            if s != t {
+                return false;
+            }
+            if s.contains(TYPE_FLAGS_SINGLETON) {
+                return true;
+            }
+        }
 
         // 可比性 carve-out：两个裸类型参数互比仅当一方约束是类型参数
         // （Go relater target TypeParameter 分支的 comparable 特例）
@@ -47,7 +62,7 @@ impl Checker {
             return false;
         }
 
-        if s.contains(TypeFlags::TypeParameter) {
+        if relation != RelationKind::Identity && s.contains(TypeFlags::TypeParameter) {
             let constraint = self
                 .get_constraint_of_type_parameter(source)
                 .unwrap_or_else(|| self.unknown_type());
@@ -58,7 +73,10 @@ impl Checker {
 
         let source_is_indexed_access = s.contains(TypeFlags::IndexedAccess)
             || matches!(source.data, TypeData::IndexedAccess(_));
-        if source_is_indexed_access && !t.contains(TypeFlags::IndexedAccess) {
+        if relation != RelationKind::Identity
+            && source_is_indexed_access
+            && !t.contains(TypeFlags::IndexedAccess)
+        {
             if let Some(constraint) = self.constraint_of_indexed_access(source)
                 && self.is_type_related_to(&constraint, target, relation)
             {
@@ -69,6 +87,12 @@ impl Checker {
         if s.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
             || t.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
         {
+            // Go structuredTypeRelatedToWorker identity 分支：union/intersection
+            // 双向 eachTypeRelatedToSomeType（成分对成分，非成分对整体）
+            if relation == RelationKind::Identity {
+                return self.each_type_related_to_some_type(source, target, relation)
+                    && self.each_type_related_to_some_type(target, source, relation);
+            }
             return self.is_union_or_intersection_related_to(source, target, relation);
         }
 
@@ -170,7 +194,8 @@ impl Checker {
             return self.is_object_type_related_to(&source, &target, relation);
         }
 
-        if s.contains(TypeFlags::TypeParameter)
+        if relation != RelationKind::Identity
+            && s.contains(TypeFlags::TypeParameter)
             && t.contains(TypeFlags::TypeParameter)
             && let (Some(ss), Some(ts)) = (&source.symbol, &target.symbol)
             && Arc::ptr_eq(ss, ts)
@@ -240,35 +265,87 @@ impl Checker {
             }
             // Go relater.go keyof 分支：S 可赋给 keyof C 即通过，C 为目标型的
             // 简化型或约束（无约束类型参数隐含 unknown，keyof unknown =
-            // string | number | symbol）
-            if self.is_tuple_type(target_of) {
-                if let Some(known) = self.get_known_keys_of_tuple_type(target_of)
-                    && self.is_type_related_to(source, &known, relation)
-                {
-                    return true;
-                }
-            } else if let Some(constraint) = self.get_simplified_type_or_constraint(target_of) {
-                // Go getIndexTypeEx：keyof unknown = never、keyof any =
-                // string | number | symbol；never 走下方守卫跳过
-                let keys = if constraint.flags.contains(TypeFlags::Any) {
-                    let parts = vec![
-                        self.string_type(),
-                        self.number_type(),
-                        self.es_symbol_type(),
-                    ];
-                    self.get_union_type(parts)
-                } else {
-                    self.get_index_type(&constraint)
-                };
-                if !keys.flags.contains(TypeFlags::Never)
-                    && self.is_type_related_to(source, &keys, relation)
-                {
-                    return true;
+            // string | number | symbol）；identity 仅直比 target
+            if relation != RelationKind::Identity {
+                if self.is_tuple_type(target_of) {
+                    if let Some(known) = self.get_known_keys_of_tuple_type(target_of)
+                        && self.is_type_related_to(source, &known, relation)
+                    {
+                        return true;
+                    }
+                } else if let Some(constraint) = self.get_simplified_type_or_constraint(target_of) {
+                    // Go getIndexTypeEx：keyof unknown = never、keyof any =
+                    // string | number | symbol；never 走下方守卫跳过
+                    let keys = if constraint.flags.contains(TypeFlags::Any) {
+                        let parts = vec![
+                            self.string_type(),
+                            self.number_type(),
+                            self.es_symbol_type(),
+                        ];
+                        self.get_union_type(parts)
+                    } else {
+                        self.get_index_type(&constraint)
+                    };
+                    if !keys.flags.contains(TypeFlags::Never)
+                        && self.is_type_related_to(source, &keys, relation)
+                    {
+                        return true;
+                    }
                 }
             }
         }
 
-        if s.contains(TypeFlags::Conditional) {
+        // Go structuredTypeRelatedToWorker identity 分支：条件类型按四元组
+        // 直比（check/extends/true/false），且要求 distributivity 一致
+        if relation == RelationKind::Identity
+            && s.contains(TypeFlags::Conditional)
+            && t.contains(TypeFlags::Conditional)
+            && let (TypeData::Conditional(sc), TypeData::Conditional(tc)) = (&source.data, &target.data)
+        {
+            let distributive_match = sc
+                .root
+                .as_ref()
+                .is_some_and(|r| r.is_distributive)
+                == tc.root.as_ref().is_some_and(|r| r.is_distributive);
+            if !distributive_match {
+                return false;
+            }
+            let (Some(sc_check), Some(tc_check)) = (
+                sc.root.as_ref().and_then(|r| r.check_type.clone()),
+                tc.root.as_ref().and_then(|r| r.check_type.clone()),
+            ) else {
+                return false;
+            };
+            let (Some(sc_extends), Some(tc_extends)) = (
+                sc.root.as_ref().and_then(|r| r.extends_type.clone()),
+                tc.root.as_ref().and_then(|r| r.extends_type.clone()),
+            ) else {
+                return false;
+            };
+            if !self.is_type_related_to(&sc_check, &tc_check, relation)
+                || !self.is_type_related_to(&sc_extends, &tc_extends, relation)
+            {
+                return false;
+            }
+            let (Some(st), Some(tt)) = (
+                self.get_true_type_of_conditional_type(&source),
+                self.get_true_type_of_conditional_type(&target),
+            ) else {
+                return false;
+            };
+            if !self.is_type_related_to(&st, &tt, relation) {
+                return false;
+            }
+            let (Some(sf), Some(tf)) = (
+                self.get_false_type_of_conditional_type(&source),
+                self.get_false_type_of_conditional_type(&target),
+            ) else {
+                return false;
+            };
+            return self.is_type_related_to(&sf, &tf, relation);
+        }
+
+        if relation != RelationKind::Identity && s.contains(TypeFlags::Conditional) {
             let resolved = match self.get_resolved_type_of_conditional_type(source) {
                 Some(resolved) => Some(resolved),
 
@@ -280,7 +357,7 @@ impl Checker {
                 }
             }
         }
-        if t.contains(TypeFlags::Conditional) {
+        if relation != RelationKind::Identity && t.contains(TypeFlags::Conditional) {
             let resolved = match self.get_resolved_type_of_conditional_type(target) {
                 Some(resolved) => Some(resolved),
                 None => self.resolve_conditional_type(target),
@@ -305,14 +382,20 @@ impl Checker {
             }
         }
 
-        if s.contains(TypeFlags::Object) && source.object_flags.contains(ObjectFlags::Mapped) {
+        if relation != RelationKind::Identity
+            && s.contains(TypeFlags::Object)
+            && source.object_flags.contains(ObjectFlags::Mapped)
+        {
             if let Some(constraint) = self.get_constraint_of_mapped_type(source) {
                 if self.is_type_related_to(&constraint, target, relation) {
                     return true;
                 }
             }
         }
-        if t.contains(TypeFlags::Object) && target.object_flags.contains(ObjectFlags::Mapped) {
+        if relation != RelationKind::Identity
+            && t.contains(TypeFlags::Object)
+            && target.object_flags.contains(ObjectFlags::Mapped)
+        {
             if let Some(constraint) = self.get_constraint_of_mapped_type(target) {
                 if self.is_type_related_to(source, &constraint, relation) {
                     return true;

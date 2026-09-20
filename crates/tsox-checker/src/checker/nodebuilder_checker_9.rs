@@ -77,7 +77,46 @@ impl Checker {
             parts.push(format!("new {tp}({}): {}", params.join(", "), ret_str));
         }
 
-        for prop in &structured.properties {
+        for info in &structured.index_infos {
+            let key_str = info
+                .key_type
+                .as_ref()
+                .map(|k| self.type_to_string_ex(k, flags))
+                .unwrap_or_else(|| "string".to_string());
+            // Go：反向映射型的索引签名值打印省略号
+            let val_str = if _t
+                .object_flags
+                .contains(crate::checker::ObjectFlags::ReverseMapped)
+            {
+                "...".to_string()
+            } else {
+                info.value_type
+                    .as_ref()
+                    .map(|v| self.type_to_string_ex(v, flags))
+                    .unwrap_or_else(|| "any".to_string())
+            };
+
+            let key_name = info
+                .declaration
+                .as_ref()
+                .and_then(|d| {
+                    let NodeData::IndexSignatureDeclaration(sd) = &d.data else {
+                        return None;
+                    };
+                    sd.parameters.iter().next().and_then(|p| match &p.data {
+                        NodeData::ParameterDeclaration(pd) => Some(pd.name.text().to_string()),
+                        _ => None,
+                    })
+                })
+                .unwrap_or_else(|| "x".to_string());
+            let readonly = if info.is_readonly { "readonly " } else { "" };
+            parts.push(format!("{readonly}[{key_name}: {key_str}]: {val_str}"));
+        }
+
+        // Go resolveStructuredTypeMembers：匿名成员按名排序后参与显示
+        let mut sorted_props: Vec<&Arc<Symbol>> = structured.properties.iter().collect();
+        sorted_props.sort_by(|a, b| a.name.cmp(&b.name));
+        for prop in sorted_props {
             // Go symbolToString：well-known symbol 内部名 __@x 渲染为 [Symbol.x]
             let name = if let Some(stripped) = prop.name.strip_prefix("__@") {
                 format!("[Symbol.{stripped}]")
@@ -142,41 +181,6 @@ impl Checker {
             }
         }
 
-        for info in &structured.index_infos {
-            let key_str = info
-                .key_type
-                .as_ref()
-                .map(|k| self.type_to_string_ex(k, flags))
-                .unwrap_or_else(|| "string".to_string());
-            // Go：反向映射型的索引签名值打印省略号
-            let val_str = if _t
-                .object_flags
-                .contains(crate::checker::ObjectFlags::ReverseMapped)
-            {
-                "...".to_string()
-            } else {
-                info.value_type
-                    .as_ref()
-                    .map(|v| self.type_to_string_ex(v, flags))
-                    .unwrap_or_else(|| "any".to_string())
-            };
-
-            let key_name = info
-                .declaration
-                .as_ref()
-                .and_then(|d| {
-                    let NodeData::IndexSignatureDeclaration(sd) = &d.data else {
-                        return None;
-                    };
-                    sd.parameters.iter().next().and_then(|p| match &p.data {
-                        NodeData::ParameterDeclaration(pd) => Some(pd.name.text().to_string()),
-                        _ => None,
-                    })
-                })
-                .unwrap_or_else(|| "x".to_string());
-            let readonly = if info.is_readonly { "readonly " } else { "" };
-            parts.push(format!("{readonly}[{key_name}: {key_str}]: {val_str}"));
-        }
 
         if parts.is_empty() {
             "{}".to_string()
@@ -270,7 +274,12 @@ impl Checker {
                 parts.insert(0, alias_name);
                 return Some(parts.join("."));
             }
-            if is_file_module || ns.name.starts_with('"') {
+            if is_file_module
+                || ns.name
+                    .chars()
+                    .next()
+                    .is_some_and(|c| c == '"' || c == '\'' || c == '`')
+            {
                 // 外部模块名段（含 declare module 增强建的符号，声明表无
                 // SourceFile）不参与限定：跨文件经 import 别名显示
                 // （tsc getSymbolChain 跳过外部模块 root 段）
@@ -499,8 +508,8 @@ impl Checker {
         sym: &Arc<Symbol>,
         flags: TypeFormatFlags,
     ) -> String {
-        if sym.flags.contains(SymbolFlags::ENUM) {
-            if matches!(&t.data, TypeData::Object(_)) {
+        if sym.flags.intersects(SymbolFlags::ENUM) {
+            if matches!(&t.data, TypeData::Object(_) | TypeData::Interface(_)) {
                 return format!("typeof {}", self.namespace_qualified_name(sym));
             }
             return self.namespace_qualified_name(sym);

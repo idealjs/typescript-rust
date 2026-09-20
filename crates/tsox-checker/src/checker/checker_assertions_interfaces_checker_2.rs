@@ -252,6 +252,7 @@ impl Checker {
                             &overload_node,
                             &impl_node,
                         );
+
                         if (arity_bad || !compat)
                             && let tsox_frontend::ast::NodeData::FunctionDeclaration(d) =
                                 &statements[i].data

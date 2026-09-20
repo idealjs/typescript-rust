@@ -4,17 +4,66 @@ use crate::checker::relater_relate_impl_chunk::*;
 
 impl Checker {
     pub fn is_type_identical_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
-        if Arc::ptr_eq(source, target) {
+        let source = if crate::checker::is_fresh_literal_type(source) {
+            self.get_regular_type_of_literal_type(source)
+        } else {
+            Arc::clone(source)
+        };
+        let target = if crate::checker::is_fresh_literal_type(target) {
+            self.get_regular_type_of_literal_type(target)
+        } else {
+            Arc::clone(target)
+        };
+        if Arc::ptr_eq(&source, &target) {
             return true;
         }
-
-        if source.flags != target.flags {
-            return false;
+        let simplifiable = TYPE_FLAGS_UNION_OR_INTERSECTION
+            | TypeFlags::from_bits_truncate(
+                TypeFlags::IndexedAccess.bits()
+                    | TypeFlags::Conditional.bits()
+                    | TypeFlags::Substitution.bits(),
+            );
+        if !(source.flags | target.flags).intersects(simplifiable) {
+            if source.flags != target.flags {
+                return false;
+            }
+            if source.flags.contains(TYPE_FLAGS_SINGLETON) {
+                return true;
+            }
+            if !source
+                .flags
+                .intersects(TYPE_FLAGS_STRUCTURED_OR_INSTANTIABLE)
+                && !target
+                    .flags
+                    .intersects(TYPE_FLAGS_STRUCTURED_OR_INSTANTIABLE)
+            {
+                return match (&source.data, &target.data) {
+                    (TypeData::Intrinsic(s), TypeData::Intrinsic(t)) => {
+                        s.intrinsic_name == t.intrinsic_name
+                    }
+                    (TypeData::Literal(s), TypeData::Literal(t)) => {
+                        s.value == t.value
+                            && match (&source.symbol, &target.symbol) {
+                                (Some(a), Some(b)) => Arc::ptr_eq(a, b),
+                                (None, None) => true,
+                                _ => false,
+                            }
+                    }
+                    _ => false,
+                };
+            }
         }
-        if source.flags.contains(TYPE_FLAGS_SINGLETON) {
-            return true;
+        if source
+            .flags
+            .intersects(TYPE_FLAGS_STRUCTURED_OR_INSTANTIABLE)
+            || target
+                .flags
+                .intersects(TYPE_FLAGS_STRUCTURED_OR_INSTANTIABLE)
+        {
+            self.is_type_related_to(&source, &target, RelationKind::Identity)
+        } else {
+            false
         }
-        self.is_simple_type_identical_to(source, target)
     }
 
     pub fn is_type_assignable_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {

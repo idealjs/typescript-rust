@@ -209,6 +209,50 @@ impl Checker {
                             }
                         }
                     }
+                    // Go checkTypeForDuplicateIndexSignatures：同键索引签名
+                    // 按参数型分组，重复组逐声明报 2374
+                    let mut index_groups: Vec<(u32, Arc<Type>, Vec<Arc<Node>>)> = Vec::new();
+                    for member in d.members.iter() {
+                        let tsox_frontend::ast::NodeData::IndexSignatureDeclaration(sd) =
+                            &member.data
+                        else {
+                            continue;
+                        };
+                        let Some(param) = sd.parameters.iter().next() else {
+                            continue;
+                        };
+                        let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &param.data
+                        else {
+                            continue;
+                        };
+                        let Some(pt) = &pd.type_node else {
+                            continue;
+                        };
+                        let key_type = self.get_type_from_type_node(pt);
+                        match index_groups
+                            .iter_mut()
+                            .find(|(id, _, _)| *id == key_type.id)
+                        {
+                            Some((_, _, decls)) => decls.push(Arc::clone(member)),
+                            None => {
+                                index_groups.push((key_type.id, key_type, vec![Arc::clone(member)]))
+                            }
+                        }
+                    }
+                    for (_, key_type, decls) in &index_groups {
+                        if decls.len() > 1 {
+                            let key_str = self.type_to_string(key_type);
+                            for decl in decls {
+                                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                    self.current_file.clone(),
+                                    decl.loc,
+                                    tsox_core::diagnostics::messages_generated::
+                                        DUPLICATE_INDEX_SIGNATURE_FOR_TYPE_0,
+                                    vec![key_str.clone()],
+                                ));
+                            }
+                        }
+                    }
                 }
             }
             _ => {}

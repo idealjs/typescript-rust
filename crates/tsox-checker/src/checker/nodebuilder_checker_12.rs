@@ -2245,6 +2245,18 @@ impl Checker {
         if annotated.id != resolved.id {
             return None;
         }
+        // Go nodebuilder 仅对箭头函数/函数表达式参数复用源注解打印，
+        // 声明签名（函数/方法/重载）参数一律按类型重建（字面量双引号）
+        let owner = tn
+            .parent()
+            .and_then(|param| param.parent())?;
+        if !matches!(
+            owner.kind,
+            tsox_frontend::ast::SyntaxKind::ArrowFunction
+                | tsox_frontend::ast::SyntaxKind::FunctionExpression
+        ) {
+            return None;
+        }
         self.node_source_text(tn)
     }
 

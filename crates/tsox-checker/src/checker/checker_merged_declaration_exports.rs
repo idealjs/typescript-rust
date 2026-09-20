@@ -162,12 +162,12 @@ impl Checker {
             | SyntaxKind::EnumMember => SPACE_TYPE | SPACE_VALUE,
             SyntaxKind::VariableDeclaration
             | SyntaxKind::BindingElement
-            | SyntaxKind::FunctionDeclaration => SPACE_VALUE,
+            | SyntaxKind::FunctionDeclaration
+            | SyntaxKind::ImportSpecifier => SPACE_VALUE,
             SyntaxKind::MethodSignature | SyntaxKind::PropertySignature => SPACE_TYPE,
             SyntaxKind::ImportEqualsDeclaration
-            | SyntaxKind::NamespaceImport
-            | SyntaxKind::ImportClause
-            | SyntaxKind::ImportSpecifier => self.alias_declaration_spaces(node, 0),
+                | SyntaxKind::NamespaceImport
+                | SyntaxKind::ImportClause => self.alias_declaration_spaces(node, 0),
             SyntaxKind::ExportAssignment | SyntaxKind::BinaryExpression => {
                 let is_alias = match &node.data {
                     tsox_frontend::ast::NodeData::ExportAssignment(e) => matches!(

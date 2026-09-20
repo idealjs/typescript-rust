@@ -3,37 +3,6 @@
 use crate::checker::relater_relate_impl_chunk::*;
 
 impl Checker {
-    pub(crate) fn is_simple_type_identical_to(
-        &mut self,
-        source: &Arc<Type>,
-        target: &Arc<Type>,
-    ) -> bool {
-        match (&source.data, &target.data) {
-            (TypeData::Intrinsic(s), TypeData::Intrinsic(t)) => {
-                s.intrinsic_name == t.intrinsic_name
-            }
-            (TypeData::Literal(s), TypeData::Literal(t)) => s.value == t.value,
-            (TypeData::TypeParameter(s), TypeData::TypeParameter(t)) => {
-                s.is_this_type == t.is_this_type
-            }
-
-            (TypeData::IndexedAccess(s), TypeData::IndexedAccess(t)) => {
-                match (&s.object_type, &t.object_type, &s.index_type, &t.index_type) {
-                    (Some(so), Some(to), Some(si), Some(ti)) => {
-                        self.is_type_identical_to(so, to) && self.is_type_identical_to(si, ti)
-                    }
-                    _ => Arc::ptr_eq(source, target),
-                }
-            }
-
-            (TypeData::Index(s), TypeData::Index(t)) => match (&s.target, &t.target) {
-                (Some(so), Some(to)) => self.is_type_identical_to(so, to),
-                _ => Arc::ptr_eq(source, target),
-            },
-            _ => source.flags == target.flags,
-        }
-    }
-
     pub fn is_simple_type_related_to(
         &mut self,
         source: &Arc<Type>,

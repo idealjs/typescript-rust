@@ -322,11 +322,6 @@ impl Checker {
                 .insert("globalThis".to_string(), Arc::clone(&global_this));
             checker.global_this_symbol = Some(global_this);
 
-            if let Some(ref undef) = checker.undefined_symbol {
-                checker
-                    .globals
-                    .insert("undefined".to_string(), Arc::clone(undef));
-            }
         }
 
         checker
