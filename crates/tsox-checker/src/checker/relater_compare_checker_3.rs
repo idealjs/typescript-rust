@@ -96,10 +96,15 @@ impl Checker {
                     head_source = fq_source;
                     head_target = fq_target;
                     tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1
+                } else if relation == RelationKind::Comparable {
+                    tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_COMPARABLE_TO_TYPE_1
                 } else {
                     tsox_core::diagnostics::messages_generated::
                         TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_TWO_DIFFERENT_TYPES_WITH_THIS_NAME_EXIST_BUT_THEY_ARE_UNRELATED
                 }
+            }
+            None if relation == RelationKind::Comparable => {
+                tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_COMPARABLE_TO_TYPE_1
             }
             None => tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
         };
