@@ -13,7 +13,7 @@ fn eval_expr(source: &str) -> EvalResult {
         NodeData::ExpressionStatement(d) => &d.expression,
         _ => unreachable!(),
     };
-    evaluate_expression(expr, None, |_, _| EvalResult::none())
+    evaluate_expression(expr, None, &mut |_, _| EvalResult::none())
 }
 
 #[test]
