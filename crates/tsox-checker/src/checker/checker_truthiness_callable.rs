@@ -75,7 +75,15 @@ impl Checker {
         if !Arc::ptr_eq(&location, cond_expr) {
             t = self.get_type_of_node(&location);
         }
-        if !self.type_has_truthy_fact(&t) {
+        let property_expression_cast = matches!(
+            &location.data,
+            NodeData::PropertyAccessExpression(pa)
+                if matches!(
+                    Self::skip_parentheses(&pa.expression).kind,
+                    SyntaxKind::TypeAssertionExpression | SyntaxKind::AsExpression
+                )
+        );
+        if !self.type_has_truthy_fact(&t) || property_expression_cast {
             return;
         }
         let call_signatures = self.get_signatures_of_type(&t, SignatureKind::Call);
