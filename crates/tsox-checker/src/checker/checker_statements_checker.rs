@@ -334,11 +334,13 @@ impl Checker {
             SyntaxKind::FunctionDeclaration => {
                 self.check_exports_on_merged_declarations(node);
                 self.check_function_declaration(node);
+                self.check_type_parameters_on_node(node);
             }
             SyntaxKind::ClassDeclaration => {
                 self.check_class_declaration(node);
             }
             SyntaxKind::InterfaceDeclaration => {
+                self.check_type_parameters_on_node(node);
                 self.check_exports_on_merged_declarations(node);
                 if !self.check_grammar_modifiers(node) {
                     self.check_grammar_interface_declaration(node);
@@ -394,6 +396,7 @@ impl Checker {
                 }
                 if node.kind == SyntaxKind::TypeAliasDeclaration {
                     self.check_exports_on_merged_declarations(node);
+                    self.check_type_parameters_on_node(node);
                 }
                 if node.kind == SyntaxKind::ImportEqualsDeclaration {
                     // Go checkImportEqualsDeclaration：先跑修饰符文法

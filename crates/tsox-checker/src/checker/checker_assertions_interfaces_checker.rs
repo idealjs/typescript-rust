@@ -135,6 +135,16 @@ impl Checker {
     }
 
     pub(crate) fn check_interface_members(&mut self, members: &NodeList) {
+        for member in members.iter() {
+            if matches!(
+                member.kind,
+                SyntaxKind::MethodSignature
+                    | SyntaxKind::CallSignature
+                    | SyntaxKind::ConstructSignature
+            ) {
+                self.check_type_parameters_on_node(member);
+            }
+        }
         {
             let mut seen: std::collections::HashMap<String, Vec<&Arc<Node>>> =
                 std::collections::HashMap::new();

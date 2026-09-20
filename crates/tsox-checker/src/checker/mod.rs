@@ -218,6 +218,7 @@ pub(crate) mod grammarchecks_checker_7;
 pub(crate) mod grammarchecks_checker_8;
 pub(crate) mod grammarchecks_checker_9;
 pub(crate) mod grammarchecks_is_this_parameter_2;
+pub(crate) mod grammarchecks_typeparameters;
 pub(crate) mod grammarchecks_modifier_kind_checks_a;
 pub(crate) mod grammarchecks_modifier_kind_checks_b;
 pub(crate) mod grammarchecks_modifier_tail_checks;
