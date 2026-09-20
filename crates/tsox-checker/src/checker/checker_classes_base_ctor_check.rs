@@ -165,10 +165,17 @@ impl Checker {
         } else {
             Arc::clone(&value_type)
         };
+        let derived_is_abstract = class_node.has_syntactic_modifier(ModifierFlags::Abstract);
         for sig in self.get_signatures_of_type(&base_type, SignatureKind::Construct) {
+            let mut flags = sig.flags;
+            if derived_is_abstract {
+                flags |= SignatureFlags::Abstract;
+            } else {
+                flags.remove(SignatureFlags::Abstract);
+            }
             let inherited = Signature {
                 id: sig.id,
-                flags: sig.flags,
+                flags,
                 min_argument_count: sig.min_argument_count,
                 resolved_min_argument_count: sig.resolved_min_argument_count,
                 declaration: sig.declaration.clone(),
