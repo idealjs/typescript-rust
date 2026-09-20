@@ -33,8 +33,39 @@ impl Checker {
                 data.operator_token.kind,
                 tsox_frontend::ast::SyntaxKind::AmpersandAmpersandToken
                     | tsox_frontend::ast::SyntaxKind::BarBarToken
+                    | tsox_frontend::ast::SyntaxKind::QuestionQuestionToken
             ) {
                 self.check_truthiness_of_type(&data.left);
+                let mut parent = node.parent();
+                while parent.as_ref().is_some_and(|p| {
+                    matches!(&p.data, tsox_frontend::ast::NodeData::ParenthesizedExpression(_))
+                        || matches!(&p.data, tsox_frontend::ast::NodeData::BinaryExpression(pb)
+                            if matches!(
+                                pb.operator_token.kind,
+                                tsox_frontend::ast::SyntaxKind::AmpersandAmpersandToken
+                                    | tsox_frontend::ast::SyntaxKind::BarBarToken
+                                    | tsox_frontend::ast::SyntaxKind::QuestionQuestionToken
+                            ))
+                }) {
+                    parent = parent.unwrap().parent();
+                }
+                let parent_is_if = parent
+                    .as_ref()
+                    .is_some_and(|p| p.kind == tsox_frontend::ast::SyntaxKind::IfStatement);
+                if data.operator_token.kind == tsox_frontend::ast::SyntaxKind::AmpersandAmpersandToken
+                    || parent_is_if
+                {
+                    let body = parent.and_then(|p| match &p.data {
+                        tsox_frontend::ast::NodeData::IfStatement(d) => Some(Arc::clone(&d.then_statement)),
+                        _ => None,
+                    });
+                    let left_type = self.get_type_of_node(&data.left);
+                    self.check_testing_known_truthy_callable_or_awaitable(
+                        &data.left,
+                        &left_type,
+                        body.as_ref(),
+                    );
+                }
             }
 
             let rhs_frame = {

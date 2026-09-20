@@ -245,8 +245,15 @@ impl Checker {
                     return t;
                 }
             }
-            let flow = self.program.symbol_map().flow_node_of(node).map(Arc::clone);
-            let narrowed = self.get_narrowed_type_of_symbol(&symbol, flow.as_ref());
+            let flow_narrowable = symbol.flags.intersects(
+                SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable,
+            ) || symbol.flags.intersects(SymbolFlags::Alias);
+            let narrowed = if flow_narrowable {
+                let flow = self.program.symbol_map().flow_node_of(node).map(Arc::clone);
+                self.get_narrowed_type_of_symbol(&symbol, flow.as_ref())
+            } else {
+                self.get_type_of_symbol(&symbol)
+            };
 
             if narrowed.object_flags.contains(ObjectFlags::EvolvingArray)
                 && self.is_evolving_array_operation_target(node)

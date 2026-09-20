@@ -148,6 +148,12 @@ impl Checker {
                 if let tsox_frontend::ast::NodeData::ConditionalExpression(data) = &node.data {
                     self.check_expression(&data.condition);
                     self.check_truthiness_of_type(&data.condition);
+                    let cond_type = self.get_type_of_node(&data.condition);
+                    self.check_testing_known_truthy_callable_or_awaitable(
+                        &data.condition,
+                        &cond_type,
+                        Some(&data.when_true),
+                    );
                     self.check_expression(&data.when_true);
                     self.check_expression(&data.when_false);
                 }

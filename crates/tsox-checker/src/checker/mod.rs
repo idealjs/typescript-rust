@@ -173,6 +173,7 @@ pub(crate) mod checker_symbol_types;
 pub(crate) mod checker_symbol_types_checker;
 pub(crate) mod checker_this_container;
 pub(crate) mod checker_this_expressions;
+pub(crate) mod checker_truthiness_callable;
 pub(crate) mod checker_symbol_types_checker_2;
 pub(crate) mod checker_symbol_types_checker_3;
 pub(crate) mod checker_symbol_types_checker_4;
