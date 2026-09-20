@@ -82,9 +82,6 @@ impl Checker {
                         ));
                     }
                 } else {
-                    if std::env::var_os("TSOX_DEBUG_DOM").is_some() {
-                        eprintln!("[2694] ns={} member={}", ns_path, member);
-                    }
                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                                 file,
                                 segment.loc,

@@ -135,14 +135,6 @@ impl Checker {
                     Some(ex) if ex.len() == sig.type_parameters.len() => ex.clone(),
                     _ => self.infer_call_type_arguments(call_node, &sig, &sibling_args),
                 };
-                if std::env::var("TSOX_DEBUG_SUBST").is_ok() {
-                    let rendered: Vec<String> = inferred.iter().map(|t| self.type_to_string(t)).collect();
-                    let node_text = self.node_source_text(call_node).unwrap_or_default();
-                    let exp_len = explicit.as_ref().map(|e| e.len());
-                    eprintln!("[ctx-arg-explicit] used={} sig_tps={} exp={:?} call=`{}` -> [{}]",
-                        explicit.is_some() && explicit.as_ref().is_some_and(|e| e.len() == sig.type_parameters.len()),
-                        sig.type_parameters.len(), exp_len, node_text.chars().take(40).collect::<String>(), rendered.join(", "));
-                }
                 self.resolving_contextual_calls.remove(&key);
                 if !inferred.is_empty() {
                     let substed = self.substitute_infer_type_parameters(

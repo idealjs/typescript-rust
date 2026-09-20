@@ -208,14 +208,6 @@ impl Checker {
     // Go getSymbolChain 的别名感知限定：命名空间父级链显示时，
     // 遇显示上下文文件内解析到该命名空间的别名用别名名；到 enclosing 文件自身模块不加前缀
     pub(crate) fn namespace_qualifier_of(&mut self, symbol: &Arc<Symbol>) -> Option<String> {
-        if std::env::var_os("TSOX_DEBUG_QI").is_some() {
-            let p_info = symbol
-                .parent()
-                .clone()
-                .map(|p| format!("{}/flags={:?}", p.name, p.flags))
-                .unwrap_or_else(|| "NONE".into());
-            eprintln!("[nsq] sym={} parent={p_info}", symbol.name);
-        }
         let mut parts: Vec<String> = Vec::new();
         let mut cur = symbol
             .parent()
@@ -550,16 +542,6 @@ impl Checker {
                     .parent()
                     .clone()
                     .or_else(|| self.namespace_container_from_declarations(sym));
-                if std::env::var_os("TSOX_DEBUG_QI").is_some() {
-                    eprintln!(
-                        "[xeq9] sym={} container={:?} exports={:?}",
-                        sym.name,
-                        container.as_ref().map(|c| c.name.clone()),
-                        container
-                            .as_ref()
-                            .map(|c| c.exports.entries.keys().cloned().collect::<Vec<_>>())
-                    );
-                }
                 let is_export_equals = container
                     .as_ref()
                     .and_then(|p| p.exports.get("export="))

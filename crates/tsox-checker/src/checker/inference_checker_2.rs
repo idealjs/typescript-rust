@@ -133,20 +133,7 @@ impl Checker {
         let st = self.get_return_type_of_signature(source);
         let tt = self.get_return_type_of_signature(target);
         if let (Some(st), Some(tt)) = (st, tt) {
-            if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
-                eprintln!(
-                    "[infer-sig] ret {} -> {}",
-                    self.type_to_string(&st),
-                    self.type_to_string(&tt)
-                );
-            }
             self.infer_from_types(state, &st, &tt);
-        } else if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
-            eprintln!(
-                "[infer-sig] ret MISSING src={} tgt={}",
-                source.resolved_return_type.get().is_some(),
-                target.resolved_return_type.get().is_some()
-            );
         }
     }
 

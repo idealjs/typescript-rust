@@ -319,8 +319,5 @@ impl Checker {
 
 pub(crate) fn node_name_probe(d: &Arc<tsox_frontend::ast::Node>) -> Option<String> {
     let r = tsox_frontend::ast::node_data_generated::node_name(d).map(|n| n.text().to_string());
-    if std::env::var_os("TSOX_DEBUG_SYMBOL").is_some() {
-        eprintln!("[tup-label] decl={:?} -> {:?}", d.kind, r);
-    }
     r
 }

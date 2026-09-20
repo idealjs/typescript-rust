@@ -20,15 +20,6 @@ impl Checker {
         }
         if let Some(export_equals) = module_symbol.exports.get("export=") {
             let target = self.resolve_export_equals_target(export_equals);
-            if std::env::var_os("TSOX_DEBUG_MODULE").is_some() {
-                eprintln!(
-                    "[mod-lookup] export= chain: module={:?} target={:?} exports={} members={}",
-                    module_symbol.name,
-                    target.name,
-                    target.exports.len(),
-                    target.members.len()
-                );
-            }
             if self.module_target_has_member(&target, name)
                 || module_symbol.exports.get(name).is_some()
             {
@@ -44,26 +35,6 @@ impl Checker {
         }
         if module_symbol.exports.get(name).is_some() {
             return M::Found;
-        }
-        if std::env::var_os("TSOX_DEBUG_MODULE").is_some() {
-            eprintln!(
-                "[mod-lookup] plain: name={name} exports={:?} members_with={:?} decls={:?}",
-                module_symbol
-                    .exports
-                    .iter()
-                    .take(12)
-                    .map(|(k, _)| k.clone())
-                    .collect::<Vec<_>>(),
-                module_symbol
-                    .members
-                    .get(name)
-                    .map(|s| (s.export_symbol.is_some(), s.flags)),
-                module_symbol
-                    .declarations
-                    .iter()
-                    .map(|d| d.kind)
-                    .collect::<Vec<_>>()
-            );
         }
 
         if self.module_has_export_clause(module_symbol, name) {

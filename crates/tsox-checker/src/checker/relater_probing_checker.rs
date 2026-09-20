@@ -41,13 +41,6 @@ impl Checker {
             }
             if let TypeData::Union(u) = &check_type.data {
                 let constituents = u.union_or_intersection.types.clone();
-                if std::env::var_os("TSOX_DEBUG_COND").is_some() {
-                    eprintln!(
-                        "[cond] distributing over {} constituent(s); tp={}",
-                        constituents.len(),
-                        tp_symbol.name
-                    );
-                }
                 let key = Arc::as_ptr(tp_symbol) as *const tsox_frontend::ast::Symbol;
                 let mut results: Vec<Arc<Type>> = Vec::with_capacity(constituents.len());
                 for constituent in constituents {
@@ -57,19 +50,9 @@ impl Checker {
                     let r =
                         self.resolve_conditional_type_with_check(t, Some(Arc::clone(&constituent)));
                     self.type_argument_stack.pop();
-                    if std::env::var_os("TSOX_DEBUG_COND").is_some() {
-                        eprintln!(
-                            "[cond]   constituent {} -> {:?}",
-                            self.type_to_string(&constituent),
-                            r.as_ref().map(|x| self.type_to_string(x))
-                        );
-                    }
                     results.push(r?);
                 }
                 let union = self.get_union_type(results);
-                if std::env::var_os("TSOX_DEBUG_COND").is_some() {
-                    eprintln!("[cond] result union = {}", self.type_to_string(&union));
-                }
                 return Some(union);
             }
         }
@@ -167,13 +150,6 @@ impl Checker {
                 self.is_type_assignable_to(&restrictive_check, &restrictive_extends)
             };
             if !definitely_true {
-                if std::env::var_os("TSOX_DEBUG_COND").is_some() {
-                    eprintln!(
-                        "[cond]     deferred (neither definite) check={} extends={}",
-                        self.type_to_string(&check_type),
-                        self.type_to_string(&inferred_extends)
-                    );
-                }
                 return None;
             }
             true
@@ -182,14 +158,6 @@ impl Checker {
         };
 
         let include_true_branch = take_true == false && check_is_any;
-        if std::env::var_os("TSOX_DEBUG_COND").is_some() {
-            eprintln!(
-                "[cond]     take_true={} check={} extends={}",
-                take_true,
-                self.type_to_string(&check_type),
-                self.type_to_string(&inferred_extends)
-            );
-        }
 
         let (cond_node, branch_node) = match ct
             .root

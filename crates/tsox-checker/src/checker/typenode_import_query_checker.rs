@@ -42,9 +42,6 @@ impl Checker {
         alias: &Arc<Symbol>,
     ) -> Option<Arc<Symbol>> {
         // import X = require("./m") 形式：目标 = 模块的 export= 符号
-        if std::env::var_os("TSOX_DEBUG_QI").is_some() && alias.name == "C" {
-            eprintln!("[req-alias] C decls={:?}", alias.declarations.iter().map(|d| d.kind).collect::<Vec<_>>());
-        }
         if let Some(decl) = alias
             .declarations
             .iter()

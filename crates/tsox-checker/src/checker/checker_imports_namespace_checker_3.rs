@@ -34,14 +34,6 @@ impl Checker {
 
     fn type_of_imported_symbol_inner(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
         // import * as X from "m"：X 的类型是模块命名空间类型（typeof import("m")）
-        if std::env::var_os("TSOX_DEBUG_QI").is_some() {
-            eprintln!(
-                "[tois] sym={} decls={:?} flags={:?}",
-                symbol.name,
-                symbol.declarations.iter().map(|d| d.kind).collect::<Vec<_>>(),
-                symbol.flags
-            );
-        }
         if let Some(decl) = symbol
             .declarations
             .iter()
@@ -49,9 +41,6 @@ impl Checker {
         {
             let mut cur = decl.parent();
             loop {
-                if std::env::var_os("TSOX_DEBUG_QI").is_some() {
-                    eprintln!("[nsi-walk] kind={:?}", cur.as_ref().map(|n| n.kind));
-                }
                 let Some(n) = cur else { break };
                 if let tsox_frontend::ast::NodeData::ImportDeclaration(id) = &n.data {
                     let spec = id
@@ -59,16 +48,6 @@ impl Checker {
                         .text()
                         .trim_matches(['"', '\'', '`'])
                         .to_string();
-                    if std::env::var_os("TSOX_DEBUG_QI").is_some() {
-                        let three_files: Vec<String> = self
-                            .program
-                            .source_files()
-                            .iter()
-                            .filter(|f| f.file_name.contains("three"))
-                            .map(|f| f.file_name.clone())
-                            .collect();
-                        eprintln!("[nsi-fs] three_files={three_files:?} spec={spec:?}");
-                    }
                     let module_sym = self
                         .resolve_module_file_symbol(&spec)
                         .or_else(|| {
@@ -92,12 +71,6 @@ impl Checker {
                                 &file.file_name,
                                 tsox_core::core::compiler_options::ModuleKind::None,
                             );
-                            if std::env::var_os("TSOX_DEBUG_QI").is_some() {
-                                eprintln!(
-                                    "[nsi-res] spec={spec:?} from={:?} path={path:?}",
-                                    file.file_name
-                                );
-                            }
                             let path = match path {
                                 Some(p) => p,
                                 // 内存 FS 下 @types 查找缺 package.json 时 Resolver 失败：

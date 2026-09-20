@@ -293,9 +293,6 @@ impl Checker {
         }
 
         if let Some(structured) = t.as_structured() {
-            if std::env::var("TSOX_DEBUG_KEYOF").is_ok() {
-                eprintln!("[keyof] names={:?} idx={}", structured.properties.iter().map(|p| p.name.clone()).collect::<Vec<_>>(), structured.index_infos.len());
-            }
             let mut keys: Vec<Arc<Type>> = structured
                 .properties
                 .iter()

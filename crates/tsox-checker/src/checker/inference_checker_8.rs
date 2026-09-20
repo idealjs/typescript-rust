@@ -778,13 +778,6 @@ impl Checker {
                         &partial,
                     );
                     let arg_type = self.type_of_context_sensitive_arg(&args[i], &inst_param);
-                    if std::env::var_os("TSOX_DEBUG_HOVER").is_some() {
-                        eprintln!(
-                            "[infer-cs] inst_param={} arg_type={}",
-                            self.type_to_string(&inst_param),
-                            self.type_to_string(&arg_type)
-                        );
-                    }
                     self.infer_types(
                         &mut context.inferences,
                         Some(arg_type),

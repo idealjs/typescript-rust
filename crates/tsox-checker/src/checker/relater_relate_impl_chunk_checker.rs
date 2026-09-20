@@ -52,15 +52,6 @@ impl Checker {
     // 空成员且带接口/类符号：解析重入期返回的未完成实例（非 `{}` 字面量）
     pub(crate) fn side_is_incomplete_shell(&self, t: &Arc<Type>, _id: u32) -> bool {
         let r = t.as_structured().is_some_and(|s| {
-            if std::env::var_os("TSOX_DEBUG_DOM").is_some() {
-                let n = t.symbol.as_ref().map(|s| s.name.clone()).unwrap_or_default();
-                if n == "Element" || n == "HTMLElement" {
-                    eprintln!("[shell?] {} props={} members_empty={} sym_decls={} ref={}",
-                        n, s.properties.len(), s.members.entries.is_empty(),
-                        t.symbol.as_ref().map(|x| x.declarations.len()).unwrap_or(0),
-                        t.object_flags.contains(ObjectFlags::Reference));
-                }
-            }
             s.members.entries.is_empty()
                 && t.symbol
                     .as_ref()
@@ -71,12 +62,6 @@ impl Checker {
                         ) && !sym.declarations.is_empty()
                     })
         });
-        if std::env::var_os("TSOX_DEBUG_DOM").is_some() {
-            let n = t.symbol.as_ref().map(|s| s.name.clone()).unwrap_or_default();
-            if n == "Element" || n == "HTMLElement" {
-                eprintln!("[shell?] -> {}", r);
-            }
-        }
         r
     }
 
@@ -142,9 +127,6 @@ impl Checker {
                 })
             && source.as_structured().is_some_and(|s| s.members.entries.is_empty())
         {
-            if std::env::var_os("TSOX_DEBUG_RELATE").is_some() {
-                eprintln!("[relate-early] shell");
-            }
             return true;
         }
 

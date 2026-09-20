@@ -150,16 +150,6 @@ impl Checker {
         } else {
             None
         };
-        if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
-            eprintln!(
-                "[infer] sig params={} tp={}",
-                sig.parameters.len(),
-                sig.type_parameters.len()
-            );
-            for (i, t) in inferred_types.iter().enumerate() {
-                eprintln!("[infer]   {} -> {}", i, self.type_to_string(t));
-            }
-        }
         self.check_call_arguments_loop(
             node,
             &sig,
