@@ -425,87 +425,151 @@ impl Checker {
         let Some(module_symbol) = self.current_file_symbol.clone() else {
             return;
         };
-        let default_locs: Vec<tsox_core::core::text::TextRange> = statements
-            .iter()
-            .filter(|s| {
-                s.kind != SyntaxKind::InterfaceDeclaration
-                    && (matches!(&s.data, tsox_frontend::ast::NodeData::ExportAssignment(d) if !d.is_export_equals)
-                        || s.has_syntactic_modifier(ModifierFlags::Default))
-            })
-            .map(|s| match &s.data {
-                tsox_frontend::ast::NodeData::ExportAssignment(d) if !d.is_export_equals => {
-                    if d.expression.kind == SyntaxKind::Identifier {
-                        d.expression.loc
-                    } else {
-                        s.loc
+        // Go binder declareSymbol 重放：顶层 default 声明按各形式的
+        // includes/excludes 合并；仅 export default EA（excludes=ALL）与
+        // 既有 default 冲突时对每处声明报 2528 且不入表（表保旧符号）
+        let mut default_table: Option<(SymbolFlags, Vec<Arc<Node>>)> = None;
+        for stmt in statements {
+            let Some((includes, excludes)) = default_decl_semantics(stmt) else {
+                continue;
+            };
+            match &mut default_table {
+                Some((flags, decls)) if flags.intersects(excludes) => {
+                    for d in decls.iter() {
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            file,
+                            default_export_name_loc(d),
+                            tsox_core::diagnostics::messages_generated::
+                                A_MODULE_CANNOT_HAVE_MULTIPLE_DEFAULT_EXPORTS,
+                            Vec::new(),
+                        ));
                     }
+                    let file = self.current_file.clone();
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        default_export_name_loc(stmt),
+                        tsox_core::diagnostics::messages_generated::
+                            A_MODULE_CANNOT_HAVE_MULTIPLE_DEFAULT_EXPORTS,
+                        Vec::new(),
+                    ));
                 }
-                _ => declaration_name_loc(s).unwrap_or(s.loc),
-            })
-            .collect();
-        if default_locs.len() > 1 {
-            for loc in default_locs {
-                let file = self.current_file.clone();
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    file,
-                    loc,
-                    tsox_core::diagnostics::messages_generated::
-                        A_MODULE_CANNOT_HAVE_MULTIPLE_DEFAULT_EXPORTS,
-                    Vec::new(),
-                ));
+                Some((flags, decls)) => {
+                    *flags |= includes;
+                    decls.push(Arc::clone(stmt));
+                }
+                None => {
+                    default_table = Some((includes, vec![Arc::clone(stmt)]));
+                }
             }
+        }
+        // 存活 default 符号走 exports 循环同款 2323 规则（Go checkExternalModuleExports
+        // 的 getExportsOfModule 含 "default" 符号，与普通导出名一视同仁）
+        if let Some((flags, decls)) = &default_table {
+            self.report_export_declarations_2323(
+                "default".to_string(),
+                *flags,
+                decls,
+            );
         }
         let exports = self.get_exports_of_module_table(&module_symbol);
         for (name, symbol) in exports.entries.iter() {
-            if name == "export*" || name == "export=" {
+            if name == "export*" || name == "export=" || name == "default" {
                 continue;
             }
             let flags = self.get_symbol_flags(symbol);
             if flags.intersects(SymbolFlags::NAMESPACE | SymbolFlags::ENUM) {
                 continue;
             }
-            let is_not_overload = |d: &Arc<Node>| {
-                !matches!(d.kind, SyntaxKind::FunctionDeclaration | SyntaxKind::MethodDeclaration)
-                    || body_of(d).is_some()
-            };
-            let exported_declarations_count = symbol
-                .declarations
-                .iter()
-                .filter(|d| {
-                    is_not_overload(d)
-                        && !matches!(
-                            d.kind,
-                            SyntaxKind::GetAccessor | SyntaxKind::SetAccessor
-                        )
-                        && d.kind != SyntaxKind::InterfaceDeclaration
-                })
-                .count();
-            if flags.intersects(SymbolFlags::TypeAlias) && exported_declarations_count <= 2 {
-                continue;
-            }
-            if exported_declarations_count > 1
-                && !symbol.declarations.iter().all(|d| {
-                    crate::binder::get_assignment_declaration_kind(d)
-                        == crate::binder::bind_js_assignment_declarations::JsDeclarationKind::ExportsProperty
-                })
-            {
-                for declaration in symbol.declarations.iter() {
-                    if is_not_overload(declaration)
-                        && let Some(loc) = declaration_name_loc(declaration)
-                    {
-                        let file = self.current_file.clone();
-                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                            file,
-                            loc,
-                            tsox_core::diagnostics::messages_generated::
-                                CANNOT_REDECLARE_EXPORTED_VARIABLE_0,
-                            vec![name.clone()],
-                        ));
-                    }
+            self.report_export_declarations_2323(name.clone(), flags, &symbol.declarations);
+        }
+    }
+
+    // Go checkExternalModuleExports 的 export 冲突段：同一导出名多个
+    // 非重载声明时报 TS2323（namespace/enum/接口合并/类型别名合并除外）
+    fn report_export_declarations_2323(
+        &mut self,
+        name: String,
+        flags: SymbolFlags,
+        declarations: &[Arc<Node>],
+    ) {
+        let is_not_overload = |d: &Arc<Node>| {
+            !matches!(d.kind, SyntaxKind::FunctionDeclaration | SyntaxKind::MethodDeclaration)
+                || body_of(d).is_some()
+        };
+        let exported_declarations_count = declarations
+            .iter()
+            .filter(|d| {
+                is_not_overload(d)
+                    && !matches!(d.kind, SyntaxKind::GetAccessor | SyntaxKind::SetAccessor)
+                    && d.kind != SyntaxKind::InterfaceDeclaration
+            })
+            .count();
+        if flags.intersects(SymbolFlags::TypeAlias) && exported_declarations_count <= 2 {
+            return;
+        }
+        if exported_declarations_count > 1
+            && !declarations.iter().all(|d| {
+                crate::binder::get_assignment_declaration_kind(d)
+                    == crate::binder::bind_js_assignment_declarations::JsDeclarationKind::ExportsProperty
+            })
+        {
+            for declaration in declarations.iter() {
+                if is_not_overload(declaration) {
+                    let loc = declaration_name_loc(declaration).unwrap_or(declaration.loc);
+                    let file = self.current_file.clone();
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        loc,
+                        tsox_core::diagnostics::messages_generated::
+                            CANNOT_REDECLARE_EXPORTED_VARIABLE_0,
+                        vec![name.clone()],
+                    ));
                 }
             }
         }
     }
+}
+
+// Go bindExportAssignment/bindFunctionDeclaration/bindClassLikeDeclaration/
+// bindBlockScopedDeclaration 的 includes/excludes（default 顶层声明）
+fn default_decl_semantics(stmt: &Arc<Node>) -> Option<(SymbolFlags, SymbolFlags)> {
+    if let tsox_frontend::ast::NodeData::ExportAssignment(d) = &stmt.data {
+        if !d.is_export_equals {
+            let includes = if crate::binder::bind_js_assignment_declarations::expression_is_alias(
+                &d.expression,
+            ) {
+                SymbolFlags::Alias
+            } else {
+                SymbolFlags::Property
+            };
+            return Some((includes, SymbolFlags::all()));
+        }
+        return None;
+    }
+    if !stmt.has_syntactic_modifier(ModifierFlags::Default) {
+        return None;
+    }
+    match stmt.kind {
+        SyntaxKind::FunctionDeclaration => {
+            Some((SymbolFlags::Function, SymbolFlags::FunctionExcludes))
+        }
+        SyntaxKind::ClassDeclaration => Some((SymbolFlags::Class, SymbolFlags::ClassExcludes)),
+        SyntaxKind::InterfaceDeclaration => {
+            Some((SymbolFlags::Interface, SymbolFlags::InterfaceExcludes))
+        }
+        _ => None,
+    }
+}
+
+// Go GetNameOfDeclaration 或节点本身（2528 的声明名定位）
+fn default_export_name_loc(d: &Arc<Node>) -> tsox_core::core::text::TextRange {
+    if let tsox_frontend::ast::NodeData::ExportAssignment(data) = &d.data {
+        if !data.is_export_equals {
+            return data.expression.loc;
+        }
+    }
+    d.name().map(|n| n.loc).unwrap_or(d.loc)
 }
 
 fn body_of(d: &Arc<Node>) -> Option<Arc<Node>> {
