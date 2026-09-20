@@ -72,8 +72,9 @@ impl Checker {
             .type_could_have_top_level_singleton_types(target)
         {
             (source_str.clone(), target_str.clone())
-        } else if crate::checker::is_fresh_literal_type(source)
-            || source.flags.intersects(TYPE_FLAGS_LITERAL)
+        } else if !target.flags.contains(TypeFlags::Never)
+            && (crate::checker::is_fresh_literal_type(source)
+                || source.flags.intersects(TYPE_FLAGS_LITERAL))
         {
             let base = self.get_base_type_of_literal_type_for_display(source);
             (self.type_to_string(&base), target_str.clone())
