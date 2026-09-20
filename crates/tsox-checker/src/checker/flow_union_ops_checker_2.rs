@@ -124,32 +124,52 @@ impl Checker {
         type_: &Arc<Type>,
         value_type: &Arc<Type>,
     ) -> Arc<Type> {
-        // Go getNarrowedTypeWorker：联合先做成分级双向收窄（保留更具体侧），
-        // 不能先按「谓词整体可赋给原类型」短路 —— any[] 谓词（Array.isArray）
-        // 万可赋值，短路会吞掉元组联合（元组成员应保留自身）
-        if type_.is_union() {
-            let constituents = self.constituent_types(type_);
-            let matching: Vec<Arc<Type>> = constituents
-                .into_iter()
-                .filter_map(|t| {
-                    if self.is_type_assignable_to(&t, value_type) {
-                        Some(t)
-                    } else if self.is_type_assignable_to(value_type, &t) {
-                        Some(Arc::clone(value_type))
-                    } else {
-                        None
+        // Go getNarrowedTypeWorker（assumeTrue）：对候选（谓词）成分逐个与源
+        // 成分做 strictSubtype/subtype 四级阶梯，取更具体侧且谓词侧优先
+        //（{} 与全可选属性类型双向可赋值，须靠 strictSubtype 分出谓词侧）；
+        // 全空时实例化成分按约束交集，最后按可赋值性收尾或交集兜底
+        if Arc::ptr_eq(type_, value_type) {
+            return Arc::clone(value_type);
+        }
+        if type_.flags.intersects(TypeFlags::Any | TypeFlags::Unknown) {
+            return Arc::clone(value_type);
+        }
+        let sources = self.constituent_types(type_);
+        let candidates = self.constituent_types(value_type);
+        let mut picked: Vec<Arc<Type>> = Vec::new();
+        for n in &candidates {
+            let mut directly: Vec<Arc<Type>> = Vec::new();
+            for t in &sources {
+                if self.is_type_strict_subtype_of(t, n) {
+                    directly.push(Arc::clone(t));
+                } else if self.is_type_strict_subtype_of(n, t) {
+                    directly.push(Arc::clone(n));
+                } else if self.is_type_subtype_of(t, n) {
+                    directly.push(Arc::clone(t));
+                } else if self.is_type_subtype_of(n, t) {
+                    directly.push(Arc::clone(n));
+                }
+            }
+            if !directly.is_empty() {
+                picked.extend(directly);
+                continue;
+            }
+            for t in &sources {
+                if t.flags.intersects(TYPE_FLAGS_INSTANTIABLE) {
+                    let related = match self.get_base_constraint_of_type(t) {
+                        None => true,
+                        Some(constraint) => self.is_type_subtype_of(n, &constraint),
+                    };
+                    if related {
+                        picked.push(self.get_intersection_type(vec![Arc::clone(t), Arc::clone(n)]));
                     }
-                })
-                .collect();
-            if matching.len() == 1 {
-                return matching.into_iter().next().expect("exactly one");
+                }
             }
-            if !matching.is_empty() {
-                return self.get_union_type(matching);
-            }
-        } else if self.is_type_assignable_to(type_, value_type) {
-            return Arc::clone(type_);
-        } else if self.is_type_assignable_to(value_type, type_) {
+        }
+        if !picked.is_empty() {
+            return self.get_union_type(picked);
+        }
+        if self.is_type_subtype_of(value_type, type_) {
             return Arc::clone(value_type);
         }
         if self.is_type_assignable_to(type_, value_type) {

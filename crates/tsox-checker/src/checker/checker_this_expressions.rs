@@ -93,10 +93,11 @@ impl Checker {
                 || get_this_parameter(&container).is_some())
         {
             if let Some(this_param) = get_this_parameter(&container) {
-                return self.type_of_this_parameter_node(&this_param);
+                let t = self.type_of_this_parameter_node(&this_param);
+                return self.get_flow_type_of_reference(node, &t);
             }
             if let Some(t) = self.contextual_this_parameter_type(&container) {
-                return t;
+                return self.get_flow_type_of_reference(node, &t);
             }
         }
         if let Some(parent) = container.parent()
@@ -105,10 +106,12 @@ impl Checker {
             // Go ast.IsStatic：static 修饰符或类静态块本体
             if has_static_modifier(&container) || container.kind == SyntaxKind::ClassStaticBlockDeclaration
             {
-                return self.get_type_of_class_declaration(&parent);
+                let t = self.get_type_of_class_declaration(&parent);
+                return self.get_flow_type_of_reference(node, &t);
             }
             let instance = self.container_instance_type_of(&parent);
-            return self.create_this_type(&parent, instance);
+            let t = self.create_this_type(&parent, instance);
+            return self.get_flow_type_of_reference(node, &t);
         }
         if container.kind == SyntaxKind::SourceFile {
             if self.container_file_is_external_module(&container) {
