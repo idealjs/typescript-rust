@@ -140,14 +140,8 @@ impl Checker {
         {
             let module_name = data.name.text().trim_matches(['"', '\'']).to_string();
             let resolvable = self.resolve_module_file_symbol(&module_name).is_some();
-            // Go mergeModuleAugmentation：ambient 上下文中的增广不校验名字
-            let in_ambient = node.has_syntactic_modifier(ModifierFlags::Ambient)
-                || self.ambient_context_depth > 0
-                || self
-                    .current_file
-                    .as_ref()
-                    .is_some_and(|f| f.is_declaration_file);
-            if !resolvable && !in_ambient {
+            let container_ambient = self.augmentation_container_is_ambient(node);
+            if !resolvable && !container_ambient {
                 let file = self.current_file.clone();
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                         file,
@@ -212,6 +206,23 @@ impl Checker {
         self.pop_scope();
         if is_ambient {
             self.ambient_context_depth -= 1;
+        }
+    }
+
+    fn augmentation_container_is_ambient(&self, node: &Arc<Node>) -> bool {
+        let file_is_declaration = self
+            .current_file
+            .as_ref()
+            .is_some_and(|f| f.is_declaration_file);
+        match node.parent() {
+            Some(p) if p.kind == SyntaxKind::ModuleBlock => {
+                p.parent().is_some_and(|outer| {
+                    outer.has_syntactic_modifier(ModifierFlags::Ambient)
+                        || self.ambient_context_depth > 0
+                        || file_is_declaration
+                })
+            }
+            _ => file_is_declaration,
         }
     }
 }
