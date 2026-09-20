@@ -204,20 +204,29 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
     ) -> bool {
+        let source = self.get_regular_type_of_object_literal(source);
         if let Some(ui) = target.as_union_or_intersection() {
             let save_len = self.relater_error_chain.len();
             let mut best: Option<Vec<RelaterChainEntry>> = None;
-            for t in &ui.types {
-                if self.is_type_related_to(source, t, relation) {
-                    return true;
+            let matched = {
+                let mut m = false;
+                for t in &ui.types {
+                    if self.is_type_related_to(&source, t, relation) {
+                        m = true;
+                        break;
+                    }
+                    if best
+                        .as_ref()
+                        .is_none_or(|b| b.len() < self.relater_error_chain.len())
+                    {
+                        best = Some(self.relater_error_chain.clone());
+                    }
+                    self.relater_error_chain.truncate(save_len);
                 }
-                if best
-                    .as_ref()
-                    .is_none_or(|b| b.len() < self.relater_error_chain.len())
-                {
-                    best = Some(self.relater_error_chain.clone());
-                }
-                self.relater_error_chain.truncate(save_len);
+                m
+            };
+            if matched {
+                return true;
             }
 
             if source.flags.contains(TypeFlags::Intersection)
@@ -237,11 +246,11 @@ impl Checker {
 
             if self.relater_chain_active
                 && self.speculation_depth == 0
-                && let Some(best_t) = self.get_best_matching_type_for_error(source, target)
+                && let Some(best_t) = self.get_best_matching_type_for_error(&source, target)
             {
                 self.relater_error_chain.truncate(save_len);
-                self.is_type_related_to(source, &best_t, relation);
-                let source_str = self.type_to_string(source);
+                self.is_type_related_to(&source, &best_t, relation);
+                let source_str = self.type_to_string(&source);
                 let target_str = self.type_to_string(&best_t);
                 let msg = if source_str == target_str {
                     tsox_core::diagnostics::messages_generated::

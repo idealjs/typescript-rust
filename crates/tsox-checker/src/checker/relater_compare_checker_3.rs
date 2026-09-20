@@ -34,6 +34,7 @@ impl Checker {
         if self.speculation_depth > 0 {
             return self.is_type_related_to(source, target, relation);
         }
+        self.relater_excess_error_node = None;
         let saved_chain = std::mem::take(&mut self.relater_error_chain);
         let was_active = self.relater_chain_active;
         self.relater_chain_active = true;
@@ -80,8 +81,9 @@ impl Checker {
             .type_could_have_top_level_singleton_types(&rebound_target)
         {
             (source_str.clone(), target_str.clone())
-        } else if crate::checker::is_fresh_literal_type(source)
-            || source.flags.intersects(TYPE_FLAGS_LITERAL)
+        } else if !target.flags.contains(TypeFlags::Never)
+            && (crate::checker::is_fresh_literal_type(source)
+                || source.flags.intersects(TYPE_FLAGS_LITERAL))
         {
             let base = self.get_base_type_of_literal_type_for_display(source);
             (self.type_to_string(&base), target_str.clone())
@@ -147,6 +149,14 @@ impl Checker {
                 a.len() >= 2 && a[0] == head_source && a[1] == head_target
             } else if m
                 == tsox_core::diagnostics::messages_generated::
+                    OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1
+                || m
+                    == tsox_core::diagnostics::messages_generated::
+                        OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_BUT_0_DOES_NOT_EXIST_IN_TYPE_1_DID_YOU_MEAN_TO_WRITE_2
+            {
+                true
+            } else if m
+                == tsox_core::diagnostics::messages_generated::
                     THE_TYPE_0_IS_READONLY_AND_CANNOT_BE_ASSIGNED_TO_THE_MUTABLE_TYPE_1
             {
                 a.len() == 2 && a[0] == head_source && a[1] == head_target
@@ -168,9 +178,18 @@ impl Checker {
             self.relater_error_chain = saved_chain;
             return false;
         };
-        let file = self
-            .get_source_file_of_node(error_node)
-            .or_else(|| self.current_file.clone());
+        let (pos_node, file) = match self.relater_excess_error_node.clone() {
+            Some(n) => (
+                n.loc,
+                self.get_source_file_of_node(&n).or_else(|| self.current_file.clone()),
+            ),
+            None => (
+                error_node.loc,
+                self
+                    .get_source_file_of_node(error_node)
+                    .or_else(|| self.current_file.clone()),
+            ),
+        };
         let mut diagnostic: Option<tsox_frontend::ast::Diagnostic> = None;
         for entry in self.relater_error_chain.iter() {
             if entry.message.elided_in_compatibility_pyramid {
@@ -178,7 +197,7 @@ impl Checker {
             }
             let mut d = tsox_frontend::ast::Diagnostic::new(
                 file.clone(),
-                error_node.loc,
+                pos_node,
                 entry.message,
                 entry.args.clone(),
             );
@@ -314,20 +333,44 @@ impl Checker {
         &mut self,
         target_type: &Arc<Type>,
         name: &str,
-        _is_comparing_jsx_attributes: bool,
+        is_comparing_jsx_attributes: bool,
     ) -> bool {
-        if let Some(structured) = target_type.as_structured() {
-            if structured.members.get(name).is_some() {
+        if target_type.flags.contains(TypeFlags::Object) {
+            if self.get_property_of_type(target_type, name).is_some()
+                || self.target_index_covers_name(target_type, name)
+                || is_comparing_jsx_attributes
+                    && crate::checker::relater_predicates::is_hyphenated_jsx_name(name)
+            {
                 return true;
             }
-            for info in &structured.index_infos {
-                if let Some(key) = &info.key_type {
-                    if key.flags.contains(TypeFlags::String) {
-                        return true;
-                    }
-                    if key.flags.contains(TypeFlags::Number) && name.parse::<f64>().is_ok() {
-                        return true;
-                    }
+        }
+        if let TypeData::Substitution(s) = &target_type.data
+            && let Some(base) = &s.base_type
+        {
+            return self.is_known_property(base, name, is_comparing_jsx_attributes);
+        }
+        if target_type.flags.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
+            && crate::checker::relater_predicates::is_excess_property_check_target(target_type)
+            && let Some(types) = target_type.types()
+        {
+            return types
+                .iter()
+                .any(|t| self.is_known_property(t, name, is_comparing_jsx_attributes));
+        }
+        false
+    }
+
+    fn target_index_covers_name(&self, target_type: &Arc<Type>, name: &str) -> bool {
+        let Some(structured) = target_type.as_structured() else {
+            return false;
+        };
+        for info in &structured.index_infos {
+            if let Some(key) = &info.key_type {
+                if key.flags.contains(TypeFlags::String) {
+                    return true;
+                }
+                if key.flags.contains(TypeFlags::Number) && name.parse::<f64>().is_ok() {
+                    return true;
                 }
             }
         }

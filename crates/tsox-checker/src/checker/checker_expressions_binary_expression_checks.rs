@@ -103,6 +103,9 @@ impl Checker {
             }
             self.check_binary_plus_operator_error(node, data);
             self.check_binary_relational_operator_error(node, data);
+            if data.operator_token.kind == InKeyword {
+                self.check_in_expression(data);
+            }
             use tsox_frontend::ast::SyntaxKind::*;
 
             let mut readonly_index_reported = false;

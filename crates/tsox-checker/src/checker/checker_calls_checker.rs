@@ -265,15 +265,6 @@ impl Checker {
                 self.get_type_of_node(arg)
             };
             let verdict = self.is_type_assignable_to(&arg_type, &param_type);
-            if std::env::var_os("TSOX_DEBUG_HOVER").is_some() {
-                eprintln!(
-                    "[applicable] arg_kind={:?} arg={} param={} -> {}",
-                    arg.kind,
-                    self.type_to_string(&arg_type),
-                    self.type_to_string(&param_type),
-                    verdict
-                );
-            }
             if !verdict {
                 return false;
             }
@@ -311,9 +302,6 @@ impl Checker {
                 let accepts = self.signature_accepts_arguments(node, sig, arguments);
                 self.relater_overflow |= saved_overflow;
                 if accepts {
-                    if std::env::var_os("TSOX_DEBUG_HOVER").is_some() {
-                        eprintln!("[overload] {} of {} picked", idx, signatures.len());
-                    }
                     return Some(idx);
                 }
             }

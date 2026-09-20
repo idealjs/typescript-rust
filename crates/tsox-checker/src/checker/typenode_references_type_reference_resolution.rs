@@ -159,6 +159,12 @@ impl Checker {
                 })
             };
             let (tp_symbols, _type_node) = self.collect_alias_type_params_and_body(symbol);
+            let mut arg_types = arg_types;
+            arg_types.extend(self.alias_missing_default_type_arguments(
+                symbol,
+                &tp_symbols,
+                &arg_types,
+            ));
             let tp_types: Vec<Arc<Type>> = tp_symbols
                 .iter()
                 .map(|tp| self.get_type_parameter_from_symbol(tp))

@@ -534,6 +534,7 @@ impl Checker {
         let mut props: Vec<Arc<Symbol>> = Vec::with_capacity(prop_pairs.len());
         for (name, t, decls) in prop_pairs {
             let mut sym = Symbol::new(SymbolFlags::Property, name.clone());
+            sym.value_declaration = decls.first().cloned();
             sym.declarations.extend(decls);
             let symbol = Arc::new(sym);
             self.value_symbol_links.insert(
@@ -548,7 +549,10 @@ impl Checker {
         }
         Arc::new(Type {
             flags: TypeFlags::Object,
-            object_flags: ObjectFlags::Anonymous | ObjectFlags::ObjectLiteral,
+            object_flags: ObjectFlags::Anonymous
+                | ObjectFlags::ObjectLiteral
+                | ObjectFlags::FreshLiteral
+                | ObjectFlags::ContainsObjectOrArrayLiteral,
             id: next_type_id(),
             symbol: literal_symbol,
             alias: None,

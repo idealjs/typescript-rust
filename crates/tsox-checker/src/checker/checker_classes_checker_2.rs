@@ -32,6 +32,7 @@ impl Checker {
     ) -> Arc<Type> {
         let node_id = class_node.id();
         let saved = self.class_instance_type_cache.remove(&node_id);
+        self.this_type_cache.remove(&node_id);
 
         let mut mapping = HashMap::new();
         let mut name_frame: Vec<(Arc<tsox_frontend::ast::Symbol>, Arc<Type>)> = Vec::new();
@@ -53,6 +54,7 @@ impl Checker {
         self.type_argument_name_frames.pop();
 
         self.class_instance_type_cache.remove(&node_id);
+        self.this_type_cache.remove(&node_id);
         match saved {
             Some(raw) => {
                 self.class_instance_type_cache.insert(node_id, raw);

@@ -45,6 +45,9 @@ impl Program {
 
         let checker = self.build_checker_internal(skip_lib, skip_default_lib);
         let mut check_diagnostics = checker.get_semantic_diagnostics();
+        if self.options.no_check.is_true() {
+            return Vec::new();
+        }
 
         let mut diagnostics: Vec<Diagnostic> = if skip_lib {
             self.symbol_map

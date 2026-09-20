@@ -508,16 +508,6 @@ impl Checker {
                             .cloned()
                     })
             };
-            if std::env::var_os("TSOX_DEBUG_QN").is_some() {
-                let raw = self
-                    .get_exports_of_symbol(&merged)
-                    .get(&name)
-                    .cloned();
-                eprintln!("[it-chain] seg={} raw={:?} next={:?}",
-                    name,
-                    raw.as_ref().map(|s| (s.flags, s.export_symbol.as_ref().map(|e| e.name.clone()))),
-                    next.as_ref().map(|s| s.name.clone()));
-            }
             let Some(next) = next else {
                 let file = self
                     .get_source_file_of_node(segment)

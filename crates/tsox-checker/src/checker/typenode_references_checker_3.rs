@@ -70,4 +70,52 @@ impl Checker {
         });
         self.resolve_interface_type_ex(symbol, arg_types)
     }
+
+    pub(crate) fn alias_missing_default_type_arguments(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        tp_symbols: &[Arc<Symbol>],
+        provided: &[Arc<Type>],
+    ) -> Vec<Arc<Type>> {
+        if provided.len() >= tp_symbols.len() {
+            return Vec::new();
+        }
+        let tp_nodes: Vec<Arc<Node>> = symbol
+            .declarations
+            .iter()
+            .find_map(|decl| match &decl.data {
+                NodeData::TypeAliasDeclaration(data) => data
+                    .type_parameters
+                    .as_ref()
+                    .map(|tps| tps.iter().cloned().collect()),
+                _ => None,
+            })
+            .unwrap_or_default();
+        let saved_scopes = std::mem::take(&mut self.scope_stack);
+        let saved_stack = std::mem::take(&mut self.type_argument_stack);
+        let mut mapping: HashMap<*const tsox_frontend::ast::Symbol, Arc<Type>> = HashMap::new();
+        let mut filled: Vec<Arc<Type>> = Vec::new();
+        for (i, tp_sym) in tp_symbols.iter().enumerate() {
+            if let Some(arg) = provided.get(i) {
+                mapping.insert(Arc::as_ptr(tp_sym) as *const _, Arc::clone(arg));
+                continue;
+            }
+            let default_node = tp_nodes.get(i).and_then(|tp| match &tp.data {
+                NodeData::TypeParameterDeclaration(td) => td.default_type.clone(),
+                _ => None,
+            });
+            let bound = default_node.map(|dn| {
+                self.type_argument_stack.push(mapping.clone());
+                let t = self.get_type_from_type_node(&dn);
+                self.type_argument_stack.pop();
+                t
+            });
+            let bound = bound.unwrap_or_else(|| self.get_unknown_type());
+            mapping.insert(Arc::as_ptr(tp_sym) as *const _, Arc::clone(&bound));
+            filled.push(bound);
+        }
+        self.type_argument_stack = saved_stack;
+        self.scope_stack = saved_scopes;
+        filled
+    }
 }

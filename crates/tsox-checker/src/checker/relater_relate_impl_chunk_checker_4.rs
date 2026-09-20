@@ -60,6 +60,13 @@ impl Checker {
             }
         }
 
+        if t.contains(TypeFlags::TypeParameter)
+            && let Some(true) =
+                self.mapped_source_related_to_type_param_target(&source, &target, relation)
+        {
+            return true;
+        }
+
         let source_is_indexed_access = s.contains(TypeFlags::IndexedAccess)
             || matches!(source.data, TypeData::IndexedAccess(_));
         if relation != RelationKind::Identity

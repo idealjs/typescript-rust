@@ -397,23 +397,55 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
     ) {
-        let source_struct = source.as_structured();
-        let target_struct = target.as_structured();
-        if let (Some(source_s), Some(target_s)) = (source_struct, target_struct) {
-            for target_index in &target_s.index_infos {
-                for source_index in &source_s.index_infos {
-                    let key_match = match (&target_index.key_type, &source_index.key_type) {
-                        (Some(tk), Some(sk)) => self.is_type_identical_to(sk, tk),
-                        _ => true,
-                    };
-                    if key_match {
-                        if let (Some(tv), Some(sv)) =
-                            (&target_index.value_type, &source_index.value_type)
-                        {
-                            self.infer_from_types(state, sv, tv);
-                        }
+        let mut priority = InferencePriority::None;
+        if source.object_flags.intersects(ObjectFlags::Mapped)
+            && target.object_flags.intersects(ObjectFlags::Mapped)
+        {
+            priority = InferencePriority::HomomorphicMappedType;
+        }
+        let target_infos = self.get_index_infos_of_type(target);
+        if self.is_object_type_with_inferable_index(source) {
+            for target_info in &target_infos {
+                let Some(target_key) = target_info.key_type.clone() else {
+                    continue;
+                };
+                let mut prop_types: Vec<Arc<Type>> = Vec::new();
+                for prop in self.get_properties_of_type(source) {
+                    let literal_key = self.get_literal_type_from_property(&prop);
+                    if self.is_applicable_index_type(&literal_key, &target_key) {
+                        let prop_type = self.get_type_of_symbol(&prop);
+                        let prop_type = if prop.flags.contains(SymbolFlags::Optional) {
+                            self.remove_missing_or_undefined_type(&prop_type)
+                        } else {
+                            prop_type
+                        };
+                        prop_types.push(prop_type);
                     }
                 }
+                for info in self.get_index_infos_of_type(source) {
+                    if let Some(src_key) = &info.key_type
+                        && self.is_applicable_index_type(src_key, &target_key)
+                        && let Some(v) = &info.value_type
+                    {
+                        prop_types.push(Arc::clone(v));
+                    }
+                }
+                if !prop_types.is_empty()
+                    && let Some(tv) = &target_info.value_type
+                {
+                    let union = self.get_union_type(prop_types);
+                    self.infer_with_priority(state, &union, tv, priority);
+                }
+            }
+        }
+        for target_info in &target_infos {
+            let Some(target_key) = target_info.key_type.clone() else {
+                continue;
+            };
+            if let Some(source_info) = self.get_applicable_index_info(source, &target_key)
+                && let (Some(sv), Some(tv)) = (&source_info.value_type, &target_info.value_type)
+            {
+                self.infer_with_priority(state, sv, tv, priority);
             }
         }
     }
@@ -469,6 +501,10 @@ impl Checker {
         target: &Arc<Type>,
         new_priority: InferencePriority,
     ) {
+        if new_priority == InferencePriority::None {
+            self.infer_from_types(state, source, target);
+            return;
+        }
         let save = state.priority;
         state.priority = new_priority;
         self.infer_from_types(state, source, target);
@@ -742,13 +778,6 @@ impl Checker {
                         &partial,
                     );
                     let arg_type = self.type_of_context_sensitive_arg(&args[i], &inst_param);
-                    if std::env::var_os("TSOX_DEBUG_HOVER").is_some() {
-                        eprintln!(
-                            "[infer-cs] inst_param={} arg_type={}",
-                            self.type_to_string(&inst_param),
-                            self.type_to_string(&arg_type)
-                        );
-                    }
                     self.infer_types(
                         &mut context.inferences,
                         Some(arg_type),

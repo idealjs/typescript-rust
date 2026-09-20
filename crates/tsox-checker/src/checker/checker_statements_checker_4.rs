@@ -222,7 +222,8 @@ impl Checker {
                             self.get_excess_property_name(&init_type, &annotation_type)
                     {
                         let file = self.current_file.clone();
-                        let annot_str = self.type_to_string(&annotation_type);
+                        let filtered_annot = self.excess_check_error_target(&annotation_type);
+                        let annot_str = self.type_to_string(&filtered_annot);
 
                         let loc = self
                             .find_object_literal_property_name_node(init, &excess_name)

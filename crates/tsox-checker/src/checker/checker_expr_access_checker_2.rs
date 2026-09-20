@@ -122,17 +122,6 @@ impl Checker {
         arg_index: usize,
     ) -> usize {
         let t = self.get_type_of_node(callee_expr);
-        if std::env::var_os("TSOX_DEBUG_SYMBOL").is_some() {
-            eprintln!(
-                "[ctx-arg] callee={:?} intr={:?} union={} structured={}",
-                callee_expr.kind,
-                t.intrinsic_name(),
-                matches!(&t.data, TypeData::Union(_)),
-                t.as_structured()
-                    .map(|s| s.call_signatures().len())
-                    .unwrap_or(usize::MAX),
-            );
-        }
         if t.flags.contains(TypeFlags::Any) {
             if let tsox_frontend::ast::NodeData::PropertyAccessExpression(data) = &callee_expr.data
             {

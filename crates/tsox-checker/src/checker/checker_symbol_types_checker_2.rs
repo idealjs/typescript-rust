@@ -793,6 +793,15 @@ impl Checker {
             .parent()
             .is_some_and(|p| p.kind == tsox_frontend::ast::SyntaxKind::ArrayBindingPattern);
         if is_array_pattern {
+            if t.is_union()
+                && let Some(members) = t.types()
+            {
+                let mapped: Vec<Arc<Type>> = members
+                    .iter()
+                    .map(|m| self.rest_element_type(elem, m))
+                    .collect();
+                return self.get_union_type(mapped);
+            }
             if self.is_tuple_type(t) {
                 let index = elem
                     .parent()
@@ -816,33 +825,100 @@ impl Checker {
             }
             return Arc::clone(t);
         }
-        let excluded = Self::pattern_excluded_property_names(elem);
-        if let Some(s) = t.as_structured() {
-            let kept: Vec<Arc<Symbol>> = s
-                .properties
-                .iter()
-                .filter(|p| !excluded.contains(&p.name))
-                .cloned()
-                .collect();
-            let mut members = crate::checker::types::SymbolTable::default();
-            for p in &kept {
-                members.insert(p.name.clone(), Arc::clone(p));
-            }
-            let mut rebuilt = Type::new(
-                t.flags,
-                TypeData::Object(ObjectTypeData {
-                    structured: crate::checker::types_impl_chunk::StructuredTypeData {
-                        members,
-                        properties: kept,
-                        ..Default::default()
-                    },
-                    ..Default::default()
-                }),
-            );
-            rebuilt.object_flags = t.object_flags;
-            return Arc::new(rebuilt);
+        let source = self.remove_nullable_constituents(t);
+        if source.flags.contains(TypeFlags::Never) {
+            return Arc::new(Type::new(
+                TypeFlags::Object,
+                TypeData::Object(ObjectTypeData::default()),
+            ));
         }
-        Arc::clone(t)
+        if source.is_union()
+            && let Some(members) = source.types()
+        {
+            let mapped: Vec<Arc<Type>> = members
+                .iter()
+                .map(|m| self.rest_element_type(elem, m))
+                .collect();
+            return self.get_union_type(mapped);
+        }
+        let excluded = Self::pattern_excluded_property_names(elem);
+        let source_props = self.get_properties_of_type(&source);
+        let kept: Vec<Arc<Symbol>> = source_props
+            .into_iter()
+            .filter(|p| !excluded.contains(&p.name))
+            .filter(|p| self.is_spreadable_property(p))
+            .collect();
+        let index_infos = self.get_index_infos_of_type(&source);
+        let mut members = crate::checker::types::SymbolTable::default();
+        for p in &kept {
+            members.insert(p.name.clone(), Arc::clone(p));
+        }
+        let mut rebuilt = Type::new(
+            TypeFlags::Object,
+            TypeData::Object(ObjectTypeData {
+                structured: crate::checker::types_impl_chunk::StructuredTypeData {
+                    members,
+                    properties: kept,
+                    index_infos,
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
+        );
+        rebuilt.object_flags = source.object_flags | crate::checker::types::ObjectFlags::ObjectRestType;
+        Arc::new(rebuilt)
+    }
+
+    fn remove_nullable_constituents(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        if !t.is_union() {
+            if t.flags.intersects(TYPE_FLAGS_NULLABLE) {
+                return self.never_type();
+            }
+            return Arc::clone(t);
+        }
+        let Some(members) = t.types() else {
+            return Arc::clone(t);
+        };
+        let kept: Vec<Arc<Type>> = members
+            .iter()
+            .filter(|m| !m.flags.intersects(TYPE_FLAGS_NULLABLE))
+            .cloned()
+            .collect();
+        if kept.len() == members.len() {
+            return Arc::clone(t);
+        }
+        match kept.len() {
+            0 => self.never_type(),
+            1 => Arc::clone(&kept[0]),
+            _ => self.get_union_type(kept),
+        }
+    }
+
+    fn is_spreadable_property(&self, prop: &Arc<Symbol>) -> bool {
+        let no_private_ident = !prop.declarations.iter().any(|d| {
+            matches!(
+                &d.data,
+                NodeData::PropertyDeclaration(pd) if pd.name.kind == tsox_frontend::ast::SyntaxKind::PrivateIdentifier
+            ) || Self::is_method_or_accessor(d)
+                && d.name().is_some_and(|n| n.kind == tsox_frontend::ast::SyntaxKind::PrivateIdentifier)
+        });
+        let not_accessor_like = !prop.flags.intersects(
+            tsox_frontend::ast::SymbolFlags::Method
+                | tsox_frontend::ast::SymbolFlags::GetAccessor
+                | tsox_frontend::ast::SymbolFlags::SetAccessor,
+        );
+        if no_private_ident && not_accessor_like {
+            return true;
+        }
+        !prop
+            .declarations
+            .iter()
+            .any(|d| d.parent().is_some_and(|p| tsox_frontend::ast::is_class_like(&p)))
+    }
+
+    fn is_method_or_accessor(node: &Arc<Node>) -> bool {
+        use tsox_frontend::ast::SyntaxKind as K;
+        matches!(node.kind, K::MethodDeclaration | K::MethodSignature | K::GetAccessor | K::SetAccessor)
     }
 
     /// 同一对象模式中其他元素绑定的属性名（rest 类型需排除这些属性）

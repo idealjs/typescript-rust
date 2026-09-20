@@ -348,9 +348,6 @@ impl Checker {
         let base = match self.resolve_identifier(leftmost) {
             Some(b) => b,
             None => {
-                if std::env::var_os("TSOX_DEBUG_TQ").is_some() {
-                    eprintln!("[tq] leftmost unresolved: {}", leftmost.text());
-                }
                 return None;
             }
         };
@@ -368,14 +365,6 @@ impl Checker {
                     None
                 }
             });
-        if std::env::var_os("TSOX_DEBUG_TQ").is_some() {
-            eprintln!(
-                "[tq] base={} type_flags={:?} ok={}",
-                leftmost.text(),
-                base_type.as_ref().map(|t| t.flags),
-                base_type.is_some()
-            );
-        }
         let base_type = base_type?;
         // Go checkExpressionWithTypeArguments：表达式语义求值（含控制流收窄），
         // 可空基类型在属性查找前取非空视图；末段保留声明类型（含可选 undefined）

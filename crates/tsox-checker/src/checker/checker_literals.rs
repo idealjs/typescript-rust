@@ -346,7 +346,7 @@ impl Checker {
 
     // Go isTypeSubsetOf(globalObjectType, target)：Object/object 成分出现即
     // 视为全局 Object 型的容器
-    fn target_admits_any_properties(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn target_admits_any_properties(&self, t: &Arc<Type>) -> bool {
         if t.flags.contains(TypeFlags::NonPrimitive) {
             return true;
         }

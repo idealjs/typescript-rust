@@ -313,11 +313,27 @@ impl Checker {
             return self.create_function_or_constructor_type(new_sigs, is_construct);
         }
 
-        // Go instantiateType：匿名对象类型的成员/索引签名按需实例化
-        // （签名实例化与泛型 owner 成员访问路径同样深入，不限 call-return）
-        // Go instantiateType：匿名对象类型的成员/索引签名按需实例化
-        // （签名实例化与泛型 owner 成员访问路径同样深入，不限 call-return）
-        if t.symbol.is_none()
+        // Go instantiateType→getObjectTypeInstantiation：匿名对象类型的成员/索引签名按需实例化
+        // （签名实例化与泛型 owner 成员访问路径同样深入，不限 call-return）。
+        // Go couldContainTypeVariables 的对象分支：仅匿名且符号为
+        // Function/Method/Class/TypeLiteral/ObjectLiteral 的类型可含类型变量，
+        // 接口等解析型对象直接原样返回（否则推断探测会整图遍历 lib 接口）。
+        // 自带声明类型参数的符号型（类/接口）走下方 attach 分支
+        let deep_ok = match t.symbol.as_ref() {
+            None => true,
+            Some(sym) => {
+                t.object_flags.contains(ObjectFlags::Anonymous)
+                    && sym.flags.intersects(
+                        tsox_frontend::ast::SymbolFlags::Function
+                            | tsox_frontend::ast::SymbolFlags::Method
+                            | tsox_frontend::ast::SymbolFlags::Class
+                            | tsox_frontend::ast::SymbolFlags::TypeLiteral
+                            | tsox_frontend::ast::SymbolFlags::ObjectLiteral,
+                    )
+                    && self.declared_type_parameter_types(sym).is_empty()
+            }
+        };
+        if deep_ok
             && (!o.structured.properties.is_empty() || !o.structured.index_infos.is_empty())
         {
             let fresh = self.subst_object_in_progress.is_empty();

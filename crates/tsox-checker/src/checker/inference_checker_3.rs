@@ -14,29 +14,6 @@ impl Checker {
 
     pub fn get_inferred_type(&mut self, context: &InferenceContext, index: usize) -> Arc<Type> {
         let inference = &context.inferences[index];
-        if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
-            eprintln!(
-                "[get-inferred] tp={} cands={} contra={}",
-                self.type_to_string(&inference.type_parameter),
-                inference
-                    .candidates
-                    .iter()
-                    .map(|c| format!(
-                        "{}(wid={})",
-                        self.type_to_string(c),
-                        c.object_flags
-                            .contains(crate::checker::types::ObjectFlags::ContainsWideningType)
-                    ))
-                    .collect::<Vec<_>>()
-                    .join(","),
-                inference
-                    .contra_candidates
-                    .iter()
-                    .map(|c| self.type_to_string(c))
-                    .collect::<Vec<_>>()
-                    .join(",")
-            );
-        }
         if let Some(ref inferred) = inference.inferred_type {
             return Arc::clone(inferred);
         }

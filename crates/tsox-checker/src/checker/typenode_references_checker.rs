@@ -7,8 +7,30 @@ impl Checker {
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
-        let constraint = self.container_instance_type_of(node);
-        let result = self.create_this_type(node, constraint);
+        let mut container: Option<Arc<Node>> = None;
+        let mut cur: Option<Arc<Node>> = Some(Arc::clone(node));
+        while let Some(n) = cur {
+            match n.kind {
+                SyntaxKind::ClassDeclaration
+                | SyntaxKind::ClassExpression
+                | SyntaxKind::InterfaceDeclaration => {
+                    container = Some(n);
+                    break;
+                }
+                _ => {}
+            }
+            cur = n.parent();
+        }
+        let result = match container {
+            Some(c) => {
+                let instance = self.container_instance_type_of(&c);
+                self.create_this_type(&c, instance)
+            }
+            None => {
+                let instance = self.container_instance_type_of(node);
+                self.create_this_type(node, instance)
+            }
+        };
         self.cache_type(node, result.clone());
         result
     }
@@ -130,6 +152,10 @@ impl Checker {
         container: &Arc<Node>,
         instance: Arc<Type>,
     ) -> Arc<Type> {
+        let key = container.id();
+        if let Some(t) = self.this_type_cache.get(&key) {
+            return Arc::clone(t);
+        }
         let mut t = Type::new(
             TypeFlags::TypeParameter,
             TypeData::TypeParameter(TypeParameterData {
@@ -142,7 +168,9 @@ impl Checker {
             }),
         );
         t.symbol = self.program.symbol_map().symbol_of(container).cloned();
-        Arc::new(t)
+        let t = Arc::new(t);
+        self.this_type_cache.insert(key, Arc::clone(&t));
+        t
     }
 
     fn interface_declaration_type(&mut self, node: &Arc<Node>) -> Arc<Type> {

@@ -140,10 +140,11 @@ impl Checker {
                 let loc = self
                     .find_object_literal_property_name_node(&data.right, &excess_name)
                     .unwrap_or(data.right.loc);
-                let annot_str = self.type_to_string(&left_type);
+                let filtered_left = self.excess_check_error_target(&left_type);
+                let annot_str = self.type_to_string(&filtered_left);
                 // Go reportUnmatchedPropertyForExcessProperty：字面量自身元素命中
                 // 拼写建议时换 TS2561 文案
-                if let Some(sugg) = self.suggestion_for_nonexistent_property(&excess_name, &left_type) {
+                if let Some(sugg) = self.suggestion_for_nonexistent_property(&excess_name, &filtered_left) {
                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                         self.current_file.clone(),
                         loc,

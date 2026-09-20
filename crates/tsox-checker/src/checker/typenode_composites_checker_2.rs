@@ -53,7 +53,12 @@ impl Checker {
                         continue;
                     }
                     let prop_type = self.get_type_from_type_node(&data.type_node);
-                    let symbol = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
+                    let optional = data.postfix_token.is_some();
+                    let mut flags = SymbolFlags::Property;
+                    if optional {
+                        flags |= SymbolFlags::Optional;
+                    }
+                    let symbol = Arc::new(Symbol::new(flags, name.clone()));
                     self.value_symbol_links.insert(
                         &symbol,
                         ValueSymbolLinks {

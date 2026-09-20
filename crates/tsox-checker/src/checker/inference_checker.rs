@@ -229,15 +229,6 @@ impl Checker {
                         .iter()
                         .any(|c| Arc::ptr_eq(c, &candidate))
                     {
-                        if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
-                            eprintln!(
-                                "[contra-rec] depth={} biv={} tp={} cand={}",
-                                depth,
-                                bivariant,
-                                self.type_to_string(&inference.type_parameter),
-                                self.type_to_string(&candidate)
-                            );
-                        }
                         inference.contra_candidates.push(candidate);
                         cleared = true;
                     }

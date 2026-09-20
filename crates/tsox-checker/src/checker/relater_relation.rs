@@ -115,6 +115,7 @@ pub struct RelationCacheKey {
     pub source_id: u32,
     pub target_id: u32,
     pub relation: RelationKind,
+    pub intersection_target: bool,
 }
 
 #[derive(Debug, Clone)]

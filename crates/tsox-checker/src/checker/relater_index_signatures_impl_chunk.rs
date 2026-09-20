@@ -144,9 +144,79 @@ impl Checker {
     }
 
     pub fn get_index_infos_of_type(&self, t: &Arc<Type>) -> Vec<Arc<IndexInfo>> {
-        t.as_structured()
+        let mut infos = t
+            .as_structured()
             .map(|s| s.index_infos.clone())
-            .unwrap_or_default()
+            .unwrap_or_default();
+        if let TypeData::Tuple(tuple) = &t.data {
+            let has_number_index = infos.iter().any(|info| {
+                info.key_type
+                    .as_ref()
+                    .is_some_and(|k| k.flags.contains(TypeFlags::Number))
+            });
+            if !has_number_index
+                && let Some(info) = self.tuple_number_index_info(t, tuple)
+            {
+                infos.push(info);
+            }
+        }
+        infos
+    }
+
+    fn tuple_number_index_info(
+        &self,
+        t: &Arc<Type>,
+        tuple: &crate::checker::types::TupleTypeData,
+    ) -> Option<Arc<IndexInfo>> {
+        let elements: Vec<Arc<Type>> = tuple
+            .element_infos
+            .iter()
+            .filter_map(|e| {
+                let ty = e.type_.clone()?;
+                if e.flags
+                    .intersects(crate::checker::types::ElementFlags::Rest | crate::checker::types::ElementFlags::Variadic)
+                    && self.is_array_type(&ty)
+                {
+                    return Some(self.get_array_element_type(&ty));
+                }
+                Some(ty)
+            })
+            .collect();
+        if elements.is_empty() {
+            return None;
+        }
+        let value = if elements.len() == 1 {
+            Arc::clone(&elements[0])
+        } else if elements.iter().all(|e| Arc::ptr_eq(e, &elements[0])) {
+            Arc::clone(&elements[0])
+        } else {
+            Arc::new(Type {
+                flags: TypeFlags::Union,
+                object_flags: ObjectFlags::None,
+                id: crate::checker::types::next_type_id(),
+                symbol: None,
+                alias: None,
+                data: TypeData::Union(UnionTypeData {
+                    union_or_intersection: UnionOrIntersectionTypeData {
+                        structured: StructuredTypeData::default(),
+                        types: elements,
+                    },
+                    resolved_reduced_type: std::sync::OnceLock::new(),
+                    regular_type: std::sync::OnceLock::new(),
+                    origin: None,
+                    key_property_name: None,
+                    constituent_map: std::collections::HashMap::new(),
+                }),
+            })
+        };
+        Some(Arc::new(IndexInfo {
+            key_type: Some(self.number_type()),
+            value_type: Some(value),
+            is_readonly: tuple.readonly,
+            declaration: None,
+            index_symbol: None,
+            components: Vec::new(),
+        }))
     }
 
     pub fn get_index_info_of_type(

@@ -29,9 +29,13 @@ impl Checker {
         } else {
             expr_type
         };
+        // Go checkAssertionDeferred：可比性判定用 getRegularTypeOfObjectLiteral
+        // （剥 FreshLiteral）+ getWidenedType 后的类型，断言路径不做多余属性检查
+        let regular = self.get_regular_type_of_object_literal(&expr_base);
+        let widened = self.get_widened_type(&regular);
 
-        let comparable = self.is_type_comparable_to(&expr_base, &target_type)
-            || self.is_type_comparable_to(&target_type, &expr_base);
+        let comparable = self.is_type_comparable_to(&widened, &target_type)
+            || self.is_type_comparable_to(&target_type, &widened);
         if !comparable {
             let conversion = tsox_core::diagnostics::messages_generated::
                 CONVERSION_OF_TYPE_0_TO_TYPE_1_MAY_BE_A_MISTAKE_BECAUSE_NEITHER_TYPE_SUFFICIENTLY_OVERLAPS_WITH_THE_OTHER_IF_THIS_WAS_INTENTIONAL_CONVERT_THE_EXPRESSION_TO_UNKNOWN_FIRST;
