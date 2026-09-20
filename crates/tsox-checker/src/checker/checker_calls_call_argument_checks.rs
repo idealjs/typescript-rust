@@ -30,7 +30,7 @@ impl Checker {
         sig: &Arc<Signature>,
         is_new: bool,
         callee_type: &Arc<Type>,
-    ) {
+    ) -> bool {
         let provided = Self::explicit_type_argument_count(node);
 
         let expected = if is_new {
@@ -49,9 +49,9 @@ impl Checker {
                 .to_string()
         } else if self.callee_has_overload_arity_split(callee_type) {
             if provided != 0 && !callee_type.flags.contains(TypeFlags::Any) {
-                self.check_overload_type_argument_arity(node, callee_type, provided);
+                return self.check_overload_type_argument_arity(node, callee_type, provided);
             }
-            return;
+            return true;
         } else {
             let min_count = Self::declared_min_type_argument_count(sig);
             let max_count = sig.type_parameters.len();
@@ -61,7 +61,7 @@ impl Checker {
                 max_count.to_string()
             }
         };
-        if provided != 0 && expected.parse::<usize>() != Ok(provided)
+        let mismatch = provided != 0 && expected.parse::<usize>() != Ok(provided)
             && !(expected.contains('-')
                 && (|| {
                     let (lo, hi) = expected.split_once('-')?;
@@ -71,10 +71,11 @@ impl Checker {
                     )
                 })()
                 .unwrap_or(false))
-            && !callee_type.flags.contains(TypeFlags::Any)
-        {
+            && !callee_type.flags.contains(TypeFlags::Any);
+        if mismatch {
             self.report_type_argument_count_mismatch(node, provided, expected);
         }
+        !mismatch
     }
 
     fn callee_has_overload_arity_split(&self, callee_type: &Arc<Type>) -> bool {
@@ -99,7 +100,7 @@ impl Checker {
         node: &Arc<Node>,
         callee_type: &Arc<Type>,
         arg_count: usize,
-    ) {
+    ) -> bool {
         let sigs = self.get_signatures_of_type(
             callee_type,
             crate::checker::types_type_id::SignatureKind::Call,
@@ -140,10 +141,12 @@ impl Checker {
                         NO_OVERLOAD_EXPECTS_0_TYPE_ARGUMENTS_BUT_OVERLOADS_DO_EXIST_THAT_EXPECT_EITHER_1_OR_2_TYPE_ARGUMENTS,
                     vec![arg_count.to_string(), b.to_string(), a.to_string()],
                 ));
+                false
             }
             _ => {
                 let expected = below.or(above).unwrap_or_default().to_string();
                 self.report_type_argument_count_mismatch(node, arg_count, expected);
+                false
             }
         }
     }

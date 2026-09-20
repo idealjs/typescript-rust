@@ -98,8 +98,10 @@ impl Checker {
             None
         };
 
+        let mut type_arity_ok = true;
         if !sig.type_parameters.is_empty() || Self::has_explicit_type_arguments(node) {
-            self.check_explicit_type_argument_count(node, &sig, is_new, callee_type);
+            type_arity_ok =
+                self.check_explicit_type_argument_count(node, &sig, is_new, callee_type);
             self.check_call_type_argument_constraints(node, &sig);
         }
 
@@ -159,6 +161,9 @@ impl Checker {
             for (i, t) in inferred_types.iter().enumerate() {
                 eprintln!("[infer]   {} -> {}", i, self.type_to_string(t));
             }
+        }
+        if !type_arity_ok {
+            return;
         }
         self.check_call_arguments_loop(
             node,
