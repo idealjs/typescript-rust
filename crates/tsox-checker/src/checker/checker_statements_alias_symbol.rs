@@ -466,19 +466,6 @@ impl Checker {
                         .or_else(|| self.current_file.clone())
                         .is_some_and(|f| !f.file_name.starts_with("bundled://"))
                     {
-                        // Go checkAndReportErrorForUsingNamespaceAsTypeOrValue：
-                        // 非实例化 namespace 在值位被引用（左段）报 TS2708
-                        if !self.declaration_is_ambient(node)
-                            && !symbol.flags.intersects(SymbolFlags::VALUE)
-                        {
-                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                                self.current_file.clone(),
-                                segments[0].loc,
-                                tsox_core::diagnostics::messages_generated::
-                                    CANNOT_USE_NAMESPACE_0_AS_A_VALUE,
-                                vec![segments[0].text().to_string()],
-                            ));
-                        }
                         self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                             self.current_file.clone(),
                             seg.loc,

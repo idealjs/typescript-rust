@@ -126,16 +126,10 @@ impl Checker {
                     && d.name()
                         .is_some_and(|n| !matches!(n.kind, SyntaxKind::StringLiteral))
             });
-            // Go 值位语义：模块符号不含 Value 含义（未实例化 namespace）即不可作值；
-            // 另保留 ValueModule 但按声明推导不可用（实例化状态与 binder 判定分叉）的兜底
+            // Go 值位语义：符号无 Value 含义的 namespace（Class/Function 合并含 Value 位）不可作值
             let module_without_value_meaning = base.flags.contains(SymbolFlags::NamespaceModule)
-                && !base.flags.contains(SymbolFlags::ValueModule);
-            if !is_export_assignment_name
-                && is_true_namespace
-                && (module_without_value_meaning
-                    || (base.flags.contains(SymbolFlags::ValueModule)
-                        && !self.namespace_usable_as_value(&base)))
-            {
+                && !base.flags.intersects(SymbolFlags::VALUE);
+            if !is_export_assignment_name && is_true_namespace && module_without_value_meaning {
                 let file = self.current_file.clone();
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,
