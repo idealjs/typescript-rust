@@ -81,7 +81,7 @@ impl Checker {
                 {
                     let obj_type = self.get_type_of_node(&pa.expression);
                     let name_text = pa.name.text();
-                    if self.is_property_readonly(&obj_type, name_text) {
+                    if self.is_readonly_property_write(&data.left, &obj_type, name_text) {
                         let file = self.current_file.clone();
                         self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                             file,
