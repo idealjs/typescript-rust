@@ -106,7 +106,7 @@ impl Checker {
     }
 
     pub(crate) fn excess_check_error_target(&mut self, t: &Arc<Type>) -> Arc<Type> {
-        if t.flags.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
+        if t.flags.contains(TypeFlags::Union)
             && let Some(types) = t.types()
         {
             let kept: Vec<Arc<Type>> = types
@@ -116,14 +116,23 @@ impl Checker {
                 })
                 .cloned()
                 .collect();
+            if kept.len() == types.len() {
+                return Arc::clone(t);
+            }
             if kept.len() == 1 {
                 return Arc::clone(&kept[0]);
             }
-            if kept.len() > 1 {
-                return self.get_union_type(kept);
+            if kept.is_empty() {
+                return self.never_type();
             }
+            return self.get_union_type(kept);
         }
-        Arc::clone(t)
+        if t.flags.contains(TypeFlags::Never)
+            || crate::checker::relater_predicates::is_excess_property_check_target(t)
+        {
+            return Arc::clone(t);
+        }
+        self.never_type()
     }
 
     fn type_of_property_in_types(
