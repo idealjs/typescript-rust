@@ -245,6 +245,7 @@ impl Checker {
                 .iter()
                 .find(|d| d.kind == SyntaxKind::ClassDeclaration)
                 .cloned();
+            let has_type_arguments = type_arguments.is_some();
             let arg_types: Option<Vec<Arc<Type>>> = type_arguments.map(|nodes| {
                 nodes
                     .iter()
@@ -271,6 +272,17 @@ impl Checker {
                 },
                 None => Vec::new(),
             };
+            if has_type_arguments && class_tps.is_empty() {
+                let file = self.current_file.clone();
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    node.loc,
+                    tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_GENERIC,
+                    vec![symbol.name.clone()],
+                ));
+                self.resolving_type_aliases.remove(&key);
+                return self.error_type();
+            }
             let args_match = arg_types
                 .as_ref()
                 .is_some_and(|a| !a.is_empty() && a.len() == class_tps.len());
@@ -314,10 +326,20 @@ impl Checker {
             return instance_type;
         }
         if symbol.flags.contains(SymbolFlags::Interface) {
+            let declared_tp_count = self.declared_type_parameter_types(&symbol).len();
+            if type_arguments.is_some() && declared_tp_count == 0 {
+                let file = self.current_file.clone();
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    node.loc,
+                    tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_GENERIC,
+                    vec![symbol.name.clone()],
+                ));
+                return self.error_type();
+            }
             // tsc getTypeFromClassOrInterfaceReference：无实参引用且类型参数带默认值时按默认值实例化；
             // 部分实参（如 Iterator<T> 少于 TReturn/TNext）补声明默认值
             //（Go getTypeArguments 的默认填充语义）
-            let declared_tp_count = self.declared_type_parameter_types(&symbol).len();
             match &type_arguments {
                 None => {
                     let defaults = self.interface_default_type_arguments(&symbol);
