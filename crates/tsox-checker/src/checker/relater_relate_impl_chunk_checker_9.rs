@@ -136,7 +136,10 @@ impl Checker {
 
         if s.contains(TypeFlags::Object)
             && t.contains(TypeFlags::NonPrimitive)
-            && !(relation == RelationKind::StrictSubtype)
+            && !(relation == RelationKind::StrictSubtype
+                && source.object_flags.contains(ObjectFlags::Anonymous)
+                && self.is_empty_object_type(source)
+                && !source.object_flags.contains(ObjectFlags::FreshLiteral))
         {
             return true;
         }

@@ -144,15 +144,21 @@ impl Checker {
             if matching.len() == 1 {
                 return matching.into_iter().next().expect("exactly one");
             }
-            if matching.is_empty() {
-                return Arc::clone(value_type);
+            if !matching.is_empty() {
+                return self.get_union_type(matching);
             }
-            return self.get_union_type(matching);
+        } else if self.is_type_assignable_to(type_, value_type) {
+            return Arc::clone(type_);
+        } else if self.is_type_assignable_to(value_type, type_) {
+            return Arc::clone(value_type);
+        }
+        if self.is_type_assignable_to(type_, value_type) {
+            return Arc::clone(type_);
         }
         if self.is_type_assignable_to(value_type, type_) {
             return Arc::clone(value_type);
         }
-        Arc::clone(value_type)
+        self.get_intersection_type(vec![Arc::clone(type_), Arc::clone(value_type)])
     }
 
     pub(crate) fn types_overlap(&self, a: &Arc<Type>, b: &Arc<Type>) -> bool {

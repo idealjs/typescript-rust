@@ -170,12 +170,6 @@ impl Checker {
             && let Some(constraint) = &tp.constraint
         {
             Arc::clone(constraint)
-        } else if obj_type.is_type_parameter()
-            && let crate::checker::types::TypeData::TypeParameter(tp) = &obj_type.data
-            && let Some(constraint) = &tp.constraint
-        {
-            // 泛型约束上的属性访问按 apparent type 报（Go 报错用基约束）
-            Arc::clone(constraint)
         } else {
             Arc::clone(&obj_type)
         };
@@ -230,9 +224,29 @@ impl Checker {
             }
             best
         });
+        let mut chain: Vec<tsox_frontend::ast::Diagnostic> = Vec::new();
+        if obj_type.is_union() && !obj_type.flags.intersects(TYPE_FLAGS_PRIMITIVE) {
+            let name_literal = self.get_string_literal_type(name_text);
+            for subtype in self.constituent_types(&obj_type) {
+                if self.get_property_of_type(&subtype, name_text).is_none()
+                    && self.get_applicable_index_info(&subtype, &name_literal).is_none()
+                {
+                    chain.push(tsox_frontend::ast::Diagnostic::new(
+                        file.clone(),
+                        name.loc,
+                        PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+                        vec![
+                            name_text.to_string(),
+                            self.type_to_string(&subtype),
+                        ],
+                    ));
+                    break;
+                }
+            }
+        }
         let static_hit = self.type_has_static_property(name_text, &display_type);
         if static_hit {
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            let mut diag = tsox_frontend::ast::Diagnostic::new(
                 file,
                 name.loc,
                 tsox_core::diagnostics::messages_generated::
@@ -242,7 +256,9 @@ impl Checker {
                     type_str.clone(),
                     format!("{type_str}.{name_text}"),
                 ],
-            ));
+            );
+            diag.message_chain = chain;
+            self.diagnostics.add(diag);
             return;
         }
         // Go reportNonexistentProperty：属性名命中 lib 特性表先报 TS2550
@@ -256,31 +272,35 @@ impl Checker {
                 )
             })
         {
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            let mut diag = tsox_frontend::ast::Diagnostic::new(
                 file,
                 name.loc,
                 tsox_core::diagnostics::messages_generated::
                     PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_2_OR_LATER,
                 vec![name_text.to_string(), type_str, lib.to_string()],
-            ));
+            );
+            diag.message_chain = chain;
+            self.diagnostics.add(diag);
             return;
         }
-        if let Some(sugg) = suggestion {
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+        let mut diag = if let Some(sugg) = suggestion {
+            tsox_frontend::ast::Diagnostic::new(
                 file,
                 name.loc,
                 tsox_core::diagnostics::messages_generated::
                     PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1_DID_YOU_MEAN_2,
                 vec![name_text.to_string(), type_str, sugg],
-            ));
+            )
         } else {
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            tsox_frontend::ast::Diagnostic::new(
                 file,
                 name.loc,
                 PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
                 vec![name_text.to_string(), type_str],
-            ));
-        }
+            )
+        };
+        diag.message_chain = chain;
+        self.diagnostics.add(diag);
     }
 
     pub(crate) fn global_this_property_access_error(

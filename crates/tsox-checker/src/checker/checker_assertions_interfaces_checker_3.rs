@@ -428,10 +428,20 @@ impl Checker {
         let default_locs: Vec<tsox_core::core::text::TextRange> = statements
             .iter()
             .filter(|s| {
-                matches!(&s.data, tsox_frontend::ast::NodeData::ExportAssignment(d) if !d.is_export_equals)
-                    || s.has_syntactic_modifier(ModifierFlags::Default)
+                s.kind != SyntaxKind::InterfaceDeclaration
+                    && (matches!(&s.data, tsox_frontend::ast::NodeData::ExportAssignment(d) if !d.is_export_equals)
+                        || s.has_syntactic_modifier(ModifierFlags::Default))
             })
-            .map(|s| s.name().map(|n| n.loc).unwrap_or(s.loc))
+            .map(|s| match &s.data {
+                tsox_frontend::ast::NodeData::ExportAssignment(d) if !d.is_export_equals => {
+                    if d.expression.kind == SyntaxKind::Identifier {
+                        d.expression.loc
+                    } else {
+                        s.loc
+                    }
+                }
+                _ => declaration_name_loc(s).unwrap_or(s.loc),
+            })
             .collect();
         if default_locs.len() > 1 {
             for loc in default_locs {
@@ -440,8 +450,8 @@ impl Checker {
                     file,
                     loc,
                     tsox_core::diagnostics::messages_generated::
-                        CANNOT_REDECLARE_EXPORTED_VARIABLE_0,
-                    vec!["default".to_string()],
+                        A_MODULE_CANNOT_HAVE_MULTIPLE_DEFAULT_EXPORTS,
+                    Vec::new(),
                 ));
             }
         }

@@ -33,23 +33,23 @@ impl Checker {
     ) {
         let provided = Self::explicit_type_argument_count(node);
 
-        let expected = if is_new {
+        let (min, max) = if is_new {
             self.get_return_type_of_signature(&sig)
                 .and_then(|rt| rt.symbol.clone())
-                .map(|class_sym| {
-                    let first_decl_count =
-                        self.first_declared_type_parameter_count(&class_sym);
-                    if first_decl_count == 0 {
-                        sig.type_parameters.len()
-                    } else {
-                        first_decl_count
-                    }
-                })
-                .unwrap_or_else(|| sig.type_parameters.len())
+                .map(|class_sym| self.declared_type_parameter_arity_range(&class_sym))
+                .unwrap_or_else(|| self.signature_type_parameter_arity_range(sig))
         } else {
-            sig.type_parameters.len()
+            self.signature_type_parameter_arity_range(sig)
         };
-        if provided != 0 && provided != expected && !callee_type.flags.contains(TypeFlags::Any) {
+        if provided != 0
+            && (provided < min || provided > max)
+            && !callee_type.flags.contains(TypeFlags::Any)
+        {
+            let expected = if min < max {
+                format!("{min}-{max}")
+            } else {
+                min.to_string()
+            };
             let loc = match &node.data {
                 tsox_frontend::ast::NodeData::CallExpression(d) => d
                     .type_arguments
@@ -70,9 +70,80 @@ impl Checker {
                 file,
                 loc,
                 tsox_core::diagnostics::messages_generated::EXPECTED_0_TYPE_ARGUMENTS_BUT_GOT_1,
-                vec![expected.to_string(), provided.to_string()],
+                vec![expected, provided.to_string()],
             ));
         }
+    }
+
+    fn signature_type_parameter_arity_range(&self, sig: &Arc<Signature>) -> (usize, usize) {
+        let max = sig.type_parameters.len();
+        let mut min = 0;
+        for (i, tp) in sig.type_parameters.iter().enumerate() {
+            if !self.type_parameter_has_default(tp) {
+                min = i + 1;
+            }
+        }
+        (min, max)
+    }
+
+    fn declared_type_parameter_arity_range(
+        &self,
+        class_sym: &Arc<tsox_frontend::ast::Symbol>,
+    ) -> (usize, usize) {
+        let params = class_sym.declarations.iter().find_map(|d| match &d.data {
+            tsox_frontend::ast::NodeData::InterfaceDeclaration(i) => {
+                i.type_parameters.as_ref().map(|t| t.len())
+            }
+            tsox_frontend::ast::NodeData::ClassDeclaration(c) => {
+                c.type_parameters.as_ref().map(|t| t.len())
+            }
+            _ => None,
+        });
+        let Some(max) = params else {
+            return (0, 0);
+        };
+        let mut defaulted_from: Option<usize> = None;
+        for d in &class_sym.declarations {
+            let tps = match &d.data {
+                tsox_frontend::ast::NodeData::InterfaceDeclaration(i) => {
+                    i.type_parameters.as_ref()
+                }
+                tsox_frontend::ast::NodeData::ClassDeclaration(c) => {
+                    c.type_parameters.as_ref()
+                }
+                _ => None,
+            };
+            let Some(tps) = tps else { continue };
+            for (j, tp) in tps.iter().enumerate() {
+                let has_default = match &tp.data {
+                    tsox_frontend::ast::NodeData::TypeParameterDeclaration(td) => {
+                        td.default_type.is_some()
+                    }
+                    _ => false,
+                };
+                if !has_default {
+                    defaulted_from = Some(j + 1);
+                }
+            }
+            break;
+        }
+        let min = defaulted_from.unwrap_or(0);
+        (min, max)
+    }
+
+    fn type_parameter_has_default(&self, t: &Arc<Type>) -> bool {
+        if let crate::checker::types::TypeData::TypeParameter(tp) = &t.data
+            && tp.resolved_default_type.get().is_some()
+        {
+            return true;
+        }
+        if let Some(sym) = &t.symbol
+            && let Some(d) = sym.declarations.first()
+            && let tsox_frontend::ast::NodeData::TypeParameterDeclaration(td) = &d.data
+        {
+            return td.default_type.is_some();
+        }
+        false
     }
 
     pub(crate) fn check_call_arguments_loop(

@@ -343,6 +343,9 @@ impl Checker {
         if symbol.flags.intersects(SymbolFlags::ENUM) {
             return self.resolve_enum_type(&symbol);
         }
+        if symbol.flags.intersects(SymbolFlags::EnumMember) {
+            return self.get_type_of_symbol(&symbol);
+        }
         if !symbol.flags.contains(SymbolFlags::TypeAlias) {
             if matches!(&node.data, NodeData::ExpressionWithTypeArguments(_))
                 && symbol.flags.intersects(

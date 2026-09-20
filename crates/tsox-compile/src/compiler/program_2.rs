@@ -135,6 +135,34 @@ impl Program {
                     tsox_core::core::compiler_options::ModuleKind::None,
                     None,
                 );
+                let type_entry_resolved = resolved
+                    .as_ref()
+                    .is_some_and(|tr| tr.is_resolved());
+                if !type_entry_resolved {
+                    let mut diag = tsox_frontend::ast::Diagnostic::new(
+                        None,
+                        TextRange::default(),
+                        tsox_core::diagnostics::messages_generated::
+                            CANNOT_FIND_TYPE_DEFINITION_FILE_FOR_0,
+                        vec![type_name.clone()],
+                    );
+                    let mut reason = tsox_frontend::ast::Diagnostic::new(
+                        None,
+                        TextRange::default(),
+                        tsox_core::diagnostics::messages_generated::
+                            THE_FILE_IS_IN_THE_PROGRAM_BECAUSE_COLON,
+                        Vec::new(),
+                    );
+                    reason.message_chain = vec![tsox_frontend::ast::Diagnostic::new(
+                        None,
+                        TextRange::default(),
+                        tsox_core::diagnostics::messages_generated::
+                            ENTRY_POINT_OF_TYPE_LIBRARY_0_SPECIFIED_IN_COMPILEROPTIONS,
+                        vec![type_name.clone()],
+                    )];
+                    diag.message_chain = vec![reason];
+                    diagnostics.push(Arc::new(diag));
+                }
                 if let Some(resolved_tr) = resolved {
                     if resolved_tr.is_resolved() {
                         let resolved_path = resolved_tr.resolved_file_name.as_str();
@@ -185,6 +213,21 @@ impl Program {
                         mode,
                         None,
                     );
+                    let type_ref_resolved = resolved
+                        .as_ref()
+                        .is_some_and(|tr| tr.is_resolved());
+                    if !type_ref_resolved {
+                        diagnostics.push(Arc::new(tsox_frontend::ast::Diagnostic::new(
+                            Some(Arc::clone(&file)),
+                            TextRange::new(
+                                type_ref.types_value_range.0,
+                                type_ref.types_value_range.1,
+                            ),
+                            tsox_core::diagnostics::messages_generated::
+                                CANNOT_FIND_TYPE_DEFINITION_FILE_FOR_0,
+                            vec![type_ref.name.clone()],
+                        )));
+                    }
                     if let Some(resolved_tr) = resolved {
                         if resolved_tr.is_resolved() {
                             let resolved_path = resolved_tr.resolved_file_name.as_str();

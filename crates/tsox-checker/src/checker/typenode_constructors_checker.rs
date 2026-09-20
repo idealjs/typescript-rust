@@ -15,6 +15,18 @@ impl Checker {
         if types.is_empty() {
             return self.never_type();
         }
+        let mut has_unknown = false;
+        for t in &types {
+            if t.flags.contains(TypeFlags::Any) {
+                return self.any_type();
+            }
+            if t.flags.contains(TypeFlags::Unknown) {
+                has_unknown = true;
+            }
+        }
+        if has_unknown {
+            return self.unknown_type();
+        }
 
         let types: Vec<Arc<Type>> = types
             .into_iter()
@@ -132,6 +144,42 @@ impl Checker {
         }
         if deduped.len() == 1 {
             return deduped.into_iter().next().expect("exactly one");
+        }
+        let mut includes = TypeFlags::empty();
+        for t in &deduped {
+            includes.insert(t.flags);
+        }
+        if includes.contains(TypeFlags::Never) {
+            return self.never_type();
+        }
+        let disjoint_domains = TYPE_FLAGS_DISJOINT_DOMAINS;
+        let without = |f: TypeFlags| TypeFlags::from_bits_truncate(disjoint_domains.bits() & !f.bits());
+        if self.strict_null_checks
+            && includes.intersects(TYPE_FLAGS_NULLABLE)
+            && includes.intersects(TypeFlags::Object | TypeFlags::NonPrimitive)
+            || includes.contains(TypeFlags::NonPrimitive)
+                && includes.intersects(without(TypeFlags::NonPrimitive))
+            || includes.intersects(TYPE_FLAGS_STRING_LIKE)
+                && includes.intersects(without(TYPE_FLAGS_STRING_LIKE))
+            || includes.intersects(TYPE_FLAGS_NUMBER_LIKE)
+                && includes.intersects(without(TYPE_FLAGS_NUMBER_LIKE))
+            || includes.intersects(TYPE_FLAGS_BIG_INT_LIKE)
+                && includes.intersects(without(TYPE_FLAGS_BIG_INT_LIKE))
+            || includes.intersects(TYPE_FLAGS_ES_SYMBOL_LIKE)
+                && includes.intersects(without(TYPE_FLAGS_ES_SYMBOL_LIKE))
+            || includes.intersects(TYPE_FLAGS_VOID_LIKE)
+                && includes.intersects(without(TYPE_FLAGS_VOID_LIKE))
+        {
+            return self.never_type();
+        }
+        if includes.contains(TypeFlags::Any) {
+            return self.any_type();
+        }
+        if !self.strict_null_checks && includes.intersects(TYPE_FLAGS_NULLABLE) {
+            if includes.contains(TypeFlags::Undefined) {
+                return self.undefined_type();
+            }
+            return self.null_type();
         }
         Arc::new(Type::new(
             TypeFlags::Intersection,
