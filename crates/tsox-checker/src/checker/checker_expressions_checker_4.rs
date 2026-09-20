@@ -399,3 +399,36 @@ impl Checker {
             .is_some_and(|p| p.kind == SyntaxKind::ExportAssignment)
     }
 }
+
+impl Checker {
+    // Go checkAndReportErrorForUsingTypeAsValue 原生类型 heritage 分支：
+    // interface extends 报 2840，class extends 报 2863，class implements 报 2862
+    pub(crate) fn primitive_heritage_message(
+        node: &Arc<Node>,
+        name: &str,
+    ) -> Option<tsox_core::diagnostics::Message> {
+        let primitive = matches!(name, "any" | "string" | "number" | "boolean" | "never" | "unknown");
+        if !primitive {
+            return None;
+        }
+        let heritage = node.parent().filter(|p| p.kind == SyntaxKind::HeritageClause)?;
+        let container = heritage.parent()?;
+        let extends = matches!(
+            &heritage.data,
+            tsox_frontend::ast::NodeData::HeritageClause(h) if h.token == SyntaxKind::ExtendsKeyword
+        );
+        use tsox_core::diagnostics::messages_generated as mg;
+        match container.kind {
+            SyntaxKind::InterfaceDeclaration if extends => {
+                Some(mg::AN_INTERFACE_CANNOT_EXTEND_A_PRIMITIVE_TYPE_LIKE_0_IT_CAN_ONLY_EXTEND_OTHER_NAMED_OBJECT_TYPES)
+            }
+            SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression if extends => {
+                Some(mg::A_CLASS_CANNOT_EXTEND_A_PRIMITIVE_TYPE_LIKE_0_CLASSES_CAN_ONLY_EXTEND_CONSTRUCTABLE_VALUES)
+            }
+            SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => {
+                Some(mg::A_CLASS_CANNOT_IMPLEMENT_A_PRIMITIVE_TYPE_LIKE_0_IT_CAN_ONLY_IMPLEMENT_OTHER_NAMED_OBJECT_TYPES)
+            }
+            _ => None,
+        }
+    }
+}

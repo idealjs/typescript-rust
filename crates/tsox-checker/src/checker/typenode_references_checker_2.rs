@@ -52,8 +52,17 @@ impl Checker {
                         let file = self
                             .get_source_file_of_node(type_name)
                             .or_else(|| self.current_file.clone());
-                        // Go onFailedToResolveSymbol：名字命中 lib 特性表先报 TS2583
-                        if let Some(lib) =
+                        // Go checkAndReportErrorForUsingTypeAsValue：原生类型名
+                        // 出现在 heritage 子句时报 2840/2863/2862 专用消息
+                        let heritage_message = Self::primitive_heritage_message(node, name_text);
+                        if let Some(msg) = heritage_message {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                file,
+                                type_name.loc,
+                                msg,
+                                vec![name_text.to_string()],
+                            ));
+                        } else if let Some(lib) =
                             crate::checker::checker_lib_feature_map::suggested_lib_for_name(
                                 name_text,
                             )
