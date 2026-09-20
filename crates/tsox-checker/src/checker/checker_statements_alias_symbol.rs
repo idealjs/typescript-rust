@@ -53,6 +53,7 @@ impl Checker {
     }
 
     pub fn check_alias_symbol(&mut self, node: &Arc<Node>) {
+        eprintln!("[cas] kind={:?} enter", node.kind);
         // Go checkExportSpecifier：无 from 的 export {X} 解析到全局声明
         //（globalThis/undefined/非模块文件顶层）报 TS2661
         if node.kind == SyntaxKind::ExportSpecifier
@@ -60,7 +61,18 @@ impl Checker {
             && let Some(exported) = property_name_or_name(node)
             && exported.kind == SyntaxKind::Identifier
         {
-            match self.resolve_identifier(&exported) {
+            let dbg_res = self.resolve_identifier(&exported);
+            eprintln!(
+                "[cas] name={} resolved={} global={} symflags={:?} decls={:?}",
+                exported.text(),
+                dbg_res.is_some(),
+                dbg_res.as_ref().is_some_and(|s| self.symbol_is_global_declaration(s)),
+                dbg_res.as_ref().map(|s| s.flags),
+                dbg_res
+                    .as_ref()
+                    .map(|s| s.declarations.iter().map(|d| format!("{:?}", d.kind)).collect::<Vec<_>>())
+            );
+            match dbg_res {
                 Some(sym) => {
                     if self.symbol_is_global_declaration(&sym) {
                         self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(

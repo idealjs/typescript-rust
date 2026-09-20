@@ -50,86 +50,148 @@ impl Checker {
     }
 
     pub(crate) fn check_export_assignment_conflicts(&mut self, statements: &[Arc<Node>]) {
-        let export_equals = statements.iter().find(|s| {
-            matches!(
-                &s.data,
-                tsox_frontend::ast::NodeData::ExportAssignment(d) if d.is_export_equals
-            )
-        });
-        let Some(eq_decl) = export_equals else { return };
-        let has_other_value_export = statements.iter().any(|s| {
-            if Arc::ptr_eq(s, eq_decl) {
-                return false;
-            }
-            let value_declaring = match s.kind {
-                SyntaxKind::ModuleDeclaration => {
-                    tsox_frontend::ast::utilities::get_module_instance_state(s)
-                        != tsox_frontend::ast::utilities::ModuleInstanceState::NonInstantiated
-                }
-                SyntaxKind::ClassDeclaration
-                | SyntaxKind::FunctionDeclaration
-                | SyntaxKind::EnumDeclaration
-                | SyntaxKind::VariableStatement => true,
-                _ => false,
-            };
-            value_declaring && s.has_syntactic_modifier(ModifierFlags::Export)
-        });
-        if has_other_value_export {
-            let file = self.current_file.clone();
-            let diagnostic = tsox_frontend::ast::Diagnostic::new(
-                file,
-                eq_decl.loc,
-                tsox_core::diagnostics::messages_generated::
-                    AN_EXPORT_ASSIGNMENT_CANNOT_BE_USED_IN_A_MODULE_WITH_OTHER_EXPORTED_ELEMENTS,
-                Vec::new(),
-            );
-            self.diagnostics.add(diagnostic);
-            return;
+        // Go checkExportAssignment/checkSourceFile：export= 所在容器（文件或
+        // ambient 模块）逐个跑 checkExternalModuleExports 的 export= 段
+        if let Some(file_sym) = self.current_file_symbol.clone() {
+            self.check_external_module_export_equals(&file_sym);
         }
+        for m in Self::collect_module_declarations(statements) {
+            if let Some(sym) = self.program.symbol_map().symbol_of(&m).cloned() {
+                self.check_external_module_export_equals(&sym);
+            }
+        }
+    }
 
-        // Go hasShadowedNamespace：export= 指向含类型/命名空间成员的命名空间，
-        // 且模块自身也导出类型/命名空间成员 → 同样报 TS2309
-        let eq_symbol = self
-            .program
-            .symbol_map()
-            .symbol_of(eq_decl)
-            .cloned();
-        let target = eq_symbol.map(|s| self.resolve_export_equals_target(&s));
-        let target_has_type = target.as_ref().is_some_and(|t| {
-            t.flags.intersects(SymbolFlags::NAMESPACE)
-                && t
-                    .exports
-                    .iter()
-                    .chain(t.members.iter())
-                    .any(|(_, m)| m.flags.intersects(SymbolFlags::TYPE | SymbolFlags::NAMESPACE))
-        });
-        if !target_has_type {
+    fn collect_module_declarations(statements: &[Arc<Node>]) -> Vec<Arc<Node>> {
+        let mut out = Vec::new();
+        let mut stack: Vec<Arc<Node>> = statements.iter().rev().cloned().collect();
+        while let Some(n) = stack.pop() {
+            if n.kind == SyntaxKind::ModuleDeclaration {
+                out.push(Arc::clone(&n));
+            }
+            let children: Vec<Arc<Node>> = match &n.data {
+                tsox_frontend::ast::NodeData::SourceFile(d) => {
+                    d.statements.iter().cloned().collect()
+                }
+                tsox_frontend::ast::NodeData::ModuleDeclaration(d) => match &d.body {
+                    Some(b)
+                        if b.kind == SyntaxKind::ModuleBlock =>
+                    {
+                        match &b.data {
+                            tsox_frontend::ast::NodeData::ModuleBlock(mb) => {
+                                mb.statements.iter().cloned().collect()
+                            }
+                            _ => Vec::new(),
+                        }
+                    }
+                    _ => Vec::new(),
+                },
+                tsox_frontend::ast::NodeData::ModuleBlock(d) => {
+                    d.statements.iter().cloned().collect()
+                }
+                tsox_frontend::ast::NodeData::Block(d) => d.statements.iter().cloned().collect(),
+                _ => Vec::new(),
+            };
+            stack.extend(children.into_iter().rev());
+        }
+        out
+    }
+
+    // Go checkExternalModuleExports 的 export= 段：模块导出含值成员，或
+    // export= 指向的类型/命名空间被模块自身同名遮蔽时，报 TS2309
+    fn check_external_module_export_equals(&mut self, module_symbol: &Arc<Symbol>) {
+        let Some(export_equals) = module_symbol
+            .exports
+            .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
+            .cloned()
+        else {
+            return;
+        };
+
+        let mut has_value = false;
+        for (name, sym) in module_symbol.exports.iter() {
+            if name == tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS {
+                continue;
+            }
+            // Go 的 exports 表不含 `export as namespace` 别名（binder 入
+            // locals）与 bind 期挂入的 JS 赋值增广成员（Go 在 check 期后合）
+            let excluded_from_exports = !sym.declarations.is_empty()
+                && sym.declarations.iter().all(|d| {
+                    d.kind == SyntaxKind::NamespaceExportDeclaration
+                        || matches!(
+                            d.kind,
+                            SyntaxKind::BinaryExpression | SyntaxKind::CallExpression
+                        ) && crate::binder::get_assignment_declaration_kind(d)
+                            != crate::binder::bind_js_assignment_declarations::JsDeclarationKind::None
+                });
+            if excluded_from_exports {
+                continue;
+            }
+            // Go getSymbolFlags：别名链断（unknownSymbol）返回全标志
+            let (flags, complete) = self.symbol_flags_with_alias_chain_ex(sym);
+            if !complete || flags.intersects(SymbolFlags::VALUE) {
+                has_value = true;
+                break;
+            }
+        }
+        let mut has_shadowed_namespace = false;
+        if !has_value
+            && export_equals.flags.contains(SymbolFlags::NamespaceModule)
+            && export_equals.flags.contains(SymbolFlags::Alias)
+        {
+            let target = self.resolve_export_equals_target(&export_equals);
+            if target.flags.intersects(SymbolFlags::NAMESPACE)
+                && Self::module_exports_have_kind(
+                    &target,
+                    SymbolFlags::TYPE | SymbolFlags::NAMESPACE,
+                )
+            {
+                has_shadowed_namespace = true;
+            }
+        }
+        if !has_value && !has_shadowed_namespace {
             return;
         }
-        let module_has_type = statements.iter().any(|s| {
-            if Arc::ptr_eq(s, eq_decl) || !s.has_syntactic_modifier(ModifierFlags::Export) {
-                return false;
-            }
-            matches!(
-                s.kind,
-                SyntaxKind::TypeAliasDeclaration
-                    | SyntaxKind::InterfaceDeclaration
-                    | SyntaxKind::EnumDeclaration
-                    | SyntaxKind::ClassDeclaration
-                    | SyntaxKind::ModuleDeclaration
-            )
-        });
-        if module_has_type {
-            let file = self.current_file.clone();
-            let diagnostic = tsox_frontend::ast::Diagnostic::new(
-                file,
-                eq_decl.loc,
-                tsox_core::diagnostics::messages_generated::
-                    AN_EXPORT_ASSIGNMENT_CANNOT_BE_USED_IN_A_MODULE_WITH_OTHER_EXPORTED_ELEMENTS,
-                Vec::new(),
-            );
-            self.diagnostics.add(diagnostic);
+        let declaration = export_equals
+            .declarations
+            .iter()
+            .rev()
+            .find(|d| {
+                matches!(
+                    d.kind,
+                    SyntaxKind::ImportClause
+                        | SyntaxKind::ImportSpecifier
+                        | SyntaxKind::NamespaceImport
+                        | SyntaxKind::ExportSpecifier
+                        | SyntaxKind::ImportEqualsDeclaration
+                        | SyntaxKind::NamespaceExport
+                        | SyntaxKind::ExportAssignment
+                )
+            })
+            .cloned()
+            .or_else(|| export_equals.value_declaration.clone());
+        let Some(declaration) = declaration else { return };
+        if crate::checker::utilities_get_assignment_target::is_top_level_in_external_module_augmentation(&declaration) {
+            return;
         }
+        let loc = declaration.loc;
+        let file = self
+            .get_source_file_of_node(&declaration)
+            .or_else(|| self.current_file.clone());
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            file,
+            loc,
+            tsox_core::diagnostics::messages_generated::
+                AN_EXPORT_ASSIGNMENT_CANNOT_BE_USED_IN_A_MODULE_WITH_OTHER_EXPORTED_ELEMENTS,
+            Vec::new(),
+        ));
+    }
+
+    fn module_exports_have_kind(module: &Arc<Symbol>, kind: SymbolFlags) -> bool {
+        module.exports.iter().any(|(name, sym)| {
+            name != tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS
+                && sym.flags.intersects(kind)
+        })
     }
 
 
@@ -421,20 +483,32 @@ impl Checker {
 impl Checker {
     // Go checkExternalModuleExports 的 export * 冲突段：同一导出名多个
     // 非重载声明时报 TS2323（namespace/enum/接口合并/类型别名合并除外）
-    pub(crate) fn check_external_module_export_duplicates(&mut self, statements: &[Arc<Node>]) {
-        let Some(module_symbol) = self.current_file_symbol.clone() else {
-            return;
+    fn check_default_export_duplicates(&mut self, statements: &[Arc<Node>]) {
+        let is_not_overload = |d: &Arc<Node>| {
+            !matches!(
+                d.kind,
+                SyntaxKind::FunctionDeclaration | SyntaxKind::MethodDeclaration
+            ) || body_of(d).is_some()
         };
-        let default_locs: Vec<tsox_core::core::text::TextRange> = statements
+        let table_decls = check_default_export_duplicates_inner(&is_not_overload, statements);
+        let count = table_decls
             .iter()
-            .filter(|s| {
-                matches!(&s.data, tsox_frontend::ast::NodeData::ExportAssignment(d) if !d.is_export_equals)
-                    || s.has_syntactic_modifier(ModifierFlags::Default)
+            .filter(|d| {
+                is_not_overload(d)
+                    && !matches!(
+                        d.kind,
+                        SyntaxKind::GetAccessor | SyntaxKind::SetAccessor
+                    )
+                    && d.kind != SyntaxKind::InterfaceDeclaration
             })
-            .map(|s| s.name().map(|n| n.loc).unwrap_or(s.loc))
-            .collect();
-        if default_locs.len() > 1 {
-            for loc in default_locs {
+            .count();
+        if count <= 1 {
+            return;
+        }
+        for declaration in &table_decls {
+            if is_not_overload(declaration)
+                && let Some(loc) = declaration_name_loc(declaration)
+            {
                 let file = self.current_file.clone();
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,
@@ -445,6 +519,13 @@ impl Checker {
                 ));
             }
         }
+    }
+
+    pub(crate) fn check_external_module_export_duplicates(&mut self, statements: &[Arc<Node>]) {
+        let Some(module_symbol) = self.current_file_symbol.clone() else {
+            return;
+        };
+        self.check_default_export_duplicates(statements);
         let exports = self.get_exports_of_module_table(&module_symbol);
         for (name, symbol) in exports.entries.iter() {
             if name == "export*" || name == "export=" {
@@ -498,6 +579,71 @@ impl Checker {
     }
 }
 
+// Go checkExternalModuleExports 的 default 声明段：default 声明按
+// declareSymbol(exports, "default", kind, kindExcludes) 顺序合并，冲突时
+// 表外另立符号；承表组按 countWhere（除重载/访问器/接口）计数 >1 时逐
+// 非重载声明报 TS2323
+fn check_default_export_duplicates_inner(
+    is_not_overload: &dyn Fn(&Arc<Node>) -> bool,
+    statements: &[Arc<Node>],
+) -> Vec<Arc<Node>> {
+    let mut table_decls: Vec<Arc<Node>> = Vec::new();
+    let mut table_flags = SymbolFlags::None;
+    let mut sealed = false;
+    for s in statements {
+        let Some((includes, excludes)) = default_export_binding(s) else {
+            continue;
+        };
+        if table_decls.is_empty() {
+            table_flags = includes;
+            table_decls.push(Arc::clone(s));
+            continue;
+        }
+        if sealed || table_flags.intersects(excludes) {
+            sealed = true;
+            continue;
+        }
+        table_flags |= includes;
+        table_decls.push(Arc::clone(s));
+    }
+    table_decls
+}
+
+fn default_export_binding(s: &Arc<Node>) -> Option<(SymbolFlags, SymbolFlags)> {
+    match &s.data {
+        tsox_frontend::ast::NodeData::ExportAssignment(d) if !d.is_export_equals => {
+            let is_alias = matches!(
+                d.expression.kind,
+                SyntaxKind::Identifier
+                    | SyntaxKind::QualifiedName
+                    | SyntaxKind::PropertyAccessExpression
+                    | SyntaxKind::ClassExpression
+            );
+            Some((
+                if is_alias {
+                    SymbolFlags::Alias
+                } else {
+                    SymbolFlags::Property
+                },
+                SymbolFlags::all(),
+            ))
+        }
+        _ if s.has_syntactic_modifier(ModifierFlags::Default) => match s.kind {
+            SyntaxKind::FunctionDeclaration => Some((
+                SymbolFlags::Function,
+                SymbolFlags::FunctionExcludes,
+            )),
+            SyntaxKind::ClassDeclaration => Some((SymbolFlags::Class, SymbolFlags::ClassExcludes)),
+            SyntaxKind::InterfaceDeclaration => Some((
+                SymbolFlags::Interface,
+                SymbolFlags::InterfaceExcludes,
+            )),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
 fn body_of(d: &Arc<Node>) -> Option<Arc<Node>> {
     match &d.data {
         tsox_frontend::ast::NodeData::FunctionDeclaration(f) => f.body.clone(),
@@ -512,5 +658,5 @@ fn declaration_name_loc(d: &Arc<Node>) -> Option<tsox_core::core::text::TextRang
     if matches!(d.kind, SyntaxKind::ExportAssignment) {
         return Some(d.loc);
     }
-    d.name().map(|n| n.loc)
+    Some(d.name().map(|n| n.loc).unwrap_or(d.loc))
 }
