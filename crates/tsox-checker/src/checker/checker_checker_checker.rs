@@ -113,6 +113,7 @@ pub struct Checker {
     pub probe_cache_restrictive: HashMap<u32, Arc<Type>>,
     pub enum_relation: HashMap<EnumRelationKey, crate::checker::relater::RelationComparisonResult>,
     pub relation_in_progress: std::collections::HashSet<crate::checker::relater::RelationCacheKey>,
+    pub new_call_fallback_signature: bool,
     pub interface_extends_reported: std::collections::HashSet<(
         *const tsox_frontend::ast::Symbol,
         *const tsox_frontend::ast::Node,

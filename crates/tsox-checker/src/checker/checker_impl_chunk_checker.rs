@@ -155,6 +155,7 @@ impl Checker {
             deferred_constraint_depth: 0,
             relation_count: 0,
             relater_overflow: false,
+            new_call_fallback_signature: false,
             relater_intersection_target_depth: 0,
             subst_object_in_progress: std::collections::HashMap::new(),
             in_return_substitution: false,
