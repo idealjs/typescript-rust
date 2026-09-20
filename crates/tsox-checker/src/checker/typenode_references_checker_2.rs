@@ -74,7 +74,7 @@ impl Checker {
                             ));
                         }
                     }
-                    return self.error_type();
+                    return self.unresolved_type();
                 }
             }
         } else if matches!(
@@ -124,7 +124,7 @@ impl Checker {
                                 X_0_REFERS_TO_A_VALUE_BUT_IS_BEING_USED_AS_A_TYPE_HERE_DID_YOU_MEAN_TYPEOF_0,
                             vec![name_text.clone(), name_text],
                         ));
-                        return self.error_type();
+                        return self.unresolved_type();
                     }
                     s
                 }
@@ -132,7 +132,7 @@ impl Checker {
                     self.report_qualified_name_resolution_failure(
                         type_name, &segment, ns_path, member,
                     );
-                    return self.error_type();
+                    return self.unresolved_type();
                 }
             }
         } else {

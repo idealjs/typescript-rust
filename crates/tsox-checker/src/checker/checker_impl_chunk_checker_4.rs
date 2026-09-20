@@ -253,6 +253,19 @@ impl Checker {
             .clone()
     }
 
+    pub fn unresolved_type(&self) -> Arc<Type> {
+        self.unresolved_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Any,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "unresolved".to_string(),
+                    }),
+                ))
+            })
+            .clone()
+    }
+
     pub fn global_regexp_type(&mut self) -> Arc<Type> {
         if let Some(t) = self.global_reg_exp_type.get() {
             return Arc::clone(t);
