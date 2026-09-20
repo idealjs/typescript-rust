@@ -430,36 +430,35 @@ impl Checker {
         // 既有 default 冲突时对每处声明报 2528 且不入表（表保旧符号）
         let mut default_table: Option<(SymbolFlags, Vec<Arc<Node>>)> = None;
         for stmt in statements {
-            let Some((includes, excludes)) = default_decl_semantics(stmt) else {
-                continue;
-            };
-            match &mut default_table {
-                Some((flags, decls)) if flags.intersects(excludes) => {
-                    for d in decls.iter() {
+            for (includes, excludes, decl_node) in default_decl_semantics(stmt) {
+                match &mut default_table {
+                    Some((flags, decls)) if flags.intersects(excludes) => {
+                        for d in decls.iter() {
+                            let file = self.current_file.clone();
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                file,
+                                default_export_name_loc(d),
+                                tsox_core::diagnostics::messages_generated::
+                                    A_MODULE_CANNOT_HAVE_MULTIPLE_DEFAULT_EXPORTS,
+                                Vec::new(),
+                            ));
+                        }
                         let file = self.current_file.clone();
                         self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                             file,
-                            default_export_name_loc(d),
+                            default_export_name_loc(&decl_node),
                             tsox_core::diagnostics::messages_generated::
                                 A_MODULE_CANNOT_HAVE_MULTIPLE_DEFAULT_EXPORTS,
                             Vec::new(),
                         ));
                     }
-                    let file = self.current_file.clone();
-                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                        file,
-                        default_export_name_loc(stmt),
-                        tsox_core::diagnostics::messages_generated::
-                            A_MODULE_CANNOT_HAVE_MULTIPLE_DEFAULT_EXPORTS,
-                        Vec::new(),
-                    ));
-                }
-                Some((flags, decls)) => {
-                    *flags |= includes;
-                    decls.push(Arc::clone(stmt));
-                }
-                None => {
-                    default_table = Some((includes, vec![Arc::clone(stmt)]));
+                    Some((flags, decls)) => {
+                        *flags |= includes;
+                        decls.push(Arc::clone(&decl_node));
+                    }
+                    None => {
+                        default_table = Some((includes, vec![Arc::clone(&decl_node)]));
+                    }
                 }
             }
         }
@@ -532,8 +531,9 @@ impl Checker {
 }
 
 // Go bindExportAssignment/bindFunctionDeclaration/bindClassLikeDeclaration/
-// bindBlockScopedDeclaration 的 includes/excludes（default 顶层声明）
-fn default_decl_semantics(stmt: &Arc<Node>) -> Option<(SymbolFlags, SymbolFlags)> {
+// bindBlockScopedDeclaration 的 includes/excludes（default 顶层声明）；
+// re-export 的 default 命名 specifier 走 declareSymbol(Alias, AliasExcludes)
+fn default_decl_semantics(stmt: &Arc<Node>) -> Vec<(SymbolFlags, SymbolFlags, Arc<Node>)> {
     if let tsox_frontend::ast::NodeData::ExportAssignment(d) = &stmt.data {
         if !d.is_export_equals {
             let includes = if crate::binder::bind_js_assignment_declarations::expression_is_alias(
@@ -543,14 +543,29 @@ fn default_decl_semantics(stmt: &Arc<Node>) -> Option<(SymbolFlags, SymbolFlags)
             } else {
                 SymbolFlags::Property
             };
-            return Some((includes, SymbolFlags::all()));
+            return vec![(includes, SymbolFlags::all(), Arc::clone(stmt))];
         }
-        return None;
+        return Vec::new();
+    }
+    if let tsox_frontend::ast::NodeData::ExportDeclaration(ed) = &stmt.data {
+        let mut out = Vec::new();
+        if let Some(clause) = &ed.export_clause
+            && let tsox_frontend::ast::NodeData::NamedExports(ne) = &clause.data
+        {
+            for el in ne.elements.iter() {
+                if let tsox_frontend::ast::NodeData::ExportSpecifier(spec) = &el.data
+                    && spec.name.text().trim_matches(['"', '\'', '`']) == "default"
+                {
+                    out.push((SymbolFlags::Alias, SymbolFlags::Alias, Arc::clone(el)));
+                }
+            }
+        }
+        return out;
     }
     if !stmt.has_syntactic_modifier(ModifierFlags::Default) {
-        return None;
+        return Vec::new();
     }
-    match stmt.kind {
+    let pair = match stmt.kind {
         SyntaxKind::FunctionDeclaration => {
             Some((SymbolFlags::Function, SymbolFlags::FunctionExcludes))
         }
@@ -559,7 +574,10 @@ fn default_decl_semantics(stmt: &Arc<Node>) -> Option<(SymbolFlags, SymbolFlags)
             Some((SymbolFlags::Interface, SymbolFlags::InterfaceExcludes))
         }
         _ => None,
-    }
+    };
+    pair.map(|(i, e)| (i, e, Arc::clone(stmt)))
+        .into_iter()
+        .collect()
 }
 
 // Go GetNameOfDeclaration 或节点本身（2528 的声明名定位）
@@ -568,6 +586,9 @@ fn default_export_name_loc(d: &Arc<Node>) -> tsox_core::core::text::TextRange {
         if !data.is_export_equals {
             return data.expression.loc;
         }
+    }
+    if d.kind == SyntaxKind::ExportSpecifier {
+        return d.name().map(|n| n.loc).unwrap_or(d.loc);
     }
     d.name().map(|n| n.loc).unwrap_or(d.loc)
 }

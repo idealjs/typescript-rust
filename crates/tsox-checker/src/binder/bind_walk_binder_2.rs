@@ -176,7 +176,10 @@ impl Binder {
                                 .to_string();
                         if has_module_specifier {
                             // re-export：建纯 alias，checker 按模块说明符解析
-                            if let Some(existing) = parent_sym.exports.get(&exported)
+                            // default 命名 specifier 的冲突（Go 报 2528）由 checker
+                            // 的 check_external_module_export_duplicates 统一重放
+                            if exported != "default"
+                                && let Some(existing) = parent_sym.exports.get(&exported)
                                 && existing
                                     .declarations
                                     .iter()
@@ -226,8 +229,11 @@ impl Binder {
                         // 无 from：目标是本容器链绑定——直接把绑定符号放入
                         // exports（不建新符号，避免 Duplicate identifier）。
                         // Go declareSymbol(AliasExcludes)：既有 exports 条目含
-                        // export specifier 声明时，同名 specifier 二次声明冲突
-                        if let Some(existing) = parent_sym.exports.get(&exported)
+                        // export specifier 声明时，同名 specifier 二次声明冲突；
+                        // default 命名specifier 的冲突（Go 报 2528）由 checker
+                        // 的 check_external_module_export_duplicates 统一重放
+                        if exported != "default"
+                            && let Some(existing) = parent_sym.exports.get(&exported)
                             && existing
                                 .declarations
                                 .iter()
