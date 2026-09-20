@@ -252,8 +252,14 @@ impl Checker {
                         for c in clauses.iter() {
                             if let tsox_frontend::ast::NodeData::HeritageClause(hc) = &c.data {
                                 for h in hc.types.iter() {
-                                    if let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(ed) = &h.data {
-                                        heritage.push(Arc::clone(&ed.expression));
+                                    match &h.data {
+                                        tsox_frontend::ast::NodeData::TypeReferenceNode(tr) => {
+                                            heritage.push(Arc::clone(&tr.type_name));
+                                        }
+                                        tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(ed) => {
+                                            heritage.push(Arc::clone(&ed.expression));
+                                        }
+                                        _ => {}
                                     }
                                 }
                             }
