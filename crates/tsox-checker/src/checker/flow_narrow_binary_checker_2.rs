@@ -98,6 +98,13 @@ impl Checker {
         let Some(instance_type) = self.get_instance_type_of_constructor(&right_type) else {
             return Arc::clone(type_);
         };
+        let assume_true = matches!(kind, NarrowKind::TrueBranch);
+        if !assume_true
+            && !(instance_type.flags.contains(TypeFlags::Object)
+                && !self.is_empty_anonymous_object_type(&instance_type))
+        {
+            return Arc::clone(type_);
+        }
         match kind {
             NarrowKind::TrueBranch => self.narrow_to_subtype(type_, &instance_type),
             NarrowKind::FalseBranch => self.remove_subtype_from_union(type_, &instance_type),

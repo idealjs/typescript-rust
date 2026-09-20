@@ -65,6 +65,16 @@ impl Checker {
                                     CANNOT_FIND_NAME_0_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_1_OR_LATER,
                                 vec![name_text.to_string(), lib.to_string()],
                             ));
+                        } else if let Some(suggestion) =
+                            self.find_name_suggestion(name_text, SymbolFlags::TYPE)
+                        {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                file,
+                                type_name.loc,
+                                tsox_core::diagnostics::messages_generated::
+                                    CANNOT_FIND_NAME_0_DID_YOU_MEAN_1,
+                                vec![name_text.to_string(), suggestion],
+                            ));
                         } else {
                             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                                 file,
