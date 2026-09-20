@@ -270,7 +270,12 @@ impl Checker {
                 parts.insert(0, alias_name);
                 return Some(parts.join("."));
             }
-            if is_file_module || ns.name.starts_with('"') {
+            if is_file_module
+                || ns.name
+                    .chars()
+                    .next()
+                    .is_some_and(|c| c == '"' || c == '\'' || c == '`')
+            {
                 // 外部模块名段（含 declare module 增强建的符号，声明表无
                 // SourceFile）不参与限定：跨文件经 import 别名显示
                 // （tsc getSymbolChain 跳过外部模块 root 段）
