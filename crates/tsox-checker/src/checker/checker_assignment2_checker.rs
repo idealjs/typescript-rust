@@ -141,15 +141,31 @@ impl Checker {
                     .find_object_literal_property_name_node(&data.right, &excess_name)
                     .unwrap_or(data.right.loc);
                 let annot_str = self.type_to_string(&left_type);
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    self.current_file.clone(),
-                    loc,
-                    OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
-                    vec![
-                        crate::checker::property_name_for_display(&excess_name),
-                        annot_str,
-                    ],
-                ));
+                // Go reportUnmatchedPropertyForExcessProperty：字面量自身元素命中
+                // 拼写建议时换 TS2561 文案
+                if let Some(sugg) = self.suggestion_for_nonexistent_property(&excess_name, &left_type) {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        loc,
+                        tsox_core::diagnostics::messages_generated::
+                            OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_BUT_0_DOES_NOT_EXIST_IN_TYPE_1_DID_YOU_MEAN_TO_WRITE_2,
+                        vec![
+                            crate::checker::property_name_for_display(&excess_name),
+                            annot_str,
+                            sugg,
+                        ],
+                    ));
+                } else {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        loc,
+                        OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
+                        vec![
+                            crate::checker::property_name_for_display(&excess_name),
+                            annot_str,
+                        ],
+                    ));
+                }
                 return;
             }
         }

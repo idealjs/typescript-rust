@@ -186,44 +186,7 @@ impl Checker {
             );
         }
 
-        let suggestion = display_type.as_structured().and_then(|st| {
-            let rune_len = name_text.chars().count();
-            let maximum_length_difference = 2.max((rune_len as f64 * 0.34) as usize);
-            let mut best_distance = (rune_len as f64 * 0.4).floor() + 0.9;
-            let mut best: Option<String> = None;
-            let mut members: Vec<&String> = st.members.entries.keys().collect();
-            members.sort();
-            for cand in members {
-                let cand = cand.as_str();
-                if cand.is_empty()
-                    || cand.starts_with('"')
-                    || cand.starts_with('\'')
-                    || cand.starts_with('`')
-                    || cand.starts_with('\u{FE}')
-                {
-                    continue;
-                }
-                let cand_len = cand.chars().count();
-
-                if cand_len < 3 && !cand.eq_ignore_ascii_case(name_text) {
-                    continue;
-                }
-                if rune_len.max(cand_len) - rune_len.min(cand_len) > maximum_length_difference {
-                    continue;
-                }
-                if cand == name_text {
-                    continue;
-                }
-                let Some(d) = levenshtein_with_max(name_text, cand, best_distance) else {
-                    continue;
-                };
-                if d < best_distance {
-                    best_distance = d;
-                    best = Some(cand.to_string());
-                }
-            }
-            best
-        });
+        let suggestion = self.suggestion_for_nonexistent_property(name_text, &display_type);
         let mut chain: Vec<tsox_frontend::ast::Diagnostic> = Vec::new();
         if obj_type.is_union() && !obj_type.flags.intersects(TYPE_FLAGS_PRIMITIVE) {
             let name_literal = self.get_string_literal_type(name_text);
@@ -421,5 +384,53 @@ impl Checker {
             args,
         ));
         true
+    }
+}
+
+impl Checker {
+    // Go getSuggestionForNonexistentProperty：目标成员集内按 Levenshtein
+    // 距离取拼写建议（对象字面量多余属性的 TS2561 同源）
+    pub(crate) fn suggestion_for_nonexistent_property(
+        &self,
+        name_text: &str,
+        target: &Arc<Type>,
+    ) -> Option<String> {
+        let st = target.as_structured()?;
+        let rune_len = name_text.chars().count();
+        let maximum_length_difference = 2.max((rune_len as f64 * 0.34) as usize);
+        let mut best_distance = (rune_len as f64 * 0.4).floor() + 0.9;
+        let mut best: Option<String> = None;
+        let mut members: Vec<&String> = st.members.entries.keys().collect();
+        members.sort();
+        for cand in members {
+            let cand = cand.as_str();
+            if cand.is_empty()
+                || cand.starts_with('"')
+                || cand.starts_with('\'')
+                || cand.starts_with('`')
+                || cand.starts_with('\u{FE}')
+            {
+                continue;
+            }
+            let cand_len = cand.chars().count();
+
+            if cand_len < 3 && !cand.eq_ignore_ascii_case(name_text) {
+                continue;
+            }
+            if rune_len.max(cand_len) - rune_len.min(cand_len) > maximum_length_difference {
+                continue;
+            }
+            if cand == name_text {
+                continue;
+            }
+            let Some(d) = levenshtein_with_max(name_text, cand, best_distance) else {
+                continue;
+            };
+            if d < best_distance {
+                best_distance = d;
+                best = Some(cand.to_string());
+            }
+        }
+        best
     }
 }
