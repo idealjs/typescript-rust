@@ -60,7 +60,25 @@ impl Parser {
             ParsingContext::TypeArguments | ParsingContext::TupleElementTypes => {
                 self.token == SyntaxKind::CommaToken || self.is_start_of_type()
             }
-            ParsingContext::HeritageClauseElement => self.is_start_of_left_hand_side_expression(),
+            ParsingContext::HeritageClauseElement => {
+                // Go isValidHeritageClauseObjectLiteral：'{}' 后跟 ,/{/extends/
+                // implements 才当 heritage 元素，否则 '{' 属于类体（列表终结）
+                if self.token == SyntaxKind::OpenBraceToken {
+                    let mut s = self.scanner.clone();
+                    if s.scan() == SyntaxKind::CloseBraceToken {
+                        let next = s.scan();
+                        return matches!(
+                            next,
+                            SyntaxKind::CommaToken
+                                | SyntaxKind::OpenBraceToken
+                                | SyntaxKind::ExtendsKeyword
+                                | SyntaxKind::ImplementsKeyword
+                        );
+                    }
+                    return true;
+                }
+                self.is_start_of_left_hand_side_expression()
+            }
             ParsingContext::HeritageClauses => {
                 self.token == SyntaxKind::ExtendsKeyword
                     || self.token == SyntaxKind::ImplementsKeyword

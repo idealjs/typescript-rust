@@ -511,7 +511,20 @@ impl Checker {
         false
     }
 
-    pub fn check_grammar_heritage_clause(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_heritage_clause(&mut self, node: &Arc<Node>) -> bool {
+        use tsox_core::diagnostics::messages_generated as msg;
+        let NodeData::HeritageClause(h) = &node.data else {
+            return false;
+        };
+        let types = &h.types;
+        if !types.nodes.is_empty() && types.loc.end() > 0 {
+            if let Some(f) = self.current_file.as_ref() {
+                if let Some(comma) = trailing_comma_before(&f.text, types.loc.end()) {
+                    return self
+                        .grammar_error_at_pos(&types.nodes[0], comma, 1, &msg::TRAILING_COMMA_NOT_ALLOWED);
+                }
+            }
+        }
         false
     }
 
@@ -557,6 +570,7 @@ impl Checker {
                 }
                 seen_implements = true;
             }
+            self.check_grammar_heritage_clause(clause);
         }
         false
     }
@@ -591,6 +605,7 @@ impl Checker {
                 }
                 _ => {}
             }
+            self.check_grammar_heritage_clause(clause);
         }
         false
     }
@@ -602,4 +617,30 @@ impl Checker {
     pub fn check_grammar_for_generator(&mut self, _node: &Arc<Node>) -> bool {
         false
     }
+}
+
+/// 列表 end 前反向跳过空白/注释后是 ',' 则返回其位置（Go NodeList
+/// HasTrailingComma 的文本近似：trailing comma 会被收进列表 loc）
+fn trailing_comma_before(text: &str, end: usize) -> Option<usize> {
+    let bytes = text.as_bytes();
+    let mut i = end.min(bytes.len());
+    while i > 0 {
+        let b = bytes[i - 1];
+        match b {
+            b' ' | b'\t' | b'\r' | b'\n' => i -= 1,
+            b'/' if i >= 2 && bytes[i - 2] == b'*' => {
+                i -= 2;
+                while i > 0 {
+                    if bytes[i - 1] == b'/' && i >= 2 && bytes[i - 2] == b'*' {
+                        i -= 2;
+                        break;
+                    }
+                    i -= 1;
+                }
+            }
+            b',' => return Some(i - 1),
+            _ => return None,
+        }
+    }
+    None
 }
