@@ -78,8 +78,10 @@ impl Checker {
                     {
                         let removed = self.remove_definitely_falsy_constituents(&left_type);
                         let non_null = self.get_non_nullable_type_of(&removed);
-                        let reduced =
-                            self.remove_subtype_redundant_members(vec![non_null, right_type]);
+                        let reduced = self.remove_subtype_redundant_members(vec![
+                            non_null,
+                            Arc::clone(&right_type),
+                        ]);
                         self.get_union_type(reduced)
                     } else {
                         left_type

@@ -9,14 +9,33 @@ impl Checker {
         symbol: &Arc<Symbol>,
         name: &str,
     ) {
+        if self.definite_assignment_violation_type(node, symbol).is_some() {
+            let file = self.current_file.clone();
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                file,
+                node.loc,
+                VARIABLE_0_IS_USED_BEFORE_BEING_ASSIGNED,
+                vec![name.to_string()],
+            ));
+        }
+    }
+
+    pub(crate) fn definite_assignment_violation_type(
+        &mut self,
+        node: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+    ) -> Option<Arc<Type>> {
+        if self.definite_assignment_check_depth > 0 {
+            return None;
+        }
         if crate::checker::utilities::get_assignment_target_kind(node)
             == crate::checker::utilities::AssignmentKind::Definite
         {
-            return;
+            return None;
         }
 
         if !self.strict_null_checks {
-            return;
+            return None;
         }
 
         let is_plain_var = symbol.flags.contains(SymbolFlags::FunctionScopedVariable)
@@ -25,7 +44,7 @@ impl Checker {
                 .as_ref()
                 .is_some_and(|d| d.kind == SyntaxKind::VariableDeclaration);
         if !symbol.flags.contains(SymbolFlags::BlockScopedVariable) && !is_plain_var {
-            return;
+            return None;
         }
 
         let declaration = symbol.value_declaration.as_ref().or_else(|| {
@@ -36,9 +55,7 @@ impl Checker {
                 )
             })
         });
-        let Some(declaration) = declaration else {
-            return;
-        };
+        let declaration = Arc::clone(declaration?);
 
         // 自初始化式内引用：解析期环路径返回 any（Go reportCircularityError），
         // assumeInitialized 短路
@@ -46,7 +63,7 @@ impl Checker {
             let mut cur = node.parent();
             let mut inside_own = false;
             while let Some(a) = cur {
-                if Arc::ptr_eq(&a, declaration) {
+                if Arc::ptr_eq(&a, &declaration) {
                     inside_own = true;
                     break;
                 }
@@ -61,7 +78,7 @@ impl Checker {
                 cur = a.parent();
             }
             if inside_own {
-                return;
+                return None;
             }
         }
 
@@ -71,11 +88,11 @@ impl Checker {
             tsox_frontend::ast::NodeData::VariableDeclaration(vd) if vd.exclamation_token.is_some()
         );
         if self
-            .get_combined_modifier_flags(declaration)
+            .get_combined_modifier_flags(&declaration)
             .contains(ModifierFlags::Ambient)
             || has_exclamation
         {
-            return;
+            return None;
         }
 
         let declared_type = self.get_type_of_symbol(symbol);
@@ -84,7 +101,7 @@ impl Checker {
             .intersects(TypeFlags::Any | TypeFlags::Unknown | TypeFlags::Void)
             || type_contains_undefined(&declared_type)
         {
-            return;
+            return None;
         }
 
         let flow_container_of = |n: &Arc<Node>| -> Option<Arc<Node>> {
@@ -109,12 +126,15 @@ impl Checker {
                 current = Arc::clone(current.parent().as_ref()?);
             }
         };
-        let same_scope = match (flow_container_of(node), flow_container_of(declaration)) {
+        let same_scope = match (
+            flow_container_of(node),
+            flow_container_of(&declaration),
+        ) {
             (Some(a), Some(b)) => Arc::ptr_eq(&a, &b),
             _ => true,
         };
         if !same_scope {
-            return;
+            return None;
         }
 
         if node
@@ -122,23 +142,20 @@ impl Checker {
             .as_ref()
             .is_some_and(|p| p.kind == SyntaxKind::NonNullExpression)
         {
-            return;
+            return None;
         }
 
         if !self.strict_null_checks {
-            return;
+            return None;
         }
-        if let Some(flow_type) = self.get_definite_assignment_flow_type(symbol, node) {
-            if type_contains_undefined(&flow_type) {
-                let file = self.current_file.clone();
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    file,
-                    node.loc,
-                    VARIABLE_0_IS_USED_BEFORE_BEING_ASSIGNED,
-                    vec![name.to_string()],
-                ));
-            }
+        self.definite_assignment_check_depth += 1;
+        let flow_type = self.get_definite_assignment_flow_type(symbol, node);
+        self.definite_assignment_check_depth -= 1;
+        let flow_type = flow_type?;
+        if type_contains_undefined(&flow_type) {
+            return Some(declared_type);
         }
+        None
     }
 
     pub(crate) fn push_ts2304_suppression(&mut self) {

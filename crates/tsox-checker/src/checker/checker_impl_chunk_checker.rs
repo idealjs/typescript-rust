@@ -155,6 +155,7 @@ impl Checker {
             deferred_constraint_depth: 0,
             relation_count: 0,
             relater_overflow: false,
+            new_call_fallback_signature: false,
             relater_intersection_target_depth: 0,
             subst_object_in_progress: std::collections::HashMap::new(),
             in_return_substitution: false,
@@ -297,6 +298,7 @@ impl Checker {
             return_type_stack: Vec::new(),
 
             flow_analysis_disabled: false,
+            definite_assignment_check_depth: 0,
             flow_invocation_count: 0,
             flow_type_cache: HashMap::new(),
             type_instantiation_count: 0,
@@ -307,7 +309,9 @@ impl Checker {
             suppress_cannot_find_name_in_type_nodes: 0,
             suppress_source_file: None,
 
+            narrowable_reference_query_stack: Vec::new(),
             merged_symbols: HashMap::new(),
+            merged_symbol_targets: HashMap::new(),
 
             tracer,
             mu: Mutex::new(()),

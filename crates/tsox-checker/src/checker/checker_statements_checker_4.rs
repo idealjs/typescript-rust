@@ -416,6 +416,9 @@ impl Checker {
                 }
             }
 
+            let resolved_type = self
+                .attach_expando_if_fn_initialized(node, resolved_type);
+
             self.type_node_links.get_or_default(node).resolved_type = Some(resolved_type.clone());
 
             self.type_node_links
@@ -525,5 +528,33 @@ impl Checker {
 
     fn is_type_equality_comparable_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
         target.flags.contains(TYPE_FLAGS_NULLABLE) || self.is_type_comparable_to(source, target)
+    }
+
+    pub(crate) fn attach_expando_if_fn_initialized(
+        &mut self,
+        node: &Arc<Node>,
+        t: Arc<Type>,
+    ) -> Arc<Type> {
+        let is_fn_init = matches!(
+            &node.data,
+            tsox_frontend::ast::NodeData::VariableDeclaration(d)
+                if d.initializer.as_ref().is_some_and(|i| matches!(
+                    i.kind,
+                    SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction
+                ))
+        );
+        if !is_fn_init {
+            return t;
+        }
+        let name = node.name();
+        let Some(name) = name else {
+            return t;
+        };
+        match self.resolve_identifier(&name) {
+            Some(symbol) if !symbol.exports.is_empty() => {
+                self.attach_function_expando_type(&symbol, t)
+            }
+            _ => t,
+        }
     }
 }

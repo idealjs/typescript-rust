@@ -65,9 +65,6 @@ impl Checker {
         }
         if is_function_arg {
             let ctx = self.contextual_param_count_for_arg(callee_expr, arg_index);
-            if std::env::var_os("TSOX_DEBUG_SYMBOL").is_some() {
-                eprintln!("[ctx-arg] pushed ctx={ctx}");
-            }
             self.call_arg_arrow_context.push(ctx);
         }
         self.check_expression(arg);
@@ -87,14 +84,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
     ) -> Option<Arc<Signature>> {
-        if std::env::var_os("TSOX_DEBUG_SYMBOL").is_some() {
-            eprintln!(
-                "[arrow-ctx] entered parent={:?}",
-                node.parent().as_ref().map(|p| p.kind)
-            );
-        }
         let t = self.get_contextual_type(node, ContextFlags::None)?;
-        if std::env::var_os("TSOX_DEBUG_SYMBOL").is_some() {}
         if let TypeData::IndexedAccess(ia) = &t.data
             && let (Some(o), Some(i)) = (&ia.object_type, &ia.index_type)
             && o.flags.contains(TypeFlags::TypeParameter)

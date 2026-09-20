@@ -60,13 +60,30 @@ impl Checker {
                 .diagnostics
                 .get_all()
                 .iter()
-                .any(|d| d.code == 2314 && d.loc == type_name.loc);
+                .any(|d| (d.code == 2314 || d.code == 2707) && d.loc == type_name.loc);
             if !already {
+                let (message, args) = if required < params.len() {
+                    (
+                        tsox_core::diagnostics::messages_generated::
+                            GENERIC_TYPE_0_REQUIRES_BETWEEN_1_AND_2_TYPE_ARGUMENTS,
+                        vec![
+                            display,
+                            required.to_string(),
+                            params.len().to_string(),
+                        ],
+                    )
+                } else {
+                    (
+                        tsox_core::diagnostics::messages_generated::
+                            GENERIC_TYPE_0_REQUIRES_1_TYPE_ARGUMENT_S,
+                        vec![display, params.len().to_string()],
+                    )
+                };
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,
                     type_name.loc,
-                    tsox_core::diagnostics::messages_generated::GENERIC_TYPE_0_REQUIRES_1_TYPE_ARGUMENT_S,
-                    vec![display, params.len().to_string()],
+                    message,
+                    args,
                 ));
             }
 

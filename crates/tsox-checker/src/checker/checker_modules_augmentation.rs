@@ -7,8 +7,6 @@ use std::sync::Arc;
 
 impl Checker {
     /// Go mergeModuleAugmentation 前置遍历：在任何文件检查之前，把本文件
-    /// 顶层的外部模块增强（`declare module "spec"`）合并进目标模块符号，
-    /// 使后续各文件的类型解析能看到增强成员
     pub fn merge_module_augmentations_in_file(&mut self, file: &Arc<SourceFile>) {
         let statements: Vec<Arc<Node>> = match &file.node.data {
             NodeData::SourceFile(data) => data.statements.iter().cloned().collect(),
@@ -20,19 +18,7 @@ impl Checker {
             }
             if tsox_frontend::ast::is_global_scope_augmentation(stmt) {
                 self.merge_module_augmentation(&stmt, stmt);
-                continue;
             }
-            let name_node = match &stmt.data {
-                NodeData::ModuleDeclaration(md) => Arc::clone(&md.name),
-                _ => continue,
-            };
-            if name_node.kind != SyntaxKind::StringLiteral {
-                continue;
-            }
-            if !Self::is_external_module_augmentation(stmt) {
-                continue;
-            }
-            self.merge_module_augmentation(&name_node, stmt);
         }
     }
 

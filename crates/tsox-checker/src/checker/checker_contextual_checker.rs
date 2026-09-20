@@ -115,15 +115,31 @@ impl Checker {
                     .find_object_literal_property_name_node(expr, &excess)
                     .unwrap_or(expr.loc);
                 let tgt_str = self.type_to_string(target);
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    self.current_file.clone(),
-                    loc,
-                    OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
-                    vec![
-                        crate::checker::property_name_for_display(&excess),
-                        tgt_str,
-                    ],
-                ));
+                // Go reportUnmatchedPropertyForExcessProperty：字面量自身元素命中
+                // 拼写建议时换 TS2561 文案
+                if let Some(sugg) = self.suggestion_for_nonexistent_property(&excess, target) {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        loc,
+                        tsox_core::diagnostics::messages_generated::
+                            OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_BUT_0_DOES_NOT_EXIST_IN_TYPE_1_DID_YOU_MEAN_TO_WRITE_2,
+                        vec![
+                            crate::checker::property_name_for_display(&excess),
+                            tgt_str,
+                            sugg,
+                        ],
+                    ));
+                } else {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        loc,
+                        OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
+                        vec![
+                            crate::checker::property_name_for_display(&excess),
+                            tgt_str,
+                        ],
+                    ));
+                }
                 return;
             }
             let missing = self.get_missing_required_properties(&expr_type, target);

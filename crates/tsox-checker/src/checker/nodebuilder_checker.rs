@@ -277,6 +277,16 @@ impl Checker {
             }
         }
 
+        if t.object_flags.contains(ObjectFlags::Anonymous) {
+            if let Some(structured) = t.as_structured()
+                && structured.properties.is_empty()
+                && structured.signatures.is_empty()
+                && structured.index_infos.is_empty()
+            {
+                return "{}".to_string();
+            }
+        }
+
         if let Some(sym) = &t.symbol {
             return self.symbol_type_to_string(t, sym, flags);
         }
@@ -289,7 +299,11 @@ impl Checker {
             {
                 return self.object_literal_to_string(t, structured, flags);
             }
-            if t.object_flags.contains(ObjectFlags::ObjectLiteral) && t.symbol.is_none() {
+            if t
+                .symbol
+                .as_ref()
+                .is_none_or(|s| s.name.starts_with('\u{FE}'))
+            {
                 return "{}".to_string();
             }
         }

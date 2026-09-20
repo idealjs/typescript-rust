@@ -138,20 +138,167 @@ impl Binder {
                     _ => false,
                 };
                 if let NodeData::NamedExports(ne) = &clause.data {
-                    for el in ne.elements.iter() {
-                        let NodeData::ExportSpecifier(spec) = &el.data else { continue };
+                    // 目标查找的容器链：文件 + 祖先 declare module（ambient 模块
+                    // 内 `export { O as P }` 的 O 在模块 locals）
+                    let mut scope_nodes: Vec<Arc<Node>> = Vec::new();
+                    {
+                        let mut cur = Some(Arc::clone(&node));
+                        while let Some(n) = cur {
+                            if matches!(
+                                n.kind,
+                                SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration
+                            ) {
+                                scope_nodes.push(Arc::clone(&n));
+                                if n.kind == SyntaxKind::SourceFile {
+                                    break;
+                                }
+                            }
+                            cur = n.parent();
+                        }
+                    }
+                    let _file_node = scope_nodes
+                        .iter()
+                        .find(|n| n.kind == SyntaxKind::SourceFile)
+                        .cloned()
+                        .unwrap_or_else(|| Arc::clone(&node));
+                        for el in ne.elements.iter() {
+                            let NodeData::ExportSpecifier(spec) = &el.data else { continue };
                         if !has_module_specifier
                             && spec.property_name.is_none()
                             && !matches!(spec.name.kind, SyntaxKind::Identifier)
                         {
                             continue;
                         }
-                        self.declare_symbol_into(
-                            el,
-                            SymbolFlags::Alias,
-                            SymbolFlags::AliasExcludes,
-                            DeclareTarget::Exports(Arc::clone(&parent_sym)),
-                        );
+                            // `export { O as P }`：name=P 是导出名，
+                            // property_name=O 是本地原始名
+                            let exported = spec
+                                .name
+                                .text()
+                                .trim_matches(['"', '\'', '`'])
+                                .to_string();
+                            let local_name = spec
+                                .property_name
+                                .as_ref()
+                                .unwrap_or(&spec.name)
+                                .text()
+                                .to_string();
+                        if has_module_specifier {
+                            // re-export：建纯 alias，checker 按模块说明符解析
+                            // default 命名 specifier 的冲突（Go 报 2528）由 checker
+                            // 的 check_external_module_export_duplicates 统一重放
+                            if exported != "default"
+                                && let Some(existing) = parent_sym.exports.get(&exported)
+                                && existing
+                                    .declarations
+                                    .iter()
+                                    .any(|d| d.kind == SyntaxKind::ExportSpecifier)
+                            {
+                                // Go declareSymbol(AliasExcludes=Alias)：同名
+                                // export specifier 二次声明冲突，报两处 2300
+                                for d in existing.declarations.iter().filter(|d| {
+                                    d.kind == SyntaxKind::ExportSpecifier && !Arc::ptr_eq(d, el)
+                                }) {
+                                    if let Some(n) = d.name() {
+                                        self.symbol_map.binder_diagnostics.push(
+                                            Diagnostic::new(
+                                                self.current_source_file.clone(),
+                                                n.loc,
+                                                DUPLICATE_IDENTIFIER_0,
+                                                vec![exported.clone()],
+                                            ),
+                                        );
+                                    }
+                                }
+                                if let Some(n) = el.name() {
+                                    self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                                        self.current_source_file.clone(),
+                                        n.loc,
+                                        DUPLICATE_IDENTIFIER_0,
+                                        vec![exported.clone()],
+                                    ));
+                                }
+                            }
+                            if parent_sym.exports.get(&exported).is_none() {
+                                let sym = self.new_symbol(SymbolFlags::Alias, exported.clone());
+                                let sym_mut = Arc::as_ptr(&sym) as *mut Symbol;
+                                unsafe {
+                                    (*sym_mut).declarations.push(Arc::clone(el));
+                                }
+                                let parent_mut = Arc::as_ptr(&parent_sym) as *mut Symbol;
+                                unsafe {
+                                    (*parent_mut)
+                                        .exports
+                                        .insert(exported.clone(), Arc::clone(&sym));
+                                }
+                                self.symbol_map.set_symbol(el, sym);
+                            }
+                            continue;
+                        }
+                        // 无 from：目标是本容器链绑定——直接把绑定符号放入
+                        // exports（不建新符号，避免 Duplicate identifier）。
+                        // Go declareSymbol(AliasExcludes)：既有 exports 条目含
+                        // export specifier 声明时，同名 specifier 二次声明冲突；
+                        // default 命名specifier 的冲突（Go 报 2528）由 checker
+                        // 的 check_external_module_export_duplicates 统一重放
+                        if exported != "default"
+                            && let Some(existing) = parent_sym.exports.get(&exported)
+                            && existing
+                                .declarations
+                                .iter()
+                                .any(|d| d.kind == SyntaxKind::ExportSpecifier)
+                        {
+                            let prior: Vec<Arc<Node>> = existing
+                                .declarations
+                                .iter()
+                                .filter(|d| {
+                                    d.kind == SyntaxKind::ExportSpecifier && !Arc::ptr_eq(d, el)
+                                })
+                                .cloned()
+                                .collect();
+                            if !prior.is_empty() {
+                                for d in &prior {
+                                    if let Some(n) = d.name() {
+                                        self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                                            self.current_source_file.clone(),
+                                            n.loc,
+                                            DUPLICATE_IDENTIFIER_0,
+                                            vec![exported.clone()],
+                                        ));
+                                    }
+                                }
+                                if let Some(n) = el.name() {
+                                    self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                                        self.current_source_file.clone(),
+                                        n.loc,
+                                        DUPLICATE_IDENTIFIER_0,
+                                        vec![exported.clone()],
+                                    ));
+                                }
+                            }
+                        }
+                        let target = scope_nodes.iter().find_map(|scope| {
+                            self.symbol_map
+                                .locals
+                                .get(&scope.id())
+                                .and_then(|l| l.get(&local_name).cloned())
+                                .or_else(|| {
+                                    self.symbol_map
+                                        .symbol_of(scope)
+                                        .and_then(|sf| sf.members.get(&local_name).cloned())
+                                })
+                        });
+                        let Some(target) = target else { continue };
+                        let target_mut = Arc::as_ptr(&target) as *mut Symbol;
+                        unsafe {
+                            (*target_mut).declarations.push(Arc::clone(el));
+                        }
+                        if parent_sym.exports.get(&exported).is_none() {
+                            let parent_mut = Arc::as_ptr(&parent_sym) as *mut Symbol;
+                            unsafe {
+                                (*parent_mut).exports.insert(exported, Arc::clone(&target));
+                            }
+                        }
+                        self.symbol_map.set_symbol(el, Arc::clone(&target));
                     }
                 }
             }

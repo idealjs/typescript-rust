@@ -50,24 +50,31 @@ impl Binder {
                 && existing.flags.intersects(excludes)
                 && !assignment_merge_exception
             {
-                if existing.flags.intersects(SymbolFlags::ENUM)
-                    || includes.intersects(SymbolFlags::ENUM)
-                {
-                    self.report_declaration_conflict_all(
-                        node,
-                        &existing,
-                        None,
-                        &tsox_core::diagnostics::messages_generated::ENUM_DECLARATIONS_CAN_ONLY_MERGE_WITH_NAMESPACE_OR_OTHER_ENUM_DECLARATIONS,
-                    );
-                } else if existing.flags.contains(SymbolFlags::BlockScopedVariable) {
-                    self.report_declaration_conflict_all(
-                        node,
-                        &existing,
-                        Some(&name),
-                        &CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0,
-                    );
-                } else {
-                    self.report_duplicate_identifier_all(node, &existing, &name);
+                // Go declareSymbolEx：export default EA 冲突报 2528（multiple
+                // default exports），本表不跟踪 default 命名的 class/function/
+                // interface 声明，2528/2323 由 checker 的
+                // check_external_module_export_duplicates 统一重放，binder 侧不报
+                let default_ea = matches!(&node.data, tsox_frontend::ast::NodeData::ExportAssignment(d) if !d.is_export_equals);
+                if !default_ea {
+                    if existing.flags.intersects(SymbolFlags::ENUM)
+                        || includes.intersects(SymbolFlags::ENUM)
+                    {
+                        self.report_declaration_conflict_all(
+                            node,
+                            &existing,
+                            None,
+                            &tsox_core::diagnostics::messages_generated::ENUM_DECLARATIONS_CAN_ONLY_MERGE_WITH_NAMESPACE_OR_OTHER_ENUM_DECLARATIONS,
+                        );
+                    } else if existing.flags.contains(SymbolFlags::BlockScopedVariable) {
+                        self.report_declaration_conflict_all(
+                            node,
+                            &existing,
+                            Some(&name),
+                            &CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0,
+                        );
+                    } else {
+                        self.report_duplicate_identifier_all(node, &existing, &name);
+                    }
                 }
                 let symbol = self.new_symbol(includes, name.clone());
                 let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;

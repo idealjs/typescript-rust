@@ -113,6 +113,7 @@ pub struct Checker {
     pub probe_cache_restrictive: HashMap<u32, Arc<Type>>,
     pub enum_relation: HashMap<EnumRelationKey, crate::checker::relater::RelationComparisonResult>,
     pub relation_in_progress: std::collections::HashSet<crate::checker::relater::RelationCacheKey>,
+    pub new_call_fallback_signature: bool,
     pub interface_extends_reported: std::collections::HashSet<(
         *const tsox_frontend::ast::Symbol,
         *const tsox_frontend::ast::Node,
@@ -240,6 +241,7 @@ pub struct Checker {
     pub in_ctor_body_stack: Vec<bool>,
     pub return_type_stack: Vec<Option<Arc<Type>>>,
     pub flow_analysis_disabled: bool,
+    pub definite_assignment_check_depth: u32,
     pub flow_invocation_count: i32,
     pub flow_type_cache: HashMap<u64, Arc<Type>>,
     pub flow_node_reachable: HashMap<u64, bool>,
@@ -250,6 +252,8 @@ pub struct Checker {
     pub suppress_cannot_find_name_in_type_nodes: u32,
     pub suppress_source_file: Option<u64>,
     pub tracer: Arc<Tracer>,
+    pub narrowable_reference_query_stack: Vec<u64>,
     pub merged_symbols: HashMap<u64, u64>,
+    pub merged_symbol_targets: HashMap<u64, Arc<tsox_frontend::ast::Symbol>>,
     pub mu: Mutex<()>,
 }

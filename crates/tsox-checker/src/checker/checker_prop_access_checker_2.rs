@@ -170,12 +170,6 @@ impl Checker {
             && let Some(constraint) = &tp.constraint
         {
             Arc::clone(constraint)
-        } else if obj_type.is_type_parameter()
-            && let crate::checker::types::TypeData::TypeParameter(tp) = &obj_type.data
-            && let Some(constraint) = &tp.constraint
-        {
-            // 泛型约束上的属性访问按 apparent type 报（Go 报错用基约束）
-            Arc::clone(constraint)
         } else {
             Arc::clone(&obj_type)
         };
@@ -192,47 +186,30 @@ impl Checker {
             );
         }
 
-        let suggestion = display_type.as_structured().and_then(|st| {
-            let rune_len = name_text.chars().count();
-            let maximum_length_difference = 2.max((rune_len as f64 * 0.34) as usize);
-            let mut best_distance = (rune_len as f64 * 0.4).floor() + 0.9;
-            let mut best: Option<String> = None;
-            let mut members: Vec<&String> = st.members.entries.keys().collect();
-            members.sort();
-            for cand in members {
-                let cand = cand.as_str();
-                if cand.is_empty()
-                    || cand.starts_with('"')
-                    || cand.starts_with('\'')
-                    || cand.starts_with('`')
-                    || cand.starts_with('\u{FE}')
+        let suggestion = self.suggestion_for_nonexistent_property(name_text, &display_type);
+        let mut chain: Vec<tsox_frontend::ast::Diagnostic> = Vec::new();
+        if obj_type.is_union() && !obj_type.flags.intersects(TYPE_FLAGS_PRIMITIVE) {
+            let name_literal = self.get_string_literal_type(name_text);
+            for subtype in self.constituent_types(&obj_type) {
+                if self.get_property_of_type(&subtype, name_text).is_none()
+                    && self.get_applicable_index_info(&subtype, &name_literal).is_none()
                 {
-                    continue;
-                }
-                let cand_len = cand.chars().count();
-
-                if cand_len < 3 && !cand.eq_ignore_ascii_case(name_text) {
-                    continue;
-                }
-                if rune_len.max(cand_len) - rune_len.min(cand_len) > maximum_length_difference {
-                    continue;
-                }
-                if cand == name_text {
-                    continue;
-                }
-                let Some(d) = levenshtein_with_max(name_text, cand, best_distance) else {
-                    continue;
-                };
-                if d < best_distance {
-                    best_distance = d;
-                    best = Some(cand.to_string());
+                    chain.push(tsox_frontend::ast::Diagnostic::new(
+                        file.clone(),
+                        name.loc,
+                        PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+                        vec![
+                            name_text.to_string(),
+                            self.type_to_string(&subtype),
+                        ],
+                    ));
+                    break;
                 }
             }
-            best
-        });
+        }
         let static_hit = self.type_has_static_property(name_text, &display_type);
         if static_hit {
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            let mut diag = tsox_frontend::ast::Diagnostic::new(
                 file,
                 name.loc,
                 tsox_core::diagnostics::messages_generated::
@@ -242,7 +219,9 @@ impl Checker {
                     type_str.clone(),
                     format!("{type_str}.{name_text}"),
                 ],
-            ));
+            );
+            diag.message_chain = chain;
+            self.diagnostics.add(diag);
             return;
         }
         // Go reportNonexistentProperty：属性名命中 lib 特性表先报 TS2550
@@ -256,31 +235,35 @@ impl Checker {
                 )
             })
         {
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            let mut diag = tsox_frontend::ast::Diagnostic::new(
                 file,
                 name.loc,
                 tsox_core::diagnostics::messages_generated::
                     PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_2_OR_LATER,
                 vec![name_text.to_string(), type_str, lib.to_string()],
-            ));
+            );
+            diag.message_chain = chain;
+            self.diagnostics.add(diag);
             return;
         }
-        if let Some(sugg) = suggestion {
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+        let mut diag = if let Some(sugg) = suggestion {
+            tsox_frontend::ast::Diagnostic::new(
                 file,
                 name.loc,
                 tsox_core::diagnostics::messages_generated::
                     PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1_DID_YOU_MEAN_2,
                 vec![name_text.to_string(), type_str, sugg],
-            ));
+            )
         } else {
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            tsox_frontend::ast::Diagnostic::new(
                 file,
                 name.loc,
                 PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
                 vec![name_text.to_string(), type_str],
-            ));
-        }
+            )
+        };
+        diag.message_chain = chain;
+        self.diagnostics.add(diag);
     }
 
     pub(crate) fn global_this_property_access_error(
@@ -401,5 +384,53 @@ impl Checker {
             args,
         ));
         true
+    }
+}
+
+impl Checker {
+    // Go getSuggestionForNonexistentProperty：目标成员集内按 Levenshtein
+    // 距离取拼写建议（对象字面量多余属性的 TS2561 同源）
+    pub(crate) fn suggestion_for_nonexistent_property(
+        &self,
+        name_text: &str,
+        target: &Arc<Type>,
+    ) -> Option<String> {
+        let st = target.as_structured()?;
+        let rune_len = name_text.chars().count();
+        let maximum_length_difference = 2.max((rune_len as f64 * 0.34) as usize);
+        let mut best_distance = (rune_len as f64 * 0.4).floor() + 0.9;
+        let mut best: Option<String> = None;
+        let mut members: Vec<&String> = st.members.entries.keys().collect();
+        members.sort();
+        for cand in members {
+            let cand = cand.as_str();
+            if cand.is_empty()
+                || cand.starts_with('"')
+                || cand.starts_with('\'')
+                || cand.starts_with('`')
+                || cand.starts_with('\u{FE}')
+            {
+                continue;
+            }
+            let cand_len = cand.chars().count();
+
+            if cand_len < 3 && !cand.eq_ignore_ascii_case(name_text) {
+                continue;
+            }
+            if rune_len.max(cand_len) - rune_len.min(cand_len) > maximum_length_difference {
+                continue;
+            }
+            if cand == name_text {
+                continue;
+            }
+            let Some(d) = levenshtein_with_max(name_text, cand, best_distance) else {
+                continue;
+            };
+            if d < best_distance {
+                best_distance = d;
+                best = Some(cand.to_string());
+            }
+        }
+        best
     }
 }

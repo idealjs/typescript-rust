@@ -89,7 +89,13 @@ impl Checker {
             if !self.expr_matches_target(arg, target) {
                 continue;
             }
-            return self.narrow_by_type_predicate(type_, pred_type, assume_true);
+            let instantiated_pred = if sig.type_parameters.is_empty() {
+                Arc::clone(pred_type)
+            } else {
+                let inferred = self.infer_call_type_arguments(expr, sig, &call.arguments.nodes);
+                self.substitute_infer_type_parameters(pred_type, &sig.type_parameters, &inferred)
+            };
+            return self.narrow_by_type_predicate(type_, &instantiated_pred, assume_true);
         }
         Arc::clone(type_)
     }
@@ -240,6 +246,9 @@ impl Checker {
                 return Arc::clone(type_);
             }
         }
+        if narrow_to_value {
+            return self.narrow_type_by_type_name(type_, type_name);
+        }
         let matching_flags = match type_name {
             "string" => TYPE_FLAGS_STRING_LIKE,
             "number" => TYPE_FLAGS_NUMBER_LIKE,
@@ -251,18 +260,12 @@ impl Checker {
                 return self.filter_type_by_callable(type_, narrow_to_value);
             }
             "object" => {
-                if narrow_to_value {
-                    return self.filter_type_by_object(type_, is_loose);
-                }
                 return self.remove_object_from_union(type_);
             }
             _ => return Arc::clone(type_),
         };
-        if narrow_to_value {
-            self.filter_type_by_flags(type_, matching_flags)
-        } else {
-            self.remove_flags_from_union(type_, matching_flags)
-        }
+        let _ = is_loose;
+        self.remove_flags_from_union(type_, matching_flags)
     }
 
     pub(crate) fn narrow_by_truthiness(&self, type_: &Arc<Type>, kind: NarrowKind) -> Arc<Type> {

@@ -39,6 +39,12 @@ impl Checker {
                     constraint = Some(self.get_type_from_type_node(constraint_node));
                     self.type_argument_stack = saved_stack;
                     self.type_argument_name_frames = saved_frames;
+                    if let Some(c) = &constraint
+                        && c.flags.contains(TypeFlags::Any)
+                        && !self.is_error_type(c)
+                    {
+                        constraint = Some(self.unknown_type());
+                    }
                 }
                 break;
             }

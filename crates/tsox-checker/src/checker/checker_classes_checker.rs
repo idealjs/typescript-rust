@@ -175,6 +175,7 @@ impl Checker {
             | SyntaxKind::Constructor
             | SyntaxKind::GetAccessor
             | SyntaxKind::SetAccessor => {
+                self.check_type_parameters_on_node(node);
                 self.check_class_accessor_member(node);
             }
             _ => {}

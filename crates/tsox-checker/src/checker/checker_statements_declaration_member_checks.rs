@@ -7,6 +7,7 @@ impl Checker {
         self.check_grammar_modifiers(node);
         self.check_grammar_class_declaration_heritage_clauses(node);
         self.check_exports_on_merged_declarations(node);
+        self.check_type_parameters_on_node(node);
 
         if node.name().is_none() && !node.has_syntactic_modifier(ModifierFlags::Default) {
             self.grammar_error_on_first_token(

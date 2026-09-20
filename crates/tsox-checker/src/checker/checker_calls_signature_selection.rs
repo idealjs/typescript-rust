@@ -98,27 +98,49 @@ impl Checker {
                     return None;
                 }
             }
-        } else if let Some(structured) = callee_type.as_structured() {
-            // Go isUntypedFunctionCall：Function 类型可赋值时按 untyped 调用
+            // Go isUntypedFunctionCall：无任何签名且为全局 Function 型时按
+            // untyped 调用，不报不可调用
             if !is_new
-                && structured.call_signatures().is_empty()
-                && structured.construct_signatures().is_empty()
+                && callee_type.as_structured().is_some_and(|s| {
+                    s.call_signatures().is_empty() && s.construct_signatures().is_empty()
+                })
                 && self.is_global_function_type(callee_type)
             {
-                let any_sig = self.untyped_call_signature();
-                union_signatures.push(any_sig);
-                &union_signatures
-            } else if is_new {
-                structured.construct_signatures()
-            } else {
-                structured.call_signatures()
+                union_signatures.push(self.untyped_call_signature());
+                return Some(union_signatures);
             }
         } else {
-            if !is_new && self.report_get_accessor_call(callee_expr) {
+            let resolved = self.get_signatures_of_type(callee_type, sig_kind);
+            if resolved.is_empty() {
+                let other_kind = if is_new {
+                    SignatureKind::Call
+                } else {
+                    SignatureKind::Construct
+                };
+                let other = self.get_signatures_of_type(callee_type, other_kind);
+                if !is_new && !other.is_empty() {
+                    let type_str = self.type_to_string(callee_type);
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        callee_expr.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            VALUE_OF_TYPE_0_IS_NOT_CALLABLE_DID_YOU_MEAN_TO_INCLUDE_NEW,
+                        vec![type_str],
+                    ));
+                    return None;
+                }
+                if is_new && !other.is_empty() {
+                    self.new_call_fallback_signature = true;
+                    return Some(other);
+                }
+                if !is_new && self.report_get_accessor_call(callee_expr) {
+                    return None;
+                }
+                self.report_invocation_error(callee_expr, callee_type, is_new);
                 return None;
             }
-            self.report_invocation_error(callee_expr, callee_type, is_new);
-            return None;
+            union_signatures = resolved;
+            &union_signatures
         };
         Some(signatures.to_vec())
     }

@@ -170,6 +170,10 @@ impl Checker {
                         self.check_expression(&ewa.expression);
                     }
 
+                    if ewa.expression.kind != SyntaxKind::Identifier {
+                        self.check_expression(&ewa.expression);
+                    }
+
                     self.push_ts2304_suppression();
                     let base_type = self.get_type_from_heritage_type_reference(type_ref);
                     self.pop_ts2304_suppression();

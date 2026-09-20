@@ -32,6 +32,7 @@ impl Checker {
         else {
             return;
         };
+        let new_call_fallback = std::mem::take(&mut self.new_call_fallback_signature);
 
         let type_arg_filtered: Vec<Arc<Signature>>;
         let signatures: &[Arc<Signature>] = {
@@ -74,6 +75,21 @@ impl Checker {
         };
         let sig = Arc::clone(&signatures[matching_idx]);
 
+        if is_new && new_call_fallback && !self.no_implicit_any {
+            let ret_void = self
+                .get_return_type_of_signature(&sig)
+                .is_some_and(|t| t.flags.contains(TypeFlags::Void));
+            if !ret_void {
+                let file = self.current_file.clone();
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    node.loc,
+                    tsox_core::diagnostics::messages_generated::
+                        ONLY_A_VOID_FUNCTION_CAN_BE_CALLED_WITH_THE_NEW_KEYWORD,
+                    Vec::new(),
+                ));
+            }
+        }
         if !self.check_call_arity(node, &sig, &arguments, callee_expr, is_new) {
             return;
         }

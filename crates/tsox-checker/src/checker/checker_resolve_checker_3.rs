@@ -191,6 +191,12 @@ result_mut.set_parent(&result);
 
     pub fn record_merged_symbol(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) {
         self.merged_symbols.insert(source.id(), target.id());
+        self.merged_symbol_targets
+            .insert(target.id(), Arc::clone(target));
+    }
+
+    pub fn merged_symbol_by_id(&self, id: u64) -> Option<Arc<Symbol>> {
+        self.merged_symbol_targets.get(&id).cloned()
     }
 
     pub fn clone_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {

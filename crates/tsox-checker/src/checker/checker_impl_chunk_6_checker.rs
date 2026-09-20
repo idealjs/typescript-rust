@@ -253,15 +253,23 @@ impl Checker {
                     return t;
                 }
             }
-            let flow_narrowable = symbol.flags.intersects(
-                SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable,
-            ) || symbol.flags.intersects(SymbolFlags::Alias);
-            let narrowed = if flow_narrowable {
-                let flow = self.program.symbol_map().flow_node_of(node).map(Arc::clone);
-                self.get_narrowed_type_of_symbol(&symbol, flow.as_ref())
-            } else {
-                self.get_type_of_symbol(&symbol)
-            };
+            let declared = self.get_type_of_symbol(&symbol);
+            let narrowed =
+                if symbol.flags.intersects(
+                    SymbolFlags::FunctionScopedVariable
+                        | SymbolFlags::BlockScopedVariable
+                        | SymbolFlags::Alias,
+                ) {
+                    let flow = self.program.symbol_map().flow_node_of(node).map(Arc::clone);
+                    let narrowable = self.get_narrowable_type_for_reference(&declared, node);
+                    self.get_narrowed_type_of_symbol_with_declared(
+                        &symbol,
+                        flow.as_ref(),
+                        narrowable,
+                    )
+                } else {
+                    declared
+                };
 
             if narrowed.object_flags.contains(ObjectFlags::EvolvingArray)
                 && self.is_evolving_array_operation_target(node)
@@ -272,6 +280,11 @@ impl Checker {
             let final_type = self.finalize_evolving_array_type(&narrowed);
 
             let target_kind = get_assignment_target_kind(node);
+            if target_kind == AssignmentKind::None
+                && let Some(declared) = self.definite_assignment_violation_type(node, &symbol)
+            {
+                return declared;
+            }
             let compound_like =
                 target_kind == AssignmentKind::Definite && is_in_compound_like_assignment(node);
             if compound_like || target_kind == AssignmentKind::Compound {
@@ -375,7 +388,9 @@ impl Checker {
                 if Arc::ptr_eq(source, target) {
                     continue;
                 }
-                if self.is_type_assignable_to(source, target) {
+                // Go removeSubtypes：strictSubtypeRelation 判缩减（assignable 会
+                // 把 {a} 对 {} 误判为可缩减，fresh {} 目标须挡住）
+                if self.is_type_strict_subtype_of(source, target) {
                     keep[i] = false;
                     break;
                 }
