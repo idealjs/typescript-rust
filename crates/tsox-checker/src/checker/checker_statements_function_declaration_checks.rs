@@ -178,9 +178,10 @@ impl Checker {
                 self.pop_function_scope();
                 return;
             }
-            if !ret_type.flags.contains(TypeFlags::Void)
-                && !ret_type.flags.contains(TypeFlags::Undefined)
-                && !ret_type.flags.contains(TypeFlags::Any)
+            if !self.maybe_type_of_kind(ret_type, TypeFlags::Void)
+                && !ret_type
+                    .flags
+                    .intersects(TypeFlags::Undefined | TypeFlags::Any)
             {
                 if let tsox_frontend::ast::NodeData::FunctionDeclaration(data) = &node.data {
                     if let Some(body) = &data.body {

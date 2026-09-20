@@ -141,7 +141,18 @@ impl Checker {
     }
 
     pub(crate) fn maybe_type_of_kind(&self, t: &Type, flags: TypeFlags) -> bool {
-        t.flags.intersects(flags)
+        if t.flags.intersects(flags) {
+            return true;
+        }
+        if t
+            .flags
+            .intersects(TypeFlags::Union | TypeFlags::Intersection)
+        {
+            if let Some(ui) = t.as_union_or_intersection() {
+                return ui.types.iter().any(|c| self.maybe_type_of_kind(c, flags));
+            }
+        }
+        false
     }
 
     pub(crate) fn create_union_type(&self, types: Vec<Arc<Type>>) -> Arc<Type> {

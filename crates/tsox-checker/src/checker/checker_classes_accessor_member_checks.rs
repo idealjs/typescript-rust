@@ -207,9 +207,10 @@ impl Checker {
             self.this_container_stack.pop();
 
             if let Some(ret_type) = &declared_return
-                && !ret_type.flags.contains(TypeFlags::Void)
-                && !ret_type.flags.contains(TypeFlags::Undefined)
-                && !ret_type.flags.contains(TypeFlags::Any)
+                && !self.maybe_type_of_kind(ret_type, TypeFlags::Void)
+                && !ret_type
+                    .flags
+                    .intersects(TypeFlags::Undefined | TypeFlags::Any)
                 && body.kind == SyntaxKind::Block
                 && !self.function_body_definitely_returns(&body)
             {
