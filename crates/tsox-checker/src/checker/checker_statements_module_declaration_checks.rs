@@ -117,6 +117,21 @@ impl Checker {
             }
         }
 
+        // Go checkModuleDeclaration：identifier 名且用 module 关键字报 TS1540
+        if let tsox_frontend::ast::NodeData::ModuleDeclaration(data) = &node.data
+            && data.name.kind == SyntaxKind::Identifier
+            && data.keyword == SyntaxKind::ModuleKeyword
+        {
+            let file = self.current_file.clone();
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                file,
+                data.name.loc,
+                tsox_core::diagnostics::messages_generated::
+                    A_NAMESPACE_DECLARATION_SHOULD_NOT_BE_DECLARED_USING_THE_MODULE_KEYWORD_PLEASE_USE_THE_NAMESPACE_KEYWORD_INSTEAD,
+                vec![],
+            ));
+        }
+
         if let tsox_frontend::ast::NodeData::ModuleDeclaration(data) = &node.data
             && data.name.kind == SyntaxKind::StringLiteral
             && self.current_file.as_ref().is_some_and(|f| {
@@ -125,7 +140,14 @@ impl Checker {
         {
             let module_name = data.name.text().trim_matches(['"', '\'']).to_string();
             let resolvable = self.resolve_module_file_symbol(&module_name).is_some();
-            if !resolvable {
+            // Go mergeModuleAugmentation：ambient 上下文中的增广不校验名字
+            let in_ambient = node.has_syntactic_modifier(ModifierFlags::Ambient)
+                || self.ambient_context_depth > 0
+                || self
+                    .current_file
+                    .as_ref()
+                    .is_some_and(|f| f.is_declaration_file);
+            if !resolvable && !in_ambient {
                 let file = self.current_file.clone();
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                         file,
