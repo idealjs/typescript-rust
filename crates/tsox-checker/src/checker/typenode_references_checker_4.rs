@@ -25,6 +25,8 @@ impl Checker {
         symbol: &Arc<Symbol>,
         type_args: Option<Vec<Arc<Type>>>,
     ) -> Arc<Type> {
+        let merged_symbol = self.get_merged_symbol(symbol);
+        let symbol: &Arc<Symbol> = &merged_symbol;
         let has_type_args = type_args.is_some();
         if !has_type_args {
             if let Some(cached) = self

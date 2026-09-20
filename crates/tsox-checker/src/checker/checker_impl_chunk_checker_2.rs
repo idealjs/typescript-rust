@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker_impl_chunk::*;
+use tsox_frontend::ast::SymbolTable;
 
 impl Checker {
     pub(crate) fn merge_global_symbols(&mut self, dst: &Arc<Symbol>, src: &Arc<Symbol>) {
@@ -250,6 +251,8 @@ impl Checker {
             if aug_entries.is_empty() {
                 continue;
             }
+            let mut star_merged: std::collections::HashMap<String, Arc<Symbol>> =
+                std::collections::HashMap::new();
             if main_module.exports.get(INTERNAL_SYMBOL_NAME_EXPORT_STAR).is_some() {
                 let resolved = self.get_exports_of_module_table(&main_module);
                 for (key, value) in &aug_entries {
@@ -257,7 +260,22 @@ impl Checker {
                         && let Some(target) = resolved.get(key)
                         && !Arc::ptr_eq(target, value)
                     {
-                        merge_declarations_into(target, value);
+                        self.merge_augmentation_symbols(target, value);
+                        star_merged.insert(key.clone(), Arc::clone(target));
+                    }
+                }
+            }
+            for (key, value) in &aug_entries {
+                if value
+                    .declarations
+                    .iter()
+                    .any(|d| d.has_syntactic_modifier(ModifierFlags::Default))
+                    && let Some(default_sym) = main_module.exports.get("default")
+                    && !Arc::ptr_eq(default_sym, value)
+                {
+                    let base = self.resolve_alias_base(Arc::clone(default_sym));
+                    if !Arc::ptr_eq(&base, value) {
+                        self.merge_augmentation_symbols(&base, value);
                     }
                 }
             }
@@ -265,13 +283,23 @@ impl Checker {
             for (key, value) in aug_entries {
                 unsafe {
                     match (*m_mut).exports.get(&key) {
-                        Some(existing) => merge_declarations_into(existing, &value),
+                        Some(existing) => {
+                            self.merge_augmentation_symbols(existing, &value);
+                        }
                         None => {
-                            (*m_mut).exports.entries.insert(key.clone(), value.clone());
+                            let insert = star_merged.get(&key).unwrap_or(&value);
+                            (*m_mut)
+                                .exports
+                                .entries
+                                .insert(key.clone(), Arc::clone(insert));
                         }
                     }
                     if (*m_mut).members.get(&key).is_none() {
-                        (*m_mut).members.entries.insert(key, value);
+                        let insert = star_merged.get(&key).unwrap_or(&value);
+                        (*m_mut)
+                            .members
+                            .entries
+                            .insert(key.clone(), Arc::clone(insert));
                     }
                 }
             }
@@ -304,7 +332,26 @@ impl Checker {
     }
 }
 
+impl Checker {
+    fn merge_augmentation_symbols(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) {
+        let mut records = Vec::new();
+        merge_declarations_into_rec(target, source, &mut records);
+        for (t, s) in records {
+            self.record_merged_symbol(&t, &s);
+        }
+    }
+}
+
 fn merge_declarations_into(target: &Arc<Symbol>, source: &Arc<Symbol>) {
+    let mut records = Vec::new();
+    merge_declarations_into_rec(target, source, &mut records);
+}
+
+fn merge_declarations_into_rec(
+    target: &Arc<Symbol>,
+    source: &Arc<Symbol>,
+    records: &mut Vec<(Arc<Symbol>, Arc<Symbol>)>,
+) {
     let t_mut = Arc::as_ptr(target) as *mut Symbol;
     let s_mut = Arc::as_ptr(source) as *mut Symbol;
     unsafe {
@@ -314,5 +361,28 @@ fn merge_declarations_into(target: &Arc<Symbol>, source: &Arc<Symbol>) {
             }
         }
         (*t_mut).flags |= (*s_mut).flags;
+        records.push((Arc::clone(target), Arc::clone(source)));
+        merge_symbol_tables_into(&mut (*t_mut).members, &(*s_mut).members, records);
+        merge_symbol_tables_into(&mut (*t_mut).exports, &(*s_mut).exports, records);
+    }
+}
+
+fn merge_symbol_tables_into(
+    target: &mut SymbolTable,
+    source: &SymbolTable,
+    records: &mut Vec<(Arc<Symbol>, Arc<Symbol>)>,
+) {
+    let entries: Vec<(String, Arc<Symbol>)> = source
+        .entries
+        .iter()
+        .map(|(k, v)| (k.clone(), Arc::clone(v)))
+        .collect();
+    for (k, v) in entries {
+        match target.entries.get(&k) {
+            Some(existing) => merge_declarations_into_rec(existing, &v, records),
+            None => {
+                target.entries.insert(k, v);
+            }
+        }
     }
 }

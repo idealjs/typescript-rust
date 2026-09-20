@@ -173,8 +173,20 @@ impl Checker {
     }
 
     pub fn get_merged_symbol(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> {
-        if let Some(_target_id) = self.merged_symbols.get(&symbol.id()) {}
-        Arc::clone(symbol)
+        let mut current = Arc::clone(symbol);
+        for _ in 0..16 {
+            let Some(target_id) = self.merged_symbols.get(&current.id()) else {
+                break;
+            };
+            let Some(target) = self.merged_symbol_by_id(*target_id) else {
+                break;
+            };
+            if Arc::ptr_eq(&target, &current) {
+                break;
+            }
+            current = target;
+        }
+        current
     }
 
     pub(crate) fn get_export_symbol_of_value_symbol_if_exported(
