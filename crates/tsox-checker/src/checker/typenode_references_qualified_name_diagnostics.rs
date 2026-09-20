@@ -3,6 +3,29 @@
 use crate::checker::typenode_references::*;
 
 impl Checker {
+    // Go tryGetQualifiedNameAsValue：限定名按值含义逐段取属性类型，
+    // 命中即说明该名字作为值存在（类型位解析失败时用于 typeof 建议）
+    pub(crate) fn try_get_qualified_name_as_value(
+        &mut self,
+        node: &Arc<Node>,
+    ) -> Option<Arc<Symbol>> {
+        let id = crate::checker::checker::base_identifier_of(node);
+        let mut symbol = self.resolve_identifier_with_meaning(&id, SymbolFlags::VALUE)?;
+        let mut n = id;
+        while let Some(parent) = n.parent()
+            && parent.kind == SyntaxKind::QualifiedName
+        {
+            let t = self.get_type_of_symbol(&symbol);
+            let right = match &parent.data {
+                tsox_frontend::ast::NodeData::QualifiedName(q) => q.right.text().to_string(),
+                _ => break,
+            };
+            symbol = self.get_property_of_type(&t, &right)?;
+            n = parent;
+        }
+        Some(symbol)
+    }
+
     pub(crate) fn report_qualified_name_resolution_failure(
         &mut self,
         type_name: &Arc<Node>,
@@ -82,9 +105,6 @@ impl Checker {
                         ));
                     }
                 } else {
-                    if std::env::var_os("TSOX_DEBUG_DOM").is_some() {
-                        eprintln!("[2694] ns={} member={}", ns_path, member);
-                    }
                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                                 file,
                                 segment.loc,

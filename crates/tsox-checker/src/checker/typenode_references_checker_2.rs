@@ -84,7 +84,50 @@ impl Checker {
                 | SyntaxKind::PropertyAccessExpression
         ) {
             match self.resolve_qualified_symbol_traced(type_name) {
-                Ok(s) => s,
+                Ok(s) => {
+                    // Go resolveQualifiedName：成员查找按 Type 含义过滤，命中纯值
+                    // 符号（函数/变量/实例化命名空间）时经 tryGetQualifiedNameAsValue
+                    // 给出 TS2749 typeof 建议；类 extends 位按 Value 解析除外
+                    let in_class_extends_position = node.kind
+                        == SyntaxKind::ExpressionWithTypeArguments
+                        && node.parent().is_some_and(|cl| {
+                            cl.kind == SyntaxKind::HeritageClause
+                                && matches!(&cl.data, NodeData::HeritageClause(h) if h.token == SyntaxKind::ExtendsKeyword)
+                                && cl.parent().is_some_and(|gp| {
+                                    matches!(
+                                        gp.kind,
+                                        SyntaxKind::ClassDeclaration
+                                            | SyntaxKind::ClassExpression
+                                    )
+                                })
+                        });
+                    if type_name.kind == SyntaxKind::QualifiedName
+                        && !in_class_extends_position
+                        && s.flags != SymbolFlags::Alias
+                        && !s.flags.intersects(SymbolFlags::TYPE)
+                        && self.try_get_qualified_name_as_value(type_name).is_some()
+                        && self.ts2304_reporting_allowed_for(type_name)
+                        && self
+                            .current_file
+                            .as_ref()
+                            .is_some_and(|f| !f.file_name.starts_with("bundled://"))
+                    {
+                        let name_text =
+                            crate::checker::checker::qualified_name_text(type_name);
+                        let file = self
+                            .get_source_file_of_node(type_name)
+                            .or_else(|| self.current_file.clone());
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            file,
+                            type_name.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                X_0_REFERS_TO_A_VALUE_BUT_IS_BEING_USED_AS_A_TYPE_HERE_DID_YOU_MEAN_TYPEOF_0,
+                            vec![name_text.clone(), name_text],
+                        ));
+                        return self.error_type();
+                    }
+                    s
+                }
                 Err((segment, ns_path, member)) => {
                     self.report_qualified_name_resolution_failure(
                         type_name, &segment, ns_path, member,
@@ -205,14 +248,6 @@ impl Checker {
             return self.error_type();
         }
 
-        if std::env::var_os("TSOX_DEBUG_NS").is_some() && symbol.name == "B" {
-            eprintln!(
-                "[tr] B flags={:?} class={} iface={:?}",
-                symbol.flags,
-                symbol.flags.contains(SymbolFlags::Class),
-                symbol.flags.contains(SymbolFlags::Interface)
-            );
-        }
         if symbol.flags.contains(SymbolFlags::TypeParameter) {
             return self.resolve_type_parameter_reference(&symbol);
         }
