@@ -528,7 +528,9 @@ impl Checker {
         self.check_default_export_duplicates(statements);
         let exports = self.get_exports_of_module_table(&module_symbol);
         for (name, symbol) in exports.entries.iter() {
-            if name == "export*" || name == "export=" {
+            if name == tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_STAR
+                || name == tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS
+            {
                 continue;
             }
             let flags = self.get_symbol_flags(symbol);

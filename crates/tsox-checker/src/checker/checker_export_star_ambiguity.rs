@@ -2,41 +2,33 @@
 
 use crate::checker::checker::*;
 
+enum Provider {
+    Local,
+    Star(String, Option<Arc<Symbol>>),
+}
+
 impl Checker {
-    /// Go collectExternalModuleInfo→exports 合并的星号歧义检查：
-    /// 文件序遍历导出，星号导出的名字与先前来源（具名/本地/更早星号）冲突时
-    /// 在该星号语句报 TS2308，责任方为首个提供者模块
     pub(crate) fn check_export_star_ambiguity(&mut self, file: &Arc<Node>) {
         let tsox_frontend::ast::NodeData::SourceFile(sf) = &file.data else {
             return;
         };
-        let mut file_sym = None;
-        {
-            let sym = self.program.symbol_map().symbol_of(file).cloned();
-            if sym.is_none() {
-                return;
-            }
-            file_sym = sym;
-        }
-        let Some(file_sym) = file_sym else {
+        let Some(file_sym) = self.program.symbol_map().symbol_of(file).cloned() else {
             return;
         };
 
-        // 名字 → 首个提供者（具名导出的提供者记 "local"）
-        let mut provided: std::collections::HashMap<String, String> =
+        let mut provided: std::collections::HashMap<String, Provider> =
             std::collections::HashMap::new();
         let mut star_queue: Vec<(Arc<Node>, String)> = Vec::new();
 
         for stmt in sf.statements.iter() {
             let tsox_frontend::ast::NodeData::ExportDeclaration(d) = &stmt.data else {
-                // 本地具名导出（export class B 等）
                 if stmt
                     .has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Export)
                     && let Some(name) = stmt.name()
                 {
                     provided
                         .entry(name.text().to_string())
-                        .or_insert_with(|| "local".to_string());
+                        .or_insert(Provider::Local);
                 }
                 continue;
             };
@@ -47,12 +39,11 @@ impl Checker {
                     if let tsox_frontend::ast::NodeData::ExportSpecifier(spec) = &el.data {
                         provided
                             .entry(spec.name.text().to_string())
-                            .or_insert_with(|| "local".to_string());
+                            .or_insert(Provider::Local);
                     }
                 }
                 continue;
             }
-            // 星号（含 export * as ns：命名空间名单独占位不参与歧义）
             if let Some(spec) = &d.module_specifier {
                 let text = spec.text().trim_matches(['"', '\'', '`']).to_string();
                 star_queue.push((Arc::clone(stmt), text));
@@ -66,101 +57,44 @@ impl Checker {
             else {
                 continue;
             };
-            let names = self.module_exported_names(&target, 4);
-            for name in names {
-                if let Some(first_provider) = provided.get(&name) {
-                    if first_provider == "local" || *first_provider == spec {
-                        // 本地导出遮蔽；同模块重复星号（export type * + export *）
-                        // 不构成歧义
-                        continue;
+            let entries: Vec<(String, Arc<Symbol>)> = self
+                .get_exports_of_module_table(&target)
+                .entries
+                .iter()
+                .filter(|(name, _)| {
+                    !name.starts_with(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_PREFIX)
+                        && name.as_str() != tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS
+                })
+                .map(|(name, symbol)| (name.clone(), Arc::clone(symbol)))
+                .collect();
+            for (name, symbol) in entries {
+                let resolved = Some(self.resolve_alias_base(Arc::clone(&symbol)));
+                match provided.get(&name) {
+                    None => {
+                        provided.insert(name, Provider::Star(spec.clone(), resolved));
                     }
-                    let already = self.diagnostics.get_all().iter().any(|dg| {
-                        dg.code == 2308 && dg.loc.pos() == stmt.loc.pos()
-                    });
-                    if already {
+                    Some(Provider::Local) => {}
+                    Some(Provider::Star(first_spec, first_sym)) => {
+                        if first_spec == &spec {
+                            continue;
+                        }
+                        let same_symbol = first_sym
+                            .as_ref()
+                            .is_some_and(|first| Arc::ptr_eq(first, resolved.as_ref().unwrap()));
+                        if same_symbol {
+                            continue;
+                        }
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            stmt.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                MODULE_0_HAS_ALREADY_EXPORTED_A_MEMBER_NAMED_1_CONSIDER_EXPLICITLY_RE_EXPORTING_TO_RESOLVE_THE_AMBIGUITY,
+                            vec![format!("\"{}\"", first_spec.clone()), name],
+                        ));
                         break;
                     }
-                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                        self.current_file.clone(),
-                        stmt.loc,
-                        tsox_core::diagnostics::messages_generated::
-                            MODULE_0_HAS_ALREADY_EXPORTED_A_MEMBER_NAMED_1_CONSIDER_EXPLICITLY_RE_EXPORTING_TO_RESOLVE_THE_AMBIGUITY,
-                        vec![format!("\"{}\"", first_provider.clone()), name],
-                    ));
-                    break;
-                }
-                provided.insert(name, spec.clone());
-            }
-        }
-    }
-
-    /// 模块导出名字集合（具名导出 + 本地导出声明 + 惰性星号递归）
-    pub(crate) fn module_exported_names(
-        &mut self,
-        module_sym: &Arc<Symbol>,
-        depth: usize,
-    ) -> Vec<String> {
-        let mut names: Vec<String> = Vec::new();
-        if depth == 0 {
-            return names;
-        }
-        for (name, _) in module_sym.exports.iter() {
-            if !name.starts_with(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_PREFIX) {
-                names.push(name.clone());
-            }
-        }
-        let mut stars: Vec<String> = Vec::new();
-        self.for_each_module_statement(module_sym, |stmt| {
-            if let tsox_frontend::ast::NodeData::ExportDeclaration(d) = &stmt.data {
-                if let Some(clause) = &d.export_clause {
-                    if let tsox_frontend::ast::NodeData::NamedExports(ne) = &clause.data {
-                        for el in ne.elements.iter() {
-                            if let tsox_frontend::ast::NodeData::ExportSpecifier(spec) =
-                                &el.data
-                            {
-                                let n = spec.name.text().to_string();
-                                if !names.contains(&n) {
-                                    names.push(n);
-                                }
-                            }
-                        }
-                    }
-                    // export * as ns：ns 本身是导出名
-                    if clause.kind == SyntaxKind::NamespaceExport
-                        && let Some(n) =
-                            tsox_frontend::ast::node_data_generated::node_name(clause)
-                    {
-                        let n = n.text().to_string();
-                        if !names.contains(&n) {
-                            names.push(n);
-                        }
-                    }
-                } else if let Some(spec) = &d.module_specifier {
-                    stars.push(spec.text().trim_matches(['"', '\'', '`']).to_string());
-                }
-            } else if stmt
-                .has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Export)
-                && let Some(n) = stmt.name()
-            {
-                let n = n.text().to_string();
-                if !names.contains(&n) {
-                    names.push(n);
-                }
-            }
-            false
-        });
-        for spec in stars {
-            if let Some(target) = self
-                .resolve_module_spec_from(module_sym, &spec)
-                .or_else(|| self.resolve_module_file_symbol(&spec))
-            {
-                for n in self.module_exported_names(&target, depth - 1) {
-                    if !names.contains(&n) {
-                        names.push(n);
-                    }
                 }
             }
         }
-        names
     }
 }
