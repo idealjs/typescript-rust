@@ -471,6 +471,15 @@ impl Checker {
                 RelationKind::Assignable | RelationKind::Subtype | RelationKind::StrictSubtype
             )
         {
+            if self.relater_chain_active {
+                let source_str = self.type_to_string(source);
+                let target_str = self.type_to_string(target);
+                self.relater_report_error(
+                    tsox_core::diagnostics::messages_generated::
+                        THE_TYPE_0_IS_READONLY_AND_CANNOT_BE_ASSIGNED_TO_THE_MUTABLE_TYPE_1,
+                    vec![source_str, target_str],
+                );
+            }
             return false;
         }
 

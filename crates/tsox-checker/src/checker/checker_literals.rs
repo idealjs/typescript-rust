@@ -77,15 +77,26 @@ impl Checker {
                     _ => return self.get_any_type(),
                 };
                 let mut element_types: Vec<Arc<Type>> = Vec::new();
+                let mut infos: Vec<crate::checker::types::TupleElementInfo> = Vec::new();
                 for elem in elements.iter() {
-                    if elem.kind == SyntaxKind::SpreadElement {
-                        let t = self.get_type_of_node(elem);
-                        element_types.push(t);
+                    // Go isConstContext：const 上下文递归传播，内层数组字面量
+                    // 同为 readonly 元组、标量保留字面型
+                    let t = if elem.kind == SyntaxKind::SpreadElement {
+                        self.get_type_of_node(elem)
+                    } else if elem.kind == SyntaxKind::ArrayLiteralExpression {
+                        self.get_const_assertion_type(elem)
                     } else {
-                        element_types.push(self.get_type_of_node(elem));
-                    }
+                        self.get_type_of_node(elem)
+                    };
+                    element_types.push(t);
+                    infos.push(crate::checker::types::TupleElementInfo {
+                        flags: crate::checker::types::ElementFlags::Required,
+                        labeled_declaration: None,
+                        label: None,
+                        type_: None,
+                    });
                 }
-                self.create_tuple_type(element_types)
+                self.create_tuple_type_ex(element_types, infos, true)
             }
             _ => self.get_type_of_node(expr),
         }

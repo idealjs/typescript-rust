@@ -160,6 +160,7 @@ pub(crate) mod checker_alias_resolution;
 pub(crate) mod checker_yield_check;
 pub(crate) mod checker_statements_checker_3;
 pub(crate) mod checker_statements_checker_4;
+pub(crate) mod checker_destructuring_pattern_excess;
 pub(crate) mod checker_statements_declaration_member_checks;
 pub(crate) mod checker_statements_function_declaration_checks;
 pub(crate) mod checker_function_symbol_checks;

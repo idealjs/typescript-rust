@@ -239,6 +239,7 @@ pub struct Checker {
     pub resolving_function_like: std::collections::HashSet<u64>,
     pub class_statics_resolution_stack: Vec<u64>,
     pub class_type_resolution_stack: Vec<u64>,
+    pub inference_constraint_in_flight: Vec<u64>,
     pub resolving_contextual_calls: std::collections::HashSet<u64>,
     pub logical_rhs_narrowing_frames: Vec<(Arc<Symbol>, Arc<Type>)>,
     pub in_ctor_body_stack: Vec<bool>,

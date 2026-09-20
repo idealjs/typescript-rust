@@ -197,6 +197,14 @@ impl Checker {
             && let Some(init) = &pd.initializer
         {
             self.check_expression(init);
+            // Go checkVariableLikeDeclaration：带初始化式的绑定模式参数按 widened
+            // 类型逐元素急切解析（TS2339 等在声明检查期发出）
+            if matches!(
+                pd.name.kind,
+                SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+            ) {
+                self.check_binding_pattern_element_types(&pd.name);
+            }
         }
     }
 }

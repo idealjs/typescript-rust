@@ -377,6 +377,62 @@ impl Checker {
         result
     }
 
+    /// Go getBindingElementTypeFromParentType：strictNullChecks 下模式父声明
+    /// 的初始化式不可能是 undefined 时，根类型剔除 undefined 成分
+    fn filter_binding_parent_undefined(&mut self, decl: &Arc<Node>, t: Arc<Type>) -> Arc<Type> {
+        if !self.strict_null_checks {
+            return t;
+        }
+        let init = match &decl.data {
+            NodeData::VariableDeclaration(d) => d.initializer.clone(),
+            NodeData::ParameterDeclaration(d) => d.initializer.clone(),
+            _ => None,
+        };
+        let Some(init) = init else {
+            return t;
+        };
+        let init_t = self.get_type_of_node(&init);
+        if Self::type_may_be_undefined(&init_t) {
+            return t;
+        }
+        if t.is_union() {
+            if let Some(members) = t.types() {
+                let kept: Vec<Arc<Type>> = members
+                    .iter()
+                    .filter(|m| !Self::type_may_be_undefined(m))
+                    .cloned()
+                    .collect();
+                return match kept.len() {
+                    0 => self.never_type(),
+                    1 => kept.into_iter().next().expect("nonempty"),
+                    _ => self.get_union_type(kept),
+                };
+            }
+            return t;
+        }
+        if Self::type_may_be_undefined(&t) {
+            return self.never_type();
+        }
+        t
+    }
+
+    /// Go getTypeFactsWorker 的 EQUndefined 位：any/unknown/未定类型视为可能
+    fn type_may_be_undefined(t: &Arc<Type>) -> bool {
+        if t.flags.intersects(
+            TypeFlags::Any
+                | TypeFlags::Unknown
+                | TypeFlags::Undefined
+                | TypeFlags::TypeParameter
+                | TypeFlags::Index
+                | TypeFlags::Conditional,
+        ) {
+            return true;
+        }
+        t.is_union()
+            && t.types()
+                .is_some_and(|ts| ts.iter().any(Self::type_may_be_undefined))
+    }
+
     /// 绑定元素解析属性时，把源类型的属性符号挂为 container（显示限定名用）。
     fn link_binding_element_container(&mut self, elem: &Arc<Node>, t: &Arc<Type>, name: &str) {
         let Some(sym) = t.symbol.clone() else { return };
@@ -452,9 +508,25 @@ impl Checker {
                         Some(tn) => self.get_type_from_type_node(tn),
                         None => {
                             let param = Arc::clone(&cur);
-                            self.contextual_type_of_parameter(&param)?
+                            match self.contextual_type_of_parameter(&param) {
+                                Some(t) => t,
+                                None => {
+                                    // Go getTypeForVariableLikeDeclaration：参数无
+                                    // 上下文类型时回退初始化式拓宽类型
+                                    let Some(init) = &d.initializer else {
+                                        return None;
+                                    };
+                                    let raw = self.get_type_of_node(init);
+                                    let widened_literal =
+                                        self.get_widened_literal_type_for_initializer(&cur, &raw);
+                                    let regularized =
+                                        self.get_regular_type_of_literal_type(&widened_literal);
+                                    self.widen_initializer_type(&regularized)
+                                }
+                            }
                         }
                     };
+                    t = self.filter_binding_parent_undefined(&cur, t);
                     for seg in path.iter().rev() {
                         t = self.binding_path_step(elem, t, seg)?;
                     }
@@ -476,6 +548,7 @@ impl Checker {
                         //（Go getTypeForVariableLikeDeclaration 的 ForIn/ForOf 分支）
                         (None, None) => self.initial_type_of_declaration(&cur)?,
                     };
+                    t = self.filter_binding_parent_undefined(&cur, t);
                     for seg in path.iter().rev() {
                         t = self.binding_path_step(elem, t, seg)?;
                     }
@@ -683,7 +756,6 @@ impl Checker {
         let diagnostics_allowed = !self.in_ambient_declaration_context()
             && !elem_has_initializer
             && !t.flags.intersects(TypeFlags::Any | TypeFlags::Unknown | TypeFlags::Never)
-            && !t.is_union()
             && !crate::checker::utilities::is_type_error(&t);
         if let BindingPathSeg::Rest = seg {
             return Some(self.rest_element_type(elem, &t));

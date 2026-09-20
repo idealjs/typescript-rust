@@ -134,13 +134,17 @@ impl Checker {
                         .unwrap_or_else(|| self.get_type_of_symbol(&ctx_params[si])),
                 );
             }
-            // Go getRestTypeAtPosition：非 rest 参数越过固定参数落在 rest 区间，取 rest 元素类型
+            // Go getRestTypeAtPosition：非 rest 参数越过固定参数落在 rest 区间，
+            // 取 rest[number 字面量] 索引访问（联合 rest 分发到各成分）
             if ctx_rest && n > 0 {
                 let rest_sym = ctx_params.last().expect("ctx_rest implies n>0");
                 let rt = self
                     .signature_instantiated_param_type(ctx_sig, n - 1)
                     .unwrap_or_else(|| self.get_type_of_symbol(rest_sym));
-                return Some(self.get_array_element_type(&rt));
+                let index_literal = self.get_number_literal_type(tsox_core::jsnum::Number(
+                    (si - fixed) as f64,
+                ));
+                return Some(self.get_indexed_access_type(&rt, &index_literal));
             }
             None
         }

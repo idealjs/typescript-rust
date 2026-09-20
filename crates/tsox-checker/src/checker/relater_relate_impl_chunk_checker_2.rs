@@ -178,6 +178,11 @@ impl Checker {
                         && last.args.len() == 3
                         && last.args[1] == args[0]
                         && last.args[2] == args[1])
+                    || (last.args.len() == 2
+                        && last.message.key
+                            == msg::THE_TYPE_0_IS_READONLY_AND_CANNOT_BE_ASSIGNED_TO_THE_MUTABLE_TYPE_1.key
+                        && last.args[0] == args[0]
+                        && last.args[1] == args[1])
                     || (last.args.len() >= 2
                         && (last.message.key == msg::TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2.key
                             || last.message.key == msg::TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2_AND_3_MORE.key)

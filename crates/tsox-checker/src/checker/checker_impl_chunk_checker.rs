@@ -295,6 +295,7 @@ impl Checker {
             resolving_function_like: std::collections::HashSet::new(),
             class_statics_resolution_stack: Vec::new(),
             class_type_resolution_stack: Vec::new(),
+            inference_constraint_in_flight: Vec::new(),
             resolving_contextual_calls: std::collections::HashSet::new(),
             logical_rhs_narrowing_frames: Vec::new(),
             in_ctor_body_stack: Vec::new(),

@@ -136,7 +136,9 @@ impl Checker {
         if !tsox_frontend::ast::is_entity_name_expression(&cd.expression) {
             return early;
         }
-        let t = self.get_type_of_node(&cd.expression);
+        // Go lateBindMember → checkComputedPropertyName：计算名经表达式检查
+        //（未解析名在此报 TS2304）
+        let t = self.check_computed_property_name_type(name);
         if crate::checker::utilities_token_is_identifier_or_keyword::is_type_usable_as_property_name(
             &t,
         ) {

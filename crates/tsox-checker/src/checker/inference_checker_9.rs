@@ -98,25 +98,20 @@ impl Checker {
             inferred_type = self.get_type_from_inference(inference);
         }
 
+        let raw_constraint = self.get_constraint_of_type_parameter(&inference.type_parameter);
+        let instantiated_constraint =
+            raw_constraint.map(|c| self.instantiate_inference_constraint(context, index, &c));
+
         if inferred_type.is_some() {
-            let constraint = self.get_constraint_of_type_parameter(&inference.type_parameter);
-            if let Some(constraint) = constraint {
-                // 裸类型参数约束按其有效约束判定（无约束 tp 的目标是 unknown，
-                // 任何源可赋值，Go isTypeAssignableTo 对 tp 目标的语义）
-                let constraint = if constraint.flags.contains(TypeFlags::TypeParameter) {
-                    self.get_constraint_of_type_parameter(&constraint)
-                        .unwrap_or_else(|| self.unknown_type())
-                } else {
-                    constraint
-                };
-                if !self.is_type_assignable_to(inferred_type.as_ref().unwrap(), &constraint) {
+            if let Some(constraint) = &instantiated_constraint {
+                if !self.is_type_assignable_to(inferred_type.as_ref().unwrap(), constraint) {
                     if inference.priority.contains(InferencePriority::ReturnType) {
                         let inferred = inferred_type.as_ref().unwrap();
                         let filtered = if inferred.flags.contains(TypeFlags::Union) {
                             if let Some(types) = inferred.types() {
                                 let filtered: Vec<Arc<Type>> = types
                                     .iter()
-                                    .filter(|u| self.is_type_assignable_to(u, &constraint))
+                                    .filter(|u| self.is_type_assignable_to(u, constraint))
                                     .cloned()
                                     .collect();
                                 if filtered.is_empty() {
@@ -129,7 +124,7 @@ impl Checker {
                             } else {
                                 self.never_type()
                             }
-                        } else if self.is_type_assignable_to(inferred, &constraint) {
+                        } else if self.is_type_assignable_to(inferred, constraint) {
                             (*inferred).clone()
                         } else {
                             self.never_type()
@@ -147,20 +142,21 @@ impl Checker {
         }
 
         if inferred_type.is_none() {
-            if let Some(fallback) = fallback_type {
-                let constraint = self.get_constraint_of_type_parameter(&inference.type_parameter);
-                if let Some(constraint) = constraint {
-                    if self.is_type_assignable_to(&fallback, &constraint) {
-                        inferred_type = Some(fallback);
+            match (&fallback_type, &instantiated_constraint) {
+                (Some(fallback), Some(constraint)) => {
+                    if self.is_type_assignable_to(fallback, constraint) {
+                        inferred_type = Some(Arc::clone(fallback));
                     } else {
-                        inferred_type = Some(constraint);
+                        inferred_type = Some(Arc::clone(constraint));
                     }
-                } else {
-                    inferred_type = Some(fallback);
                 }
-            } else {
-                let constraint = self.get_constraint_of_type_parameter(&inference.type_parameter);
-                inferred_type = constraint;
+                (Some(fallback), None) => {
+                    inferred_type = Some(Arc::clone(fallback));
+                }
+                (None, Some(constraint)) => {
+                    inferred_type = Some(Arc::clone(constraint));
+                }
+                (None, None) => {}
             }
         }
 
@@ -171,5 +167,40 @@ impl Checker {
                 self.unknown_type()
             }
         })
+    }
+
+    /// Go instantiateType(constraint, nonFixingMapper)：约束中的推断类型参数
+    /// 替换为其当前推断结果（in-flight 守卫防循环约束递归）
+    fn instantiate_inference_constraint(
+        &mut self,
+        context: &InferenceContext,
+        index: usize,
+        constraint: &Arc<Type>,
+    ) -> Arc<Type> {
+        let mut params: Vec<Arc<Type>> = Vec::new();
+        let mut indices: Vec<usize> = Vec::new();
+        for (i, inf) in context.inferences.iter().enumerate() {
+            if i == index {
+                continue;
+            }
+            let id = u64::from(inf.type_parameter.id);
+            if self.inference_constraint_in_flight.contains(&id) {
+                continue;
+            }
+            params.push(Arc::clone(&inf.type_parameter));
+            indices.push(i);
+        }
+        if params.is_empty() {
+            return Arc::clone(constraint);
+        }
+        let mut args: Vec<Arc<Type>> = Vec::with_capacity(params.len());
+        for i in &indices {
+            let id = u64::from(context.inferences[*i].type_parameter.id);
+            self.inference_constraint_in_flight.push(id);
+            let t = self.get_inferred_type(context, *i);
+            self.inference_constraint_in_flight.pop();
+            args.push(t);
+        }
+        self.substitute_infer_type_parameters(constraint, &params, &args)
     }
 }

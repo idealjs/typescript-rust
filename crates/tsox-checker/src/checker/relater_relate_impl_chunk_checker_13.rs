@@ -28,10 +28,14 @@ impl Checker {
                                 .or_else(|| Some(self.any_type()));
                         }
                     }
-                } else if let Some(elem) = self.get_array_element_type_of(&rest_type) {
-                    return Some(elem);
                 }
-                return Some(self.any_type());
+                // Go getTypeAtPosition：rest 位之后的参数类型 = rest[number 字面量]
+                // 的索引访问（联合 rest 分发到各成分）
+                let index_literal =
+                    self.get_number_literal_type(tsox_core::jsnum::Number(
+                        (pos - param_count) as f64,
+                    ));
+                return Some(self.get_indexed_access_type(&rest_type, &index_literal));
             }
             return None;
         }
@@ -58,6 +62,9 @@ impl Checker {
                 }
             }
 
+            let index_literal =
+                self.get_number_literal_type(tsox_core::jsnum::Number((pos - param_count) as f64));
+            return Some(self.get_indexed_access_type(&rest_type, &index_literal));
         }
         None
     }
@@ -87,12 +94,11 @@ impl Checker {
         pos: usize,
     ) -> Option<Arc<Type>> {
         let parameter_count = self.get_parameter_count(sig);
-        if !sig.has_rest_parameter() {
-            return None;
-        }
+        let has_rest = sig.has_rest_parameter();
         // Go getRestTypeAtPosition：rest 位本身返回 rest 数组；越过后返回
-        // rest[number][]；rest 位之前返回剩余参数的（含 variadic 尾部的）元组
-        if pos >= parameter_count.saturating_sub(1) {
+        // rest[number][]；rest 位之前（或无 rest 签名）返回剩余参数的（含
+        // variadic 尾部的）元组
+        if has_rest && pos >= parameter_count.saturating_sub(1) {
             let rest = self.get_effective_rest_type(sig)?;
             if pos == parameter_count.saturating_sub(1) {
                 return Some(rest);
@@ -100,11 +106,14 @@ impl Checker {
             let indexed = self.get_indexed_access_type(&rest, &self.number_type());
             return Some(self.create_array_type(indexed));
         }
+        if pos >= parameter_count {
+            return Some(self.create_tuple_type_ex(Vec::new(), Vec::new(), false));
+        }
         let min_argument_count = self.get_min_argument_count(sig).max(0) as usize;
         let mut element_types: Vec<Arc<Type>> = Vec::new();
         let mut infos: Vec<crate::checker::types::TupleElementInfo> = Vec::new();
         for i in pos..parameter_count {
-            if i == parameter_count - 1 {
+            if has_rest && i == parameter_count - 1 {
                 let rest = self.get_effective_rest_type(sig)?;
                 element_types.push(rest);
                 infos.push(crate::checker::types::TupleElementInfo {
@@ -115,6 +124,11 @@ impl Checker {
                 });
             } else {
                 element_types.push(self.get_type_at_position(sig, i));
+                let label = sig
+                    .parameters
+                    .get(i)
+                    .map(|p| p.name.clone())
+                    .filter(|n| !n.is_empty());
                 infos.push(crate::checker::types::TupleElementInfo {
                     flags: if i < min_argument_count {
                         ElementFlags::Required
@@ -122,7 +136,7 @@ impl Checker {
                         ElementFlags::Optional
                     },
                     labeled_declaration: None,
-                    label: None,
+                    label,
                     type_: None,
                 });
             }

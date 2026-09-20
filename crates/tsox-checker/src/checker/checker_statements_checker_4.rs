@@ -260,6 +260,9 @@ impl Checker {
                     self.get_type_from_type_node(type_node)
                 }
                 (None, Some(init)) => {
+                    if data.name.kind == SyntaxKind::ObjectBindingPattern && !in_ambient {
+                        self.check_binding_pattern_initializer_excess(&data.name, init);
+                    }
                     if data.name.kind == SyntaxKind::ArrayBindingPattern {
                         let init_type = if init.kind == SyntaxKind::Identifier
                             && let Some(sym) = self.resolve_identifier(init)
