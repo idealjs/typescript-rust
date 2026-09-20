@@ -61,6 +61,28 @@ impl Checker {
             .collect();
         for file in &script_files {
             let symbol_map = self.program.symbol_map();
+            // Go initializeChecker：脚本文件自声明 globalThis 即与内建全局冲突
+            let file_global_this = symbol_map
+                .symbol_of(&file.node)
+                .and_then(|fs| fs.members.get("globalThis").cloned())
+                .or_else(|| {
+                    symbol_map
+                        .locals_of(&file.node)
+                        .and_then(|l| l.get("globalThis").cloned())
+                });
+            if let Some(gt) = file_global_this {
+                for d in &gt.declarations {
+                    let loc = d.name().map(|n| n.loc).unwrap_or(d.loc);
+                    let file = self.get_source_file_of_node(d);
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        loc,
+                        tsox_core::diagnostics::messages_generated::
+                            DECLARATION_NAME_CONFLICTS_WITH_BUILT_IN_GLOBAL_IDENTIFIER_0,
+                        vec!["globalThis".to_string()],
+                    ));
+                }
+            }
             let mut member_entries: Vec<(String, Arc<Symbol>)> = Vec::new();
             let mut local_entries: Vec<(String, Arc<Symbol>)> = Vec::new();
             if let Some(file_sym) = symbol_map.symbol_of(&file.node) {
@@ -190,7 +212,49 @@ impl Checker {
 
         self.merge_module_augmentations();
 
+        self.add_undefined_to_globals_or_error_on_redeclaration();
+
         self.report_missing_global_types();
+    }
+
+    // Go addUndefinedToGlobalsOrErrorOnRedeclaration：globals 已有用户声明的
+    // undefined 时逐非类型声明报 2397，否则并入内建 undefined 符号
+    fn add_undefined_to_globals_or_error_on_redeclaration(&mut self) {
+        let name = self
+            .undefined_symbol
+            .as_ref()
+            .map(|s| s.name.clone())
+            .unwrap_or_else(|| "undefined".to_string());
+        match self.globals.get(&name).cloned() {
+            Some(target) => {
+                for d in &target.declarations {
+                    let is_type_declaration = matches!(
+                        d.kind,
+                        tsox_frontend::ast::SyntaxKind::TypeParameter
+                            | tsox_frontend::ast::SyntaxKind::ClassDeclaration
+                            | tsox_frontend::ast::SyntaxKind::InterfaceDeclaration
+                            | tsox_frontend::ast::SyntaxKind::TypeAliasDeclaration
+                            | tsox_frontend::ast::SyntaxKind::EnumDeclaration
+                    );
+                    if !is_type_declaration {
+                        let loc = d.name().map(|n| n.loc).unwrap_or(d.loc);
+                        let file = self.get_source_file_of_node(d);
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            file,
+                            loc,
+                            tsox_core::diagnostics::messages_generated::
+                                DECLARATION_NAME_CONFLICTS_WITH_BUILT_IN_GLOBAL_IDENTIFIER_0,
+                            vec![name.clone()],
+                        ));
+                    }
+                }
+            }
+            None => {
+                if let Some(undef) = self.undefined_symbol.clone() {
+                    self.globals.insert(name, undef);
+                }
+            }
+        }
     }
 
     /// Go mergeModuleAugmentation（非 global）：增广模块的导出并入目标模块符号；
