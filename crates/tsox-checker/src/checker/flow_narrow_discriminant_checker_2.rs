@@ -94,64 +94,33 @@ impl Checker {
                 .iter()
                 .any(|c| c.kind == SyntaxKind::DefaultClause);
         if has_default {
-            let mut outside_implied: Vec<Arc<Type>> = Vec::new();
+            let mut not_equal_facts = 0;
             for (i, w) in witnesses.iter().enumerate() {
                 if (i < start || i >= end) && !w.is_empty() {
-                    outside_implied.push(self.typeof_string_to_type(w));
+                    not_equal_facts |= Self::typeof_ne_facts_of_witness(w);
                 }
             }
-            let constituents = self.constituent_types(type_);
-            let remaining: Vec<Arc<Type>> = constituents
+            let remaining: Vec<Arc<Type>> = self
+                .constituent_types(type_)
                 .into_iter()
-                .filter(|t| !outside_implied.iter().any(|it| self.types_overlap(t, it)))
+                .filter(|t| self.get_typeof_facts(t) & not_equal_facts == not_equal_facts)
                 .collect();
             return self.rebuild_union_or_never(type_, remaining);
         }
 
-        let group_witnesses: Vec<(String, Arc<Type>)> = witnesses[start..end]
-            .iter()
-            .filter(|w| !w.is_empty())
-            .map(|w| (w.clone(), self.typeof_string_to_type(w)))
-            .collect();
-        if group_witnesses.is_empty() {
+        let mut parts: Vec<Arc<Type>> = Vec::new();
+        for w in &witnesses[start..end] {
+            if !w.is_empty() {
+                parts.push(self.narrow_type_by_type_name(type_, w));
+            }
+        }
+        if parts.is_empty() {
             return Arc::clone(type_);
         }
-
-        if type_.is_union() {
-            let constituents = self.constituent_types(type_);
-            let matching: Vec<Arc<Type>> = constituents
-                .into_iter()
-                .filter(|t| {
-                    group_witnesses.iter().any(|(text, implied)| {
-                        if text == "function" {
-                            return self.types_overlap(t, implied)
-                                && !self
-                                    .get_signatures_of_type(t, SignatureKind::Call)
-                                    .is_empty();
-                        }
-                        self.types_overlap(t, implied)
-                    })
-                })
-                .collect();
-            return self.rebuild_union_or_never(type_, matching);
+        if parts.len() == 1 {
+            return parts.into_iter().next().expect("exactly one");
         }
-
-        let overlapped: Vec<Arc<Type>> = group_witnesses
-            .iter()
-            .filter(|(_, implied)| self.types_overlap(type_, implied))
-            .map(|(_, implied)| Arc::clone(implied))
-            .collect();
-        if overlapped.is_empty() {
-            return self.never_type();
-        }
-        if overlapped.len() == 1 {
-            let implied = overlapped.into_iter().next().expect("exactly one");
-            if self.is_type_assignable_to(type_, &implied) {
-                return Arc::clone(type_);
-            }
-            return implied;
-        }
-        self.get_union_type(overlapped)
+        self.get_union_type(parts)
     }
 
     pub(crate) fn get_switch_clause_typeof_witnesses(

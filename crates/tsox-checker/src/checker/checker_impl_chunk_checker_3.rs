@@ -184,6 +184,26 @@ impl Checker {
             .clone()
     }
 
+    pub fn empty_object_type(&self) -> Arc<Type> {
+        self.empty_object_type
+            .get_or_init(|| {
+                Arc::new(Type {
+                    flags: TypeFlags::Object,
+                    object_flags: crate::checker::types::ObjectFlags::Anonymous,
+                    id: crate::checker::types::next_type_id(),
+                    symbol: None,
+                    alias: None,
+                    data: TypeData::Object(ObjectTypeData {
+                        structured: StructuredTypeData::default(),
+                        target: None,
+                        mapper: None,
+                        type_arguments: Vec::new(),
+                    }),
+                })
+            })
+            .clone()
+    }
+
     pub fn undefined_type(&self) -> Arc<Type> {
         self.undefined_type
             .get_or_init(|| {

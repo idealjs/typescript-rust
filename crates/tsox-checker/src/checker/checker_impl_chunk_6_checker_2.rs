@@ -42,10 +42,18 @@ impl Checker {
             }
 
             if t.object_flags.contains(ObjectFlags::Anonymous)
-                && structured.call_signature_count > 0
-                && self.global_interface_has_property("Function", name)
+                && !structured.signatures.is_empty()
             {
-                return true;
+                let fallback_type = if structured.call_signature_count > 0 {
+                    self.global_callable_function_type()
+                } else {
+                    self.global_newable_function_type()
+                };
+                if let Some(ft) = fallback_type
+                    && self.get_property_of_type(&ft, name).is_some()
+                {
+                    return true;
+                }
             }
 
             if t.flags.contains(TypeFlags::Object)
@@ -85,11 +93,15 @@ impl Checker {
         }
 
         if t.flags.contains(TypeFlags::TypeParameter) {
-            if let Some(constraint) = self.get_constraint_of_type_parameter(t) {
+            if let Some(constraint) = self.get_constraint_of_type_parameter(t)
+                && !constraint.flags.contains(TypeFlags::Unknown)
+            {
                 return self.has_property_of_type(&constraint, name);
             }
-
-            return true;
+            if self.strict_null_checks {
+                return false;
+            }
+            return self.global_interface_has_property("Object", name);
         }
 
         if t.flags.contains(TypeFlags::Conditional) {
@@ -127,6 +139,17 @@ impl Checker {
             }
 
             if self.global_interface_has_property("Array", name) {
+                return true;
+            }
+            if let Some(array_sym) = self.globals.get("Array")
+                && let Some(declared) = self
+                    .type_alias_links
+                    .get(array_sym)
+                    .and_then(|l| l.declared_type.clone())
+                && declared
+                    .as_structured()
+                    .is_some_and(|s| s.members.get(name).is_some())
+            {
                 return true;
             }
             return false;

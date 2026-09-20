@@ -164,12 +164,25 @@ impl Checker {
         None
     }
 
-    pub(crate) fn global_callable_function_type(&self) -> Option<Arc<Type>> {
-        None
+    pub(crate) fn global_function_type_of(&mut self, name: &str) -> Option<Arc<Type>> {
+        let sym = self.globals.get(name).cloned()?;
+        Some(self.get_declared_type_of_symbol(&sym))
     }
 
-    pub(crate) fn global_newable_function_type(&self) -> Option<Arc<Type>> {
-        None
+    pub(crate) fn global_callable_function_type(&mut self) -> Option<Arc<Type>> {
+        if self.strict_bind_call_apply {
+            self.global_function_type_of("CallableFunction")
+        } else {
+            self.global_function_type_of("Function")
+        }
+    }
+
+    pub(crate) fn global_newable_function_type(&mut self) -> Option<Arc<Type>> {
+        if self.strict_bind_call_apply {
+            self.global_function_type_of("NewableFunction")
+        } else {
+            self.global_function_type_of("Function")
+        }
     }
 
     pub(crate) fn get_jsx_type_symbol(

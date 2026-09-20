@@ -200,6 +200,7 @@ pub(crate) mod flow_narrow_discriminant_checker;
 pub(crate) mod flow_narrow_discriminant_checker_2;
 pub(crate) mod flow_narrow_discriminant_checker_3;
 pub(crate) mod flow_narrow_expr;
+pub(crate) mod flow_narrow_typeof;
 pub(crate) mod flow_post_super;
 pub(crate) mod flow_property_presence;
 pub(crate) mod flow_union_ops;

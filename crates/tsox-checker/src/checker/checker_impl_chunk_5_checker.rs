@@ -170,6 +170,11 @@ impl Checker {
         t: &Arc<Type>,
         kind: SignatureKind,
     ) -> Vec<Arc<Signature>> {
+        if let crate::checker::types::TypeData::TypeParameter(tp) = &t.data
+            && let Some(constraint) = &tp.constraint
+        {
+            return self.get_signatures_of_type(constraint, kind);
+        }
         // Go resolveStructuredTypeMembers：交集的签名 = 各成分签名拼接
         if t.is_intersection()
             && let Some(types) = t.types()
