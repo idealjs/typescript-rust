@@ -49,6 +49,7 @@ pub struct Checker {
     pub indexed_access_types: HashMap<CacheHashKey, Arc<Type>>,
     pub template_literal_types: HashMap<CacheHashKey, Arc<Type>>,
     pub string_mapping_types: HashMap<u64, Arc<Type>>,
+    pub intrinsic_marker_type: OnceLock<Arc<Type>>,
     pub cached_types: HashMap<CachedTypeKey, Arc<Type>>,
     pub union_types: HashMap<CacheHashKey, Arc<Type>>,
     pub intersection_types: HashMap<CacheHashKey, Arc<Type>>,

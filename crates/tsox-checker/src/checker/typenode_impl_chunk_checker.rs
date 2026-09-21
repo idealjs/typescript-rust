@@ -126,6 +126,7 @@ impl Checker {
             SyntaxKind::ObjectKeyword => self.non_primitive_type(),
 
             SyntaxKind::ConstKeyword => self.any_type(),
+            SyntaxKind::IntrinsicKeyword => self.intrinsic_marker_type(),
             SyntaxKind::ThisType | SyntaxKind::ThisKeyword => {
                 self.get_type_from_this_type_node(node)
             }

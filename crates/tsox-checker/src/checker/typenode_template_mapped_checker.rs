@@ -197,6 +197,19 @@ impl Checker {
         let mut symbol_table = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::new();
         for key in &keys {
+            let key_type = self.get_string_literal_type(key);
+            // Go resolveMappedTypeMembers：`as` 改名在 K→key 帧下解析
+            // name_type，归约为字符串字面量时作为成员名
+            let name = match &data.name_type {
+                Some(name_node) => {
+                    let t = self.resolve_mapped_decl_node(Some(node), name_node, &key_type, &[]);
+                    match t.literal_value() {
+                        Some(LiteralValue::String(s)) => s.clone(),
+                        _ => key.clone(),
+                    }
+                }
+                None => key.clone(),
+            };
             let mut prop_type = match &data.type_node {
                 Some(tn) => {
                     if let Some(k) = tp_key {
@@ -219,7 +232,7 @@ impl Checker {
             if is_optional {
                 flags |= SymbolFlags::Optional;
             }
-            let symbol = Arc::new(Symbol::new(flags, key.clone()));
+            let symbol = Arc::new(Symbol::new(flags, name.clone()));
             self.value_symbol_links.insert(
                 &symbol,
                 ValueSymbolLinks {
@@ -227,7 +240,7 @@ impl Checker {
                     ..Default::default()
                 },
             );
-            symbol_table.insert(key.clone(), Arc::clone(&symbol));
+            symbol_table.insert(name.clone(), Arc::clone(&symbol));
             props.push(symbol);
         }
         Arc::new(Type {

@@ -188,7 +188,18 @@ impl Checker {
         chain: &[(Vec<Arc<Type>>, Vec<Arc<Type>>)],
     ) -> Arc<Type> {
         let decl = m.declaration.clone();
-        let tp_node = decl.as_ref().and_then(|d| match &d.data {
+        self.resolve_mapped_decl_node(decl.as_ref(), node, key, chain)
+    }
+
+    /// 映射型声明节点词法帧下解析其内部类型节点（快路径无 MappedTypeData 时共用）
+    pub(crate) fn resolve_mapped_decl_node(
+        &mut self,
+        decl: Option<&Arc<tsox_frontend::ast::Node>>,
+        node: &Arc<tsox_frontend::ast::Node>,
+        key: &Arc<Type>,
+        chain: &[(Vec<Arc<Type>>, Vec<Arc<Type>>)],
+    ) -> Arc<Type> {
+        let tp_node = decl.and_then(|d| match &d.data {
             NodeData::MappedTypeNode(md) => Some(Arc::clone(&md.type_parameter)),
             _ => None,
         });

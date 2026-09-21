@@ -178,6 +178,7 @@ impl Parser {
             | SyntaxKind::BooleanKeyword
             | SyntaxKind::UndefinedKeyword
             | SyntaxKind::NeverKeyword
+            | SyntaxKind::IntrinsicKeyword
             | SyntaxKind::ObjectKeyword => {
                 if self.look_ahead_token() == SyntaxKind::DotToken {
                     return self.parse_type_reference();

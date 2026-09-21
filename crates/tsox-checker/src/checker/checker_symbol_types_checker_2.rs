@@ -35,6 +35,18 @@ impl Checker {
             Arc::as_ptr(symbol) as *const Symbol,
             crate::checker::TypeResolutionProperty::Type,
         ) {
+            // Go checkComputedPropertyName 的 circularConstraintType 语义：解构
+            // 元素经自身计算属性名回入（无初始化式形态）按空匿名对象定型，
+            // 上层按 TS2538('{}') 报告而非环错误/TS7022
+            let plain_binding_element = symbol.declarations.iter().any(|d| {
+                matches!(
+                    &d.data,
+                    NodeData::BindingElement(be) if be.initializer.is_none()
+                )
+            });
+            if plain_binding_element {
+                return Some(self.circular_constraint_type());
+            }
             return Some(self.report_circularity_error(symbol));
         }
         let result = self.resolve_symbol_declared_type_on_demand_inner(symbol);
@@ -460,6 +472,17 @@ impl Checker {
     /// 绑定元素类型：沿模式链上行到根声明取类型，再按属性/索引路径逐层查。
     pub(crate) fn binding_element_type(&mut self, elem: &Arc<Node>) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
+        // Go getTypeForBindingElementParent：符号缓存型（含上下文定型驻留的）
+        // 优先直取，重复解析会重复报属性查找诊断
+        if let Some(sym) = self.program.symbol_map().symbol_of(elem)
+            && let Some(t) = self
+                .value_symbol_links
+                .get(sym)
+                .and_then(|l| l.resolved_type.clone())
+            && !crate::checker::utilities::is_type_error(&t)
+        {
+            return Some(t);
+        }
         let mut path: Vec<BindingPathSeg> = Vec::new();
         let mut cur = Arc::clone(elem);
         loop {
@@ -761,17 +784,37 @@ impl Checker {
             return Some(self.rest_element_type(elem, &t));
         }
         if let BindingPathSeg::Prop(name, renamed) = seg {
-            // Go isTypeUsableAsPropertyName：computed 名表达式解析失败（error 型，
-            // 如未解析名）时属性查找不可用，错误已由名表达式自身报告
+            // Go isTypeUsableAsPropertyName：computed 名表达式解析失败（error 型）
+            // 时属性查找不可用，错误已由名表达式自身报告
             if let Some(pn) = Self::binding_element_computed_property_name(elem)
                 && let tsox_frontend::ast::NodeData::ComputedPropertyName(cd) = &pn.data
             {
                 let name_expr_type = self.get_type_of_node(&cd.expression);
-                if crate::checker::utilities::is_type_error(&name_expr_type)
-                    || (tsox_frontend::ast::is_identifier(&cd.expression)
-                        && self.resolve_identifier(&cd.expression).is_none())
-                {
+                if crate::checker::utilities::is_type_error(&name_expr_type) {
                     return None;
+                }
+                // Go getPropertyNameFromIndex：字面量/unique symbol 计算名按
+                // 类型派生名直查属性（{[Key]: v} 的 symbol 键成员）
+                if crate::checker::utilities_token_is_identifier_or_keyword::is_type_usable_as_property_name(&name_expr_type)
+                {
+                    let derived = crate::checker::utilities_token_is_identifier_or_keyword::get_property_name_from_type(&name_expr_type);
+                    if *renamed {
+                        self.link_binding_element_container(elem, &t, &derived);
+                    }
+                    let result = self.get_type_of_property_of_type(&t, &derived);
+                    if result.is_none() && diagnostics_allowed {
+                        let display = self.boxed_declared_type_for_display(&t);
+                        let type_str = self.type_to_string(&display);
+                        let name_node = Self::binding_element_name_node(elem)
+                            .unwrap_or_else(|| Arc::clone(elem));
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            name_node.loc,
+                            tsox_core::diagnostics::messages_generated::PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+                            vec![derived, type_str],
+                        ));
+                    }
+                    return result;
                 }
                 // computed string 名走索引签名通道（Go getIndexedAccessTypeEx）：
                 // 无匹配 string 索引签名报 TS2537，命中取值类型
@@ -804,6 +847,34 @@ impl Checker {
                     }
                     return None;
                 }
+                if name_expr_type.flags.intersects(TypeFlags::Number) {
+                    let structured = t.as_structured();
+                    let match_info = structured.and_then(|s| {
+                        s.index_infos.iter().find(|info| {
+                            info.key_type
+                                .as_ref()
+                                .map(|k| k.flags.intersects(TypeFlags::Number))
+                                .unwrap_or(false)
+                        })
+                    });
+                    if let Some(info) = match_info {
+                        return info.value_type.clone();
+                    }
+                }
+                // Go getPropertyTypeForIndexType 末端 else：不可用作属性名的
+                // 计算名类型（any、对象等）报 TS2538，元素类型回落 any
+                if diagnostics_allowed {
+                    let type_str = self.type_to_string(&name_expr_type);
+                    let anchor_loc = cd.expression.loc;
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        anchor_loc,
+                        tsox_core::diagnostics::messages_generated::
+                            TYPE_0_CANNOT_BE_USED_AS_AN_INDEX_TYPE,
+                        vec![type_str],
+                    ));
+                }
+                return Some(self.get_any_type());
             }
             if *renamed {
                 self.link_binding_element_container(elem, &t, name);

@@ -181,6 +181,40 @@ impl Checker {
             }
             return self.null_type();
         }
+        // Go removeRedundantSupertypes：字面量/模板/映射型存在时删除同域
+        // 原始超类型（"q" & string → "q"）
+        let reducible = includes.contains(TypeFlags::String)
+            && includes.intersects(
+                TypeFlags::StringLiteral | TypeFlags::TemplateLiteral | TypeFlags::StringMapping,
+            )
+            || includes.contains(TypeFlags::Number) && includes.intersects(TypeFlags::NumberLiteral)
+            || includes.contains(TypeFlags::BigInt) && includes.intersects(TypeFlags::BigIntLiteral)
+            || includes.contains(TypeFlags::ESSymbol)
+                && includes.intersects(TypeFlags::UniqueESSymbol)
+            || includes.contains(TypeFlags::Void) && includes.intersects(TypeFlags::Undefined);
+        let mut deduped = deduped;
+        if reducible {
+            deduped.retain(|t| {
+                let supertype_of_literal = (t.flags.contains(TypeFlags::String)
+                    && includes.intersects(
+                        TypeFlags::StringLiteral
+                            | TypeFlags::TemplateLiteral
+                            | TypeFlags::StringMapping,
+                    ))
+                    || (t.flags.contains(TypeFlags::Number)
+                        && includes.intersects(TypeFlags::NumberLiteral))
+                    || (t.flags.contains(TypeFlags::BigInt)
+                        && includes.intersects(TypeFlags::BigIntLiteral))
+                    || (t.flags.contains(TypeFlags::ESSymbol)
+                        && includes.intersects(TypeFlags::UniqueESSymbol))
+                    || (t.flags.contains(TypeFlags::Void)
+                        && includes.intersects(TypeFlags::Undefined));
+                !supertype_of_literal
+            });
+            if deduped.len() == 1 {
+                return deduped.into_iter().next().expect("exactly one");
+            }
+        }
         Arc::new(Type::new(
             TypeFlags::Intersection,
             TypeData::Intersection(IntersectionTypeData {

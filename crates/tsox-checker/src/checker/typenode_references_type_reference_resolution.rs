@@ -204,6 +204,10 @@ impl Checker {
                 &tp_symbols,
                 &arg_types,
             ));
+            if let Some(mapped) = self.intrinsic_alias_instantiation(symbol, &arg_types) {
+                self.alias_args_resolution_stack.pop();
+                return mapped;
+            }
             let tp_types: Vec<Arc<Type>> = tp_symbols
                 .iter()
                 .map(|tp| self.get_type_parameter_from_symbol(tp))

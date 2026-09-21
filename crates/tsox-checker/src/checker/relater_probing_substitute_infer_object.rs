@@ -47,6 +47,46 @@ impl Checker {
             .collect()
     }
 
+    /// Go instantiateSymbol（this 参数位）：类型含被替换类型参数时克隆符号
+    /// 并驻留代入后的类型，原符号不动
+    fn instantiate_this_parameter_symbol(
+        &mut self,
+        this_param: &Option<Arc<Symbol>>,
+        params: &[Arc<Type>],
+        substitutions: &[Arc<Type>],
+    ) -> Option<Arc<Symbol>> {
+        let original = this_param.as_ref()?;
+        let old = match self
+            .value_symbol_links
+            .get(original)
+            .and_then(|l| l.resolved_type.clone())
+        {
+            Some(t) => t,
+            None => self.get_type_of_symbol(original),
+        };
+        let new = self.substitute_infer_type_parameters(&old, params, substitutions);
+        if Arc::ptr_eq(&old, &new) {
+            return Some(Arc::clone(original));
+        }
+        let mut cloned = Symbol::new(original.flags, original.name.clone());
+        cloned.check_flags = original.check_flags;
+        cloned.declarations = original.declarations.clone();
+        cloned.value_declaration = original.value_declaration.clone();
+        if let Some(parent) = original.parent() {
+            cloned.set_parent(&parent);
+        }
+        let cloned = Arc::new(cloned);
+        self.value_symbol_links.insert(
+            &cloned,
+            crate::checker::types::ValueSymbolLinks {
+                resolved_type: Some(new),
+                target: Some(Arc::clone(original)),
+                ..Default::default()
+            },
+        );
+        Some(cloned)
+    }
+
     pub(crate) fn substitute_infer_object(
         &mut self,
         t: &Arc<Type>,
@@ -159,7 +199,11 @@ impl Checker {
                         inst.declaration = sig.declaration.clone();
                         inst.target = sig.target.clone();
                         inst.parameters = sig.parameters.clone();
-                        inst.this_parameter = sig.this_parameter.clone();
+                        inst.this_parameter = self.instantiate_this_parameter_symbol(
+                            &sig.this_parameter,
+                            params,
+                            substitutions,
+                        );
                         inst.type_parameters = self.substitute_type_parameter_constraints(
                             &sig.type_parameters,
                             params,
@@ -253,7 +297,11 @@ impl Checker {
                 inst.declaration = sig.declaration.clone();
                 inst.target = Some(Arc::clone(sig));
                 inst.parameters = sig.parameters.clone();
-                inst.this_parameter = sig.this_parameter.clone();
+                inst.this_parameter = self.instantiate_this_parameter_symbol(
+                    &sig.this_parameter,
+                    params,
+                    substitutions,
+                );
                 inst.type_parameters = self.substitute_type_parameter_constraints(
                     &sig.type_parameters,
                     params,

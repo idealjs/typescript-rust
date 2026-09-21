@@ -5,6 +5,23 @@ use tsox_frontend::ast::{Node, Symbol};
 use crate::checker::checker::*;
 
 impl Checker {
+    /// Go circularConstraintType：计算属性名解析重入期的占位空匿名对象
+    /// （显示为 {}）
+    pub(crate) fn circular_constraint_type(&self) -> Arc<crate::checker::types::Type> {
+        self.circular_constraint_type
+            .get_or_init(|| {
+                Arc::new(crate::checker::types::Type {
+                    flags: crate::checker::types::TypeFlags::Object,
+                    object_flags: crate::checker::types::ObjectFlags::Anonymous,
+                    id: crate::checker::types::next_type_id(),
+                    symbol: None,
+                    alias: None,
+                    data: crate::checker::types::TypeData::Object(Default::default()),
+                })
+            })
+            .clone()
+    }
+
     pub(crate) fn report_circularity_error(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
         let Some(decl) = symbol.value_declaration.clone() else {
             return self.get_any_type();

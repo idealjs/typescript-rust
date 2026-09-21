@@ -186,28 +186,6 @@ impl Checker {
                             if let tsox_frontend::ast::NodeData::ComputedPropertyName(cd) = &pn.data
                             {
                                 self.check_expression(&cd.expression);
-
-                                let expr_type = self.get_type_of_node(&cd.expression);
-                                let is_any = match &expr_type.data {
-                                    crate::checker::types::TypeData::Union(u) => u
-                                        .union_or_intersection
-                                        .types
-                                        .iter()
-                                        .any(|t| t.flags.contains(TypeFlags::Any)),
-                                    _ => expr_type.flags.contains(TypeFlags::Any),
-                                };
-                                if is_any {
-                                    let file = self.current_file.clone();
-                                    let type_str = self.type_to_string(&expr_type);
-                                    let diagnostic = tsox_frontend::ast::Diagnostic::new(
-                                        file,
-                                        cd.expression.loc,
-                                        tsox_core::diagnostics::messages_generated::
-                                            TYPE_0_CANNOT_BE_USED_AS_AN_INDEX_TYPE,
-                                        vec![type_str],
-                                    );
-                                    self.diagnostics.add(diagnostic);
-                                }
                             }
                         }
                     }

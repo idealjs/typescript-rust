@@ -97,6 +97,7 @@ impl Checker {
             indexed_access_types: HashMap::new(),
             template_literal_types: HashMap::new(),
             string_mapping_types: HashMap::new(),
+            intrinsic_marker_type: OnceLock::new(),
             cached_types: HashMap::new(),
             union_types: HashMap::new(),
             intersection_types: HashMap::new(),

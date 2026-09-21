@@ -335,6 +335,8 @@ pub(crate) mod symbolaccessibility_checker_3;
 pub(crate) mod symbolaccessibility_checker_4;
 pub(crate) mod symbolaccessibility_checker_5;
 pub(crate) mod symbolaccessibility_symbol_table_id;
+pub(crate) mod string_mapping;
+pub(crate) mod string_mapping_checker;
 #[cfg(test)]
 pub(crate) mod tracer_tests;
 pub(crate) mod typenode_contextual_param;
