@@ -388,7 +388,11 @@ impl Checker {
 
     /// Go getBindingElementTypeFromParentType：strictNullChecks 下模式父声明
     /// 的初始化式不可能是 undefined 时，根类型剔除 undefined 成分
-    fn filter_binding_parent_undefined(&mut self, decl: &Arc<Node>, t: Arc<Type>) -> Arc<Type> {
+    pub(crate) fn filter_binding_parent_undefined(
+        &mut self,
+        decl: &Arc<Node>,
+        t: Arc<Type>,
+    ) -> Arc<Type> {
         if !self.strict_null_checks {
             return t;
         }

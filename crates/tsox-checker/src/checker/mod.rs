@@ -204,6 +204,8 @@ pub(crate) mod flow_narrow_binary;
 pub(crate) mod flow_narrow_binary_checker;
 pub(crate) mod flow_narrow_binary_checker_2;
 pub(crate) mod flow_narrow_calls;
+pub(crate) mod flow_narrow_destructured;
+pub(crate) mod flow_narrow_destructured_checker;
 pub(crate) mod flow_narrow_discriminant;
 pub(crate) mod flow_narrow_discriminant_checker;
 pub(crate) mod flow_narrow_discriminant_checker_2;

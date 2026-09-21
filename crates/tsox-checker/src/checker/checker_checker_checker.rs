@@ -261,6 +261,7 @@ pub struct Checker {
     pub suppress_source_file: Option<u64>,
     pub tracer: Arc<Tracer>,
     pub narrowable_reference_query_stack: Vec<u64>,
+    pub binding_pattern_narrowing_stack: Vec<u64>,
     pub merged_symbols: HashMap<u64, u64>,
     pub merged_symbol_targets: HashMap<u64, Arc<tsox_frontend::ast::Symbol>>,
     pub mu: Mutex<()>,

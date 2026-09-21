@@ -247,6 +247,16 @@ impl Checker {
             }
         }
 
+        if let FlowRef::Node(reference) = target
+            && matches!(
+                reference.kind,
+                SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+            )
+            && let Some(access) = self.binding_pattern_sibling_access(&discriminant, reference)
+        {
+            return self.narrow_by_switch_on_discriminant_property(type_, switch_stmt, range, &access);
+        }
+
         if discriminant.kind == SyntaxKind::TypeOfExpression {
             if let NodeData::TypeOfExpression(typeof_data) = &discriminant.data {
                 if self.expr_matches_target(&typeof_data.expression, target) {

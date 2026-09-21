@@ -162,7 +162,7 @@ impl Checker {
                 }
             }
             let flow = self.program.symbol_map().flow_node_of(node).cloned()?;
-            let narrowed = self.get_narrowed_type_of_symbol(symbol, Some(&flow));
+            let narrowed = self.get_narrowed_type_of_symbol(symbol, Some(&flow), Some(node));
             if crate::checker::utilities::is_type_error(&narrowed) {
                 return None;
             }

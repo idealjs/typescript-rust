@@ -307,6 +307,7 @@ impl Checker {
                         &symbol,
                         flow.as_ref(),
                         narrowable,
+                        Some(node),
                     )
                 } else {
                     declared

@@ -268,7 +268,7 @@ impl Checker {
                             && let Some(sym) = self.resolve_identifier(init)
                         {
                             let flow = self.program.symbol_map().flow_node_of(init).map(Arc::clone);
-                            self.get_narrowed_type_of_symbol(&sym, flow.as_ref())
+                            self.get_narrowed_type_of_symbol(&sym, flow.as_ref(), Some(init))
                         } else {
                             self.get_type_of_node(init)
                         };

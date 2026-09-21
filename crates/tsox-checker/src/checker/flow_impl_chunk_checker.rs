@@ -7,9 +7,10 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         flow: Option<&Arc<FlowNode>>,
+        location: Option<&Arc<Node>>,
     ) -> Arc<Type> {
         let declared = self.get_type_of_symbol(symbol);
-        self.get_narrowed_type_of_symbol_with_declared(symbol, flow, declared)
+        self.get_narrowed_type_of_symbol_with_declared(symbol, flow, declared, location)
     }
 
     pub fn get_narrowed_type_of_symbol_with_declared(
@@ -17,6 +18,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         flow: Option<&Arc<FlowNode>>,
         declared: Arc<Type>,
+        location: Option<&Arc<Node>>,
     ) -> Arc<Type> {
         let frame_type = self
             .logical_rhs_narrowing_frames
@@ -33,6 +35,12 @@ impl Checker {
         let declared = match frame_type {
             Some(t) => t,
             None => declared,
+        };
+        let declared = if let Some(location) = location {
+            self.narrow_destructured_symbol_type(symbol, location, flow)
+                .unwrap_or(declared)
+        } else {
+            declared
         };
         let target = FlowRef::Symbol(Arc::clone(symbol));
         let key = self.flow_cache_key(&target, flow, &declared);

@@ -318,6 +318,7 @@ impl Checker {
             suppress_source_file: None,
 
             narrowable_reference_query_stack: Vec::new(),
+            binding_pattern_narrowing_stack: Vec::new(),
             merged_symbols: HashMap::new(),
             merged_symbol_targets: HashMap::new(),
 
