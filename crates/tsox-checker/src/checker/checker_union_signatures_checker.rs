@@ -162,28 +162,8 @@ impl Checker {
     }
 
     fn combined_param_type_at(&mut self, sig: &Arc<Signature>, i: usize) -> Arc<Type> {
-        let named = sig
-            .parameters
-            .len()
-            .saturating_sub(usize::from(sig.has_rest_parameter()));
-        if i < named {
-            return self
-                .try_get_type_at_position(sig, i)
-                .unwrap_or_else(|| self.any_type());
-        }
-        if sig.has_rest_parameter() {
-            if let Some(rest) = self.get_non_array_rest_type(sig) {
-                if crate::checker::utilities::is_tuple_type(&rest)
-                    && let TypeData::Tuple(t) = &rest.data
-                    && let Some(info) = t.element_infos.get(i - named)
-                    && let Some(ty) = &info.type_
-                {
-                    return Arc::clone(ty);
-                }
-                return rest;
-            }
-        }
-        self.unknown_type()
+        self.try_get_type_at_position(sig, i)
+            .unwrap_or_else(|| self.unknown_type())
     }
 
     fn parameter_name_at_position(&mut self, sig: &Arc<Signature>, i: usize) -> String {

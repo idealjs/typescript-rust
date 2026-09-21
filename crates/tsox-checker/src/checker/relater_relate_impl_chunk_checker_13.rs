@@ -16,26 +16,25 @@ impl Checker {
             }
             if sig.has_rest_parameter() {
                 let rest_type = Arc::clone(&overrides[param_count]);
-                if is_tuple_type(&rest_type) {
-                    if let TypeData::Tuple(t) = &rest_type.data {
-                        let index = pos - param_count;
-                        let has_variadic = t.combined_flags.contains(ElementFlags::Variadic);
-                        if index < t.fixed_length || has_variadic {
-                            return t
-                                .element_infos
-                                .get(index)
-                                .and_then(|info| info.type_.clone())
-                                .or_else(|| Some(self.any_type()));
-                        }
+                if !is_tuple_type(&rest_type) {
+                    let index_literal =
+                        self.get_number_literal_type(tsox_core::jsnum::Number(
+                            (pos - param_count) as f64,
+                        ));
+                    return Some(self.get_indexed_access_type(&rest_type, &index_literal));
+                }
+                if let TypeData::Tuple(t) = &rest_type.data {
+                    let index = pos - param_count;
+                    let has_variadic = t.combined_flags.contains(ElementFlags::Variadic);
+                    if index < t.fixed_length || has_variadic {
+                        return t
+                            .element_infos
+                            .get(index)
+                            .and_then(|info| info.type_.clone())
+                            .or_else(|| Some(self.any_type()));
                     }
                 }
-                // Go getTypeAtPosition：rest 位之后的参数类型 = rest[number 字面量]
-                // 的索引访问（联合 rest 分发到各成分）
-                let index_literal =
-                    self.get_number_literal_type(tsox_core::jsnum::Number(
-                        (pos - param_count) as f64,
-                    ));
-                return Some(self.get_indexed_access_type(&rest_type, &index_literal));
+                return None;
             }
             return None;
         }
@@ -48,23 +47,22 @@ impl Checker {
             let rest_param = &sig.parameters[param_count];
             let rest_type = self.get_type_of_symbol(rest_param);
 
-            if is_tuple_type(&rest_type) {
-                if let TypeData::Tuple(t) = &rest_type.data {
-                    let index = pos - param_count;
-                    let has_variadic = t.combined_flags.contains(ElementFlags::Variadic);
-                    if index < t.fixed_length || has_variadic {
-                        return t
-                            .element_infos
-                            .get(index)
-                            .and_then(|info| info.type_.clone())
-                            .or_else(|| Some(self.any_type()));
-                    }
+            if !is_tuple_type(&rest_type) {
+                let index_literal =
+                    self.get_number_literal_type(tsox_core::jsnum::Number((pos - param_count) as f64));
+                return Some(self.get_indexed_access_type(&rest_type, &index_literal));
+            }
+            if let TypeData::Tuple(t) = &rest_type.data {
+                let index = pos - param_count;
+                let has_variadic = t.combined_flags.contains(ElementFlags::Variadic);
+                if index < t.fixed_length || has_variadic {
+                    return t
+                        .element_infos
+                        .get(index)
+                        .and_then(|info| info.type_.clone())
+                        .or_else(|| Some(self.any_type()));
                 }
             }
-
-            let index_literal =
-                self.get_number_literal_type(tsox_core::jsnum::Number((pos - param_count) as f64));
-            return Some(self.get_indexed_access_type(&rest_type, &index_literal));
         }
         None
     }
@@ -158,30 +156,11 @@ impl Checker {
     }
 
     pub fn get_non_array_rest_type(&mut self, sig: &Arc<Signature>) -> Option<Arc<Type>> {
-        if !sig.has_rest_parameter() {
-            return None;
-        }
-        if let Some(overrides) = &sig.instantiated_parameter_types {
-            let rest_type = overrides.last()?.clone();
-            if is_tuple_type(&rest_type) {
-                return Some(rest_type);
-            }
-            if self.is_array_type(&rest_type) {
-                return self.get_type_arguments(&rest_type).into_iter().next();
-            }
+        let rest_type = self.get_effective_rest_type(sig)?;
+        if !self.is_array_type(&rest_type) && !rest_type.flags.intersects(TypeFlags::Any) {
             return Some(rest_type);
         }
-        let last = sig.parameters.last()?;
-        let rest_type = self.get_type_of_symbol(last);
-
-        if is_tuple_type(&rest_type) {
-            return Some(rest_type);
-        }
-
-        if self.is_array_type(&rest_type) {
-            return self.get_type_arguments(&rest_type).into_iter().next();
-        }
-        Some(rest_type)
+        None
     }
 
     pub(crate) fn get_array_element_type_of(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
