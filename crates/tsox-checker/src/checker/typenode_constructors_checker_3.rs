@@ -53,6 +53,24 @@ impl Checker {
             return self.deferred_indexed_access(object_type, index_type);
         }
 
+        // Go getPropertyTypeForIndexType → getPropertyOfType：交集对象逐成分
+        // 解析属性，命中成分求交（{a: X} & {b: {}}["a"] → X，非 any）
+        if object_type.flags.contains(TypeFlags::Intersection)
+            && let Some(constituents) = object_type.types()
+        {
+            let resolved: Vec<Arc<Type>> = constituents
+                .iter()
+                .filter_map(|c| {
+                    self.try_get_indexed_access_type(c, index_type, AccessFlags::None)
+                })
+                .collect();
+            match resolved.len() {
+                0 => {}
+                1 => return resolved.into_iter().next().unwrap(),
+                _ => return self.get_intersection_type(resolved),
+            }
+        }
+
         if let TypeData::Mapped(m) = &object_type.data
             && let Some(constraint) = &m.constraint_type
         {

@@ -30,6 +30,7 @@ impl Checker {
 
         let arg_index = args.iter().position(|a| Arc::ptr_eq(a, arg_node))?;
 
+
         let is_new = matches!(&call_node.data, NodeData::NewExpression(_));
         let expression_type = match &call_node.data {
             NodeData::CallExpression(data) => Some(self.get_type_of_node(&data.expression)),
@@ -108,7 +109,6 @@ impl Checker {
                     .map(|p| self.get_type_of_symbol(p))
             })
             .unwrap_or_else(|| self.any_type());
-
         if !sig.type_parameters.is_empty() {
             let key = call_node.id();
             if self.resolving_contextual_calls.insert(key) {
@@ -134,19 +134,16 @@ impl Checker {
                 let inferred = match &explicit {
                     Some(ex) if ex.len() == sig.type_parameters.len() => ex.clone(),
                     _ => self.infer_call_type_arguments(call_node, &sig, &sibling_args),
-                };
-                self.resolving_contextual_calls.remove(&key);
+                };                self.resolving_contextual_calls.remove(&key);
                 if !inferred.is_empty() {
                     let substed = self.substitute_infer_type_parameters(
                         &base_param_type,
                         &sig.type_parameters,
                         &inferred,
-                    );
-                    return Some(substed);
+                    );                    return Some(substed);
                 }
             }
-        }
-        Some(base_param_type)
+        }        Some(base_param_type)
     }
 
     pub(crate) fn get_contextual_type_for_binary_operand(

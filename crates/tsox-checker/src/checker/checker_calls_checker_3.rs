@@ -138,7 +138,6 @@ impl Checker {
             Some(ex) => ex.clone(),
             None => self.infer_call_type_arguments(node, &sig, &arguments.nodes),
         };
-
         let new_explicit_subst: Option<(Vec<Arc<Type>>, Vec<Arc<Type>>)> = if is_new {
             self.get_return_type_of_signature(&sig)
                 .and_then(|rt| rt.symbol.clone())

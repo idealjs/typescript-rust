@@ -10,6 +10,7 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         use crate::checker::types::TypeData;
 
+
         if t.flags.contains(TypeFlags::TypeParameter) {
             let constraint = self.get_constraint_of_type_parameter(t)?;
             return self.get_type_of_property_of_contextual_type(&constraint, name);
@@ -122,12 +123,24 @@ impl Checker {
         if t.flags.contains(TypeFlags::Intersection)
             && let TypeData::Intersection(i) = &t.data
         {
+            // Go getTypeOfPropertyOfContextualTypeEx：交集逐成分收集属性型后
+            // 求交（any 换 unknown 防抹掉其它成分的上下文信息）
+            let mut found: Vec<Arc<Type>> = Vec::new();
             for c in &i.union_or_intersection.types {
-                if let Some(found) = self.get_type_of_property_of_contextual_type(c, name) {
-                    return Some(found);
+                if let Some(t) = self.get_type_of_property_of_contextual_type(c, name) {
+                    let t = if t.flags.contains(TypeFlags::Any) {
+                        self.unknown_type()
+                    } else {
+                        t
+                    };
+                    found.push(t);
                 }
             }
-            return None;
+            return match found.len() {
+                0 => None,
+                1 => Some(found.pop().unwrap()),
+                _ => Some(self.get_intersection_type(found)),
+            };
         }
 
         if let Some(prop) = self.get_property_of_type(t, name) {
