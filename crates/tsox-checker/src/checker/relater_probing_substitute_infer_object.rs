@@ -47,8 +47,6 @@ impl Checker {
             .collect()
     }
 
-    /// Go instantiateSymbol（this 参数位）：类型含被替换类型参数时克隆符号
-    /// 并驻留代入后的类型，原符号不动
     fn instantiate_this_parameter_symbol(
         &mut self,
         this_param: &Option<Arc<Symbol>>,

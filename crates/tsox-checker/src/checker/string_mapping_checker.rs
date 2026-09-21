@@ -1,6 +1,7 @@
-#![allow(unused_imports)]
+use std::sync::Arc;
 
-use crate::checker::string_mapping::*;
+use crate::checker::checker::Checker;
+use crate::checker::types::{ObjectFlags, Type, TypeData, TypeFlags, TYPE_FLAGS_LITERAL};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum StringMappingKind {

@@ -5,8 +5,6 @@ use tsox_frontend::ast::{Node, Symbol};
 use crate::checker::checker::*;
 
 impl Checker {
-    /// Go circularConstraintType：计算属性名解析重入期的占位空匿名对象
-    /// （显示为 {}）
     pub(crate) fn circular_constraint_type(&self) -> Arc<crate::checker::types::Type> {
         self.circular_constraint_type
             .get_or_init(|| {

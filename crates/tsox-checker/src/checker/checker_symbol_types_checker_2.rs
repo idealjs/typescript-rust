@@ -35,9 +35,6 @@ impl Checker {
             Arc::as_ptr(symbol) as *const Symbol,
             crate::checker::TypeResolutionProperty::Type,
         ) {
-            // Go checkComputedPropertyName 的 circularConstraintType 语义：解构
-            // 元素经自身计算属性名回入（无初始化式形态）按空匿名对象定型，
-            // 上层按 TS2538('{}') 报告而非环错误/TS7022
             let plain_binding_element = symbol.declarations.iter().any(|d| {
                 matches!(
                     &d.data,
@@ -472,8 +469,6 @@ impl Checker {
     /// 绑定元素类型：沿模式链上行到根声明取类型，再按属性/索引路径逐层查。
     pub(crate) fn binding_element_type(&mut self, elem: &Arc<Node>) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
-        // Go getTypeForBindingElementParent：符号缓存型（含上下文定型驻留的）
-        // 优先直取，重复解析会重复报属性查找诊断
         if let Some(sym) = self.program.symbol_map().symbol_of(elem)
             && let Some(t) = self
                 .value_symbol_links
@@ -793,8 +788,6 @@ impl Checker {
                 if crate::checker::utilities::is_type_error(&name_expr_type) {
                     return None;
                 }
-                // Go getPropertyNameFromIndex：字面量/unique symbol 计算名按
-                // 类型派生名直查属性（{[Key]: v} 的 symbol 键成员）
                 if crate::checker::utilities_token_is_identifier_or_keyword::is_type_usable_as_property_name(&name_expr_type)
                 {
                     let derived = crate::checker::utilities_token_is_identifier_or_keyword::get_property_name_from_type(&name_expr_type);
@@ -861,8 +854,6 @@ impl Checker {
                         return info.value_type.clone();
                     }
                 }
-                // Go getPropertyTypeForIndexType 末端 else：不可用作属性名的
-                // 计算名类型（any、对象等）报 TS2538，元素类型回落 any
                 if diagnostics_allowed {
                     let type_str = self.type_to_string(&name_expr_type);
                     let anchor_loc = cd.expression.loc;

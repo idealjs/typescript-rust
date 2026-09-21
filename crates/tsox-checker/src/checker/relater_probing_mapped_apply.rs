@@ -191,7 +191,6 @@ impl Checker {
         self.resolve_mapped_decl_node(decl.as_ref(), node, key, chain)
     }
 
-    /// 映射型声明节点词法帧下解析其内部类型节点（快路径无 MappedTypeData 时共用）
     pub(crate) fn resolve_mapped_decl_node(
         &mut self,
         decl: Option<&Arc<tsox_frontend::ast::Node>>,

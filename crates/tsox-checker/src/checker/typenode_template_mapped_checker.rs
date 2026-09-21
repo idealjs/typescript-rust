@@ -198,8 +198,6 @@ impl Checker {
         let mut props: Vec<Arc<Symbol>> = Vec::new();
         for key in &keys {
             let key_type = self.get_string_literal_type(key);
-            // Go resolveMappedTypeMembers：`as` 改名在 K→key 帧下解析
-            // name_type，归约为字符串字面量时作为成员名
             let name = match &data.name_type {
                 Some(name_node) => {
                     let t = self.resolve_mapped_decl_node(Some(node), name_node, &key_type, &[]);

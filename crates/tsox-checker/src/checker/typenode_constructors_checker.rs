@@ -181,8 +181,6 @@ impl Checker {
             }
             return self.null_type();
         }
-        // Go removeRedundantSupertypes：字面量/模板/映射型存在时删除同域
-        // 原始超类型（"q" & string → "q"）
         let reducible = includes.contains(TypeFlags::String)
             && includes.intersects(
                 TypeFlags::StringLiteral | TypeFlags::TemplateLiteral | TypeFlags::StringMapping,
