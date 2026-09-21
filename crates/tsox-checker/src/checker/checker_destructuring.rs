@@ -9,6 +9,15 @@ impl Checker {
         node: &Arc<Node>,
         source_type: &Arc<Type>,
     ) {
+        self.check_destructuring_assignment_ex(node, source_type, false);
+    }
+
+    pub(crate) fn check_destructuring_assignment_ex(
+        &mut self,
+        node: &Arc<Node>,
+        source_type: &Arc<Type>,
+        right_is_this: bool,
+    ) {
         let mut target = Arc::clone(node);
         let mut source_type = Arc::clone(source_type);
         let mut shorthand_initializer: Option<Arc<Node>> = None;
@@ -36,7 +45,7 @@ impl Checker {
         }
         match target.kind {
             SyntaxKind::ObjectLiteralExpression => {
-                self.check_object_literal_assignment(&target, &source_type);
+                self.check_object_literal_assignment(&target, &source_type, right_is_this);
             }
             SyntaxKind::ArrayLiteralExpression => {
                 self.check_array_literal_assignment(&target, &source_type);
@@ -63,7 +72,12 @@ impl Checker {
         }
     }
 
-    fn check_object_literal_assignment(&mut self, node: &Arc<Node>, source_type: &Arc<Type>) {
+    fn check_object_literal_assignment(
+        &mut self,
+        node: &Arc<Node>,
+        source_type: &Arc<Type>,
+        right_is_this: bool,
+    ) {
         let NodeData::ObjectLiteralExpression(data) = &node.data else {
             return;
         };
@@ -74,6 +88,13 @@ impl Checker {
                         .name()
                         .map(|n| self.property_assignment_name(n))
                         .unwrap_or_default();
+                    if let Some(prop) = self.get_property_of_type(source_type, &name) {
+                        self.mark_property_as_referenced_ex(
+                            &prop,
+                            Some(property),
+                            Some(right_is_this),
+                        );
+                    }
                     let element_type = self.get_property_type_of_type(source_type, &name)
                         .unwrap_or_else(|| self.get_any_type());
                     let expr = match &property.data {

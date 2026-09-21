@@ -13,9 +13,10 @@ impl Checker {
                 .iter()
                 .all(|e| self.is_unreferenced_variable_declaration(e))
         {
+            let root = Self::binding_root_declaration(pattern);
             self.report_unused(
-                pattern,
-                false,
+                &root,
+                root.kind == SyntaxKind::Parameter,
                 pattern.loc,
                 &tsox_core::diagnostics::messages_generated::ALL_DESTRUCTURED_ELEMENTS_ARE_UNUSED,
                 vec![],
@@ -180,6 +181,15 @@ impl Checker {
     }
 
     pub(crate) fn mark_property_as_referenced(&self, prop: &Arc<Symbol>, node: Option<&Arc<Node>>) {
+        self.mark_property_as_referenced_ex(prop, node, None);
+    }
+
+    pub(crate) fn mark_property_as_referenced_ex(
+        &self,
+        prop: &Arc<Symbol>,
+        node: Option<&Arc<Node>>,
+        self_type_access: Option<bool>,
+    ) {
         let has_private_modifier = prop.declarations.iter().any(|d| {
             d.has_syntactic_modifier(ModifierFlags::Private)
         });
@@ -196,14 +206,26 @@ impl Checker {
             if is_write_only_access(n) && !prop.flags.contains(SymbolFlags::SetAccessor) {
                 return;
             }
-            if let tsox_frontend::ast::NodeData::PropertyAccessExpression(d) = &n.data
-                && d.expression.kind == SyntaxKind::ThisKeyword
-            {
+            let self_access = self_type_access.unwrap_or_else(|| {
+                matches!(
+                    &n.data,
+                    tsox_frontend::ast::NodeData::PropertyAccessExpression(d)
+                        if d.expression.kind == SyntaxKind::ThisKeyword
+                )
+            });
+            if self_access {
+                let mut prop_ids = std::collections::HashSet::new();
+                prop_ids.insert(prop.id());
+                for d in &prop.declarations {
+                    if let Some(ds) = self.program.symbol_map().symbol_of(d) {
+                        prop_ids.insert(ds.id());
+                    }
+                }
                 let mut ancestor = n.parent();
                 while let Some(a) = ancestor {
                     if Self::function_like_has_body(&a)
                         && let Some(sym) = self.program.symbol_map().symbol_of(&a)
-                        && Arc::ptr_eq(&sym, prop)
+                        && prop_ids.contains(&sym.id())
                     {
                         return;
                     }

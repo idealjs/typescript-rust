@@ -262,46 +262,7 @@ impl Checker {
     }
 
     pub(crate) fn jsx_factory_namespace_in_scope(&self, name: &str) -> bool {
-        use tsox_frontend::ast::SymbolFlags;
-        let symbol_map = self.program.symbol_map();
-        let value = |sym: &std::sync::Arc<tsox_frontend::ast::Symbol>| {
-            if sym.flags.intersects(SymbolFlags::Alias) {
-                match self.follow_alias(sym) {
-                    Some(t) if std::sync::Arc::ptr_eq(&t, sym) => true,
-                    Some(t) => t.flags.intersects(SymbolFlags::VALUE),
-                    None => true,
-                }
-            } else {
-                sym.flags.intersects(SymbolFlags::VALUE)
-            }
-        };
-        for &container_id in self.scope_stack.iter().rev() {
-            if let Some(locals) = symbol_map.locals.get(&container_id)
-                && let Some(sym) = locals.get(name)
-                && value(sym)
-            {
-                return true;
-            }
-            if let Some(cs) = symbol_map.symbols.get(&container_id)
-                && (!cs.flags.intersects(SymbolFlags::Class)
-                    || cs.flags.intersects(SymbolFlags::Function))
-                && let Some(sym) = cs.members.get(name)
-                && value(sym)
-            {
-                return true;
-            }
-            if let Some(cs) = symbol_map.symbols.get(&container_id)
-                && cs.flags.intersects(SymbolFlags::MODULE)
-                && !cs.flags.intersects(SymbolFlags::Class)
-                && let Some(sym) = cs.exports.get(name)
-                && value(sym)
-            {
-                return true;
-            }
-        }
-        self.globals
-            .get(name)
-            .is_some_and(|g| g.flags.intersects(SymbolFlags::VALUE))
+        self.jsx_factory_namespace_symbol(name).is_some()
     }
 
     pub(crate) fn local_jsx_pragma_factory(&self, pragma: &str) -> Option<String> {

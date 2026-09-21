@@ -258,7 +258,8 @@ impl Checker {
                 )
             {
                 let rhs_type = self.get_type_of_node(&data.right);
-                self.check_destructuring_assignment(&data.left, &rhs_type);
+                let right_is_this = data.right.kind == SyntaxKind::ThisKeyword;
+                self.check_destructuring_assignment_ex(&data.left, &rhs_type, right_is_this);
                 assigned_target_blocks_type_check = true;
             }
 

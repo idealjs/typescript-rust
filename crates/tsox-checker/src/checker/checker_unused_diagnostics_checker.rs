@@ -403,6 +403,22 @@ impl Checker {
         }
     }
 
+    pub(crate) fn binding_root_declaration(node: &Arc<Node>) -> Arc<Node> {
+        let mut current = Arc::clone(node);
+        while matches!(
+            current.kind,
+            SyntaxKind::BindingElement
+                | SyntaxKind::ObjectBindingPattern
+                | SyntaxKind::ArrayBindingPattern
+        ) {
+            let Some(parent) = current.parent().clone() else {
+                break;
+            };
+            current = parent;
+        }
+        current
+    }
+
     pub(crate) fn report_unused_local(&mut self, node: &Arc<Node>, name: &str, is_type_decl: bool) {
         let message: &'static tsox_core::diagnostics::Message = if is_type_decl {
             &tsox_core::diagnostics::messages_generated::X_0_IS_DECLARED_BUT_NEVER_USED
@@ -505,9 +521,10 @@ impl Checker {
                 self.report_unused_binding_elements(&name_node);
             } else if self.is_unreferenced_variable_declaration(declaration) {
                 let name = name_node.text().to_string();
+                let root = Self::binding_root_declaration(declaration);
                 self.report_unused(
-                    declaration,
-                    declaration.kind == SyntaxKind::Parameter,
+                    &root,
+                    root.kind == SyntaxKind::Parameter,
                     name_node.loc,
                     &tsox_core::diagnostics::messages_generated::
                         X_0_IS_DECLARED_BUT_ITS_VALUE_IS_NEVER_READ,

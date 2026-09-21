@@ -9,6 +9,7 @@ impl Checker {
             self.check_grammar_jsx_element(opening);
         }
         self.check_jsx_preconditions(opening);
+        self.mark_jsx_alias_referenced(opening);
 
         if is_opening_like
             && matches!(
