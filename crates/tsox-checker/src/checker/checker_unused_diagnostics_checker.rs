@@ -178,8 +178,36 @@ impl Checker {
         let Some(sym) = self.program.symbol_map().symbol_of(node) else {
             return false;
         };
-        !self
-            .symbol_reference_kinds
+        if self.type_parameter_referenced(&sym) {
+            return false;
+        }
+        let mut owner = node.parent();
+        while let Some(o) = owner {
+            if Self::type_parameter_list(&o).is_some() {
+                if let Some(owner_sym) = self.program.symbol_map().symbol_of(&o) {
+                    for decl in &owner_sym.declarations {
+                        let Some(list) = Self::type_parameter_list(decl) else {
+                            continue;
+                        };
+                        for p in &list.nodes {
+                            let Some(p_sym) = self.program.symbol_map().symbol_of(p) else {
+                                continue;
+                            };
+                            if p_sym.name == sym.name && self.type_parameter_referenced(&p_sym) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+            owner = o.parent();
+        }
+        true
+    }
+
+    fn type_parameter_referenced(&self, sym: &Arc<tsox_frontend::ast::Symbol>) -> bool {
+        self.symbol_reference_kinds
             .get(&sym.id())
             .is_some_and(|k| k.intersects(SymbolFlags::TypeParameter))
     }
@@ -243,11 +271,9 @@ impl Checker {
         {
             let mut seen: std::collections::HashSet<u64> =
                 locals.iter().map(|s| s.id()).collect();
-            for table in [&file_sym.members, &file_sym.exports] {
-                for sym in table.entries.values() {
-                    if seen.insert(sym.id()) {
-                        locals.push(Arc::clone(sym));
-                    }
+            for sym in file_sym.members.entries.values() {
+                if seen.insert(sym.id()) {
+                    locals.push(Arc::clone(sym));
                 }
             }
         }
