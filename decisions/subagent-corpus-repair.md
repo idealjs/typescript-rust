@@ -1,4 +1,4 @@
-> 版本：v1.1 · 2026-09-20
+> 版本：v1.2 · 2026-09-21
 
 # corpus 修复 subagent 的任务边界
 
@@ -10,6 +10,7 @@
 2. subagent 必须接到明确的用例清单（worktree 根的 assigned_cases.txt），不放任自由修复
 3. subagent 只负责查看逻辑与修改代码：定位根因、对照 Go 改代码、cargo check 编译通过即交付；修改是否正确由主 agent 测试裁决，不通过打回重修
 4. subagent 按 hunk 粒度小步提交或以补丁交付，配合交接日志，防止平台配额终止导致进度丢失
+5. 派发并发 ≤4；派发 prompt 内联时间预算（默认 75 分钟，剩 15 分钟强制收尾）、单根因 25 分钟熔断、环境故障退出协议、禁改清单（仓库根 CSV/AGENTS.md/tools/），模板见 `tools/subagent_prompt_template.md`
 
 ## 否决项一：subagent 执行全量测试
 

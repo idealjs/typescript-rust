@@ -20,6 +20,10 @@ flowchart TD
     G -- 是 --> H[循环结束,汇总报告]
 ```
 
+派发粒度：主 agent 先聚簇（按错误码组合/平铺行差异签名），从簇内摘取约 5 个代表性 key 直接写入派发 prompt，并写明预期转绿数作为验收线。禁止把清单文件交给 subagent 自行挑选，也不把全簇 key 一次性全量下发。首批验证通过后滚动派发下一批（可逐步扩大到 10-20 例），不达标打回重修。
+
+派发并发与退出契约：并发 ≤4（宿主 24 核需留 30% 余量；subagent 构建 `CARGO_BUILD_JOBS=3`、批量 `TSOX_SUBMODULE_JOBS=4`）。派发 prompt 必须内联（模板 `tools/subagent_prompt_template.md`，不引用路径代替全文）：总时长预算（默认 75 分钟，剩 15 分钟强制收尾）、单根因 25 分钟熔断、每根因验证通过立即 commit（禁止只在末端提交一次）、Bash 连续 3 次故障即写交接退出、验收线达成即报告退出。subagent 禁止全量测试与运行 `tools/corpus_csv_export.py`，禁改仓库根 CSV/AGENTS.md/tools/；全量与双表导出只由主 agent 在收集后执行。
+
 收敛指标：以 `corpus_results.csv` 的 FAIL 总数为准。FAIL = 0 即收敛、循环结束。每轮准入门槛：新增回归必须为 0 且 FAIL 数下降，否则该轮作废重修。SKIP 必须与 Go 保持一致：SKIP 集合超出 Go 的部分按缺陷对待，纳入修复循环，不计入合法收敛状态。
 
 SKIP 差异表：`python3 tools/corpus_csv_export.py` 每轮同时产出 `corpus_skips.csv`（超出 Go 合法 SKIP 基准的用例，基准记录在 `tools/skip_baseline.txt`，缺失时全部 SKIP 视为差异）。SKIP 差异与 FAIL 同流程修复：挑选 key 下发 subagent、循环消解，直至 `corpus_skips.csv` 为空。
