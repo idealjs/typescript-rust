@@ -122,7 +122,7 @@ impl Checker {
 
                     continue;
                 }
-                let t = self.element_access_result_type(node, m, arg_expr, &effective_arg);
+                let t = self.element_access_result_type(node, m, arg_expr, &effective_arg, false);
                 if !t.flags.contains(TypeFlags::Any) {
                     elem_types.push(t);
                 }
@@ -132,7 +132,7 @@ impl Checker {
             }
             return self.get_any_type();
         }
-        self.element_access_result_type(node, &obj_type, arg_expr, &effective_arg)
+        self.element_access_result_type(node, &obj_type, arg_expr, &effective_arg, true)
     }
 
     fn member_allows_dynamic_index(&self, m: &Arc<Type>, want_string: bool) -> bool {
@@ -165,6 +165,7 @@ impl Checker {
         obj_type: &Arc<Type>,
         arg_expr: &Arc<Node>,
         effective_arg: &Arc<Type>,
+        report_nia: bool,
     ) -> Arc<Type> {
         if self.is_tuple_type(obj_type) {
             if let Some(index) = self.get_constant_numeric_value(arg_expr) {
@@ -177,12 +178,14 @@ impl Checker {
         }
 
         if self.is_array_type(obj_type) {
-            if !effective_arg.flags.intersects(
-                TypeFlags::Number
-                    | TypeFlags::NumberLiteral
-                    | TypeFlags::Any
-                    | TypeFlags::EnumLiteral,
-            ) {
+            if report_nia
+                && !effective_arg.flags.intersects(
+                    TypeFlags::Number
+                        | TypeFlags::NumberLiteral
+                        | TypeFlags::Any
+                        | TypeFlags::EnumLiteral,
+                )
+            {
                 self.report_element_access_implicit_any(node, obj_type, arg_expr, effective_arg);
             }
             return self.get_array_element_type(obj_type);
@@ -258,7 +261,9 @@ impl Checker {
             return self.flow_type_of_access_expression(node, None, val_type);
         }
 
-        self.report_element_access_implicit_any(node, obj_type, arg_expr, effective_arg);
+        if report_nia {
+            self.report_element_access_implicit_any(node, obj_type, arg_expr, effective_arg);
+        }
         self.get_any_type()
     }
 }

@@ -429,6 +429,15 @@ impl Checker {
                 if Arc::ptr_eq(source, target) {
                     continue;
                 }
+                // Go requireOptionalProperties 排除元组/数组源：其必需成员
+                // （数字索引名）不因空对象成员参与子型缩减，保住联合有序性
+                if (self.is_array_type(source) || self.is_tuple_type(source))
+                    && !self.is_array_type(target)
+                    && !self.is_tuple_type(target)
+                    && self.is_empty_object_type(target)
+                {
+                    continue;
+                }
                 // Go removeSubtypes：strictSubtypeRelation 判缩减（assignable 会
                 // 把 {a} 对 {} 误判为可缩减，fresh {} 目标须挡住）
                 if self.is_type_strict_subtype_of(source, target) {
