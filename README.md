@@ -6,7 +6,6 @@ TypeScript 到 Rust 的移植工程（tsox 系列 crate，详见 `Cargo.toml` wo
 
 - `docs/`：怎么做。设计文档、操作流程（如 [subagent 语料修复工作流](docs/subagent-corpus-repair.md)）
 - `decisions/`：已拍板决策（ADR），含否决项留档（如 [subagent 任务边界](decisions/subagent-corpus-repair.md)）
-- `todos/`：待办事项
 - 各文档的变更记录见同名 `.change.md` 文件
 
 ## 环境备忘

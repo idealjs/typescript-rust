@@ -8,10 +8,10 @@
 
 ```mermaid
 flowchart TD
-    A[主 agent: 全量跑 corpus 得到 runlog] --> B[tools/corpus_families.py 按错误码家族聚类]
+    A[主 agent: 全量跑 corpus 得到 runlog] --> B[tools/corpus_csv_export.py 出双表, 主 agent 按错误码聚簇]
     B --> C[每家族建 worktree 与分支 corpusN/family]
     C --> D[主 agent: 提取家族当前剩余失败集写入 assigned_cases.txt]
-    D --> E[按波次派发 subagent, 每 8 路并发]
+    D --> E[按波次派发 subagent, 并发不超过 4, 模板见 tools/subagent_prompt_template.md]
     E --> F[subagent: 看逻辑定位根因, 改代码, cargo check, 报告改动]
     F --> G[主 agent: 测试改动, 单例复核加清单批量]
     G --> H{修对了?}
@@ -20,7 +20,7 @@ flowchart TD
     I --> J{有回归?}
     J -- 是 --> K[回归用例写入 regression_cases.txt 派发回归修复]
     K --> I
-    J -- 否 --> L[逐家族合并主分支, 汇总报告]
+    J -- 否 --> L[逐家族 rebase 合并主分支, 汇总报告]
 ```
 
 ## 分工
