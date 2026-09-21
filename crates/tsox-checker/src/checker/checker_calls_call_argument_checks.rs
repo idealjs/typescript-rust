@@ -105,6 +105,12 @@ impl Checker {
             callee_type,
             crate::checker::types_type_id::SignatureKind::Call,
         );
+        if sigs.iter().any(|s| {
+            Self::declared_min_type_argument_count(s) <= arg_count
+                && arg_count <= s.type_parameters.len()
+        }) {
+            return true;
+        }
         let mut below: Option<usize> = None;
         let mut above: Option<usize> = None;
         for sig in &sigs {
