@@ -209,8 +209,25 @@ impl Checker {
             return false;
         }
 
+        let explicit_types: Option<Vec<Arc<Type>>> = match &node.data {
+            tsox_frontend::ast::NodeData::CallExpression(d) => d
+                .type_arguments
+                .as_ref()
+                .map(|ta| ta.iter().map(|t| self.get_type_from_type_node(t)).collect()),
+            tsox_frontend::ast::NodeData::NewExpression(d) => d
+                .type_arguments
+                .as_ref()
+                .map(|ta| ta.iter().map(|t| self.get_type_from_type_node(t)).collect()),
+            _ => None,
+        };
         let inferred_types = if sig.type_parameters.is_empty() {
             Vec::new()
+        } else if let Some(ex) = explicit_types.filter(|ex| ex.len() == sig.type_parameters.len())
+        {
+            if self.explicit_type_args_violate_constraints(node, sig) {
+                return false;
+            }
+            ex
         } else {
             self.infer_call_type_arguments(node, sig, &arguments.nodes)
         };
@@ -268,6 +285,9 @@ impl Checker {
             if !verdict {
                 return false;
             }
+        }
+        if self.non_array_rest_spread_parts(node, sig, arguments).is_some() {
+            return false;
         }
         true
     }

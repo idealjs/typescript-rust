@@ -11,35 +11,36 @@ impl Checker {
     ) -> bool {
         let saved = self.diagnostics.take_inner();
         let mut entries: Vec<tsox_frontend::ast::Diagnostic> = Vec::new();
-        let mut all_failed = true;
+        
         for sig in signatures.iter() {
-            match self.probe_first_argument_error(node, sig, arguments) {
-                Some(d) => entries.push(d),
-                None => {
-                    all_failed = false;
-                    break;
-                }
+            
+            if !self.candidate_reaches_argument_check(node, sig, arguments) {
+                continue;
+            }
+            if let Some(d) = self.probe_first_argument_error(node, sig, arguments) {
+                entries.push(d);
             }
         }
         let _probe_only = self.diagnostics.take_inner();
         self.diagnostics.set_inner(saved);
-        if !all_failed {
+        if entries.is_empty() {
             return false;
         }
         // Go reportCallResolutionErrors：candidatesForArgumentError 非空时取
         // 最后一个候选的实参错误链；候选数 >1 时包「最后一个过载给出如下错误」
-        let file = self.current_file.clone();
         let anchor = entries.first().map(|d| d.loc).unwrap_or(node.loc);
+        let multiple = entries.len() > 1;
         let last_entry = entries
             .pop()
-            .expect("all_failed implies at least one entry");
-        let mut head = tsox_frontend::ast::Diagnostic::new(
-            file,
-            anchor,
-            tsox_core::diagnostics::messages_generated::NO_OVERLOAD_MATCHES_THIS_CALL,
-            Vec::new(),
-        );
-        if signatures.len() > 1 {
+            .expect("non-empty entries checked above");
+        if multiple {
+            let file = self.current_file.clone();
+            let mut head = tsox_frontend::ast::Diagnostic::new(
+                file,
+                anchor,
+                tsox_core::diagnostics::messages_generated::NO_OVERLOAD_MATCHES_THIS_CALL,
+                Vec::new(),
+            );
             let mut last_overload = tsox_frontend::ast::Diagnostic::new(
                 None,
                 anchor,
@@ -48,11 +49,88 @@ impl Checker {
             );
             last_overload.message_chain = vec![last_entry];
             head.message_chain = vec![last_overload];
+            self.diagnostics.add(head);
         } else {
-            head.message_chain = vec![last_entry];
+            let file = self.current_file.clone();
+            let mut single = last_entry;
+            single.file = file;
+            self.diagnostics.add(single);
         }
-        self.diagnostics.add(head);
         true
+    }
+
+    pub(crate) fn candidate_reaches_argument_check(
+        &mut self,
+        node: &Arc<Node>,
+        sig: &Arc<Signature>,
+        arguments: &Arc<NodeList>,
+    ) -> bool {
+        let arg_count = arguments.len();
+        let max_params = if sig.has_rest_parameter() {
+            usize::MAX
+        } else {
+            sig.parameters.len()
+        };
+        if arg_count > max_params || arg_count < sig.min_argument_count.max(0) as usize {
+            return false;
+        }
+        let provided = Self::explicit_type_argument_count(node);
+        if provided != 0
+            && (provided > sig.type_parameters.len()
+                || provided < Self::declared_min_type_argument_count(sig))
+        {
+            return false;
+        }
+        !self.explicit_type_args_violate_constraints(node, sig)
+    }
+
+    pub(crate) fn explicit_type_args_violate_constraints(
+        &mut self,
+        node: &Arc<Node>,
+        sig: &Arc<Signature>,
+    ) -> bool {
+        let type_arg_nodes: Vec<Arc<Node>> = match &node.data {
+            tsox_frontend::ast::NodeData::CallExpression(d) => d.type_arguments.as_ref(),
+            tsox_frontend::ast::NodeData::NewExpression(d) => d.type_arguments.as_ref(),
+            _ => None,
+        }
+        .map(|l| l.iter().cloned().collect())
+        .unwrap_or_default();
+        if type_arg_nodes.is_empty() || sig.type_parameters.is_empty() {
+            return false;
+        }
+        let tps = sig.type_parameters.clone();
+        let arg_types: Vec<Arc<Type>> = type_arg_nodes
+            .iter()
+            .map(|t| self.get_type_from_type_node(t))
+            .collect();
+        let class_subst = self.receiver_class_type_argument_substitution(node);
+        for i in 0..type_arg_nodes.len().min(tps.len()) {
+            let Some(constraint) = self.get_constraint_of_type_parameter(&tps[i]) else {
+                continue;
+            };
+            let constraint = self.substitute_infer_type_parameters(&constraint, &tps, &arg_types);
+            let constraint = match &class_subst {
+                Some((class_tps, class_args)) => {
+                    self.substitute_infer_type_parameters(&constraint, class_tps, class_args)
+                }
+                None => constraint,
+            };
+            let arg_type = Arc::clone(&arg_types[i]);
+            if arg_type.flags.intersects(TypeFlags::Any | TypeFlags::Never)
+                || self.is_error_type(&arg_type)
+                || self.is_error_type(&constraint)
+                || self.degraded_type_ptrs.contains(&arg_type.id)
+                || self.degraded_type_ptrs.contains(&constraint.id)
+                || keeps_unsubstituted_type_parameter(&constraint)
+            {
+                continue;
+            }
+            if !self.is_type_assignable_to(&arg_type, &constraint) {
+                return true;
+            }
+        }
+        false
     }
 
     pub(crate) fn probe_first_argument_error(
@@ -90,7 +168,22 @@ impl Checker {
         } else {
             None
         };
-        let inferred_types = self.infer_call_type_arguments(node, sig, &arguments.nodes);
+        let explicit_types: Option<Vec<Arc<Type>>> = match &node.data {
+            tsox_frontend::ast::NodeData::CallExpression(d) => d
+                .type_arguments
+                .as_ref()
+                .map(|ta| ta.iter().map(|t| self.get_type_from_type_node(t)).collect()),
+            tsox_frontend::ast::NodeData::NewExpression(d) => d
+                .type_arguments
+                .as_ref()
+                .map(|ta| ta.iter().map(|t| self.get_type_from_type_node(t)).collect()),
+            _ => None,
+        };
+        let explicit_types = explicit_types.filter(|ex| ex.len() == sig.type_parameters.len());
+        let inferred_types = match &explicit_types {
+            Some(ex) => ex.clone(),
+            None => self.infer_call_type_arguments(node, sig, &arguments.nodes),
+        };
         for (i, arg) in arguments.iter().enumerate() {
             let base_param_type = if has_rest && i >= rest_index {
                 Arc::clone(rest_element_type.as_ref().unwrap())
@@ -116,7 +209,11 @@ impl Checker {
             {
                 continue;
             }
-            let arg_type = self.get_type_of_node(arg);
+            let arg_type = if self.is_context_sensitive(arg) {
+                self.type_of_context_sensitive_arg(arg, &param_type)
+            } else {
+                self.get_type_of_node(arg)
+            };
             if self.is_type_related_to(
                 &arg_type,
                 &param_type,
@@ -153,7 +250,64 @@ impl Checker {
             );
             return out.into_iter().next();
         }
-        None
+        let (spread, rest_type, err_node) = self.non_array_rest_spread_parts(node, sig, arguments)?;
+        let mut out: Vec<tsox_frontend::ast::Diagnostic> = Vec::new();
+        self.check_type_related_to_and_elaborate_display(
+            &spread,
+            &rest_type,
+            crate::checker::relater::RelationKind::Assignable,
+            Some(&err_node),
+            Some(&err_node),
+            Some(&ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1),
+            Some(&mut out),
+            None,
+        );
+        out.into_iter().next()
+    }
+
+    pub(crate) fn non_array_rest_spread_parts(
+        &mut self,
+        node: &Arc<Node>,
+        sig: &Arc<Signature>,
+        arguments: &Arc<NodeList>,
+    ) -> Option<(Arc<Type>, Arc<Type>, Arc<Node>)> {
+        if !sig.has_rest_parameter() {
+            return None;
+        }
+        let rest_index = sig.parameters.len().saturating_sub(1);
+        let rest_type = self.get_type_of_symbol(&sig.parameters[rest_index]);
+        if self.is_array_type(&rest_type)
+            || self.is_tuple_type(&rest_type)
+            || rest_type.flags.contains(TypeFlags::Any)
+        {
+            return None;
+        }
+        let remaining: Vec<Arc<Node>> = arguments.iter().skip(rest_index).cloned().collect();
+        let (spread, err_node) = match (remaining.first(), remaining.last()) {
+            (Some(first), Some(last)) => {
+                if matches!(&last.data, tsox_frontend::ast::NodeData::SpreadElement(_)) {
+                    let expr = match &last.data {
+                        tsox_frontend::ast::NodeData::SpreadElement(d) => {
+                            Arc::clone(&d.expression)
+                        }
+                        _ => unreachable!(),
+                    };
+                    (self.get_type_of_node(&expr), Arc::clone(last))
+                } else {
+                    let types = remaining.iter().map(|a| self.get_type_of_node(a)).collect();
+                    (self.create_tuple_type(types), Arc::clone(first))
+                }
+            }
+            _ => (self.create_tuple_type(Vec::new()), Arc::clone(node)),
+        };
+        if self.is_type_related_to(
+            &spread,
+            &rest_type,
+            crate::checker::relater::RelationKind::Assignable,
+        ) {
+            return None;
+        }
+        Some((spread, rest_type, err_node))
     }
     fn call_receiver_type(&mut self, callee: &Arc<Node>) -> Option<Arc<Type>> {
         let mut cur = Arc::clone(callee);

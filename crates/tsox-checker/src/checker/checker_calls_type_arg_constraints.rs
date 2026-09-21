@@ -87,7 +87,7 @@ impl Checker {
 
     // 方法调用位接收者的类类型实参（x.m<T> 中 x 的实例化实参），
     // 用于代入约束中残留的类类型参数
-    fn receiver_class_type_argument_substitution(
+    pub(crate) fn receiver_class_type_argument_substitution(
         &mut self,
         node: &Arc<Node>,
     ) -> Option<(Vec<Arc<Type>>, Vec<Arc<Type>>)> {

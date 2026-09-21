@@ -49,6 +49,10 @@ impl Checker {
                 .to_string()
         } else if self.callee_has_overload_arity_split(callee_type) {
             if provided != 0 && !callee_type.flags.contains(TypeFlags::Any) {
+                let min_tp = Self::declared_min_type_argument_count(sig);
+                if provided >= min_tp && provided <= sig.type_parameters.len() {
+                    return true;
+                }
                 return self.check_overload_type_argument_arity(node, callee_type, provided);
             }
             return true;
@@ -159,7 +163,7 @@ impl Checker {
 
     // 声明级最小实参数：default 子句前的非默认形参个数（resolved 默认惰性，
     // 语义位取声明节点）
-    fn declared_min_type_argument_count(sig: &Arc<Signature>) -> usize {
+    pub(crate) fn declared_min_type_argument_count(sig: &Arc<Signature>) -> usize {
         let Some(decl) = &sig.declaration else {
             return sig.type_parameters.len();
         };
@@ -281,7 +285,7 @@ impl Checker {
 
     pub(crate) fn check_call_arguments_loop(
         &mut self,
-        _node: &Arc<Node>,
+        node: &Arc<Node>,
         sig: &Arc<Signature>,
         arguments: &Arc<NodeList>,
         has_rest: bool,
@@ -385,6 +389,20 @@ impl Checker {
             if !ok {
                 break;
             }
+        }
+        if let Some((spread, rest_type, err_node)) =
+            self.non_array_rest_spread_parts(node, sig, arguments)
+        {
+            self.check_type_related_to_and_elaborate_display(
+                &spread,
+                &rest_type,
+                crate::checker::relater::RelationKind::Assignable,
+                Some(&err_node),
+                Some(&err_node),
+                Some(&ARGUMENT_OF_TYPE_0_IS_NOT_ASSIGNABLE_TO_PARAMETER_OF_TYPE_1),
+                None,
+                None,
+            );
         }
     }
 }
