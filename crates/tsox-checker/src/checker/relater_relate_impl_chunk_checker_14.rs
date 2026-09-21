@@ -244,7 +244,29 @@ impl Checker {
             for c in &constituents {
                 resolved.push(self.try_get_indexed_access_type(object_type, c, access_flags)?);
             }
+            if access_flags.contains(AccessFlags::Writing) {
+                if resolved.len() == 1 {
+                    return resolved.pop();
+                }
+                return Some(self.get_intersection_type(resolved));
+            }
             return Some(self.get_union_type(resolved));
+        }
+
+        if object_type.flags.contains(TypeFlags::Intersection)
+            && let Some(constituents) = object_type.types()
+        {
+            let mut resolved: Vec<Arc<Type>> = Vec::new();
+            for c in constituents {
+                if let Some(t) = self.try_get_indexed_access_type(c, index_type, access_flags) {
+                    resolved.push(t);
+                }
+            }
+            return match resolved.len() {
+                0 => None,
+                1 => Some(resolved.pop().expect("exactly one")),
+                _ => Some(self.get_intersection_type(resolved)),
+            };
         }
 
         if object_type.flags.contains(TypeFlags::TypeParameter) {

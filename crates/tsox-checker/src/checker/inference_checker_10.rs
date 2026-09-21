@@ -15,6 +15,14 @@ impl Checker {
             return self.get_type_of_property_of_contextual_type(&constraint, name);
         }
 
+        if let TypeData::IndexedAccess(ia) = &t.data
+            && let (Some(obj), Some(idx)) = (&ia.object_type, &ia.index_type)
+            && let Some(resolved) =
+                self.try_get_indexed_access_type(obj, idx, AccessFlags::None)
+        {
+            return self.get_type_of_property_of_contextual_type(&resolved, name);
+        }
+
         if t.flags.contains(TypeFlags::Union)
             && let TypeData::Union(u) = &t.data
         {
