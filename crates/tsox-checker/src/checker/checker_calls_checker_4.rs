@@ -196,6 +196,10 @@ impl Checker {
             tsox_frontend::ast::NodeData::CallExpression(d) => d.type_arguments.clone(),
             _ => None,
         };
+        // Go checkCallExpression：callee 为 super 时调用结果恒为 void
+        if callee.0.kind == SyntaxKind::SuperKeyword {
+            return self.get_void_type();
+        }
         let callee_type = self.get_type_of_node(&callee.0);
         // 多态 this 返回位：lib 形如 sort(): this —— 返回型以接收者类型实例化
         let receiver_type: Option<Arc<Type>> = self.call_receiver_type(&callee.0);
