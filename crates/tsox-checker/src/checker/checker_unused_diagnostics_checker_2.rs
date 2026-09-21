@@ -180,6 +180,31 @@ impl Checker {
         }
     }
 
+    pub(crate) fn is_self_type_access(
+        &self,
+        receiver: &Arc<Node>,
+        object_type: &Arc<crate::checker::types::Type>,
+    ) -> bool {
+        if receiver.kind == SyntaxKind::ThisKeyword {
+            return true;
+        }
+        let Some(parent) = object_type.symbol.as_ref() else {
+            return false;
+        };
+        let mut first = receiver;
+        loop {
+            match &first.data {
+                tsox_frontend::ast::NodeData::Identifier(_) => break,
+                tsox_frontend::ast::NodeData::PropertyAccessExpression(d) => {
+                    first = &d.expression;
+                }
+                _ => return false,
+            }
+        }
+        self.resolve_identifier(first)
+            .is_some_and(|sym| sym.id() == parent.id())
+    }
+
     pub(crate) fn mark_property_as_referenced(&self, prop: &Arc<Symbol>, node: Option<&Arc<Node>>) {
         self.mark_property_as_referenced_ex(prop, node, None);
     }

@@ -12,6 +12,10 @@ impl Checker {
         let mut containers: Vec<(Arc<Node>, bool)> = Vec::new();
         Self::collect_unused_check_containers(file_node, &mut containers);
         for (container, check_locals) in containers {
+            if container.kind == SyntaxKind::InferType {
+                self.check_unused_infer_type_parameter(&container);
+                continue;
+            }
             if check_locals {
                 self.check_unused_locals_and_parameters(&container);
             }
@@ -40,6 +44,7 @@ impl Checker {
             ClassDeclaration | ClassExpression | MethodSignature | CallSignature
             | ConstructSignature | FunctionType | ConstructorType | TypeAliasDeclaration
             | InterfaceDeclaration => out.push((Arc::clone(node), false)),
+            InferType => out.push((Arc::clone(node), false)),
             _ => {}
         }
         tsox_frontend::ast::node_data_generated::for_each_child(node, |child| {
@@ -136,6 +141,25 @@ impl Checker {
                 }
                 _ => {}
             }
+        }
+    }
+
+    pub(crate) fn check_unused_infer_type_parameter(&mut self, node: &Arc<Node>) {
+        use tsox_core::diagnostics::messages_generated::X_0_IS_DECLARED_BUT_NEVER_USED;
+        let tsox_frontend::ast::NodeData::InferTypeNode(data) = &node.data else {
+            return;
+        };
+        let type_parameter = Arc::clone(&data.type_parameter);
+        if self.is_unreferenced_type_parameter(&type_parameter) {
+            let name = type_parameter
+                .name()
+                .map(|n| n.text().to_string())
+                .unwrap_or_default();
+            let loc = type_parameter
+                .name()
+                .map(|n| n.loc)
+                .unwrap_or(type_parameter.loc);
+            self.report_unused(&type_parameter, true, loc, &X_0_IS_DECLARED_BUT_NEVER_USED, vec![name]);
         }
     }
 

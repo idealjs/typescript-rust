@@ -193,6 +193,10 @@ impl Checker {
             .or_else(|| self.literal_element_access_name(arg_expr));
         if let Some(member_name) = prop_name {
             if let Some(sym) = self.get_property_of_type(obj_type, &member_name) {
+                if let tsox_frontend::ast::NodeData::ElementAccessExpression(data) = &node.data {
+                    let self_access = self.is_self_type_access(&data.expression, obj_type);
+                    self.mark_property_as_referenced_ex(&sym, Some(node), Some(self_access));
+                }
                 if let Some(substituted) = self.instantiate_array_member_type(obj_type, &sym) {
                     return self.flow_type_of_access_expression(node, Some(&sym), substituted);
                 }
