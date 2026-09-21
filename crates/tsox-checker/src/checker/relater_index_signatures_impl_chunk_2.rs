@@ -78,14 +78,28 @@ impl Checker {
             } else {
                 self.remove_undefined_from_union(&prop_type)
             };
-            let related = self.compare_types(compared, Arc::clone(&target_value), relation, false);
+            let related = self.compare_types(compared.clone(), Arc::clone(&target_value), relation, false);
             if related.is_false() {
                 if self.relater_chain_active {
-                    let name = crate::checker::property_name_for_display(&prop.name);
-                    self.relater_report_error(
-                        msg::PROPERTY_0_IS_INCOMPATIBLE_WITH_INDEX_SIGNATURE,
-                        vec![name],
-                    );
+                    let name = self.chain_property_arg_name(&prop);
+                    // Go 链上去重：同一属性对同一索引值的失败只报一轮
+                    let already = (0..2).any(|i| {
+                        self.chain_message_key(i)
+                            == Some(msg::PROPERTY_0_IS_INCOMPATIBLE_WITH_INDEX_SIGNATURE.key)
+                            && self.chain_args(i).is_some_and(|a| a.first() == Some(&name))
+                    });
+                    if !already {
+                        let source_str = self.type_to_string(&compared);
+                        let target_str = self.type_to_string(&target_value);
+                        self.relater_report_error(
+                            msg::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                            vec![source_str, target_str],
+                        );
+                        self.relater_report_error(
+                            msg::PROPERTY_0_IS_INCOMPATIBLE_WITH_INDEX_SIGNATURE,
+                            vec![name],
+                        );
+                    }
                 }
                 return Ternary::False;
             }
