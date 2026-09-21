@@ -14,8 +14,15 @@ impl Checker {
         if !check_mode.contains(SignatureCheckMode::IgnoreReturnTypes) {
             let target_return = self.get_non_circular_return_type_of_signature(&target);
 
+            let target_return_own_tp = target_return.flags.contains(TypeFlags::TypeParameter)
+                && target
+                    .type_parameters
+                    .iter()
+                    .any(|tp| crate::checker::utilities::type_parameters_match(tp, &target_return));
             if !Arc::ptr_eq(&target_return, &self.void_type())
                 && !target_return.flags.contains(TypeFlags::Any)
+                && !(target_return.flags.contains(TypeFlags::TypeParameter)
+                    && !target_return_own_tp)
             {
                 let source_return = self.get_non_circular_return_type_of_signature(&source);
                 let target_type_predicate = self.get_type_predicate_of_signature(&target).cloned();
