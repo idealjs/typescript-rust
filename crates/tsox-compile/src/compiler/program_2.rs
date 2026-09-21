@@ -341,6 +341,9 @@ impl Program {
                         )));
                     }
                     let is_resolved = resolved.as_ref().map(|m| m.is_resolved()).unwrap_or(false);
+                    let lib_diagnostics_skipped = options.skip_lib_check.is_true()
+                        && (file.is_declaration_file
+                            || is_external_library_file(&file.file_name));
                     if is_resolved {
                         let resolved_module = resolved.unwrap();
                         // Go tsc 默认 preserveSymlinks=false：解析结果经 realpath
@@ -360,7 +363,7 @@ impl Program {
                             );
                             stack.extend(source_files[pre..].iter().cloned());
                         }
-                    } else if (module_spec.starts_with('.')
+                    } else if ((module_spec.starts_with('.')
                         && !pattern_ambient_module_exists(&source_files, module_spec)
                         && !node_next_needs_extension(
                             &options,
@@ -369,7 +372,8 @@ impl Program {
                             &|p| host.fs().read_file(p),
                         ))
                         || (!module_spec.starts_with('.')
-                            && !ambient_module_exists(&source_files, module_spec))
+                            && !ambient_module_exists(&source_files, module_spec)))
+                        && !lib_diagnostics_skipped
                     {
                         // TS2307 报告位：ImportType（含动态 import() 类型位）由
                         // checker 报，这里跳过避免双报
