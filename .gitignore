@@ -7,7 +7,8 @@ crates/tsox/tests/baselines/local/
 *.log
 __pycache__/
 fullrun.log
-# 修复循环每轮轮转产物(当前轮 corpus_results.csv 入库,其余不入)
+# 修复循环每轮轮转产物(当前轮 corpus_results.csv 与 corpus_skips.csv 入库,prev/diff 不入)
 corpus_results.prev.csv
 corpus_results.diff
-corpus_skips*
+corpus_skips.prev.csv
+corpus_skips.diff
