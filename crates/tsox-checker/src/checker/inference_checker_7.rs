@@ -72,13 +72,23 @@ impl Checker {
                 vec![Arc::clone(source)]
             };
             let target_types = target.types().unwrap_or_default().to_vec();
-            let (temp_sources, temp_targets) =
-                self.infer_from_matching_types(state, &source_types, &target_types, true);
-            if temp_targets.is_empty() {
+            let (temp_sources, temp_targets) = self.infer_from_matching_types(
+                state,
+                &source_types,
+                &target_types,
+                MatchingKind::OrBaseIdentical,
+            );
+            let (sources, targets) = self.infer_from_matching_types(
+                state,
+                &temp_sources,
+                &temp_targets,
+                MatchingKind::CloselyMatched,
+            );
+            if targets.is_empty() {
                 return;
             }
-            let target = self.get_union_type(temp_targets);
-            if temp_sources.is_empty() {
+            let target = self.get_union_type(targets);
+            if sources.is_empty() {
                 self.infer_with_priority(
                     state,
                     source,
@@ -87,9 +97,10 @@ impl Checker {
                 );
                 return;
             }
-            let source = self.get_union_type(temp_sources);
+            let source = self.get_union_type(sources);
             if target.flags.contains(TypeFlags::Union) {
-                self.infer_from_types_union(state, &source, &target);
+                let target_list: Vec<Arc<Type>> = target.types().unwrap_or_default().to_vec();
+                self.infer_to_multiple_types_union(state, &source, &target_list);
             } else {
                 // 匹配消去后归约为单成分：继续主流程（Go 分支重赋值
                 // source/target 后继续执行，走 TypeVariable 登记）
@@ -178,40 +189,6 @@ impl Checker {
             branch_types.push(t);
         }
         self.infer_to_multiple_types_non_union(state, source, &branch_types, group_priority);
-    }
-
-    pub(crate) fn infer_from_types_union(
-        &mut self,
-        state: &mut InferenceState,
-        source: &Arc<Type>,
-        target: &Arc<Type>,
-    ) {
-        let source_types = if source.flags.contains(TypeFlags::Union) {
-            source.types().unwrap_or_default().to_vec()
-        } else {
-            vec![Arc::clone(source)]
-        };
-        let target_types = target.types().unwrap_or_default().to_vec();
-        let (sources, targets) =
-            self.infer_from_matching_types(state, &source_types, &target_types, false);
-        if targets.is_empty() {
-            return;
-        }
-        let target = self.get_union_type(targets);
-        if sources.is_empty() {
-            self.infer_with_priority(state, source, &target, InferencePriority::NakedTypeVariable);
-            return;
-        }
-        let source = self.get_union_type(sources);
-        if target.flags.contains(TypeFlags::Union) {
-            for t in target.types().unwrap_or(&[]) {
-                self.infer_from_types(state, &source, t);
-            }
-        } else {
-            // 匹配消去后归约为单成分（如裸类型参数）：继续主流程
-            //（Go 联合分支重赋值 source/target 后继续执行，走 TypeVariable 登记）
-            self.infer_from_types(state, &source, &target);
-        }
     }
 
     pub(crate) fn infer_from_types_intersection(

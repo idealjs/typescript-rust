@@ -2,6 +2,26 @@
 
 use crate::checker::inference::*;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum MatchingKind {
+    Identical,
+    OrBaseIdentical,
+    CloselyMatched,
+}
+
+fn symbols_match(a: &Option<Arc<Symbol>>, b: &Option<Arc<Symbol>>) -> bool {
+    match (a, b) {
+        (Some(x), Some(y)) => Arc::ptr_eq(x, y),
+        _ => false,
+    }
+}
+
+fn push_if_unique_arc(list: &mut Vec<Arc<Type>>, t: &Arc<Type>) {
+    if !list.iter().any(|x| Arc::ptr_eq(x, t)) {
+        list.push(Arc::clone(t));
+    }
+}
+
 impl Checker {
     pub(crate) fn infer_from_object_types(
         &mut self,
@@ -459,34 +479,115 @@ impl Checker {
         state: &mut InferenceState,
         sources: &[Arc<Type>],
         targets: &[Arc<Type>],
-        use_identical: bool,
+        kind: MatchingKind,
     ) -> (Vec<Arc<Type>>, Vec<Arc<Type>>) {
-        let mut remaining_sources: Vec<Arc<Type>> = sources.to_vec();
-        let mut remaining_targets: Vec<Arc<Type>> = targets.to_vec();
-        let mut i = 0;
-        while i < remaining_sources.len() {
-            let mut matched = false;
-            let mut j = 0;
-            while j < remaining_targets.len() {
-                let is_match = if use_identical {
-                    self.is_type_identical_to(&remaining_sources[i], &remaining_targets[j])
-                } else {
-                    self.is_type_identical_to(&remaining_sources[i], &remaining_targets[j])
-                };
-                if is_match {
-                    self.infer_from_types(state, &remaining_sources[i], &remaining_targets[j]);
-                    remaining_sources.remove(i);
-                    remaining_targets.remove(j);
-                    matched = true;
-                    break;
+        let mut matched_sources: Vec<Arc<Type>> = Vec::new();
+        let mut matched_targets: Vec<Arc<Type>> = Vec::new();
+        for t in targets {
+            for s in sources {
+                if self.matches_by_kind(s, t, kind) {
+                    if kind != MatchingKind::CloselyMatched {
+                        self.infer_from_types(state, s, t);
+                    }
+                    push_if_unique_arc(&mut matched_sources, s);
+                    push_if_unique_arc(&mut matched_targets, t);
                 }
-                j += 1;
-            }
-            if !matched {
-                i += 1;
             }
         }
-        (remaining_sources, remaining_targets)
+        if kind == MatchingKind::CloselyMatched {
+            matched_targets.sort_by(|a, b| self.compare_types_and_depth(a, b));
+            for t in &matched_targets {
+                for s in &matched_sources {
+                    if self.matches_by_kind(s, t, kind) {
+                        self.infer_from_types(state, s, t);
+                    }
+                }
+            }
+        }
+        let sources: Vec<Arc<Type>> = sources
+            .iter()
+            .filter(|s| !matched_sources.iter().any(|m| Arc::ptr_eq(m, s)))
+            .cloned()
+            .collect();
+        let targets: Vec<Arc<Type>> = targets
+            .iter()
+            .filter(|t| !matched_targets.iter().any(|m| Arc::ptr_eq(m, t)))
+            .cloned()
+            .collect();
+        (sources, targets)
+    }
+
+    fn matches_by_kind(&mut self, s: &Arc<Type>, t: &Arc<Type>, kind: MatchingKind) -> bool {
+        match kind {
+            MatchingKind::Identical => self.is_type_identical_to(s, t),
+            MatchingKind::OrBaseIdentical => self.is_type_or_base_identical_to(s, t),
+            MatchingKind::CloselyMatched => self.is_type_closely_matched_by(s, t),
+        }
+    }
+
+    pub(crate) fn is_type_or_base_identical_to(&mut self, s: &Arc<Type>, t: &Arc<Type>) -> bool {
+        self.is_type_identical_to(s, t)
+            || (t.flags.contains(TypeFlags::String) && s.flags.contains(TypeFlags::StringLiteral))
+            || (t.flags.contains(TypeFlags::Number) && s.flags.contains(TypeFlags::NumberLiteral))
+    }
+
+    pub(crate) fn is_type_closely_matched_by(&self, s: &Arc<Type>, t: &Arc<Type>) -> bool {
+        let same_object_instantiation = s.flags.contains(TypeFlags::Object)
+            && t.flags.contains(TypeFlags::Object)
+            && symbols_match(&s.symbol, &t.symbol);
+        let same_alias_instantiation = match (&s.alias, &t.alias) {
+            (Some(sa), Some(ta)) => {
+                !sa.type_arguments.is_empty() && symbols_match(&sa.symbol, &ta.symbol)
+            }
+            _ => false,
+        };
+        same_object_instantiation || same_alias_instantiation
+    }
+
+    pub(crate) fn compare_types_and_depth(
+        &self,
+        t1: &Arc<Type>,
+        t2: &Arc<Type>,
+    ) -> std::cmp::Ordering {
+        let d1 = self.get_type_depth(t1, 3);
+        let d2 = self.get_type_depth(t2, 3);
+        if d1 != d2 {
+            return d2.cmp(&d1);
+        }
+        crate::checker::utilities::compare_types(t1, t2)
+    }
+
+    pub(crate) fn get_type_depth(&self, t: &Arc<Type>, max_depth: i32) -> i32 {
+        if max_depth != 0 {
+            if let Some(alias) = &t.alias
+                && !alias.type_arguments.is_empty()
+            {
+                return self.get_type_list_depth(&alias.type_arguments, max_depth - 1) + 1;
+            }
+            if t.object_flags.contains(ObjectFlags::Reference) {
+                let type_arguments = self.get_type_arguments(t);
+                if !type_arguments.is_empty() {
+                    return self.get_type_list_depth(&type_arguments, max_depth - 1) + 1;
+                }
+            }
+            if t.flags.intersects(TypeFlags::Union | TypeFlags::Intersection)
+                && let Some(types) = t.types()
+            {
+                return self.get_type_list_depth(types, max_depth);
+            }
+        }
+        0
+    }
+
+    fn get_type_list_depth(&self, types: &[Arc<Type>], max_depth: i32) -> i32 {
+        let mut depth = 0;
+        for t in types {
+            let type_depth = self.get_type_depth(t, max_depth);
+            if type_depth > depth {
+                depth = type_depth;
+            }
+        }
+        depth
     }
 
     pub(crate) fn infer_matching_types_identical(
@@ -495,7 +596,7 @@ impl Checker {
         sources: &[Arc<Type>],
         targets: &[Arc<Type>],
     ) -> (Vec<Arc<Type>>, Vec<Arc<Type>>) {
-        self.infer_from_matching_types(state, sources, targets, true)
+        self.infer_from_matching_types(state, sources, targets, MatchingKind::Identical)
     }
 
     pub(crate) fn infer_with_priority(
