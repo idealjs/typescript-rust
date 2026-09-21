@@ -200,6 +200,11 @@ impl Checker {
     pub(crate) fn single_base_for_non_augmenting_subtype(&mut self, t: &Arc<Type>) -> Arc<Type> {
         let mut cur = Arc::clone(t);
         for _ in 0..32 {
+            if let TypeData::Object(o) = &cur.data
+                && !o.structured.construct_signatures().is_empty()
+            {
+                break;
+            }
             let Some(sym) = cur.symbol.clone() else {
                 break;
             };
