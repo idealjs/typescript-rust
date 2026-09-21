@@ -381,7 +381,7 @@ impl Checker {
     }
 
     // 逐属性 widen 对象字面量；无可 widen 属性时返回 None（保持原类型）
-    fn widen_object_literal_properties(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn widen_object_literal_properties(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
         let obj = match &t.data {
             TypeData::Object(o) => o,
             _ => return None,
@@ -484,7 +484,7 @@ impl Checker {
         }))
     }
 
-    fn regular_object_literal_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn regular_object_literal_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
         let obj = match &t.data {
             TypeData::Object(o) => o,
             _ => return None,

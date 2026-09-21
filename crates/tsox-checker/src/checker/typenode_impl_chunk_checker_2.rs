@@ -412,9 +412,18 @@ impl Checker {
         body: &Arc<Node>,
         fn_node: Option<&Arc<Node>>,
     ) -> Arc<Type> {
+        let is_async = fn_node
+            .map(|n| n.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Async))
+            .unwrap_or(false);
         if body.kind != SyntaxKind::Block {
-            let t = self.get_type_of_node(body);
-            return self.get_widened_type(&t);
+            let mut t = self.get_type_of_node(body);
+            if self.is_const_context(body) {
+                t = self.get_regular_type_of_literal_type(&t);
+            }
+            if is_async {
+                t = self.awaited_type_of_body_return(fn_node, t);
+            }
+            return self.finalize_inferred_return_type(fn_node, t, is_async);
         }
         let mut types: Vec<Arc<Type>> = Vec::new();
         let mut has_return_with_no_expression = !self.function_body_definitely_returns(body);
@@ -429,10 +438,15 @@ impl Checker {
         if types.is_empty() {
             let never_returning = !has_return_with_no_expression
                 && (has_return_of_type_never || fn_node.is_some_and(Self::may_return_never));
-            if never_returning {
-                return self.never_type();
+            let base = if never_returning {
+                self.never_type()
+            } else {
+                self.void_type()
+            };
+            if is_async {
+                return self.create_promise_return_type_for(&base);
             }
-            return self.void_type();
+            return base;
         }
         // Go checkAndAggregateReturnExpressionTypes：strictNullChecks 下体尾
         // 可达（隐式 return undefined）时并入 undefined
@@ -442,13 +456,153 @@ impl Checker {
                 types.push(undef);
             }
         }
+        if is_async {
+            for t in types.iter_mut() {
+                let owned = std::mem::replace(t, self.never_type());
+                *t = self.awaited_type_of_body_return(fn_node, owned);
+            }
+        }
         let inferred = if types.len() == 1 {
             types.into_iter().next().expect("exactly one")
         } else {
             self.get_union_type(types)
         };
 
-        self.get_widened_type(&inferred)
+        self.finalize_inferred_return_type(fn_node, inferred, is_async)
+    }
+
+    // Go checkAndAggregateReturnExpressionTypes 的 async 分支：体返回表达式的
+    // 类型先取 awaited 型（坏 thenable 报 TS1058 后按 errorType 继续参与）
+    fn awaited_type_of_body_return(
+        &mut self,
+        fn_node: Option<&Arc<Node>>,
+        t: Arc<Type>,
+    ) -> Arc<Type> {
+        self.check_awaited_type_no_alias(
+            &t,
+            fn_node,
+            tsox_core::diagnostics::messages_generated::
+                THE_RETURN_TYPE_OF_AN_ASYNC_FUNCTION_MUST_EITHER_BE_A_VALID_PROMISE_OR_MUST_NOT_CONTAIN_A_CALLABLE_THEN_MEMBER,
+        )
+        .unwrap_or_else(|| self.get_error_type())
+    }
+
+    // Go getReturnTypeFromBody 公共尾段：单元型按上下文签名返回型决定字面量
+    // 保留或加宽，再整体加宽，async 容器包 Promise
+    fn finalize_inferred_return_type(
+        &mut self,
+        fn_node: Option<&Arc<Node>>,
+        mut t: Arc<Type>,
+        is_async: bool,
+    ) -> Arc<Type> {
+        if crate::checker::is_unit_type(&t) {
+            let contextual = match fn_node.and_then(|f| self.get_contextual_signature(f)) {
+                Some(sig) => {
+                    if sig
+                        .declaration
+                        .as_ref()
+                        .is_some_and(|d| fn_node.is_some_and(|f| Arc::ptr_eq(d, f)))
+                    {
+                        Some(Arc::clone(&t))
+                    } else {
+                        self.get_return_type_of_signature(&sig).map(|rt| {
+                            if is_async {
+                                self.get_promised_type_of_promise(&rt).unwrap_or(rt)
+                            } else {
+                                rt
+                            }
+                        })
+                    }
+                }
+                None => None,
+            };
+            let keep = contextual
+                .as_ref()
+                .is_some_and(|c| self.is_literal_of_contextual_type(&t, c));
+            if !keep && crate::checker::is_fresh_literal_type(&t) {
+                t = self.get_base_type_of_literal_type(&t);
+            }
+            t = self.get_regular_type_of_literal_type(&t);
+        }
+        let widened = self.widen_inferred_return_type(&t);
+        if is_async {
+            return self.create_promise_return_type_for(&widened);
+        }
+        widened
+    }
+
+    // Go getWidenedType：仅 RequiresWidening（widening null/undefined、对象/
+    // 数组字面量）参与加宽；裸 fresh literal 与非数组/元组引用的类型实参不 widen
+    fn widen_inferred_return_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        if t.flags.intersects(crate::checker::types::TYPE_FLAGS_NULLABLE)
+            && t
+                .object_flags
+                .intersects(crate::checker::types::OBJECT_FLAGS_REQUIRES_WIDENING)
+        {
+            return self.get_any_type();
+        }
+        if t.flags.contains(TypeFlags::Object)
+            && t.object_flags.contains(ObjectFlags::ObjectLiteral)
+        {
+            if let Some(widened) = self.widen_object_literal_properties(t) {
+                return widened;
+            }
+            if t.object_flags.contains(ObjectFlags::FreshLiteral) {
+                if let Some(regular) = self.regular_object_literal_type(t) {
+                    return regular;
+                }
+            }
+            return Arc::clone(t);
+        }
+        if let TypeData::Union(union_data) = &t.data {
+            let widened: Vec<Arc<Type>> = union_data
+                .union_or_intersection
+                .types
+                .iter()
+                .map(|member| self.widen_inferred_return_type(member))
+                .collect();
+            if widened
+                .iter()
+                .zip(union_data.union_or_intersection.types.iter())
+                .all(|(w, o)| Arc::ptr_eq(w, o))
+            {
+                return Arc::clone(t);
+            }
+            return self.build_union_from_types(widened);
+        }
+        if crate::checker::is_array_or_tuple_type(t)
+            && t.object_flags.contains(ObjectFlags::Reference)
+            && let Some(obj) = t.as_object()
+            && !obj.type_arguments.is_empty()
+        {
+            let widened: Vec<Arc<Type>> = obj
+                .type_arguments
+                .iter()
+                .map(|a| self.widen_inferred_return_type(a))
+                .collect();
+            let unchanged = widened
+                .iter()
+                .zip(obj.type_arguments.iter())
+                .all(|(w, o)| Arc::ptr_eq(w, o));
+            if !unchanged {
+                return crate::checker::checker_attach_explicit_type_arguments::attach_explicit_type_arguments(
+                    t, widened,
+                );
+            }
+        }
+        Arc::clone(t)
+    }
+
+    // Go createPromiseType：全局 Promise 泛型壳 + awaited 型实参
+    pub(crate) fn create_promise_return_type_for(&mut self, promised: &Arc<Type>) -> Arc<Type> {
+        let Some(promise_sym) = self.globals.get("Promise").cloned() else {
+            return self.unknown_type();
+        };
+        let declared = self.get_declared_type_of_symbol(&promise_sym);
+        let arg = self
+            .get_awaited_type(promised)
+            .unwrap_or_else(|| self.unknown_type());
+        self.rebuild_with_type_arguments(&declared, vec![arg])
     }
 
     /// Go getWidenedTypeForVariableLikeDeclaration 的绑定模式分支：

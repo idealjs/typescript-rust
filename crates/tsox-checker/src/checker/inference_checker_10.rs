@@ -284,6 +284,19 @@ impl Checker {
             SyntaxKind::ArrayLiteralExpression => {
                 self.get_contextual_type_for_array_literal_element(node, &parent, _context_flags)
             }
+            // Go getContextualTypeForConditionalOperand：条件表达式两分支
+            // 继承条件表达式自身的上下文型，条件不透传
+            SyntaxKind::ConditionalExpression => {
+                if let tsox_frontend::ast::NodeData::ConditionalExpression(d) = &parent.data {
+                    if Arc::ptr_eq(&d.when_true, node) || Arc::ptr_eq(&d.when_false, node) {
+                        self.get_contextual_type(&parent, _context_flags)
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            }
 
             SyntaxKind::ParenthesizedExpression | SyntaxKind::NonNullExpression => {
                 self.get_contextual_type(&parent, _context_flags)

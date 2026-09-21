@@ -350,7 +350,15 @@ impl Checker {
                 }
             }
         }
-        self.contextual_return_type_of(&current)
+        let contextual = self.contextual_return_type_of(&current)?;
+        // Go getContextualTypeForReturnExpression：async 容器将上下文返回型
+        // 逐成分取 awaited 无别名型，再与 PromiseLike<该型> 取并
+        if current.has_syntactic_modifier(crate::checker::ModifierFlags::Async) {
+            let awaited = self.get_awaited_type(&contextual)?;
+            let promise_like = self.create_promise_like_type(&awaited);
+            return Some(self.get_union_type(vec![awaited, promise_like]));
+        }
+        Some(contextual)
     }
 
     pub fn contextual_return_type_of(
@@ -379,16 +387,35 @@ impl Checker {
             }
         }
 
-        let mut parent = fn_node.parent()?;
-        while parent.kind == SyntaxKind::ParenthesizedExpression {
-            parent = parent.parent()?;
-        }
-        if let NodeData::CallExpression(call) = &parent.data {
-            if Arc::ptr_eq(&call.expression, fn_node) {
-                return self.get_contextual_type(&parent, ContextFlags::None);
+        // Go GetImmediatelyInvokedFunctionExpression：向上最多两层（括号/
+        // 调用），调用目标为该函数本身时取该调用表达式的上下文型
+        let mut prev = Arc::clone(fn_node);
+        let mut current = fn_node.parent()?;
+        for _ in 0..2 {
+            match &current.data {
+                NodeData::ParenthesizedExpression(_) => {}
+                NodeData::CallExpression(call) => {
+                    if Arc::ptr_eq(&call.expression, &prev) {
+                        return self.get_contextual_type(&current, ContextFlags::None);
+                    }
+                }
+                _ => return None,
             }
+            prev = Arc::clone(&current);
+            current = current.parent()?;
         }
         None
+    }
+
+    pub(crate) fn create_promise_like_type(&mut self, promised_type: &Arc<Type>) -> Arc<Type> {
+        let Some(promise_like_sym) = self.globals.get("PromiseLike").cloned() else {
+            return self.unknown_type();
+        };
+        let declared = self.get_declared_type_of_symbol(&promise_like_sym);
+        let promised = self
+            .get_awaited_type(promised_type)
+            .unwrap_or_else(|| self.unknown_type());
+        self.rebuild_with_type_arguments(&declared, vec![promised])
     }
 }
 
