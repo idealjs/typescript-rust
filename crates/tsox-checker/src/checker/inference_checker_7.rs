@@ -271,6 +271,11 @@ impl Checker {
         }
         if !inference.is_fixed {
             let candidate = propagation_type.unwrap_or_else(|| Arc::clone(source));
+            // 自引用推断（T←T）无信息量：Go 用 non-fixing mapper 让上下文化实参的类型参数
+            // 引用脱离推断跟踪，此处以候选与被推断类型参数符号等价拦截
+            if crate::checker::utilities::type_parameters_match(&candidate, &inference.type_parameter) {
+                return;
+            }
             if priority.bits() < inference.priority.bits() {
                 inference.candidates.clear();
                 inference.candidate_depths.clear();
