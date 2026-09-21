@@ -25,10 +25,52 @@ impl Checker {
         let result = scope.as_ref().and_then(|s| self.follow_alias(s));
         if let Some(sym) = &scope
             && access_kind(node) != AccessKind::Write
+            && !self.self_reference_location_exempts(node, sym)
         {
             self.record_symbol_reference(sym, record_meaning);
         }
         result
+    }
+
+    fn self_reference_location_exempts(&self, node: &Arc<Node>, resolved: &Arc<Symbol>) -> bool {
+        let name = match &node.data {
+            tsox_frontend::ast::NodeData::Identifier(data) => data.text.as_str(),
+            _ => return false,
+        };
+        let symbol_map = self.program.symbol_map();
+        let mut last_location: Option<Arc<Node>> = None;
+        let mut last_self_reference: Option<Arc<Node>> = None;
+        let mut current = node.parent();
+        while let Some(location) = current {
+            if let Some(locals) = symbol_map.locals.get(&location.id())
+                && locals.get(name).is_some()
+            {
+                break;
+            }
+            let is_self_reference = match location.kind {
+                SyntaxKind::Parameter => last_location
+                    .as_ref()
+                    .zip(location.name())
+                    .is_some_and(|(last, name)| Arc::ptr_eq(last, &name)),
+                SyntaxKind::FunctionDeclaration
+                | SyntaxKind::ClassDeclaration
+                | SyntaxKind::InterfaceDeclaration
+                | SyntaxKind::EnumDeclaration
+                | SyntaxKind::TypeAliasDeclaration
+                | SyntaxKind::ModuleDeclaration => true,
+                _ => false,
+            };
+            if is_self_reference && last_self_reference.is_none() {
+                last_self_reference = Some(Arc::clone(&location));
+            }
+            last_location = Some(Arc::clone(&location));
+            current = location.parent();
+        }
+        last_self_reference.is_some_and(|location| {
+            symbol_map
+                .symbol_of(&location)
+                .is_some_and(|sym| sym.id() == resolved.id())
+        })
     }
 
     pub(crate) fn record_symbol_reference(&self, symbol: &Arc<Symbol>, bits: SymbolFlags) {
