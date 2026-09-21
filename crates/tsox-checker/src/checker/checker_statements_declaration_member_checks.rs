@@ -241,7 +241,25 @@ impl Checker {
                     ) {
                         self.check_return_expression_against_type(&expected, node, expr, false, true);
                     } else {
-                        let actual = self.get_type_of_node(expr);
+                        // Go checkReturnExpression：async 容器返回表达式先取
+                        // awaited 型，thenable 报 TS1058 并按 errorType 参与比对
+                        let raw_actual = self.get_type_of_node(expr);
+                        let container_async = container
+                            .as_ref()
+                            .is_some_and(|c| c.has_syntactic_modifier(ModifierFlags::Async));
+                        let actual = if container_async {
+                            match self.check_awaited_type_no_alias(
+                                &raw_actual,
+                                Some(node),
+                                tsox_core::diagnostics::messages_generated::
+                                    THE_RETURN_TYPE_OF_AN_ASYNC_FUNCTION_MUST_EITHER_BE_A_VALID_PROMISE_OR_MUST_NOT_CONTAIN_A_CALLABLE_THEN_MEMBER,
+                            ) {
+                                Some(t) => t,
+                                None => self.get_error_type(),
+                            }
+                        } else {
+                            raw_actual
+                        };
 
                         if !actual.flags.contains(TypeFlags::Any)
                             && !self.is_type_assignable_to(&actual, &expected)

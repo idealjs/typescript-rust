@@ -125,6 +125,13 @@ impl Checker {
                         ));
                     }
                 }
+                // Go checkAsyncFunctionReturnType：async 非生成器注解非全局
+                // Promise 引用报 TS1064，Promise 内 thenable 成员报 TS1058
+                if is_async && data.asterisk_token.is_none()
+                    && let Some(tn) = data.type_node.as_ref()
+                {
+                    self.check_async_function_return_type(node, tn);
+                }
                 data.type_node
                     .as_ref()
                     .map(|tn| self.get_type_from_type_node(tn))
