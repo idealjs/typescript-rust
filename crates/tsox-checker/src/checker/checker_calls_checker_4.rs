@@ -250,7 +250,8 @@ impl Checker {
             );
             return out.into_iter().next();
         }
-        let (spread, rest_type, err_node) = self.non_array_rest_spread_parts(node, sig, arguments)?;
+        let (spread, rest_type, err_node) =
+            self.non_array_rest_spread_parts(node, sig, arguments, &inferred_types)?;
         let mut out: Vec<tsox_frontend::ast::Diagnostic> = Vec::new();
         self.check_type_related_to_and_elaborate_display(
             &spread,
@@ -270,6 +271,7 @@ impl Checker {
         node: &Arc<Node>,
         sig: &Arc<Signature>,
         arguments: &Arc<NodeList>,
+        inferred_types: &[Arc<Type>],
     ) -> Option<(Arc<Type>, Arc<Type>, Arc<Node>)> {
         if !sig.has_rest_parameter() {
             return None;
@@ -279,6 +281,24 @@ impl Checker {
         if self.is_array_type(&rest_type)
             || self.is_tuple_type(&rest_type)
             || rest_type.flags.contains(TypeFlags::Any)
+        {
+            return None;
+        }
+        let rest_type = if !inferred_types.is_empty() {
+            self.substitute_infer_type_parameters(
+                &rest_type,
+                &sig.type_parameters,
+                inferred_types,
+            )
+        } else if !sig.type_parameters.is_empty() {
+            return None;
+        } else {
+            rest_type
+        };
+        if self.is_array_type(&rest_type)
+            || self.is_tuple_type(&rest_type)
+            || rest_type.flags.contains(TypeFlags::Any | TypeFlags::Unknown)
+            || rest_type.is_type_parameter()
         {
             return None;
         }

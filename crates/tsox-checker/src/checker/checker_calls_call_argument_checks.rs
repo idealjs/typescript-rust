@@ -391,7 +391,7 @@ impl Checker {
             }
         }
         if let Some((spread, rest_type, err_node)) =
-            self.non_array_rest_spread_parts(node, sig, arguments)
+            self.non_array_rest_spread_parts(node, sig, arguments, inferred_types)
         {
             self.check_type_related_to_and_elaborate_display(
                 &spread,

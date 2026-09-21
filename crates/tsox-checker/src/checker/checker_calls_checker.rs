@@ -286,7 +286,10 @@ impl Checker {
                 return false;
             }
         }
-        if self.non_array_rest_spread_parts(node, sig, arguments).is_some() {
+        if self
+            .non_array_rest_spread_parts(node, sig, arguments, &inferred_types)
+            .is_some()
+        {
             return false;
         }
         true
