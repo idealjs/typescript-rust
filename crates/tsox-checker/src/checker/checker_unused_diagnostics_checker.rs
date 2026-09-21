@@ -335,6 +335,7 @@ impl Checker {
                     _ => {
                         if declaration.kind != SyntaxKind::TypeParameter
                             && declaration.kind != SyntaxKind::ModuleDeclaration
+                            && declaration.kind != SyntaxKind::FunctionExpression
                         {
                             let name = local.name.clone();
                             let is_type_decl = matches!(
