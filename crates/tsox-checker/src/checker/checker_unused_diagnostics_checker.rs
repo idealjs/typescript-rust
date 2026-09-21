@@ -9,30 +9,107 @@ impl Checker {
         if no_locals && no_params {
             return;
         }
-        let mut containers: Vec<Arc<Node>> = Vec::new();
+        let mut containers: Vec<(Arc<Node>, bool)> = Vec::new();
         Self::collect_unused_check_containers(file_node, &mut containers);
-        for container in containers {
-            self.check_unused_locals_and_parameters(&container);
+        for (container, check_locals) in containers {
+            if check_locals {
+                self.check_unused_locals_and_parameters(&container);
+            }
+            self.check_unused_type_parameters(&container);
         }
     }
 
-    pub(crate) fn collect_unused_check_containers(node: &Arc<Node>, out: &mut Vec<Arc<Node>>) {
+    pub(crate) fn collect_unused_check_containers(
+        node: &Arc<Node>,
+        out: &mut Vec<(Arc<Node>, bool)>,
+    ) {
         use SyntaxKind::*;
         match node.kind {
             SourceFile | ModuleDeclaration | Block | CaseBlock | ForStatement | ForInStatement
-            | ForOfStatement => out.push(Arc::clone(node)),
+            | ForOfStatement => out.push((Arc::clone(node), true)),
             Constructor | FunctionExpression | FunctionDeclaration | ArrowFunction
             | MethodDeclaration | GetAccessor | SetAccessor => {
-                if Self::function_like_has_body(node) {
-                    out.push(Arc::clone(node));
-                }
+                out.push((Arc::clone(node), Self::function_like_has_body(node)));
             }
+            ClassDeclaration | ClassExpression | MethodSignature | CallSignature
+            | ConstructSignature | FunctionType | ConstructorType | TypeAliasDeclaration
+            | InterfaceDeclaration => out.push((Arc::clone(node), false)),
             _ => {}
         }
         tsox_frontend::ast::node_data_generated::for_each_child(node, |child| {
             Self::collect_unused_check_containers(child, out);
             false
         });
+    }
+
+    pub(crate) fn check_unused_type_parameters(&mut self, node: &Arc<Node>) {
+        use tsox_core::diagnostics::messages_generated::{
+            ALL_TYPE_PARAMETERS_ARE_UNUSED, X_0_IS_DECLARED_BUT_NEVER_USED,
+        };
+        let Some(list) = Self::type_parameter_list(node) else {
+            return;
+        };
+        let params: Vec<Arc<Node>> = list.nodes.iter().cloned().collect();
+        if params.is_empty() {
+            return;
+        }
+        if params.len() > 1 && params.iter().all(|p| self.is_unreferenced_type_parameter(p)) {
+            let loc = tsox_core::core::text::TextRange::new(list.loc.pos() - 1, list.loc.end() + 1);
+            self.report_unused(node, true, loc, &ALL_TYPE_PARAMETERS_ARE_UNUSED, vec![]);
+        } else {
+            for p in &params {
+                if self.is_unreferenced_type_parameter(p) {
+                    let name = p.name().map(|n| n.text().to_string()).unwrap_or_default();
+                    let loc = p.name().map(|n| n.loc).unwrap_or(p.loc);
+                    self.report_unused(
+                        p,
+                        true,
+                        loc,
+                        &X_0_IS_DECLARED_BUT_NEVER_USED,
+                        vec![name],
+                    );
+                }
+            }
+        }
+    }
+
+    pub(crate) fn is_unreferenced_type_parameter(&self, node: &Arc<Node>) -> bool {
+        let underscore = node.name().is_some_and(|n| n.text().starts_with('_'));
+        if underscore {
+            return false;
+        }
+        let Some(sym) = self.program.symbol_map().symbol_of(node) else {
+            return false;
+        };
+        !self
+            .symbol_reference_kinds
+            .get(&sym.id())
+            .is_some_and(|k| k.intersects(SymbolFlags::TypeParameter))
+    }
+
+    pub(crate) fn type_parameter_list(
+        node: &Arc<Node>,
+    ) -> Option<Arc<tsox_frontend::ast::NodeList>> {
+        use tsox_frontend::ast::NodeData::*;
+        match &node.data {
+            FunctionDeclaration(d) => d.type_parameters.clone(),
+            ClassDeclaration(d) => d.type_parameters.clone(),
+            ClassExpression(d) => d.type_parameters.clone(),
+            InterfaceDeclaration(d) => d.type_parameters.clone(),
+            TypeAliasDeclaration(d) => d.type_parameters.clone(),
+            CallSignatureDeclaration(d) => d.type_parameters.clone(),
+            ConstructSignatureDeclaration(d) => d.type_parameters.clone(),
+            ConstructorDeclaration(d) => d.type_parameters.clone(),
+            GetAccessorDeclaration(d) => d.type_parameters.clone(),
+            SetAccessorDeclaration(d) => d.type_parameters.clone(),
+            MethodSignatureDeclaration(d) => d.type_parameters.clone(),
+            MethodDeclaration(d) => d.type_parameters.clone(),
+            ArrowFunction(d) => d.type_parameters.clone(),
+            FunctionExpression(d) => d.type_parameters.clone(),
+            FunctionTypeNode(d) => d.type_parameters.clone(),
+            ConstructorTypeNode(d) => d.type_parameters.clone(),
+            _ => None,
+        }
     }
 
     pub(crate) fn function_like_has_body(node: &Arc<Node>) -> bool {
