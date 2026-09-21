@@ -358,6 +358,45 @@ impl Checker {
             return self.is_type_related_to(&sf, &tf, relation);
         }
 
+        if relation == RelationKind::Identity
+            && s.contains(TypeFlags::TemplateLiteral)
+            && t.contains(TypeFlags::TemplateLiteral)
+            && let (
+                crate::checker::types::TypeData::TemplateLiteral(sl),
+                crate::checker::types::TypeData::TemplateLiteral(tl),
+            ) = (&source.data, &target.data)
+        {
+            if sl.texts != tl.texts || sl.types.len() != tl.types.len() {
+                return false;
+            }
+            return sl
+                .types
+                .iter()
+                .zip(tl.types.iter())
+                .all(|(a, b)| self.is_type_related_to(a, b, relation));
+        }
+        if relation == RelationKind::Identity
+            && s.contains(TypeFlags::StringMapping)
+            && t.contains(TypeFlags::StringMapping)
+            && let (
+                crate::checker::types::TypeData::StringMapping(sm),
+                crate::checker::types::TypeData::StringMapping(tm),
+            ) = (&source.data, &target.data)
+        {
+            let same_symbol = source
+                .symbol
+                .as_ref()
+                .zip(target.symbol.as_ref())
+                .is_some_and(|(a, b)| Arc::ptr_eq(a, b));
+            if !same_symbol {
+                return false;
+            }
+            if let (Some(st), Some(tt)) = (&sm.target, &tm.target) {
+                return self.is_type_related_to(st, tt, relation);
+            }
+            return true;
+        }
+
         if relation != RelationKind::Identity && s.contains(TypeFlags::Conditional) {
             let resolved = match self.get_resolved_type_of_conditional_type(source) {
                 Some(resolved) => Some(resolved),
@@ -389,9 +428,11 @@ impl Checker {
                 if result.is_true() {
                     return true;
                 }
-                if result.is_false() {
-                    return false;
-                }
+            }
+            if s.contains(TypeFlags::Conditional)
+                && self.conditional_four_way_related(source, target, relation) == Some(true)
+            {
+                return true;
             }
         }
 

@@ -1,5 +1,6 @@
 #![allow(unused_imports)]
 
+use crate::checker::inference::InferencePriority;
 use crate::checker::relater_conditional::*;
 
 impl Checker {
@@ -198,4 +199,70 @@ fn get_actual_type_variable(t: &Arc<Type>) -> Arc<Type> {
         return get_actual_type_variable(base);
     }
     Arc::clone(t)
+}
+
+impl Checker {
+    pub(crate) fn conditional_four_way_related(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> Option<bool> {
+        let (sct, tct) = match (&source.data, &target.data) {
+            (TypeData::Conditional(s), TypeData::Conditional(t)) => (s, t),
+            _ => return None,
+        };
+        let source_params = sct
+            .root
+            .as_ref()
+            .map(|r| r.infer_type_parameters.clone())
+            .unwrap_or_default();
+        let (s_check, t_check) = (sct.check_type.clone()?, tct.check_type.clone()?);
+        let s_extends_raw = sct.extends_type.clone()?;
+        let t_extends = tct.extends_type.clone()?;
+        let (s_extends, mapper_types) = if source_params.is_empty() {
+            (s_extends_raw, None)
+        } else {
+            let inferences: Vec<crate::checker::inference::InferenceInfo> = source_params
+                .iter()
+                .map(|p| crate::checker::inference::InferenceInfo::new(Arc::clone(p)))
+                .collect();
+            let mut context = crate::checker::inference::InferenceContext::new(inferences);
+            self.infer_types(
+                &mut context.inferences,
+                Some(Arc::clone(&t_extends)),
+                Some(Arc::clone(&s_extends_raw)),
+                InferencePriority::NoConstraints | InferencePriority::AlwaysStrict,
+                false,
+            );
+            let inferred = self.get_inferred_types(&context);
+            let inst =
+                self.substitute_infer_type_parameters(&s_extends_raw, &source_params, &inferred);
+            (inst, Some(inferred))
+        };
+        if !self.is_type_related_to(&s_extends, &t_extends, RelationKind::Identity) {
+            return None;
+        }
+        if !self.is_type_related_to(&s_check, &t_check, relation)
+            && !self.is_type_related_to(&t_check, &s_check, relation)
+        {
+            return None;
+        }
+        let apply_mapper = |c: &mut Self, t: &Arc<Type>| -> Arc<Type> {
+            match &mapper_types {
+                Some(inferred) => c.substitute_infer_type_parameters(t, &source_params, inferred),
+                None => Arc::clone(t),
+            }
+        };
+        let s_true = self.get_forced_branch_type_of_conditional_type(source, true)?;
+        let t_true = self.get_forced_branch_type_of_conditional_type(target, true)?;
+        let s_false = self.get_forced_branch_type_of_conditional_type(source, false)?;
+        let t_false = self.get_forced_branch_type_of_conditional_type(target, false)?;
+        let s_true = apply_mapper(self, &s_true);
+        let s_false = apply_mapper(self, &s_false);
+        if !self.is_type_related_to(&s_true, &t_true, relation) {
+            return Some(false);
+        }
+        Some(self.is_type_related_to(&s_false, &t_false, relation))
+    }
 }

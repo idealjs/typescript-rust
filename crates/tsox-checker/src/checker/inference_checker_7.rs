@@ -54,32 +54,6 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
     ) {
-        if let (TypeData::Conditional(sc), TypeData::Conditional(tc)) = (&source.data, &target.data)
-        {
-            let same_root = match (
-                sc.root.as_ref().and_then(|r| r.node.as_ref()),
-                tc.root.as_ref().and_then(|r| r.node.as_ref()),
-            ) {
-                (Some(sn), Some(tn)) => sn.id() == tn.id(),
-                _ => false,
-            };
-            let no_infers = |c: &crate::checker::types::ConditionalTypeData| {
-                c.root
-                    .as_ref()
-                    .map(|r| r.infer_type_parameters.is_empty())
-                    .unwrap_or(true)
-            };
-            if same_root && no_infers(sc) && no_infers(tc) {
-                if let (Some(scheck), Some(tcheck)) = (&sc.check_type, &tc.check_type) {
-                    self.infer_from_types(state, scheck, tcheck);
-                }
-                if let (Some(sextends), Some(textends)) = (&sc.extends_type, &tc.extends_type) {
-                    self.infer_from_types(state, sextends, textends);
-                }
-                return;
-            }
-        }
-
         if Arc::ptr_eq(source, target)
             && source
                 .flags
@@ -151,9 +125,56 @@ impl Checker {
             }
         }
 
+        if target.flags.contains(TypeFlags::Conditional) {
+            self.infer_to_conditional_type(state, source, target);
+            return;
+        }
+
         if target.flags.contains(TypeFlags::Object) {
             self.infer_from_object_types(state, source, target);
             return;
+        }
+    }
+
+    fn infer_to_conditional_type(
+        &mut self,
+        state: &mut InferenceState,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) {
+        let tc = match &target.data {
+            TypeData::Conditional(tc) => tc,
+            _ => return,
+        };
+        if let TypeData::Conditional(sc) = &source.data {
+            if let (Some(scheck), Some(tcheck)) = (&sc.check_type, &tc.check_type) {
+                self.infer_from_types(state, scheck, tcheck);
+            }
+            if let (Some(sextends), Some(textends)) = (&sc.extends_type, &tc.extends_type) {
+                self.infer_from_types(state, sextends, textends);
+            }
+            let s_true = self.get_forced_branch_type_of_conditional_type(source, true);
+            let t_true = self.get_forced_branch_type_of_conditional_type(target, true);
+            if let (Some(s), Some(t)) = (&s_true, &t_true) {
+                self.infer_from_types(state, s, t);
+            }
+            let s_false = self.get_forced_branch_type_of_conditional_type(source, false);
+            let t_false = self.get_forced_branch_type_of_conditional_type(target, false);
+            if let (Some(s), Some(t)) = (&s_false, &t_false) {
+                self.infer_from_types(state, s, t);
+            }
+            return;
+        }
+        let contravariant_priority = if state.contravariant && !state.bivariant {
+            InferencePriority::ContravariantConditional
+        } else {
+            InferencePriority::None
+        };
+        if let Some(t_true) = self.get_forced_branch_type_of_conditional_type(target, true) {
+            self.infer_with_priority(state, source, &t_true, contravariant_priority);
+        }
+        if let Some(t_false) = self.get_forced_branch_type_of_conditional_type(target, false) {
+            self.infer_with_priority(state, source, &t_false, contravariant_priority);
         }
     }
 

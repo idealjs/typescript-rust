@@ -33,14 +33,22 @@ impl Checker {
         }
 
         let skip_true = match (ct.check_type.as_ref(), ct.extends_type.as_ref()) {
-            (Some(check), Some(extends)) => !self.is_type_assignable_to(check, extends),
+            (Some(check), Some(extends)) => {
+                let pc = self.get_permissive_instantiation(check);
+                let pe = self.get_permissive_instantiation(extends);
+                !self.is_type_assignable_to(&pc, &pe)
+            }
             _ => false,
         };
         let skip_false = if skip_true {
             false
         } else {
             match (ct.check_type.as_ref(), ct.extends_type.as_ref()) {
-                (Some(check), Some(extends)) => self.is_type_assignable_to(check, extends),
+                (Some(check), Some(extends)) => {
+                    let rc = self.get_restrictive_instantiation(check);
+                    let re = self.get_restrictive_instantiation(extends);
+                    self.is_type_assignable_to(&rc, &re)
+                }
                 _ => false,
             }
         };
