@@ -37,7 +37,7 @@ impl Checker {
         // 上溯到顶层后判 ExportAssignment 表达式位置
         let is_export_assignment_name = Self::is_export_assignment_expression_name(node);
 
-        if let Some(symbol) = self.resolve_identifier(node) {
+        if let Some(symbol) = self.resolve_identifier_use(node, SymbolFlags::VALUE | SymbolFlags::ExportValue) {
             if name == "arguments"
                 && self.arguments_symbol.is_some()
                 && Arc::ptr_eq(&symbol, self.arguments_symbol.as_ref().unwrap())

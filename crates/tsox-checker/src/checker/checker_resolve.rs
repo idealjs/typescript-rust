@@ -1,6 +1,7 @@
 pub(crate) use crate::checker::checker::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_resolve_checker::*;
+pub use crate::checker::checker_resolve_access::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_resolve_checker_2::*;
 #[allow(unused_imports)]

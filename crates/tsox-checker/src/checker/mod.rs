@@ -143,6 +143,7 @@ pub(crate) mod checker_prop_access_checker_3;
 pub(crate) mod checker_prop_access_checker_4;
 pub(crate) mod checker_resolve;
 pub(crate) mod checker_resolve_checker;
+pub(crate) mod checker_resolve_access;
 pub(crate) mod checker_resolve_checker_2;
 pub(crate) mod checker_resolve_checker_3;
 pub(crate) mod checker_statements;

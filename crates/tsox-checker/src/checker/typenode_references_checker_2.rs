@@ -48,7 +48,7 @@ impl Checker {
             self.diagnostics.add(diag);
         }
         let mut symbol = if type_name.kind == SyntaxKind::Identifier {
-            match self.resolve_identifier(type_name) {
+            match self.resolve_identifier_use(type_name, SymbolFlags::TYPE | SymbolFlags::NAMESPACE) {
                 Some(s) => s,
                 None => {
                     if self.ts2304_reporting_allowed_for(type_name) {

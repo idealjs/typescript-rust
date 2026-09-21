@@ -12,14 +12,21 @@ impl Checker {
         node: &Arc<Node>,
         meaning: SymbolFlags,
     ) -> Option<Arc<Symbol>> {
-        let result = self.resolve_identifier_with_meaning_inner(node, meaning);
+        self.resolve_identifier_scope_symbol(node, meaning)
+            .and_then(|s| self.follow_alias(&s))
+    }
 
-        if let Some(sym) = &result {
-            let mut bits = meaning;
-            if meaning.intersects(SymbolFlags::VALUE) {
-                bits |= SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable;
-            }
-            self.record_symbol_reference(sym, bits);
+    pub fn resolve_identifier_use(
+        &self,
+        node: &Arc<Node>,
+        record_meaning: SymbolFlags,
+    ) -> Option<Arc<Symbol>> {
+        let scope = self.resolve_identifier_scope_symbol(node, SymbolFlags::all());
+        let result = scope.as_ref().and_then(|s| self.follow_alias(s));
+        if let Some(sym) = &scope
+            && access_kind(node) != AccessKind::Write
+        {
+            self.record_symbol_reference(sym, record_meaning);
         }
         result
     }
@@ -41,7 +48,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn resolve_identifier_with_meaning_inner(
+    pub(crate) fn resolve_identifier_scope_symbol(
         &self,
         node: &Arc<Node>,
         meaning: SymbolFlags,
@@ -57,7 +64,7 @@ impl Checker {
                 if let Some(sym) = locals.get(name) {
                     if sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(&sym, meaning)
                     {
-                        return self.follow_alias(sym);
+                        return Some(Arc::clone(sym));
                     }
                 }
             }
@@ -70,7 +77,7 @@ impl Checker {
                         if sym.flags.intersects(meaning)
                             || self.alias_chain_hits_meaning(&sym, meaning)
                         {
-                            return self.follow_alias(sym);
+                            return Some(Arc::clone(sym));
                         }
                     }
                 }
@@ -88,7 +95,7 @@ impl Checker {
                                         || d.kind == SyntaxKind::NamespaceExport
                                 });
                         if !is_export_specifier {
-                            return self.follow_alias(sym);
+                            return Some(Arc::clone(sym));
                         }
                     }
 
@@ -98,7 +105,7 @@ impl Checker {
                         if sym.flags.intersects(meaning)
                             || self.alias_chain_hits_meaning(&sym, meaning)
                         {
-                            return self.follow_alias(&sym);
+                            return Some(sym);
                         }
                     }
 
@@ -110,14 +117,14 @@ impl Checker {
                                 if sym.flags.intersects(meaning)
                                     || self.alias_chain_hits_meaning(&sym, meaning)
                                 {
-                                    return self.follow_alias(sym);
+                                    return Some(Arc::clone(sym));
                                 }
                             }
                             if let Some(sym) = self.ambient_namespace_local(merged, name) {
                                 if sym.flags.intersects(meaning)
                                     || self.alias_chain_hits_meaning(&sym, meaning)
                                 {
-                                    return self.follow_alias(&sym);
+                                    return Some(sym);
                                 }
                             }
                         }
@@ -129,7 +136,7 @@ impl Checker {
                         if sym.flags.intersects(meaning)
                             || self.alias_chain_hits_meaning(&sym, meaning)
                         {
-                            return self.follow_alias(sym);
+                            return Some(Arc::clone(sym));
                         }
                     }
                 }
@@ -138,7 +145,7 @@ impl Checker {
                     if sym.flags.intersects(meaning & SymbolFlags::TYPE)
                         || self.alias_chain_hits_meaning(&sym, meaning)
                     {
-                        return self.follow_alias(sym);
+                        return Some(Arc::clone(sym));
                     }
                 }
             }
@@ -184,7 +191,7 @@ impl Checker {
                         && (sym.flags.intersects(meaning)
                             || self.alias_chain_hits_meaning(&sym, meaning))
                     {
-                        return self.follow_alias(sym);
+                        return Some(Arc::clone(sym));
                     }
                 }
                 if let Some(a_sym) = symbol_map.symbols.get(&aid) {
@@ -193,7 +200,7 @@ impl Checker {
                             && (sym.flags.intersects(meaning)
                                 || self.alias_chain_hits_meaning(&sym, meaning))
                         {
-                            return self.follow_alias(sym);
+                            return Some(Arc::clone(sym));
                         }
                         if a_sym
                             .flags
@@ -214,7 +221,7 @@ impl Checker {
                                 && (sym.flags.intersects(meaning)
                                     || self.alias_chain_hits_meaning(&sym, meaning))
                             {
-                                return self.follow_alias(sym);
+                                return Some(Arc::clone(sym));
                             }
                         }
 
@@ -227,13 +234,13 @@ impl Checker {
                                         && (sym.flags.intersects(meaning)
                                             || self.alias_chain_hits_meaning(&sym, meaning))
                                     {
-                                        return self.follow_alias(sym);
+                                        return Some(Arc::clone(sym));
                                     }
                                     if let Some(sym) = self.ambient_namespace_local(merged, name)
                                         && (sym.flags.intersects(meaning)
                                             || self.alias_chain_hits_meaning(&sym, meaning))
                                     {
-                                        return self.follow_alias(&sym);
+                                        return Some(sym);
                                     }
                                 }
                             }
@@ -244,7 +251,7 @@ impl Checker {
                         && (sym.flags.intersects(meaning & SymbolFlags::TYPE)
                             || self.alias_chain_hits_meaning(&sym, meaning))
                     {
-                        return self.follow_alias(sym);
+                        return Some(Arc::clone(sym));
                     }
                 }
                 ancestor = a.parent();
@@ -281,16 +288,6 @@ impl Checker {
     }
 
     pub fn follow_alias(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
-        if symbol.flags.intersects(SymbolFlags::Alias) {
-            self.record_symbol_reference(
-                symbol,
-                SymbolFlags::VALUE
-                    | SymbolFlags::TYPE
-                    | SymbolFlags::NAMESPACE
-                    | SymbolFlags::FunctionScopedVariable
-                    | SymbolFlags::BlockScopedVariable,
-            );
-        }
         if !symbol.flags.intersects(SymbolFlags::Alias) {
             return Some(Arc::clone(symbol));
         }
