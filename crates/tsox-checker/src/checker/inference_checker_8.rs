@@ -744,11 +744,11 @@ impl Checker {
         let mut cs_snapshot: Option<Vec<(Vec<Arc<Type>>, Vec<Arc<Type>>)>> = None;
         let mut cs_fixed: Option<Vec<Arc<Type>>> = None;
         for i in order {
+            // Go getTypeAtPosition(signature, i)：rest 位 = rest 类型按位索引访问
+            //（如 {a,b}[][] 位 0 → {a,b}[]），仅下钻一层
             let param_type = if has_rest && i >= rest_index {
-                let rest_type = self
-                    .try_get_type_at_position(signature, rest_index)
-                    .unwrap_or_else(|| self.get_type_of_symbol(&signature.parameters[rest_index]));
-                self.get_array_element_type(&rest_type)
+                self.try_get_type_at_position(signature, i)
+                    .unwrap_or_else(|| self.get_type_of_symbol(&signature.parameters[rest_index]))
             } else if i < signature.parameters.len() {
                 self.signature_instantiated_param_type(signature, i)
                     .unwrap_or_else(|| self.get_type_of_symbol(&signature.parameters[i]))
