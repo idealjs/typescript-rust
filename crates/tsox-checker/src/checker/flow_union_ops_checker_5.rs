@@ -406,7 +406,8 @@ impl Checker {
         }
         // Go getPropertyOfObjectType：声明成员未命中时按索引签名合成属性
         //（数字名配 number 索引，非数字名配 string 索引）
-        if let Some(structured) = t.as_structured()
+        if !self.property_lookup_skips_index_synthesis
+            && let Some(structured) = t.as_structured()
             && structured.members.get(name).is_none()
         {
             let numeric = name.parse::<f64>().is_ok();

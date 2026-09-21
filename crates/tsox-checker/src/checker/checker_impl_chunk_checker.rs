@@ -157,6 +157,7 @@ impl Checker {
             relater_excess_error_node: None,
             relater_chain_active: false,
             relater_pending_primitive_source: false,
+            property_lookup_skips_index_synthesis: false,
             relater_depth: 0,
             deferred_constraint_depth: 0,
             relation_count: 0,

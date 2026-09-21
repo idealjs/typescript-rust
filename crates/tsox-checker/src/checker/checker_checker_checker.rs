@@ -105,6 +105,7 @@ pub struct Checker {
     pub relater_excess_error_node: Option<Arc<tsox_frontend::ast::Node>>,
     pub relater_chain_active: bool,
     pub relater_pending_primitive_source: bool,
+    pub property_lookup_skips_index_synthesis: bool,
     pub relater_depth: u32,
     pub deferred_constraint_depth: u32,
     pub relation_count: u32,

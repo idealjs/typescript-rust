@@ -104,9 +104,14 @@ impl Checker {
     }
 
     pub(crate) fn is_tuple_like_type(&mut self, t: &Arc<Type>) -> bool {
-        if crate::checker::utilities::is_tuple_type(t)
-            || self.get_property_of_type(t, "0").is_some()
-        {
+        if crate::checker::utilities::is_tuple_type(t) {
+            return true;
+        }
+        let saved = self.property_lookup_skips_index_synthesis;
+        self.property_lookup_skips_index_synthesis = true;
+        let prop0 = self.get_property_of_type(t, "0");
+        self.property_lookup_skips_index_synthesis = saved;
+        if prop0.is_some() {
             return true;
         }
         if self.is_array_like_type(t)
