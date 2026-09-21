@@ -256,7 +256,7 @@ impl Checker {
         let inference_idx = state.inferences.iter().position(|info| {
             crate::checker::utilities::type_parameters_match(&info.type_parameter, target)
         });
-                let Some(idx) = inference_idx else { return };
+        let Some(idx) = inference_idx else { return };
 
         let priority = state.priority;
         let contravariant = state.contravariant;
