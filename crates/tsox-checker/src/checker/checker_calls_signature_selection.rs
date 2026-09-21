@@ -96,6 +96,10 @@ impl Checker {
                             union_signatures.extend(s.call_signatures().iter().cloned());
                         }
                     }
+                    if let Some(combined) = self.try_combine_union_call_signatures(&union_signatures)
+                    {
+                        union_signatures = vec![combined];
+                    }
                     if union_signatures.is_empty() {
                         self.report_invocation_error(callee_expr, callee_type, is_new);
                         return None;

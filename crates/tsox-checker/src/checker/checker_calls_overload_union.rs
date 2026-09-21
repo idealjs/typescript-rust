@@ -184,3 +184,111 @@ impl Checker {
         arc
     }
 }
+
+impl Checker {
+    /// Go getUnionSignatures 兜底分支（checker.go:21465 起）：各成分单签名、
+    /// 无泛型、无有效 rest（定长 tuple rest 视作位置参数）时合并为单一
+    /// 签名，参数位取交集（combineUnionOrIntersectionParameters，
+    /// union 方向）、min 取 max、返回取并集。有效 rest（数组/非元组/
+    /// 变长 tuple）与泛型签名维持逐成员拼接，避免无 composite 分布语义
+    /// 的真交集误伤上下文敏感推断
+    pub(crate) fn try_combine_union_call_signatures(
+        &mut self,
+        sigs: &[Arc<Signature>],
+    ) -> Option<Arc<Signature>> {
+        if sigs.len() < 2 {
+            return None;
+        }
+        for s in sigs {
+            if !s.type_parameters.is_empty() {
+                return None;
+            }
+            if s.has_rest_parameter() {
+                let rest_param = s.parameters.last()?;
+                let rest_type = self.get_type_of_symbol(rest_param);
+                let TypeData::Tuple(t) = &rest_type.data else {
+                    return None;
+                };
+                if t.combined_flags.intersects(
+                    ElementFlags::Variadic | ElementFlags::Rest,
+                ) {
+                    return None;
+                }
+            }
+        }
+        let mut positional_counts: Vec<usize> = Vec::with_capacity(sigs.len());
+        for s in sigs {
+            let mut count = s.parameters.len();
+            if s.has_rest_parameter() {
+                count -= 1;
+                let rest_param = s.parameters.last().unwrap();
+                let rest_type = self.get_type_of_symbol(rest_param);
+                if let TypeData::Tuple(t) = &rest_type.data {
+                    count += t.fixed_length;
+                }
+            }
+            positional_counts.push(count);
+        }
+        let max_count = positional_counts.iter().copied().max().unwrap_or(0);
+        let max_min = sigs.iter().map(|s| s.min_argument_count).max().unwrap_or(0);
+
+        let mut parameters: Vec<Arc<Symbol>> = Vec::with_capacity(max_count);
+        for i in 0..max_count {
+            let mut types: Vec<Arc<Type>> = Vec::new();
+            for sig in sigs {
+                if let Some(t) = self.try_get_type_at_position(sig, i) {
+                    types.push(t);
+                }
+            }
+            let combined_type = if types.is_empty() {
+                self.any_type()
+            } else {
+                self.get_intersection_type(types)
+            };
+            let optional = sigs
+                .iter()
+                .all(|s| i >= s.min_argument_count.max(0) as usize);
+            let mut symbol = Symbol::new(
+                SymbolFlags::Property
+                    | if optional {
+                        SymbolFlags::Optional
+                    } else {
+                        SymbolFlags::empty()
+                    },
+                format!("arg{i}"),
+            );
+            symbol.check_flags |= CheckFlags::SyntheticProperty;
+            let arc = Arc::new(symbol);
+            self.value_symbol_links.insert(
+                &arc,
+                crate::checker::types::ValueSymbolLinks {
+                    resolved_type: Some(combined_type),
+                    ..Default::default()
+                },
+            );
+            parameters.push(arc);
+        }
+
+        let mut returns: Vec<Arc<Type>> = Vec::new();
+        for sig in sigs {
+            if let Some(rt) = self.get_return_type_of_signature(sig) {
+                returns.push(rt);
+            }
+        }
+        let return_type = if returns.is_empty() {
+            None
+        } else {
+            Some(self.get_union_type(returns))
+        };
+
+        let mut combined = Signature::new();
+        combined.flags = SignatureFlags::IsSignatureCandidateForOverloadFailure;
+        combined.declaration = sigs.first().and_then(|s| s.declaration.clone());
+        combined.parameters = parameters;
+        combined.min_argument_count = max_min;
+        if let Some(rt) = return_type {
+            let _ = combined.resolved_return_type.set(rt);
+        }
+        Some(Arc::new(combined))
+    }
+}
