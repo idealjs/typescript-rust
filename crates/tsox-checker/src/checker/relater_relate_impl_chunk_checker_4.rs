@@ -116,6 +116,8 @@ impl Checker {
             let target = self
                 .normalize_readonly_array_instance(target)
                 .unwrap_or_else(|| Arc::clone(target));
+            let source = self.single_base_for_non_augmenting_subtype(&source);
+            let target = self.single_base_for_non_augmenting_subtype(&target);
 
             if let (Some(ss), Some(ts)) = (&source.symbol, &target.symbol)
                 && ss.id() == ts.id()
