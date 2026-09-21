@@ -94,6 +94,8 @@ impl Checker {
                     }
                     self.check_mixin_constructor_type(node);
                     self.check_members_for_override_modifier(node);
+                    self.check_class_heritage_members(node);
+                    self.check_property_initialization(node);
                     self.this_type_stack.pop();
                     self.pop_scope();
                     self.enclosing_class_stack.pop();

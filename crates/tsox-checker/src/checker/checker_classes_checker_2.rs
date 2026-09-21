@@ -313,6 +313,7 @@ impl Checker {
         }
         let members = match &class_node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(d) => &d.members,
+            tsox_frontend::ast::NodeData::ClassExpression(d) => &d.members,
             _ => return,
         };
 
