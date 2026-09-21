@@ -345,19 +345,7 @@ impl Checker {
         inference: &InferenceInfo,
         _signature: &Arc<Signature>,
     ) -> Option<Arc<Type>> {
-        // Go non-fixing mapper：候选即类型参数自身（自引用推断）不参与
-        let filtered: Vec<Arc<Type>> = inference
-            .candidates
-            .iter()
-            .filter(|c| {
-                !crate::checker::utilities::type_parameters_match(c, &inference.type_parameter)
-            })
-            .cloned()
-            .collect();
-        if filtered.is_empty() {
-            return None;
-        }
-        let candidates = self.union_object_and_array_literal_candidates(&filtered);
+        let candidates = self.union_object_and_array_literal_candidates(&inference.candidates);
         // Go convertAutoToAny/widen：widening 标记候选（auto、undefinedWidening 等
         // 内部标记型）按 any 参与联合（_.all([], ...) → T=any）
         let candidates: Vec<Arc<Type>> = candidates

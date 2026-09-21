@@ -251,17 +251,27 @@ impl Checker {
                 }
                 if !sig.type_parameters.is_empty() {
                     let args: Vec<Arc<Node>> = callee.1.iter().cloned().collect();
-                    let inferred = match &explicit_type_args {
-                        Some(ta) if ta.len() == sig.type_parameters.len() => ta
-                            .iter()
-                            .map(|t| self.get_type_from_type_node(t))
-                            .collect(),
-                        _ => self.infer_call_type_arguments(node, sig, &args),
-                    };
+                    let (inferred, inferred_tps): (Vec<Arc<Type>>, Vec<Arc<Type>>) =
+                        match &explicit_type_args {
+                            Some(ta) if ta.len() == sig.type_parameters.len() => (
+                                ta.iter()
+                                    .map(|t| self.get_type_from_type_node(t))
+                                    .collect(),
+                                Vec::new(),
+                            ),
+                            _ => self.infer_call_type_arguments_with_tps(node, sig, &args),
+                        };
                     self.in_return_substitution = true;
                     let r =
                         self.substitute_infer_type_parameters(&rt, &sig.type_parameters, &inferred);
                     self.in_return_substitution = false;
+                    // Go getSignatureInstantiation 的 inferredTypeParameters 分支：
+                    // 返回型为单签名函数型时以实参侧推断类型参数重建泛型函数型
+                    let r = if inferred_tps.is_empty() {
+                        r
+                    } else {
+                        self.regenericize_return_with_tps(&r, &inferred_tps)
+                    };
                     // 泛型函数体内声明的类经调用位实例化：携带 (外层函数, 实参) 显示元
                     // （变量侧渲染 f<string>.C 形态；仅限体内声明，不污染顶层类）
                     if !inferred.is_empty()

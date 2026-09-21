@@ -88,6 +88,7 @@ pub struct InferenceContext {
     pub mapper: Option<Arc<TypeMapper>>,
     pub return_mapper: Option<Arc<TypeMapper>>,
     pub outer_return_mapper: Option<Arc<TypeMapper>>,
+    pub inferred_type_parameters: Vec<Arc<Type>>,
 }
 
 impl InferenceContext {
@@ -99,6 +100,7 @@ impl InferenceContext {
             mapper: None,
             return_mapper: None,
             outer_return_mapper: None,
+            inferred_type_parameters: Vec::new(),
         }
     }
 }
