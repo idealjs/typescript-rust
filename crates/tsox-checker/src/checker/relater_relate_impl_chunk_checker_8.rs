@@ -192,7 +192,12 @@ impl Checker {
             let source_declares_locally = source_struct.members.get(&target_prop.name).is_some();
             let mut source_prop = source_struct.members.get(&target_prop.name).cloned();
             if source_prop.is_none() {
+                // Go getPropertyOfType 不做索引签名合成（propertiesRelatedTo 的
+                // 缺失属性判定据此视 string index 源为缺目标属性）
+                let saved_skip_index_synthesis = self.property_lookup_skips_index_synthesis;
+                self.property_lookup_skips_index_synthesis = true;
                 source_prop = self.get_property_of_type(source, &target_prop.name);
+                self.property_lookup_skips_index_synthesis = saved_skip_index_synthesis;
             }
             let source_prop = match source_prop {
                 Some(p) => p,
