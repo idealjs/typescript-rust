@@ -165,17 +165,19 @@ impl Checker {
             }
             return;
         }
-        let contravariant_priority = if state.contravariant && !state.bivariant {
+        let group_priority = if state.contravariant && !state.bivariant {
             InferencePriority::ContravariantConditional
         } else {
             InferencePriority::None
         };
-        if let Some(t_true) = self.get_forced_branch_type_of_conditional_type(target, true) {
-            self.infer_with_priority(state, source, &t_true, contravariant_priority);
+        let mut branch_types = Vec::new();
+        if let Some(t) = self.get_forced_branch_type_of_conditional_type(target, true) {
+            branch_types.push(t);
         }
-        if let Some(t_false) = self.get_forced_branch_type_of_conditional_type(target, false) {
-            self.infer_with_priority(state, source, &t_false, contravariant_priority);
+        if let Some(t) = self.get_forced_branch_type_of_conditional_type(target, false) {
+            branch_types.push(t);
         }
+        self.infer_to_multiple_types_non_union(state, source, &branch_types, group_priority);
     }
 
     pub(crate) fn infer_from_types_union(
