@@ -478,7 +478,7 @@ impl Checker {
         {
             return Some(t);
         }
-        let mut path: Vec<BindingPathSeg> = Vec::new();
+        let mut path: Vec<(Arc<Node>, BindingPathSeg)> = Vec::new();
         let mut cur = Arc::clone(elem);
         loop {
             match &cur.data {
@@ -486,7 +486,7 @@ impl Checker {
                     let parent_kind = cur.parent().as_ref().map(|p| p.kind);
                     if d.dot_dot_dot_token.is_some() {
                         // rest 元素：类型是模式容器的“剩余部分”，不是属性查找
-                        path.push(BindingPathSeg::Rest);
+                        path.push((Arc::clone(&cur), BindingPathSeg::Rest));
                     } else if parent_kind == Some(tsox_frontend::ast::SyntaxKind::ArrayBindingPattern) {
                         let pattern = cur.parent().expect("checked kind above");
                         let index = match &pattern.data {
@@ -500,7 +500,7 @@ impl Checker {
                             NodeData::NumericLiteral(num) => num.text.parse::<usize>().ok(),
                             _ => None,
                         });
-                        path.push(BindingPathSeg::Index(renamed.unwrap_or(index)));
+                        path.push((Arc::clone(&cur), BindingPathSeg::Index(renamed.unwrap_or(index))));
                     } else {
                         let renamed = d.property_name.as_ref().and_then(|n| match &n.data {
                             NodeData::Identifier(i) => Some(i.text.clone()),
@@ -514,7 +514,7 @@ impl Checker {
                                 _ => None,
                             })
                         })?;
-                        path.push(BindingPathSeg::Prop(seg, renamed.is_some()));
+                        path.push((Arc::clone(&cur), BindingPathSeg::Prop(seg, renamed.is_some())));
                     }
                     cur = Arc::clone(cur.parent().as_ref()?);
                 }
@@ -562,8 +562,8 @@ impl Checker {
                         }
                     };
                     t = self.filter_binding_parent_undefined(&cur, t);
-                    for seg in path.iter().rev() {
-                        t = self.binding_path_step(elem, t, seg)?;
+                    for (seg_elem, seg) in path.iter().rev() {
+                        t = self.binding_path_step(seg_elem, t, seg)?;
                     }
                     return Some(t);
                 }
@@ -600,8 +600,8 @@ impl Checker {
                         (None, None) => self.initial_type_of_declaration(&cur)?,
                     };
                     t = self.filter_binding_parent_undefined(&cur, t);
-                    for seg in path.iter().rev() {
-                        t = self.binding_path_step(elem, t, seg)?;
+                    for (seg_elem, seg) in path.iter().rev() {
+                        t = self.binding_path_step(seg_elem, t, seg)?;
                     }
                     return Some(t);
                 }
