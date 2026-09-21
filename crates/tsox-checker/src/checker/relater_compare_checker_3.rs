@@ -62,6 +62,25 @@ impl Checker {
 
         self.try_elaborate_primitive_and_object(source, target);
 
+        // Go reportErrorResults：源为全局 Object 接口型时在链上补 TS2696
+        //（object→primitive 分支被 switch 前置，不再叠加）
+        if source.flags.contains(TypeFlags::Object)
+            && !target
+                .flags
+                .intersects(crate::checker::types_type_id::TYPE_FLAGS_PRIMITIVE)
+            && source.symbol.as_ref().is_some_and(|sym| {
+                self.globals
+                    .get("Object")
+                    .is_some_and(|g| Arc::ptr_eq(g, sym))
+            })
+        {
+            use tsox_core::diagnostics::messages_generated as msg;
+            self.relater_report_error(
+                msg::THE_OBJECT_TYPE_IS_ASSIGNABLE_TO_VERY_FEW_OTHER_TYPES_DID_YOU_MEAN_TO_USE_THE_ANY_TYPE_INSTEAD,
+                Vec::new(),
+            );
+        }
+
         // Go isRelatedToEx 目标重绑定同样作用于错误报告：gate 与兜底显示
         // 都基于剔除可空成分后的目标（display override 仍优先）；identity
         // 关系不走该路径
