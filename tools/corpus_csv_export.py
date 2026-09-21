@@ -55,10 +55,14 @@ def emit(rows, path, header="key,seconds\n"):
             f.write(f"{key},{rows[key]}\n")
 
 
-def rotate_and_diff(path):
-    prev, diff = path.replace(".csv", ".prev.csv"), path.replace(".csv", ".diff")
+def stash_prev(path):
+    prev = path.replace(".csv", ".prev.csv")
     if os.path.isfile(path):
         shutil.copyfile(path, prev)
+
+
+def write_diff(path):
+    prev, diff = path.replace(".csv", ".prev.csv"), path.replace(".csv", ".diff")
     if os.path.isfile(prev):
         status = os.system(f"diff -U0 {prev} {path} > {diff} 2>/dev/null")
         added = sum(1 for l in open(diff) if l.startswith("+") and not l.startswith("+++"))
@@ -82,16 +86,19 @@ def main():
     skip_diff = {k: v for k, v in skips.items() if k not in legit}
 
     results = os.path.join(ROOT, "corpus_results.csv")
+    skips_csv = os.path.join(ROOT, "corpus_skips.csv")
+    for path in (results, skips_csv):
+        stash_prev(path)
+
     emit(fails, results)
     print(f"corpus_results.csv ({len(fails)} failed cases)")
 
-    skips_csv = os.path.join(ROOT, "corpus_skips.csv")
     emit(skip_diff, skips_csv)
     print(f"corpus_skips.csv ({len(skip_diff)} skip defects; "
           f"{len(skips)} skipped, {len(skips) - len(skip_diff)} in Go baseline)")
 
     for path in (results, skips_csv):
-        rotate_and_diff(path)
+        write_diff(path)
 
 
 if __name__ == "__main__":
