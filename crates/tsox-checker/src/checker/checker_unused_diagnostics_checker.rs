@@ -50,11 +50,36 @@ impl Checker {
     }
 
     pub(crate) fn check_unused_locals_and_parameters(&mut self, container: &Arc<Node>) {
-        let Some(locals) = self.program.symbol_map().locals.get(&container.id()) else {
+        let mut locals: Vec<Arc<tsox_frontend::ast::Symbol>> = self
+            .program
+            .symbol_map()
+            .locals
+            .get(&container.id())
+            .map(|l| l.entries.values().cloned().collect())
+            .unwrap_or_default();
+        let file_is_module = self
+            .current_file
+            .as_ref()
+            .is_some_and(|f| {
+                f.external_module_indicator.is_some() || f.common_js_module_indicator.is_some()
+            });
+        if container.kind == SyntaxKind::SourceFile
+            && file_is_module
+            && let Some(file_sym) = self.program.symbol_map().symbols.get(&container.id())
+        {
+            let mut seen: std::collections::HashSet<u64> =
+                locals.iter().map(|s| s.id()).collect();
+            for table in [&file_sym.members, &file_sym.exports] {
+                for sym in table.entries.values() {
+                    if seen.insert(sym.id()) {
+                        locals.push(Arc::clone(sym));
+                    }
+                }
+            }
+        }
+        if locals.is_empty() {
             return;
-        };
-        let locals: Vec<Arc<tsox_frontend::ast::Symbol>> =
-            locals.entries.values().cloned().collect();
+        }
 
         let mut variable_parents: Vec<(Arc<Node>, bool)> = Vec::new();
 

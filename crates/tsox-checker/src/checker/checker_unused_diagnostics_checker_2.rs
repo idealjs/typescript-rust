@@ -167,7 +167,12 @@ impl Checker {
             );
         } else {
             for u in unused {
-                let name = u.text().to_string();
+                let name = self
+                    .program
+                    .symbol_map()
+                    .symbol_of(u)
+                    .map(|s| s.name.clone())
+                    .unwrap_or_else(|| u.text().to_string());
                 let is_type_decl = false;
                 self.report_unused_local(u, &name, is_type_decl);
             }
