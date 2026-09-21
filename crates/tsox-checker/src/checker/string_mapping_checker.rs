@@ -32,23 +32,43 @@ fn map_ascii_char(kind: StringMappingKind, c: char) -> char {
     }
 }
 
+fn is_case_ignorable(c: char) -> bool {
+    !c.is_ascii() && !c.is_alphabetic() && !c.is_numeric() && !c.is_whitespace()
+}
+
+fn is_final_sigma(chars: &[char], index: usize, cased_before: bool) -> bool {
+    if !cased_before {
+        return false;
+    }
+    let mut j = index + 1;
+    while j < chars.len() {
+        if is_case_ignorable(chars[j]) {
+            j += 1;
+            continue;
+        }
+        return !chars[j].is_alphabetic();
+    }
+    true
+}
+
 fn map_str(kind: StringMappingKind, s: &str) -> String {
-    let mapped: String = s
-        .chars()
-        .map(|c| {
-            if c.is_ascii() {
-                map_ascii_char(kind, c).to_string()
+    if matches!(kind, StringMappingKind::Lowercase | StringMappingKind::Uncapitalize) {
+        let chars: Vec<char> = s.chars().collect();
+        let mut out = String::with_capacity(s.len());
+        let mut cased_before = false;
+        for (i, &c) in chars.iter().enumerate() {
+            if c == 'Σ' && is_final_sigma(&chars, i, cased_before) {
+                out.push('ς');
             } else {
-                match kind {
-                    StringMappingKind::Uppercase | StringMappingKind::Capitalize => {
-                        c.to_uppercase().collect()
-                    }
-                    _ => c.to_lowercase().collect(),
-                }
+                out.extend(c.to_lowercase());
             }
-        })
-        .collect();
-    mapped
+            if !is_case_ignorable(c) {
+                cased_before = c.is_alphabetic();
+            }
+        }
+        return out;
+    }
+    s.chars().flat_map(|c| c.to_uppercase()).collect()
 }
 
 pub fn apply_string_mapping(kind: StringMappingKind, s: &str) -> String {
