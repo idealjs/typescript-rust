@@ -28,16 +28,17 @@ impl Checker {
         };
         for i in 0..param_count {
             let source_type = if i as isize == rest_index {
-                self.get_rest_or_any_type_at_position(&source, i)
+                Some(self.get_rest_or_any_type_at_position(&source, i))
             } else {
                 self.try_get_type_at_position(&source, i)
-                    .unwrap_or_else(|| self.any_type())
             };
             let target_type = if i as isize == rest_index {
-                self.get_rest_or_any_type_at_position(&target, i)
+                Some(self.get_rest_or_any_type_at_position(&target, i))
             } else {
                 self.try_get_type_at_position(&target, i)
-                    .unwrap_or_else(|| self.any_type())
+            };
+            let (Some(source_type), Some(target_type)) = (source_type, target_type) else {
+                continue;
             };
 
             if Arc::ptr_eq(&source_type, &target_type)
