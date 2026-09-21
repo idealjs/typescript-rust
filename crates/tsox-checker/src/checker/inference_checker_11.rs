@@ -118,7 +118,102 @@ impl Checker {
             }
         }
 
+        let pattern_name = match &declaration.data {
+            NodeData::VariableDeclaration(d) => Some(&d.name),
+            NodeData::ParameterDeclaration(d) => Some(&d.name),
+            NodeData::PropertyDeclaration(d) => Some(&d.name),
+            NodeData::BindingElement(d) => d.name.as_ref(),
+            _ => None,
+        };
+        if let Some(name) = pattern_name
+            && name.kind == SyntaxKind::ArrayBindingPattern
+            && let Some(implied) = self.implied_type_of_array_binding_pattern(name)
+        {
+            return Some(implied);
+        }
+
         None
+    }
+
+    fn implied_type_of_array_binding_pattern(
+        &mut self,
+        pattern: &Arc<tsox_frontend::ast::Node>,
+    ) -> Option<Arc<Type>> {
+        use tsox_frontend::ast::NodeData;
+
+        let elements = match &pattern.data {
+            NodeData::BindingPattern(d) => &d.elements,
+            _ => return None,
+        };
+        if elements.nodes.is_empty() {
+            return None;
+        }
+        let last = elements.nodes.last()?;
+        let last_is_rest = matches!(
+            &last.data,
+            NodeData::BindingElement(b) if b.dot_dot_dot_token.is_some()
+        );
+        if elements.nodes.len() == 1 && last_is_rest {
+            return None;
+        }
+
+        let has_default =
+            |e: &Arc<tsox_frontend::ast::Node>| matches!(&e.data, NodeData::BindingElement(b) if b.initializer.is_some());
+        let has_name = |e: &Arc<tsox_frontend::ast::Node>| {
+            matches!(&e.data, NodeData::BindingElement(b) if b.name.is_some())
+        };
+        let min_length = elements
+            .nodes
+            .iter()
+            .rposition(|e| has_name(e) && !has_default(e))
+            .map_or(0, |i| i + 1);
+
+        let mut element_types: Vec<Arc<Type>> = Vec::with_capacity(elements.nodes.len());
+        let mut element_infos: Vec<crate::checker::types::TupleElementInfo> =
+            Vec::with_capacity(elements.nodes.len());
+        for (i, e) in elements.nodes.iter().enumerate() {
+            let b = match &e.data {
+                NodeData::BindingElement(b) => b,
+                _ => {
+                    element_types.push(self.any_type());
+                    element_infos.push(crate::checker::types::TupleElementInfo {
+                        label: None,
+                        flags: crate::checker::types::ElementFlags::Required,
+                        labeled_declaration: None,
+                        type_: None,
+                    });
+                    continue;
+                }
+            };
+            let t = if let Some(init) = &b.initializer {
+                let t = self.get_type_of_node(init);
+                self.get_widened_literal_type(&t)
+            } else if let Some(name) = &b.name {
+                if name.kind == SyntaxKind::ArrayBindingPattern {
+                    self.implied_type_of_array_binding_pattern(name)
+                        .unwrap_or_else(|| self.any_type())
+                } else {
+                    self.any_type()
+                }
+            } else {
+                self.any_type()
+            };
+            let flags = if b.dot_dot_dot_token.is_some() {
+                crate::checker::types::ElementFlags::Rest
+            } else if i >= min_length {
+                crate::checker::types::ElementFlags::Optional
+            } else {
+                crate::checker::types::ElementFlags::Required
+            };
+            element_types.push(t);
+            element_infos.push(crate::checker::types::TupleElementInfo {
+                label: None,
+                flags,
+                labeled_declaration: None,
+                type_: None,
+            });
+        }
+        Some(self.create_tuple_type_ex(element_types, element_infos, false))
     }
 
     pub(crate) fn get_contextual_type_from_binding_element(
