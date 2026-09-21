@@ -177,6 +177,15 @@ impl Checker {
     }
 
     pub(crate) fn get_return_type_of_call_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        // Go getResolvedSignature：调用位签名/返回型解析同步强制（inferSignature
+        // 会查询实参函数的返回型），此窗口内不开函数体推断环抑制界
+        self.call_return_query_depth += 1;
+        let t = self.get_return_type_of_call_expression_inner(node);
+        self.call_return_query_depth -= 1;
+        t
+    }
+
+    fn get_return_type_of_call_expression_inner(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let callee = match &node.data {
             tsox_frontend::ast::NodeData::CallExpression(data) => {
                 (&data.expression, data.arguments.clone())
@@ -292,6 +301,13 @@ impl Checker {
     }
 
     pub(crate) fn get_return_type_of_new_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+        self.call_return_query_depth += 1;
+        let t = self.get_return_type_of_new_expression_inner(node);
+        self.call_return_query_depth -= 1;
+        t
+    }
+
+    fn get_return_type_of_new_expression_inner(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let (callee, args) = match &node.data {
             tsox_frontend::ast::NodeData::NewExpression(data) => {
                 (&data.expression, data.arguments.clone().unwrap_or_default())

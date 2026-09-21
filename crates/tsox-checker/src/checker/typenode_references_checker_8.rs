@@ -234,13 +234,6 @@ impl Checker {
             {
                 continue;
             }
-            // globalThis 成员（全局符号）延迟定型：window 等自引用 typeof globalThis
-            // 的全局在此处取型会无限递归（Go 的成员解析本就是惰性的）
-            let member_type = if is_global_this {
-                None
-            } else {
-                Some(self.get_type_of_symbol(member_sym))
-            };
 
             // 保留成员原始身份（flags/声明/父链），显示 var A.Y 等限定前缀用
             let prop_sym = if is_global_this {
@@ -254,21 +247,6 @@ impl Checker {
                 }
                 Arc::clone(member_sym)
             };
-            // 环期产物（error）不驻留成员链接（外层 typeof import 链完成后的
-            // 重取才是完整结果）；已有有效值不覆盖（get_type_of_symbol 的
-            // in-flight 占位会被这里无条件清掉）
-            if let Some(member_type) = member_type {
-                let existing_ok = self
-                    .value_symbol_links
-                    .get(&prop_sym)
-                    .and_then(|l| l.resolved_type.clone())
-                    .is_some_and(|t| !crate::checker::utilities::is_type_error(&t));
-                if !existing_ok && !crate::checker::utilities::is_type_error(&member_type) {
-                    self.value_symbol_links
-                        .get_or_default(&prop_sym)
-                        .resolved_type = Some(member_type);
-                }
-            }
             symbol_table.insert(name.clone(), Arc::clone(&prop_sym));
             props.push(prop_sym);
         }

@@ -322,8 +322,13 @@ impl Checker {
             && let NodeData::GetAccessorDeclaration(gd) = &g.data
             && let Some(body) = &gd.body
         {
+            // Go checkObjectLiteral 对 accessor 成员一律 checkNodeDeferred：
+            // getter 体推断始终延后（不因外层调用位解析被强制）
+            let saved_depth = self.call_return_query_depth;
+            self.call_return_query_depth = 0;
             let accessor = g.clone();
             let inferred = self.infer_method_return_type(&accessor, &Some(Arc::clone(body)));
+            self.call_return_query_depth = saved_depth;
             return self.get_widened_type(&inferred);
         }
         self.get_any_type()

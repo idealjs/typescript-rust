@@ -319,7 +319,7 @@ impl Checker {
         });
     }
 
-    fn is_bare_recursive_call(&self, fn_node: Option<&Arc<Node>>, expr: &Arc<Node>) -> bool {
+    fn is_bare_recursive_call(&mut self, fn_node: Option<&Arc<Node>>, expr: &Arc<Node>) -> bool {
         if expr.kind != SyntaxKind::CallExpression {
             return false;
         }
@@ -333,19 +333,38 @@ impl Checker {
         let Some(fn_node) = fn_node else {
             return false;
         };
+        let mut owners = Vec::new();
+        if let Some(s) = self.program.symbol_map().symbol_of(fn_node) {
+            owners.push(Arc::clone(s));
+        }
+        let mut const_bound = false;
+        if let Some(parent) = fn_node.parent()
+            && parent.kind == SyntaxKind::VariableDeclaration
+            && self
+                .get_combined_node_flags(&parent)
+                .contains(tsox_frontend::ast::NodeFlags::Const)
+        {
+            const_bound = true;
+            if let Some(s) = self.program.symbol_map().symbol_of(&parent) {
+                owners.push(Arc::clone(s));
+            }
+        }
+        if owners.is_empty() {
+            return false;
+        }
+        let Some(callee_sym) = self.resolve_identifier(callee) else {
+            return false;
+        };
+        if !owners.iter().any(|o| Arc::ptr_eq(o, &callee_sym)) {
+            return false;
+        }
         if matches!(
             fn_node.kind,
             SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction
         ) {
-            return false;
+            return const_bound;
         }
-        let (Some(fn_sym), Some(callee_sym)) = (
-            self.program.symbol_map().symbol_of(fn_node),
-            self.program.symbol_map().symbol_of(callee),
-        ) else {
-            return false;
-        };
-        Arc::ptr_eq(fn_sym, callee_sym)
+        true
     }
 
     pub fn may_return_never(fn_node: &Arc<Node>) -> bool {
@@ -372,6 +391,27 @@ impl Checker {
             return self.get_any_type();
         };
 
+        // Go checkNodeDeferred：函数值定型期体推断延后到外层符号帧出栈之后；
+        // 调用位返回型查询（getResolvedSignature 内）是 Go 同步强制的，不开界
+        let boundary = if self.call_return_query_depth == 0 {
+            self.rt_infer_boundary_marks
+                .push(self.type_resolution_stack.len());
+            true
+        } else {
+            false
+        };
+        let result = self.infer_function_return_type_inner(body, fn_node);
+        if boundary {
+            self.rt_infer_boundary_marks.pop();
+        }
+        result
+    }
+
+    fn infer_function_return_type_inner(
+        &mut self,
+        body: &Arc<Node>,
+        fn_node: Option<&Arc<Node>>,
+    ) -> Arc<Type> {
         if body.kind != SyntaxKind::Block {
             let t = self.get_type_of_node(body);
             return self.get_widened_type(&t);
@@ -388,8 +428,7 @@ impl Checker {
         );
         if types.is_empty() {
             let never_returning = !has_return_with_no_expression
-                && (has_return_of_type_never
-                    || fn_node.is_some_and(Self::may_return_never));
+                && (has_return_of_type_never || fn_node.is_some_and(Self::may_return_never));
             if never_returning {
                 return self.never_type();
             }

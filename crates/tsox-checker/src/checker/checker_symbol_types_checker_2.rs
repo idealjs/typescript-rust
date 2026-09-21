@@ -525,21 +525,38 @@ impl Checker {
                     let mut t = match &d.type_node {
                         Some(tn) => self.get_type_from_type_node(tn),
                         None => {
-                            let param = Arc::clone(&cur);
-                            match self.contextual_type_of_parameter(&param) {
+                            // Go getTypeForBindingElementParent：优先取上下文定型
+                            // 已写入符号链接的参数型，未定型才落上下文重解析
+                            let memoized = self
+                                .program
+                                .symbol_map()
+                                .symbol_of(&cur)
+                                .and_then(|s| {
+                                    self.value_symbol_links
+                                        .get(s)
+                                        .and_then(|l| l.resolved_type.clone())
+                                })
+                                .filter(|t| !crate::checker::utilities::is_type_error(t));
+                            match memoized {
                                 Some(t) => t,
                                 None => {
-                                    // Go getTypeForVariableLikeDeclaration：参数无
-                                    // 上下文类型时回退初始化式拓宽类型
-                                    let Some(init) = &d.initializer else {
-                                        return None;
-                                    };
-                                    let raw = self.get_type_of_node(init);
-                                    let widened_literal =
-                                        self.get_widened_literal_type_for_initializer(&cur, &raw);
-                                    let regularized =
-                                        self.get_regular_type_of_literal_type(&widened_literal);
-                                    self.widen_initializer_type(&regularized)
+                                    let param = Arc::clone(&cur);
+                                    match self.contextual_type_of_parameter(&param) {
+                                        Some(t) => t,
+                                        None => {
+                                            // Go getTypeForVariableLikeDeclaration：参数无
+                                            // 上下文类型时回退初始化式拓宽类型
+                                            let Some(init) = &d.initializer else {
+                                                return None;
+                                            };
+                                            let raw = self.get_type_of_node(init);
+                                            let widened_literal =
+                                                self.get_widened_literal_type_for_initializer(&cur, &raw);
+                                            let regularized =
+                                                self.get_regular_type_of_literal_type(&widened_literal);
+                                            self.widen_initializer_type(&regularized)
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -554,13 +571,29 @@ impl Checker {
                     let mut t = match (&d.type_node, &d.initializer) {
                         (Some(tn), _) => self.get_type_from_type_node(tn),
                         (None, Some(init)) => {
-                            let raw = self.get_type_of_node(init);
-                            // Go widenTypeInferredFromInitializer：解构根类型按
-                            // 初始化式拓宽（fresh 字面量 6 → number）
-                            let widened_literal =
-                                self.get_widened_literal_type_for_initializer(&cur, &raw);
-                            let regularized = self.get_regular_type_of_literal_type(&widened_literal);
-                            self.widen_initializer_type(&regularized)
+                            let memoized = self
+                                .program
+                                .symbol_map()
+                                .symbol_of(&cur)
+                                .and_then(|s| {
+                                    self.value_symbol_links
+                                        .get(s)
+                                        .and_then(|l| l.resolved_type.clone())
+                                })
+                                .filter(|t| !crate::checker::utilities::is_type_error(t));
+                            match memoized {
+                                Some(t) => t,
+                                None => {
+                                    let raw = self.get_type_of_node(init);
+                                    // Go widenTypeInferredFromInitializer：解构根类型按
+                                    // 初始化式拓宽（fresh 字面量 6 → number）
+                                    let widened_literal =
+                                        self.get_widened_literal_type_for_initializer(&cur, &raw);
+                                    let regularized =
+                                        self.get_regular_type_of_literal_type(&widened_literal);
+                                    self.widen_initializer_type(&regularized)
+                                }
+                            }
                         }
                         // for-in/of 头声明无初始化式：迭代类型即根类型
                         //（Go getTypeForVariableLikeDeclaration 的 ForIn/ForOf 分支）

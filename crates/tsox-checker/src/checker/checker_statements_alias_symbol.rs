@@ -144,14 +144,32 @@ impl Checker {
         if symbol.flags.intersects(SymbolFlags::NAMESPACE) {
             excluded_meanings |= SymbolFlags::NAMESPACE;
         }
-
-        if target_flags.intersects(excluded_meanings)
-            // Go checkAliasSymbol：无 from 的 export {X} 命中全局声明时本地
-            // 别名是纯 Alias（excluded meanings 为空），不报导出冲突
-            && !(node.kind == SyntaxKind::ExportSpecifier
-                && !export_specifier_has_module_specifier(node)
-                && self.symbol_is_global_declaration(&target))
+        // Go declareSymbol(exports, Alias)：无 from 的 export {X as Y} 的检查
+        // 符号是导出名下的纯 Alias（binder 不把本地绑定符号给 specifier），
+        // 仅导出名已有显式导出条目（真合并）时才携带该条目的含义
+        let mut conflict_name: Option<String> = None;
+        if node.kind == SyntaxKind::ExportSpecifier
+            && !export_specifier_has_module_specifier(node)
         {
+            excluded_meanings = SymbolFlags::None;
+            if let Some(entry) = self
+                .export_specifier_exported_entry(node)
+                .filter(|e| !Arc::ptr_eq(e, &target))
+            {
+                if entry.flags.intersects(SymbolFlags::VALUE | SymbolFlags::ExportValue) {
+                    excluded_meanings |= SymbolFlags::VALUE;
+                }
+                if entry.flags.intersects(SymbolFlags::TYPE) {
+                    excluded_meanings |= SymbolFlags::TYPE;
+                }
+                if entry.flags.intersects(SymbolFlags::NAMESPACE) {
+                    excluded_meanings |= SymbolFlags::NAMESPACE;
+                }
+                conflict_name = Some(entry.name.clone());
+            }
+        }
+
+        if target_flags.intersects(excluded_meanings) {
             let message = if node.kind == SyntaxKind::ExportSpecifier {
                 EXPORT_DECLARATION_CONFLICTS_WITH_EXPORTED_DECLARATION_OF_0
             } else {
@@ -159,11 +177,12 @@ impl Checker {
             };
             // Go：锚定 import 的名字节点（默认导入名/命名空间导入名/导入别名）
             let anchor_loc = Self::import_conflict_anchor(node);
+            let name = conflict_name.unwrap_or_else(|| symbol.name.clone());
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                 self.current_file.clone(),
                 anchor_loc,
                 message,
-                vec![symbol.name.clone()],
+                vec![name],
             ));
         } else if node.kind != SyntaxKind::ExportSpecifier
             && self.compiler_options.isolated_modules
@@ -296,6 +315,32 @@ fn export_specifier_has_module_specifier(node: &Arc<Node>) -> bool {
 }
 
 impl Checker {
+    // 无 from export {X as Y} 的导出名条目：容器（文件/最近 declare 模块）
+    // exports 表中 Y 对应的既有导出符号
+    fn export_specifier_exported_entry(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+        let exported = match &node.data {
+            NodeData::ExportSpecifier(spec) => {
+                spec.name.text().trim_matches(['"', '\'', '`']).to_string()
+            }
+            _ => return None,
+        };
+        if exported.is_empty() {
+            return None;
+        }
+        let mut container = node.parent().and_then(|c| c.parent());
+        while let Some(n) = container {
+            if matches!(
+                n.kind,
+                SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration
+            ) && let Some(sym) = self.program.symbol_map().symbol_of(&n)
+            {
+                return sym.exports.get(&exported).cloned();
+            }
+            container = n.parent();
+        }
+        None
+    }
+
     // Go checkExportSpecifier：解析命中 undefined/globalThis 符号，或声明的
     // 声明容器（GetDeclarationContainer）是非模块全局源文件
     fn symbol_is_global_declaration(&self, sym: &Arc<Symbol>) -> bool {

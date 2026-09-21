@@ -20,7 +20,22 @@ impl Checker {
             .clone()
     }
 
+    fn cycle_crosses_rt_infer_boundary(&self, symbol: &Arc<Symbol>) -> bool {
+        let target = Arc::as_ptr(symbol) as *const Symbol;
+        let Some(idx) = self
+            .type_resolution_stack
+            .iter()
+            .rposition(|e| e.target == target && e.property == TypeResolutionProperty::Type)
+        else {
+            return false;
+        };
+        self.rt_infer_boundary_marks.iter().any(|&m| m > idx)
+    }
+
     pub(crate) fn report_circularity_error(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+        if self.cycle_crosses_rt_infer_boundary(symbol) {
+            return self.get_any_type();
+        }
         let Some(decl) = symbol.value_declaration.clone() else {
             return self.get_any_type();
         };

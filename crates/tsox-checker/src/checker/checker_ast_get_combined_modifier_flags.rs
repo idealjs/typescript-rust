@@ -47,7 +47,12 @@ impl Checker {
             .iter()
             .rposition(|entry| entry.target == target && entry.property == property);
 
-        if cycle_start.is_some() {
+        if let Some(idx) = cycle_start {
+            // Go checkNodeDeferred/懒 resolvedReturnType：函数值定型期的体推断
+            // 在 Go 中延后到外层符号帧出栈之后，帧下界以上的重入不构成环
+            if self.rt_infer_boundary_marks.iter().any(|&m| m > idx) {
+                return false;
+            }
             self.mark_type_resolution_cycle(target, property);
             false
         } else {
