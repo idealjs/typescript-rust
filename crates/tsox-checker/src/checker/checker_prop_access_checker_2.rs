@@ -35,12 +35,13 @@ impl Checker {
         }
 
         if let Some(prop) = self.get_property_of_type(&obj_type, name_text) {
+            self.mark_property_as_referenced(&prop, Some(node));
             self.check_property_not_used_before_declaration(&prop, node, name);
         }
 
         if let Some(structured) = obj_type.as_structured() {
             if let Some(member_symbol) = structured.members.get(name_text) {
-                self.mark_property_as_referenced(member_symbol, node);
+                self.mark_property_as_referenced(member_symbol, Some(node));
                 // TS2855：super 访问基类实例字段（字段在实例上而非原型）不可达，
                 // 优先于 private/protected 可访问性错误
                 if obj_expr.kind == SyntaxKind::SuperKeyword

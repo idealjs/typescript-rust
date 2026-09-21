@@ -903,6 +903,11 @@ impl Checker {
             if *renamed {
                 self.link_binding_element_container(elem, &t, name);
             }
+            if !Self::binding_element_computed_property_name(elem).is_some() {
+                if let Some(prop) = self.get_property_of_type(&t, name) {
+                    self.mark_property_as_referenced(&prop, None);
+                }
+            }
             let result = self.get_type_of_property_of_type(&t, name);
             if result.is_none() && diagnostics_allowed {
                 let display = self.boxed_declared_type_for_display(&t);

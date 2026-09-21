@@ -179,7 +179,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn mark_property_as_referenced(&self, prop: &Arc<Symbol>, node: &Arc<Node>) {
+    pub(crate) fn mark_property_as_referenced(&self, prop: &Arc<Symbol>, node: Option<&Arc<Node>>) {
         let has_private_modifier = prop.declarations.iter().any(|d| {
             d.has_syntactic_modifier(ModifierFlags::Private)
         });
@@ -192,21 +192,23 @@ impl Checker {
         if !has_private_modifier && !has_private_identifier {
             return;
         }
-        if is_write_only_access(node) && !prop.flags.contains(SymbolFlags::SetAccessor) {
-            return;
-        }
-        if let tsox_frontend::ast::NodeData::PropertyAccessExpression(d) = &node.data
-            && d.expression.kind == SyntaxKind::ThisKeyword
-        {
-            let mut ancestor = node.parent();
-            while let Some(a) = ancestor {
-                if Self::function_like_has_body(&a)
-                    && let Some(sym) = self.program.symbol_map().symbol_of(&a)
-                    && Arc::ptr_eq(&sym, prop)
-                {
-                    return;
+        if let Some(n) = node {
+            if is_write_only_access(n) && !prop.flags.contains(SymbolFlags::SetAccessor) {
+                return;
+            }
+            if let tsox_frontend::ast::NodeData::PropertyAccessExpression(d) = &n.data
+                && d.expression.kind == SyntaxKind::ThisKeyword
+            {
+                let mut ancestor = n.parent();
+                while let Some(a) = ancestor {
+                    if Self::function_like_has_body(&a)
+                        && let Some(sym) = self.program.symbol_map().symbol_of(&a)
+                        && Arc::ptr_eq(&sym, prop)
+                    {
+                        return;
+                    }
+                    ancestor = a.parent();
                 }
-                ancestor = a.parent();
             }
         }
         self.record_symbol_reference(prop, SymbolFlags::all());
