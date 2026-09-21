@@ -119,6 +119,60 @@ impl Checker {
         i.flags.contains(TypeFlags::Never)
     }
 
+    pub(crate) fn constraint_of_distributive_conditional(
+        &mut self,
+        t: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        let (is_distributive, raw_check_type, raw_extends_type, mapper) = match &t.data {
+            TypeData::Conditional(ct) => (
+                ct.root
+                    .as_ref()
+                    .map(|r| r.is_distributive)
+                    .unwrap_or(false),
+                ct.check_type.clone()?,
+                ct.extends_type.clone()?,
+                ct.mapper.clone(),
+            ),
+            _ => return None,
+        };
+        if !is_distributive {
+            return None;
+        }
+        let map = |ty: &Arc<Type>| match mapper.as_ref() {
+            Some(m) => m.map(ty),
+            None => Arc::clone(ty),
+        };
+        let check_type = map(&raw_check_type);
+        let extends_type = map(&raw_extends_type);
+        let constraint = self.get_simplified_type_or_constraint(&check_type)?;
+        if Arc::ptr_eq(&constraint, &check_type)
+            || constraint.flags.contains(TypeFlags::Never)
+        {
+            return None;
+        }
+        let take_true = if extends_type.flags.intersects(TypeFlags::Any | TypeFlags::Unknown) {
+            true
+        } else {
+            let permissive_extends = self.get_permissive_instantiation(&extends_type);
+            let permissive_constraint = self.get_permissive_instantiation(&constraint);
+            if !self.is_type_assignable_to(&permissive_constraint, &permissive_extends) {
+                false
+            } else {
+                let restrictive_extends = self.get_restrictive_instantiation(&extends_type);
+                let restrictive_constraint = self.get_restrictive_instantiation(&constraint);
+                if !self.is_type_assignable_to(&restrictive_constraint, &restrictive_extends) {
+                    return None;
+                }
+                true
+            }
+        };
+        let branch = self.get_forced_branch_type_of_conditional_type(t, take_true)?;
+        if branch.flags.contains(TypeFlags::Never) || Arc::ptr_eq(&branch, t) {
+            return None;
+        }
+        Some(branch)
+    }
+
     pub(crate) fn conditional_fallback_related(
         &mut self,
         source: &Arc<Type>,
@@ -131,6 +185,19 @@ impl Checker {
         {
             self.deferred_constraint_depth += 1;
             let r = self.is_type_related_to(&constraint, target, relation);
+            self.deferred_constraint_depth -= 1;
+            if r {
+                return true;
+            }
+        }
+
+        if source.flags.contains(TypeFlags::Conditional)
+            && !target.flags.contains(TypeFlags::Conditional)
+            && self.deferred_constraint_depth < 100
+            && let Some(distributive) = self.constraint_of_distributive_conditional(source)
+        {
+            self.deferred_constraint_depth += 1;
+            let r = self.is_type_related_to(&distributive, target, relation);
             self.deferred_constraint_depth -= 1;
             if r {
                 return true;
