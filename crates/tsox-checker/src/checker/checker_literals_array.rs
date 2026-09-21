@@ -199,12 +199,23 @@ impl Checker {
         let t = self.get_type_of_node(elem);
         let widened = if in_const_context {
             t
-        } else if crate::checker::is_object_literal_type(&t) {
-            self.widen_initializer_type(&t)
-        } else if t.flags.intersects(TypeFlags::Null | TypeFlags::Undefined) {
-            t
         } else {
-            self.get_widened_type(&t)
+            let contextual = self.get_contextual_type(
+                elem,
+                crate::checker::inference::ContextFlags::empty(),
+            );
+            let literal_of_ctx = contextual
+                .as_ref()
+                .is_some_and(|c| self.is_literal_of_contextual_type(&t, c));
+            if literal_of_ctx {
+                self.get_regular_type_of_literal_type(&t)
+            } else if crate::checker::is_object_literal_type(&t) {
+                self.widen_initializer_type(&t)
+            } else if t.flags.intersects(TypeFlags::Null | TypeFlags::Undefined) {
+                t
+            } else {
+                self.get_widened_type(&t)
+            }
         };
         (widened, ElementFlags::Required)
     }

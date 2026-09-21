@@ -20,6 +20,7 @@ pub(crate) enum IterationUse {
     ForOf { for_await: bool },
     Spread,
     Destructuring,
+    Element,
     YieldStar { is_async: bool },
     GeneratorReturnType { is_async: bool },
 }

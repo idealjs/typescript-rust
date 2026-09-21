@@ -155,13 +155,105 @@ impl Checker {
 
     pub fn get_contextual_type_for_element_expression(
         &mut self,
-        _contextual_type: &Arc<Type>,
-        _element_index: usize,
+        contextual_type: &Arc<Type>,
+        element_index: usize,
         _length: Option<usize>,
-        _first_spread_index: i32,
+        first_spread_index: i32,
         _last_spread_index: i32,
     ) -> Option<Arc<Type>> {
-        None
+        let constituents: Vec<Arc<Type>> = if let crate::checker::types::TypeData::Union(u) =
+            &contextual_type.data
+        {
+            u.union_or_intersection.types.clone()
+        } else {
+            vec![Arc::clone(contextual_type)]
+        };
+        let mut result: Option<Arc<Type>> = None;
+        for t in constituents {
+            let Some(mapped) =
+                self.element_contextual_constituent(&t, element_index, first_spread_index)
+            else {
+                continue;
+            };
+            result = Some(match result {
+                None => mapped,
+                Some(prev) => self.get_union_type(vec![prev, mapped]),
+            });
+        }
+        result
+    }
+
+    fn element_contextual_constituent(
+        &mut self,
+        t: &Arc<Type>,
+        element_index: usize,
+        first_spread_index: i32,
+    ) -> Option<Arc<Type>> {
+        if let crate::checker::types::TypeData::Tuple(tuple) = &t.data {
+            if (first_spread_index < 0 || (element_index as i32) < first_spread_index)
+                && element_index < tuple.fixed_length
+            {
+                let info = tuple.element_infos.get(element_index)?;
+                let elem = info.type_.clone()?;
+                let optional = info.flags.contains(ElementFlags::Optional);
+                return Some(self.remove_missing_type(elem, optional));
+            }
+            let start = tuple.fixed_length.min(if first_spread_index >= 0 {
+                first_spread_index as usize
+            } else {
+                usize::MAX
+            });
+            let types: Vec<Arc<Type>> = tuple
+                .element_infos
+                .iter()
+                .skip(start)
+                .filter_map(|i| i.type_.clone())
+                .collect();
+            if types.is_empty() {
+                return None;
+            }
+            if types.len() == 1 {
+                return types.into_iter().next();
+            }
+            return Some(self.get_union_type(types));
+        }
+        if first_spread_index < 0 || (element_index as i32) < first_spread_index {
+            let prop = self.get_type_of_property_of_contextual_type(t, &element_index.to_string());
+            if prop.is_some() {
+                return prop;
+            }
+        }
+        self.get_iterated_type_or_element_type(
+            crate::checker::checker_iteration::IterationUse::Element,
+            t,
+            None,
+        )
+    }
+
+    fn remove_missing_type(&mut self, t: Arc<Type>, is_optional: bool) -> Arc<Type> {
+        if !is_optional {
+            return t;
+        }
+        if let crate::checker::types::TypeData::Union(u) = &t.data {
+            let filtered: Vec<Arc<Type>> = u
+                .union_or_intersection
+                .types
+                .iter()
+                .filter(|m| !m.flags.contains(TypeFlags::Undefined))
+                .cloned()
+                .collect();
+            if filtered.len() != u.union_or_intersection.types.len() {
+                if filtered.is_empty() {
+                    return self.never_type();
+                }
+                return self.get_union_type(filtered);
+            }
+            return t;
+        }
+        if t.flags.contains(TypeFlags::Undefined) {
+            return self.never_type();
+        }
+        t
     }
 
     pub(crate) fn global_function_type_of(&mut self, name: &str) -> Option<Arc<Type>> {
