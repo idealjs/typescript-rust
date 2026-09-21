@@ -74,19 +74,8 @@ impl Checker {
         signature: &Arc<Signature>,
         args: &[Arc<Node>],
     ) -> Vec<Arc<Type>> {
-        self.infer_call_type_arguments_with_tps(_node, signature, args).0
-    }
-
-    /// Go inferTypeArguments 后 inferredTypeParameters 随推断类型一并带回
-    /// （resolveCall checker.go:9241-9245 用其重建泛型返回签名）
-    pub fn infer_call_type_arguments_with_tps(
-        &mut self,
-        _node: &Arc<Node>,
-        signature: &Arc<Signature>,
-        args: &[Arc<Node>],
-    ) -> (Vec<Arc<Type>>, Vec<Arc<Type>>) {
         if signature.type_parameters.is_empty() {
-            return (Vec::new(), Vec::new());
+            return Vec::new();
         }
         let inferences: Vec<InferenceInfo> = signature
             .type_parameters
@@ -95,8 +84,6 @@ impl Checker {
             .collect();
         let mut context = InferenceContext::new(inferences);
         context.signature = Some(Arc::clone(signature));
-        let types = self.infer_type_arguments(_node, signature, args, &mut context);
-        let tps = std::mem::take(&mut context.inferred_type_parameters);
-        (types, tps)
+        self.infer_type_arguments(_node, signature, args, &mut context)
     }
 }

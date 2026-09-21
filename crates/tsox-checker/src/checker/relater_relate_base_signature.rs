@@ -81,11 +81,6 @@ impl Checker {
         if !ctx_sig.type_parameters.is_empty() {
             return None;
         }
-        if let Some(inst) =
-            self.instantiate_with_inferred_return_tps(&sig, &ctx_sig, outer, construct)
-        {
-            return Some(inst);
-        }
 
         let n = outer.inferences.len();
         let outer_tps: Vec<Arc<Type>> = outer
