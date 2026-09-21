@@ -435,12 +435,6 @@ impl Checker {
                 &msg::AN_INDEX_SIGNATURE_PARAMETER_TYPE_CANNOT_BE_A_LITERAL_TYPE_OR_GENERIC_TYPE_CONSIDER_USING_A_MAPPED_OBJECT_TYPE_INSTEAD,
             );
         }
-        if data.type_node.kind == SyntaxKind::MissingDeclaration {
-            return self.grammar_error_on_node(
-                node,
-                &msg::AN_INDEX_SIGNATURE_MUST_HAVE_A_TYPE_ANNOTATION,
-            );
-        }
         let valid_key = if t.is_union() {
             t.types().is_some_and(|parts| {
                 parts.iter().all(|c| self.index_key_type_is_valid(c))
@@ -452,6 +446,12 @@ impl Checker {
             return self.grammar_error_on_node(
                 &pd.name,
                 &msg::AN_INDEX_SIGNATURE_PARAMETER_TYPE_MUST_BE_STRING_NUMBER_SYMBOL_OR_A_TEMPLATE_LITERAL_TYPE,
+            );
+        }
+        if data.type_node.kind == SyntaxKind::MissingDeclaration {
+            return self.grammar_error_on_node(
+                node,
+                &msg::AN_INDEX_SIGNATURE_MUST_HAVE_A_TYPE_ANNOTATION,
             );
         }
         false
