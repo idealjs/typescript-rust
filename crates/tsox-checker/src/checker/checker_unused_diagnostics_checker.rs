@@ -15,6 +15,12 @@ impl Checker {
             if check_locals {
                 self.check_unused_locals_and_parameters(&container);
             }
+            if matches!(
+                container.kind,
+                SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
+            ) {
+                self.check_unused_class_members(&container);
+            }
             self.check_unused_type_parameters(&container);
         }
     }
@@ -40,6 +46,97 @@ impl Checker {
             Self::collect_unused_check_containers(child, out);
             false
         });
+    }
+
+    pub(crate) fn check_unused_class_members(&mut self, node: &Arc<Node>) {
+        use tsox_core::diagnostics::messages_generated::{
+            PROPERTY_0_IS_DECLARED_BUT_ITS_VALUE_IS_NEVER_READ,
+            X_0_IS_DECLARED_BUT_NEVER_USED, X_0_IS_DECLARED_BUT_ITS_VALUE_IS_NEVER_READ,
+        };
+        let members: Vec<Arc<Node>> = match &node.data {
+            tsox_frontend::ast::NodeData::ClassDeclaration(d) => {
+                d.members.iter().cloned().collect()
+            }
+            tsox_frontend::ast::NodeData::ClassExpression(d) => {
+                d.members.iter().cloned().collect()
+            }
+            _ => return,
+        };
+        let _ = &X_0_IS_DECLARED_BUT_NEVER_USED;
+        for member in &members {
+            match member.kind {
+                SyntaxKind::MethodDeclaration
+                | SyntaxKind::PropertyDeclaration
+                | SyntaxKind::GetAccessor
+                | SyntaxKind::SetAccessor => {
+                    let Some(sym) = self.program.symbol_map().symbol_of(member) else {
+                        continue;
+                    };
+                    if member.kind == SyntaxKind::SetAccessor
+                        && sym.flags.contains(SymbolFlags::GetAccessor)
+                    {
+                        continue;
+                    }
+                    let name_is_private = member
+                        .name()
+                        .is_some_and(|n| n.kind == SyntaxKind::PrivateIdentifier);
+                    let referenced = self
+                        .symbol_reference_kinds
+                        .get(&sym.id())
+                        .is_some_and(|k| !k.is_empty());
+                    if !referenced
+                        && (member.has_syntactic_modifier(ModifierFlags::Private) || name_is_private)
+                        && !member
+                            .flags
+                            .contains(tsox_frontend::ast::NodeFlags::Ambient)
+                    {
+                        let name = sym.name.clone();
+                        let loc = member.name().map(|n| n.loc).unwrap_or(member.loc);
+                        self.report_unused(
+                            member,
+                            false,
+                            loc,
+                            &X_0_IS_DECLARED_BUT_ITS_VALUE_IS_NEVER_READ,
+                            vec![name],
+                        );
+                    }
+                }
+                SyntaxKind::Constructor => {
+                    let parameters: Vec<Arc<Node>> = match &member.data {
+                        tsox_frontend::ast::NodeData::ConstructorDeclaration(d) => {
+                            d.parameters.iter().cloned().collect()
+                        }
+                        _ => continue,
+                    };
+                    for parameter in &parameters {
+                        let Some(sym) = self.program.symbol_map().symbol_of(parameter) else {
+                            continue;
+                        };
+                        let referenced = self
+                            .symbol_reference_kinds
+                            .get(&sym.id())
+                            .is_some_and(|k| !k.is_empty());
+                        if !referenced
+                            && parameter.has_syntactic_modifier(ModifierFlags::Private)
+                        {
+                            let name = sym.name.clone();
+                            let loc = parameter
+                                .name()
+                                .map(|n| n.loc)
+                                .unwrap_or(parameter.loc);
+                            self.report_unused(
+                                parameter,
+                                false,
+                                loc,
+                                &PROPERTY_0_IS_DECLARED_BUT_ITS_VALUE_IS_NEVER_READ,
+                                vec![name],
+                            );
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
     }
 
     pub(crate) fn check_unused_type_parameters(&mut self, node: &Arc<Node>) {

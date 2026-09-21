@@ -3,6 +3,7 @@ pub(crate) use crate::checker::checker::*;
 pub use crate::checker::checker_unused_diagnostics_checker::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_unused_diagnostics_checker_2::*;
+pub use crate::checker::checker_resolve_access::*;
 pub(crate) use std::sync::Arc;
 pub(crate) use tsox_frontend::ast::ModifierFlags;
 pub(crate) use tsox_frontend::ast::Node;

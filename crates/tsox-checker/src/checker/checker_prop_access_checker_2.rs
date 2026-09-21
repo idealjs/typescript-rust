@@ -40,6 +40,7 @@ impl Checker {
 
         if let Some(structured) = obj_type.as_structured() {
             if let Some(member_symbol) = structured.members.get(name_text) {
+                self.mark_property_as_referenced(member_symbol, node);
                 // TS2855：super 访问基类实例字段（字段在实例上而非原型）不可达，
                 // 优先于 private/protected 可访问性错误
                 if obj_expr.kind == SyntaxKind::SuperKeyword
