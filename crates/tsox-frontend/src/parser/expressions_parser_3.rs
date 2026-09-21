@@ -50,9 +50,13 @@ impl Parser {
         let diag_len = self.diagnostics.len();
         let pos = self.token_pos();
 
-        if starts_with_async {
+        let async_modifier = if starts_with_async {
+            let token_node = self.create_token_node();
             self.next_token();
-        }
+            Some(token_node)
+        } else {
+            None
+        };
 
         let type_parameters = self.parse_optional_type_parameters();
 
@@ -89,10 +93,11 @@ impl Parser {
         self.yield_context = saved_yield;
         self.await_context = saved_await;
         let end = body.end();
+        let modifiers = async_modifier.and_then(|m| self.make_async_modifier_list(m));
         Some(Arc::new(Node::with_loc(
             SyntaxKind::ArrowFunction,
             NodeData::ArrowFunction(ArrowFunctionData {
-                modifiers: None,
+                modifiers,
                 type_parameters,
                 parameters,
                 type_node,

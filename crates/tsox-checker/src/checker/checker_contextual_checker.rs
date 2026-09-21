@@ -213,12 +213,13 @@ impl Checker {
             .symbol
             .as_ref()
             .is_some_and(|s| s.name == "Promise");
+        if is_promise
+            && let Some(obj) = declared.as_object()
+            && let Some(t) = obj.type_arguments.first()
+        {
+            return Arc::clone(t);
+        }
         if is_promise {
-            if let crate::checker::TypeData::Object(obj) = &declared.data {
-                if let Some(t) = obj.type_arguments.first() {
-                    return Arc::clone(t);
-                }
-            }
             return self.get_any_type();
         }
         declared
@@ -264,7 +265,7 @@ impl Checker {
 
     pub(crate) fn get_promised_type_of_promise(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
         if t.symbol.as_ref().is_some_and(|s| s.name == "Promise") {
-            if let crate::checker::TypeData::Object(obj) = &t.data {
+            if let Some(obj) = t.as_object() {
                 if let Some(first) = obj.type_arguments.first() {
                     return Some(Arc::clone(first));
                 }
