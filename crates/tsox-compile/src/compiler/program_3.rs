@@ -251,7 +251,7 @@ impl tsox_checker::checker::Program for Program {
             resolver.resolve_module_name(specifier, containing_file, resolution_mode, None);
         resolved
             .filter(|m| m.is_resolved())
-            .map(|m| m.resolved_file_name)
+            .map(|m| self.host.fs().realpath(m.resolved_file_name.as_str()))
     }
     fn symbol_map(&self) -> &NodeSymbolMap {
         Program::symbol_map(self)

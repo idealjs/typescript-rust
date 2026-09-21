@@ -53,7 +53,11 @@ impl Checker {
                     NodeData::ExternalModuleReference(ext) => ext.expression.loc,
                     _ => data.module_reference.loc,
                 };
-                let module_sym = match self.resolve_module_file_symbol_relative(&spec) {
+                let module_sym = match if spec.starts_with("./") || spec.starts_with("../") {
+                    self.resolve_module_file_symbol_relative(&spec)
+                } else {
+                    self.resolve_module_file_symbol(&spec)
+                } {
                     Some(sym) => {
                         // Go resolveExternalModule：目标文件无模块指示（脚本）
                         // 报 TS2306，参数为解析后文件名
