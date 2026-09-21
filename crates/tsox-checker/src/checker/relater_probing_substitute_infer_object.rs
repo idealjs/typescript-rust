@@ -262,8 +262,7 @@ impl Checker {
                     ));
                 }
                 if rest_offset == 1 {
-                    if let Some(last) = sig.parameters.last() {
-                        let rt = self.get_type_of_symbol(last);
+                    if let Some(rt) = self.get_effective_rest_type(sig) {
                         old_params.push(Arc::clone(&rt));
                         new_params.push(self.substitute_infer_type_parameters(
                             &rt,

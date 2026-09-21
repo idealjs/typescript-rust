@@ -254,8 +254,9 @@ impl Checker {
             ));
         }
         if rest_offset == 1 {
-            let last = sig.parameters.last().expect("rest parameter");
-            let rest_type = self.get_type_of_symbol(last);
+            let rest_type = self
+                .get_effective_rest_type(sig)
+                .expect("rest parameter");
             param_types.push(self.substitute_infer_type_parameters(
                 &rest_type,
                 &sig.type_parameters,
