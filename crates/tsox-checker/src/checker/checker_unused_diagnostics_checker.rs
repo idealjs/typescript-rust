@@ -333,8 +333,13 @@ impl Checker {
                         }
                     }
                     _ => {
+                        let ambient_module = matches!(
+                            &declaration.data,
+                            tsox_frontend::ast::NodeData::ModuleDeclaration(d)
+                                if d.name.kind == SyntaxKind::StringLiteral
+                        );
                         if declaration.kind != SyntaxKind::TypeParameter
-                            && declaration.kind != SyntaxKind::ModuleDeclaration
+                            && !ambient_module
                             && declaration.kind != SyntaxKind::FunctionExpression
                         {
                             let name = local.name.clone();
@@ -380,8 +385,10 @@ impl Checker {
     }
 
     pub(crate) fn name_starts_with_underscore(node: &Arc<Node>) -> bool {
-        let text = node.text();
-        !text.is_empty() && text.starts_with('_')
+        node.name().is_some_and(|n| {
+            let text = n.text();
+            !text.is_empty() && text.starts_with('_')
+        })
     }
 
     pub(crate) fn import_clause_from_imported(node: &Arc<Node>) -> Arc<Node> {
