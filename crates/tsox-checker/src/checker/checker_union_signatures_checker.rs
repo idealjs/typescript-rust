@@ -29,18 +29,19 @@ impl Checker {
             let signature = Arc::clone(&list[0]);
             results = results
                 .iter()
-                .map(|sig| self.combine_union_member_signature(sig, &signature))
+                .map(|sig| self.combine_union_member_signature(sig, &signature, true))
                 .collect();
         }
         results
     }
 
-    fn combine_union_member_signature(
+    pub(crate) fn combine_union_member_signature(
         &mut self,
         left: &Arc<Signature>,
         right: &Arc<Signature>,
+        is_union: bool,
     ) -> Arc<Signature> {
-        let (params, overrides) = self.combine_union_parameters(left, right);
+        let (params, overrides) = self.combine_union_parameters(left, right, is_union);
         let mut flags = left.flags | right.flags;
         flags.remove(SignatureFlags::HasRestParameter);
         if params.last().is_some_and(|_| self.combined_has_rest_tail(left, right)) {
@@ -65,7 +66,15 @@ impl Checker {
         let right_ret = self
             .get_return_type_of_signature(right)
             .unwrap_or_else(|| self.any_type());
-        let _ = s.resolved_return_type.set(self.get_union_type(vec![left_ret, right_ret]));
+        if is_union {
+            let _ = s
+                .resolved_return_type
+                .set(self.get_union_type(vec![left_ret, right_ret]));
+        } else {
+            let _ = s
+                .resolved_return_type
+                .set(self.get_intersection_type(vec![left_ret, right_ret]));
+        }
         Arc::new(s)
     }
 
@@ -77,6 +86,7 @@ impl Checker {
         &mut self,
         left: &Arc<Signature>,
         right: &Arc<Signature>,
+        is_union: bool,
     ) -> (Vec<Arc<Symbol>>, Vec<Arc<Type>>) {
         let left_count = self.get_parameter_count(left);
         let right_count = self.get_parameter_count(right);
@@ -105,8 +115,10 @@ impl Checker {
                 .collect();
             let combined = if members.is_empty() {
                 self.unknown_type()
-            } else {
+            } else if is_union {
                 self.get_intersection_type(members)
+            } else {
+                self.get_union_type(members)
             };
             let is_rest = either_has_rest && !needs_extra_rest && i == longest_count - 1;
             let is_optional = i >= left_min && i >= right_min;

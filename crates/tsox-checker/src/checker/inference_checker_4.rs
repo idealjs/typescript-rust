@@ -235,9 +235,41 @@ impl Checker {
         node: &Arc<tsox_frontend::ast::Node>,
     ) -> Option<Arc<Signature>> {
         let signatures = self.get_signatures_of_type(t, SignatureKind::Call);
-        signatures
+        let applicable: Vec<Arc<Signature>> = signatures
             .into_iter()
-            .find(|s| !self.is_arity_smaller(s, node))
+            .filter(|s| !self.is_arity_smaller(s, node))
+            .collect();
+        if applicable.len() == 1 {
+            return applicable.into_iter().next();
+        }
+        self.get_intersected_signatures(applicable)
+    }
+
+    fn get_intersected_signatures(
+        &mut self,
+        signatures: Vec<Arc<Signature>>,
+    ) -> Option<Arc<Signature>> {
+        if !self.no_implicit_any {
+            return None;
+        }
+        let mut combined: Option<Arc<Signature>> = None;
+        for sig in signatures {
+            match &combined {
+                None => combined = Some(sig),
+                Some(c) if Arc::ptr_eq(c, &sig) => {}
+                Some(c) => {
+                    if self.compare_type_parameters_identical(
+                        &c.type_parameters,
+                        &sig.type_parameters,
+                    ) {
+                        combined = Some(self.combine_union_member_signature(c, &sig, false));
+                    } else {
+                        return None;
+                    }
+                }
+            }
+        }
+        combined
     }
 
     pub(crate) fn is_arity_smaller(&self, signature: &Arc<Signature>, target: &Arc<tsox_frontend::ast::Node>) -> bool {

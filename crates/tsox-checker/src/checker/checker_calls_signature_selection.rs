@@ -83,14 +83,38 @@ impl Checker {
                             || self.is_global_function_type(m)
                     });
                 if all_callable {
-                    for m in &expanded_leaves {
-                        if self.is_global_function_type(m) {
-                            union_signatures.push(self.untyped_call_signature());
-                            continue;
+                    // Go resolveUnionTypeMembers→getUnionSignatures：各成分签名
+                    // 列表组合为合并签名（参数交集、返回并集），非逐成员拼接
+                    let lists: Vec<Vec<Arc<crate::checker::types::Signature>>> =
+                        expanded_leaves
+                            .iter()
+                            .map(|m| {
+                                if self.is_global_function_type(m) {
+                                    vec![self.untyped_call_signature()]
+                                } else if let Some(s) = m.as_structured() {
+                                    s.call_signatures().iter().cloned().collect()
+                                } else {
+                                    Vec::new()
+                                }
+                            })
+                            .collect();
+                    let combined = self.get_union_signatures(&lists);
+                    if combined.is_empty() {
+                        for m in &expanded_leaves {
+                            if self.is_global_function_type(m) {
+                                union_signatures.push(self.untyped_call_signature());
+                                continue;
+                            }
+                            if let Some(s) = m.as_structured() {
+                                union_signatures.extend(s.call_signatures().iter().cloned());
+                            }
                         }
-                        if let Some(s) = m.as_structured() {
-                            union_signatures.extend(s.call_signatures().iter().cloned());
-                        }
+                    } else {
+                        union_signatures.extend(combined);
+                    }
+                    if union_signatures.is_empty() {
+                        self.report_invocation_error(callee_expr, callee_type, is_new);
+                        return None;
                     }
                     &union_signatures
                 } else {
