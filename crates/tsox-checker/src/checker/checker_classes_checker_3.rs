@@ -261,19 +261,24 @@ impl Checker {
         }
     }
 
-    // Go getSignatureFromDeclaration：直接从声明构建签名（构造子挂类符号
-    // 的构造签名表按声明匹配）
+    // Go getSignatureFromDeclaration：直接从声明构建签名，不经符号签名表
+    // （实现签名在 getSignaturesOfSymbol 语义下被剔除，表内查不到）
     fn signature_of_declaration_node(&mut self, node: &Arc<Node>) -> Option<Arc<Signature>> {
         if node.kind == SyntaxKind::Constructor {
             let class_node = node.parent()?;
             let owner_symbol = self.program.symbol_map().symbol_of(&class_node).cloned()?;
-            let t = self.get_type_of_symbol(&owner_symbol);
-            let sigs = self.get_signatures_of_type(&t, SignatureKind::Construct);
-            return sigs.into_iter().find(|sig| {
-                sig.declaration
-                    .as_ref()
-                    .is_some_and(|d| Arc::ptr_eq(d, node))
-            });
+            let instance_type = self.get_declared_type_of_symbol(&owner_symbol);
+            let params = match &node.data {
+                tsox_frontend::ast::NodeData::ConstructorDeclaration(d) => &d.parameters,
+                _ => return None,
+            };
+            return Some(self.build_signature_from_function_like_type_node(
+                params,
+                instance_type,
+                true,
+                None,
+                Some(Arc::clone(node)),
+            ));
         }
         let (parameters, type_node) = match &node.data {
             tsox_frontend::ast::NodeData::FunctionDeclaration(d) => {
