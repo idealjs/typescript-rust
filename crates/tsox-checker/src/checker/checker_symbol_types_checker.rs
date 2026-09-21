@@ -199,6 +199,15 @@ impl Checker {
             || symbol.flags.contains(SymbolFlags::Property)
             || symbol.flags.contains(SymbolFlags::EnumMember)
         {
+            if symbol.flags.contains(SymbolFlags::Function)
+                && symbol.flags.contains(SymbolFlags::Class)
+                && let Some(t) = self.merged_class_function_symbol_type(symbol)
+            {
+                self.value_symbol_links
+                    .get_or_default(symbol)
+                    .resolved_type = Some(Arc::clone(&t));
+                return t;
+            }
             if let Some(links) = self.value_symbol_links.get(symbol) {
                 if let Some(ref t) = links.resolved_type {
                     // Go getTypeOfVariableOrParameterOrProperty：缓存型（含

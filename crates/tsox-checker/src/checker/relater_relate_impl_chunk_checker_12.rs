@@ -142,17 +142,38 @@ impl Checker {
         } else {
             for t in &target_sigs {
                 let t = self.get_erased_signature(t);
+                let chain_len_before = self.relater_error_chain.len();
+                let mut should_elaborate_errors = self.relater_chain_active;
                 let mut found = false;
                 for s in &source_sigs {
                     let s = self.get_erased_signature(s);
+                    let saved_active = self.relater_chain_active;
+                    if !should_elaborate_errors {
+                        self.relater_chain_active = false;
+                    }
                     let related = self.compare_signatures_related(&s, &t, check_mode, relation);
+                    self.relater_chain_active = saved_active;
                     if !related.is_false() {
                         result = result.and(related);
+                        self.relater_error_chain.truncate(chain_len_before);
                         found = true;
                         break;
                     }
+                    should_elaborate_errors = false;
                 }
                 if !found {
+                    if should_elaborate_errors {
+                        let source_str = self.type_to_string(source);
+                        let sig_str = self.signature_display_colon(
+                            &t,
+                            if kind == SignatureKind::Construct { "new " } else { "" },
+                        );
+                        self.relater_report_error(
+                            tsox_core::diagnostics::messages_generated::
+                                TYPE_0_PROVIDES_NO_MATCH_FOR_THE_SIGNATURE_1,
+                            vec![source_str, sig_str],
+                        );
+                    }
                     return Ternary::False;
                 }
             }

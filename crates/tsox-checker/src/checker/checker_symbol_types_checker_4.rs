@@ -12,22 +12,31 @@ impl Checker {
 
         let instance_type = self.build_class_instance_type_with_base(node);
         let mut construct_sigs: Vec<Arc<Signature>> = Vec::new();
+        let mut prev_member_ctor = false;
         for member in members.iter() {
             if member.kind != SyntaxKind::Constructor {
+                prev_member_ctor = false;
                 continue;
             }
-            let params = match &member.data {
-                tsox_frontend::ast::NodeData::ConstructorDeclaration(data) => &data.parameters,
-                _ => continue,
-            };
-            let sig = self.build_signature_from_function_like_type_node(
-                params,
-                Arc::clone(&instance_type),
-                true,
-                None,
-                Some(Arc::clone(member)),
+            let has_body = matches!(
+                &member.data,
+                tsox_frontend::ast::NodeData::ConstructorDeclaration(data) if data.body.is_some()
             );
-            construct_sigs.push(sig);
+            if !(has_body && prev_member_ctor) {
+                let params = match &member.data {
+                    tsox_frontend::ast::NodeData::ConstructorDeclaration(data) => &data.parameters,
+                    _ => continue,
+                };
+                let sig = self.build_signature_from_function_like_type_node(
+                    params,
+                    Arc::clone(&instance_type),
+                    true,
+                    None,
+                    Some(Arc::clone(member)),
+                );
+                construct_sigs.push(sig);
+            }
+            prev_member_ctor = true;
         }
         self.pop_scope();
         if construct_sigs.is_empty() {

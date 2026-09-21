@@ -87,9 +87,14 @@ impl Checker {
         if let tsox_frontend::ast::NodeData::FunctionDeclaration(data) = &node.data {
             if let Some(name) = &data.name {
                 if let Some(symbol) = self.resolve_identifier(name) {
-                    let symbol_type = match self.build_overload_function_type(&symbol) {
-                        Some(overload_type) => self.attach_function_expando_type(&symbol, overload_type),
-                        None => fn_type.clone(),
+                    let symbol_type = match self.merged_class_function_symbol_type(&symbol) {
+                        Some(t) => t,
+                        None => match self.build_overload_function_type(&symbol) {
+                            Some(overload_type) => {
+                                self.attach_function_expando_type(&symbol, overload_type)
+                            }
+                            None => fn_type.clone(),
+                        },
                     };
                     self.value_symbol_links
                         .get_or_default(&symbol)

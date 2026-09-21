@@ -185,6 +185,7 @@ pub(crate) mod checker_truthiness_callable;
 pub(crate) mod checker_symbol_types_checker_2;
 pub(crate) mod checker_symbol_types_checker_3;
 pub(crate) mod checker_symbol_types_checker_4;
+pub(crate) mod checker_symbol_types_class_function_merge;
 pub(crate) mod checker_unused_diagnostics;
 pub(crate) mod checker_unused_renamed_bindings;
 pub(crate) mod checker_unused_diagnostics_checker;
