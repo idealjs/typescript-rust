@@ -210,7 +210,7 @@ impl Checker {
             self.type_argument_stack.push(mapping);
             pushed += 1;
         }
-        for (ps, ss) in chain {
+        for (ps, ss) in chain.iter().rev() {
             let mut mapping = HashMap::new();
             for (i, p) in ps.iter().enumerate() {
                 if let Some(sym) = p.symbol.as_ref() {
