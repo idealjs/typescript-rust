@@ -27,6 +27,51 @@ impl Program {
             )));
         }
 
+        let module_in_node_family = matches!(
+            options.module,
+            ModuleKind::Node16 | ModuleKind::Node18 | ModuleKind::Node20 | ModuleKind::NodeNext
+        );
+        let effective_resolution = options.get_module_resolution_kind();
+        let resolution_in_node_family = matches!(
+            effective_resolution,
+            tsox_core::core::compiler_options::ModuleResolutionKind::Node16
+                | tsox_core::core::compiler_options::ModuleResolutionKind::NodeNext
+        );
+        if module_in_node_family && !resolution_in_node_family {
+            let module_kind_name = match options.module {
+                ModuleKind::Node18 => "node18",
+                ModuleKind::Node20 => "node20",
+                ModuleKind::NodeNext => "nodenext",
+                _ => "node16",
+            };
+            let mapped_resolution = if options.module == ModuleKind::NodeNext {
+                "NodeNext"
+            } else {
+                "Node16"
+            };
+            diagnostics.push(Arc::new(Diagnostic::new(
+                None,
+                TextRange::default(),
+                tsox_core::diagnostics::messages_generated::
+                    OPTION_MODULERESOLUTION_MUST_BE_SET_TO_0_OR_LEFT_UNSPECIFIED_WHEN_OPTION_MODULE_IS_SET_TO_1,
+                vec![mapped_resolution.to_string(), module_kind_name.to_string()],
+            )));
+        } else if resolution_in_node_family && !module_in_node_family {
+            let resolution_name =
+                if effective_resolution == tsox_core::core::compiler_options::ModuleResolutionKind::NodeNext {
+                    "NodeNext"
+                } else {
+                    "Node16"
+                };
+            diagnostics.push(Arc::new(Diagnostic::new(
+                None,
+                TextRange::default(),
+                tsox_core::diagnostics::messages_generated::
+                    OPTION_MODULE_MUST_BE_SET_TO_0_WHEN_OPTION_MODULERESOLUTION_IS_SET_TO_1,
+                vec![resolution_name.to_string(), resolution_name.to_string()],
+            )));
+        }
+
         if options.emit_declaration_only.is_true() && !options.get_emit_declarations() {
             diagnostics.push(Arc::new(Diagnostic::new(
                 None,
