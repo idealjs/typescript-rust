@@ -842,6 +842,19 @@ impl Checker {
                     }
                     return result;
                 }
+                if name_expr_type.flags.intersects(TypeFlags::TypeParameter) {
+                    let constraint = self
+                        .get_constraint_of_type_parameter(&name_expr_type)
+                        .or_else(|| self.get_base_constraint_of_type(&name_expr_type));
+                    let index_like = constraint.as_ref().is_some_and(|c| {
+                        c.flags.intersects(
+                            TypeFlags::String | TypeFlags::Number | TypeFlags::ESSymbol,
+                        )
+                    });
+                    if index_like {
+                        return Some(self.get_indexed_access_type(&t, &name_expr_type));
+                    }
+                }
                 // computed string 名走索引签名通道（Go getIndexedAccessTypeEx）：
                 // 无匹配 string 索引签名报 TS2537，命中取值类型
                 if name_expr_type.flags.intersects(TypeFlags::String) {
