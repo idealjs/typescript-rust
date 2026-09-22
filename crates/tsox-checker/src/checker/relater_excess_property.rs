@@ -283,7 +283,7 @@ impl Checker {
         None
     }
 
-    fn is_discriminant_property_of_union_members(
+    pub(crate) fn is_discriminant_property_of_union_members(
         &mut self,
         union_target: &Arc<Type>,
         name: &str,

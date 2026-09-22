@@ -230,7 +230,7 @@ impl Checker {
         )
     }
 
-    fn remove_missing_type(&mut self, t: Arc<Type>, is_optional: bool) -> Arc<Type> {
+    pub(crate) fn remove_missing_type(&mut self, t: Arc<Type>, is_optional: bool) -> Arc<Type> {
         if !is_optional {
             return t;
         }

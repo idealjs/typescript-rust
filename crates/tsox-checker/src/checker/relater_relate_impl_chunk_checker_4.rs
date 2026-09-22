@@ -89,7 +89,13 @@ impl Checker {
                 return self.each_type_related_to_some_type(source, target, relation)
                     && self.each_type_related_to_some_type(target, source, relation);
             }
-            return self.is_union_or_intersection_related_to(source, target, relation);
+            if self.is_union_or_intersection_related_to(source, target, relation) {
+                return true;
+            }
+            if s.contains(TypeFlags::Object) && t.contains(TypeFlags::Union) {
+                return self.type_related_to_discriminated_type(source, target, relation);
+            }
+            return false;
         }
 
         if t.contains(TypeFlags::Object)

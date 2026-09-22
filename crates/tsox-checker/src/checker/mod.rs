@@ -291,6 +291,7 @@ pub(crate) mod relater_compare_checker_6;
 pub(crate) mod relater_conditional;
 pub(crate) mod relater_conditional_checker;
 pub(crate) mod relater_conditional_checker_2;
+pub(crate) mod relater_discriminated;
 pub(crate) mod relater_index_signatures;
 pub(crate) mod relater_index_signatures_impl_chunk;
 pub(crate) mod relater_index_signatures_impl_chunk_2;
