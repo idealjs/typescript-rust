@@ -3,10 +3,10 @@
 use crate::checker::typenode_references::*;
 
 impl Checker {
-    fn push_interface_shell(&mut self, symbol: &Arc<Symbol>) -> bool {
+    fn push_interface_shell(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
         let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol as usize;
         if self.pending_interface_shells.contains_key(&key) {
-            return false;
+            return None;
         }
         let shell = Arc::new(Type {
             flags: crate::checker::types::TypeFlags::Object,
@@ -16,8 +16,8 @@ impl Checker {
             alias: None,
             data: crate::checker::types::TypeData::Object(Default::default()),
         });
-        self.pending_interface_shells.insert(key, shell);
-        true
+        self.pending_interface_shells.insert(key, Arc::clone(&shell));
+        Some(shell)
     }
 
     pub fn resolve_interface_type_ex(
@@ -79,9 +79,9 @@ impl Checker {
             return self.error_type();
         }
         let shell_key = key as usize;
-        let shell_inserted = self.push_interface_shell(symbol);
+        let shell = self.push_interface_shell(symbol);
         let shell_cleanup = |checker: &mut Checker| {
-            if shell_inserted {
+            if shell.is_some() {
                 checker.pending_interface_shells.remove(&shell_key);
             }
         };
@@ -250,13 +250,13 @@ impl Checker {
             heritage_degraded = true;
         }
 
-        let result = if shell_inserted
-            && !has_type_args
-            && !crate::checker::utilities::is_type_error(&result)
-        {
-            self.fill_interface_shell(shell_key, result)
-        } else {
-            result
+        let result = match (
+            shell.as_ref(),
+            has_type_args,
+            crate::checker::utilities::is_type_error(&result),
+        ) {
+            (Some(shell), false, false) => self.fill_interface_shell(shell, result),
+            _ => result,
         };
 
         let mut degraded_accepted = false;
@@ -286,23 +286,23 @@ impl Checker {
         result
     }
 
-    fn fill_interface_shell(&mut self, shell_key: usize, result: Arc<Type>) -> Arc<Type> {
-        let Some(shell) = self.pending_interface_shells.get(&shell_key) else {
-            return result;
-        };
-        let shell = Arc::clone(shell);
+    fn fill_interface_shell(
+        &mut self,
+        shell: &Arc<Type>,
+        result: Arc<Type>,
+    ) -> Arc<Type> {
         let shell_empty = shell
             .as_structured()
             .is_some_and(|s| s.members.entries.is_empty() && s.index_infos.is_empty());
         if !shell_empty {
             return result;
         }
-        let sptr = Arc::as_ptr(&shell) as *mut crate::checker::types::Type;
+        let sptr = Arc::as_ptr(shell) as *mut crate::checker::types::Type;
         let rptr = Arc::as_ptr(&result) as *mut crate::checker::types::Type;
         unsafe {
             (*sptr).object_flags |= (*rptr).object_flags;
             std::mem::swap(&mut (*sptr).data, &mut (*rptr).data);
         }
-        shell
+        Arc::clone(shell)
     }
 }
