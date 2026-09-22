@@ -283,24 +283,9 @@ impl Checker {
                     }
                 }
             } else {
-                let expected = unwrap_if_generator(
-                    self,
-                    self.return_type_stack.last().and_then(|opt| opt.clone()),
-                );
-                if let Some(expected) = expected {
-                    if !expected.flags.contains(TypeFlags::Void)
-                        && !expected.flags.contains(TypeFlags::Undefined)
-                        && !expected.flags.contains(TypeFlags::Any)
-                    {
-                        let expected_str = self.type_to_string(&expected);
-                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                            self.current_file.clone(),
-                            node.loc,
-                            TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                            vec!["undefined".to_string(), expected_str],
-                        ));
-                    }
-                }
+                let annotated = self.return_type_stack.last().and_then(|opt| opt.clone());
+                let expected = unwrap_if_generator(self, annotated.clone());
+                self.check_bare_return_statement(node, container.as_ref(), expected);
             }
         }
     }

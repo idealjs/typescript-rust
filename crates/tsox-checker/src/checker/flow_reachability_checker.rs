@@ -204,6 +204,68 @@ impl Checker {
         ));
     }
 
+    pub fn check_bare_return_statement(
+        &mut self,
+        node: &Arc<Node>,
+        container: Option<&Arc<Node>>,
+        annotated: Option<Arc<Type>>,
+    ) {
+        let never = annotated
+            .as_ref()
+            .is_some_and(|t| t.flags.contains(TypeFlags::Never));
+        if self.strict_null_checks || never {
+            let Some(expected) = annotated else {
+                return;
+            };
+            if !expected.flags.contains(TypeFlags::Any)
+                && !self.is_type_assignable_to(&self.undefined_type(), &expected)
+            {
+                let expected_str = self.type_to_string(&expected);
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    node.loc,
+                    tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                    vec!["undefined".to_string(), expected_str],
+                ));
+            }
+            return;
+        }
+        if !self.compiler_options.no_implicit_returns.is_true() {
+            return;
+        }
+        let Some(container) = container else {
+            return;
+        };
+        if container.kind == SyntaxKind::Constructor {
+            return;
+        }
+        let t = match annotated {
+            Some(t) => t,
+            None => {
+                let Some(body) = function_like_body(container) else {
+                    return;
+                };
+                let inferred =
+                    self.infer_function_return_type(Some(container), Some(&body), None);
+                let is_async = container.has_syntactic_modifier(ModifierFlags::Async);
+                self.unwrap_async_return_type(inferred, is_async)
+            }
+        };
+        if self.maybe_type_of_kind(&t, TypeFlags::Void)
+            || t
+                .flags
+                .intersects(TypeFlags::Any | TypeFlags::Undefined)
+        {
+            return;
+        }
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            self.current_file.clone(),
+            node.loc,
+            tsox_core::diagnostics::messages_generated::NOT_ALL_CODE_PATHS_RETURN_A_VALUE,
+            vec![],
+        ));
+    }
+
     pub fn check_all_code_paths_annotated(
         &mut self,
         node: &Arc<Node>,
