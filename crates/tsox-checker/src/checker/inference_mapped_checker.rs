@@ -15,6 +15,8 @@ impl Checker {
         let Some(constraint) = constraint_type else {
             return false;
         };
+        let normalized = self.primitive_apparent_source(source);
+        let source = &normalized;
         if constraint.flags.intersects(TypeFlags::Union | TypeFlags::Intersection) {
             let types = constraint.types().map(|t| t.to_vec()).unwrap_or_default();
             let mut result = false;
@@ -165,7 +167,33 @@ impl Checker {
     }
 
     /// Go apparentType：原始类型的成员来自对应全局接口（Number/String/Boolean）
-    fn primitive_interface_members(&mut self, t: &Arc<Type>) -> Option<Vec<Arc<Symbol>>> {
+    fn primitive_apparent_source(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        let Some(name) = self.primitive_interface_name(t) else {
+            return Arc::clone(t);
+        };
+        if let Some(cached) = self.primitive_apparent_types.get(name) {
+            return Arc::clone(cached);
+        }
+        let Some(sym) = self.globals.get(name).cloned() else {
+            return Arc::clone(t);
+        };
+        let declared = self
+            .type_alias_links
+            .get(&sym)
+            .and_then(|l| l.declared_type.clone())
+            .unwrap_or_else(|| self.resolve_interface_type(&sym, None));
+        let complete = !crate::checker::utilities::is_type_error(&declared)
+            && declared
+                .as_structured()
+                .is_some_and(|s| !s.properties.is_empty());
+        if complete {
+            self.primitive_apparent_types
+                .insert(name, Arc::clone(&declared));
+        }
+        declared
+    }
+
+    fn primitive_interface_declared_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
         let name = self.primitive_interface_name(t)?;
         let sym = self.globals.get(name)?.clone();
         let declared = self
@@ -173,6 +201,11 @@ impl Checker {
             .get(&sym)
             .and_then(|l| l.declared_type.clone())
             .unwrap_or_else(|| self.resolve_interface_type(&sym, None));
+        Some(declared)
+    }
+
+    fn primitive_interface_members(&mut self, t: &Arc<Type>) -> Option<Vec<Arc<Symbol>>> {
+        let declared = self.primitive_interface_declared_type(t)?;
         declared.as_structured().map(|s| s.properties.clone())
     }
 
@@ -304,8 +337,13 @@ impl Checker {
         let mut new_props: Vec<Arc<Symbol>> = Vec::with_capacity(props.len());
         for prop in props {
             let mut sym = Symbol::new(prop.flags, prop.name.clone());
+            let readonly = self.is_readonly_symbol_for_identity(&prop);
             sym.check_flags = tsox_frontend::ast::CheckFlags::ReverseMapped
-                | (prop.check_flags & tsox_frontend::ast::CheckFlags::Readonly);
+                | (if readonly {
+                    tsox_frontend::ast::CheckFlags::Readonly
+                } else {
+                    tsox_frontend::ast::CheckFlags::empty()
+                });
             sym.declarations = prop.declarations.clone();
             let sym = Arc::new(sym);
             let raw_prop_type = self.get_type_of_symbol(&prop);
@@ -372,12 +410,14 @@ impl Checker {
         if !sym.flags.contains(tsox_frontend::ast::SymbolFlags::Interface) {
             return Arc::clone(t);
         }
-        let already_full = t.as_structured().is_some_and(|s| {
-            !s.properties.is_empty()
-                || !s.index_infos.is_empty()
-                || !s.signatures.is_empty()
-                || !s.members.is_empty()
-        });
+        let degraded = self.degraded_type_ptrs.contains(&t.id);
+        let already_full = !degraded
+            && t.as_structured().is_some_and(|s| {
+                !s.properties.is_empty()
+                    || !s.index_infos.is_empty()
+                    || !s.signatures.is_empty()
+                    || !s.members.is_empty()
+            });
         if already_full {
             return Arc::clone(t);
         }

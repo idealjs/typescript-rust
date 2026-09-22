@@ -183,6 +183,7 @@ impl Checker {
             variance_links: LinkStore::new(),
             reverse_mapped_symbol_links: LinkStore::new(),
             reverse_mapped_cache: HashMap::new(),
+            primitive_apparent_types: HashMap::new(),
             template_resolving_ids: std::collections::HashSet::new(),
             template_resolution_letway: false,
             deferred_indexed_access_cache: HashMap::new(),
