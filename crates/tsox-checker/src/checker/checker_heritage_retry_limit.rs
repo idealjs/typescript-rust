@@ -4,6 +4,8 @@ use crate::checker::checker::*;
 
 pub const HERITAGE_RETRY_LIMIT: u32 = 100;
 
+pub const ALIAS_SELF_INSTANTIATION_DEPTH: usize = 8;
+
 pub const EXTERNAL_EMIT_HELPER_IMPORT_DEFAULT: u32 = 1 << 0;
 pub const EXTERNAL_EMIT_HELPER_IMPORT_STAR: u32 = 1 << 1;
 pub const EXTERNAL_EMIT_HELPER_EXPORT_STAR: u32 = 1 << 2;

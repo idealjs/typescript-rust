@@ -12,6 +12,24 @@ impl Checker {
         if params.is_empty() || substitutions.is_empty() {
             return Arc::clone(t);
         }
+        let t_ptr = Arc::as_ptr(t) as usize;
+        if self.infer_subst_ancestor_stack.len() > 1000
+            && self.infer_subst_ancestor_stack.contains(&t_ptr)
+        {
+            return Arc::clone(t);
+        }
+        self.infer_subst_ancestor_stack.push(t_ptr);
+        let result = self.substitute_infer_type_parameters_inner(t, params, substitutions);
+        self.infer_subst_ancestor_stack.pop();
+        result
+    }
+
+    fn substitute_infer_type_parameters_inner(
+        &mut self,
+        t: &Arc<Type>,
+        params: &[Arc<Type>],
+        substitutions: &[Arc<Type>],
+    ) -> Arc<Type> {
 
         for (i, p) in params.iter().enumerate() {
             if Arc::ptr_eq(p, t)
@@ -49,6 +67,15 @@ impl Checker {
                     })
             });
             if !self_form {
+                let sym_key = Arc::as_ptr(&alias_sym) as *const tsox_frontend::ast::Symbol as usize;
+                let same_symbol_depth = self
+                    .alias_type_instantiation_stack
+                    .iter()
+                    .filter(|(k, _)| *k == sym_key)
+                    .count();
+                if same_symbol_depth >= crate::checker::checker::ALIAS_SELF_INSTANTIATION_DEPTH {
+                    return Arc::clone(t);
+                }
                 let new_args: Vec<Arc<Type>> = alias
                     .type_arguments
                     .iter()

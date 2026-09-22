@@ -300,7 +300,10 @@ impl Checker {
         let sptr = Arc::as_ptr(shell) as *mut crate::checker::types::Type;
         let rptr = Arc::as_ptr(&result) as *mut crate::checker::types::Type;
         unsafe {
-            (*sptr).object_flags |= (*rptr).object_flags;
+            (*sptr).flags = (*rptr).flags;
+            (*sptr).object_flags = (*rptr).object_flags;
+            (*sptr).symbol = (*rptr).symbol.clone();
+            (*sptr).alias = (*rptr).alias.clone();
             std::mem::swap(&mut (*sptr).data, &mut (*rptr).data);
         }
         Arc::clone(shell)
