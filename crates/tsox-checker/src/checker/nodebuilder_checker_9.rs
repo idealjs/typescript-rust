@@ -613,7 +613,7 @@ impl Checker {
         if sym.flags.contains(SymbolFlags::Class) {
             if let Some(structured) = t.as_structured() {
                 if !structured.construct_signatures().is_empty() {
-                    return format!("typeof {}", self.namespace_qualified_name(sym));
+                    return format!("typeof {}", self.symbol_display_name_for_print(sym));
                 }
             }
             // 类实例（含与命名空间合并的类）：typeof 前缀只给静态侧（构造
@@ -621,7 +621,7 @@ impl Checker {
             // 内类同尾部分支给限定名（d.D）
             return format!(
                 "{}{}",
-                self.namespace_qualified_name(sym),
+                self.symbol_display_name_for_print(sym),
                 self.declared_type_param_suffix(t, sym)
             );
         }
@@ -703,8 +703,32 @@ impl Checker {
         }
     }
 
-    pub(crate) fn namespace_qualified_name(&mut self, sym: &Arc<Symbol>) -> String {
-        if sym
+    pub(crate) fn internal_symbol_written_name(&self, sym: &Arc<Symbol>) -> Option<String> {
+        if !sym.name.starts_with('\u{FE}') {
+            return None;
+        }
+        let decl = sym.declarations.first()?;
+        if let Some(parent) = decl.parent()
+            && parent.kind == SyntaxKind::VariableDeclaration
+            && let Some(name) = parent.name()
+        {
+            return Some(name.text().to_string());
+        }
+        match decl.kind {
+            SyntaxKind::ClassExpression => Some("(Anonymous class)".to_string()),
+            SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => {
+                Some("(Anonymous function)".to_string())
+            }
+            _ => None,
+        }
+    }
+
+    pub(crate) fn symbol_display_name_for_print(&mut self, sym: &Arc<Symbol>) -> String {
+        self.internal_symbol_written_name(sym)
+            .unwrap_or_else(|| self.namespace_qualified_name(sym))
+    }
+
+    pub(crate) fn namespace_qualified_name(&mut self, sym: &Arc<Symbol>) -> String {        if sym
             .parent()
             .as_ref()
             .is_some_and(|p| p.flags.contains(SymbolFlags::ValueModule))
