@@ -321,6 +321,26 @@ impl Checker {
             }
             SyntaxKind::TypeAssertionExpression => {
                 if let tsox_frontend::ast::NodeData::TypeAssertion(data) = &node.data {
+                    // Go checkAssertion：erasableSyntaxOnly 下尖括号断言报 TS1294，
+                    // span 取断言起点到被断言表达式起点的区间
+                    if self.compiler_options.erasable_syntax_only.is_true()
+                        && !tsox_frontend::ast::is_in_js_file(node)
+                        && let Some(file) = self.current_file.clone()
+                    {
+                        let start =
+                            tsox_frontend::scanner::skip_trivia(&file.text, node.loc.pos());
+                        let range = tsox_core::core::text::TextRange::new(
+                            start,
+                            data.expression.loc.pos(),
+                        );
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            Some(file),
+                            range,
+                            tsox_core::diagnostics::messages_generated::
+                                THIS_SYNTAX_IS_NOT_ALLOWED_WHEN_ERASABLESYNTAXONLY_IS_ENABLED,
+                            vec![],
+                        ));
+                    }
                     self.check_expression(&data.expression);
                     // isConstTypeReference：不做 overlap 检查（Go 同）
                     if !crate::checker::utilities_has_only_expression_initialization::is_const_type_reference(&data.type_node) {
