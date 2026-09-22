@@ -111,8 +111,9 @@ pub fn is_prologue_directive(node: &Node) -> bool {
     }
 }
 
-/// Go IsPotentiallyExecutableNode：语句（var 须有初始化或块级绑定）或
-/// class/enum/module 声明；其余（如 import）不算可执行
+/// Go IsPotentiallyExecutableNode：KindFirstStatement..KindLastStatement
+/// 语句（var 须有初始化或块级绑定）或 class/enum/module 声明；
+/// 函数/接口/类型别名/import/export 不算可执行
 pub fn is_potentially_executable_node(node: &Node) -> bool {
     match node.kind {
         SyntaxKind::BreakStatement
@@ -132,18 +133,9 @@ pub fn is_potentially_executable_node(node: &Node) -> bool {
         | SyntaxKind::TryStatement
         | SyntaxKind::WhileStatement
         | SyntaxKind::WithStatement
-        | SyntaxKind::NotEmittedStatement
-        | SyntaxKind::ImportDeclaration
-        | SyntaxKind::ImportEqualsDeclaration
-        | SyntaxKind::ExportDeclaration
-        | SyntaxKind::ExportAssignment
-        | SyntaxKind::NamespaceExportDeclaration
         | SyntaxKind::ClassDeclaration
         | SyntaxKind::EnumDeclaration
-        | SyntaxKind::ModuleDeclaration
-        | SyntaxKind::FunctionDeclaration
-        | SyntaxKind::InterfaceDeclaration
-        | SyntaxKind::TypeAliasDeclaration => true,
+        | SyntaxKind::ModuleDeclaration => true,
         SyntaxKind::VariableStatement => {
             let Some(crate::ast::node_data_generated::NodeData::VariableStatement(data)) =
                 Some(&node.data)

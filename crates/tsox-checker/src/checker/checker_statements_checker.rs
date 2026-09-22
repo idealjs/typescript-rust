@@ -667,25 +667,35 @@ impl Checker {
         true
     }
 
-    /// Go isSourceElementUnreachable：旗标分支（const enum / 非实例化
-    /// module 除外）
-    pub(crate) fn is_source_element_unreachable(&self, node: &Arc<Node>) -> bool {
-        if !node
+    /// Go isSourceElementUnreachable：旗标分支优先（const enum 受
+    /// preserveConstEnums、非实例化 module 例外），无旗标走 flow 可达性兜底
+    pub(crate) fn is_source_element_unreachable(&mut self, node: &Arc<Node>) -> bool {
+        if node
             .flags
             .contains(tsox_frontend::ast::NodeFlags::Unreachable)
         {
-            return false;
-        }
-        match node.kind {
-            SyntaxKind::EnumDeclaration => !node.has_syntactic_modifier(
-                tsox_frontend::ast::ModifierFlags::Const,
-            ),
-            SyntaxKind::ModuleDeclaration => {
-                crate::checker::checker_attach_explicit_type_arguments::module_is_instantiated(
-                    node, false,
-                )
+            match node.kind {
+                SyntaxKind::EnumDeclaration => {
+                    !node.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Const)
+                        || self.compiler_options.should_preserve_const_enums()
+                }
+                SyntaxKind::ModuleDeclaration => {
+                    crate::checker::checker_attach_explicit_type_arguments::module_is_instantiated(
+                        node,
+                        false,
+                    )
+                }
+                _ => true,
             }
-            _ => true,
+        } else if let Some(flow) = self
+            .program
+            .symbol_map()
+            .flow_node_of(node)
+            .map(Arc::clone)
+        {
+            !self.is_reachable_flow_node(&flow)
+        } else {
+            false
         }
     }
 }

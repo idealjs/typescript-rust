@@ -21,6 +21,20 @@ impl Binder {
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return Arc::clone(antecedent);
         }
+        // Go createFlowCondition：true 字面量的 FALSE 分支、false 字面量的
+        // TRUE 分支直接返回 unreachableFlow（?? 右操作数除外），让
+        // while(true)/do{}while(true)/for(;false;) 之后的语句进入不可达流
+        let constant_contradiction = match expression.kind {
+            SyntaxKind::TrueKeyword => flags == FlowFlags::FALSE_CONDITION,
+            SyntaxKind::FalseKeyword => flags == FlowFlags::TRUE_CONDITION,
+            _ => false,
+        } && !expression
+            .parent()
+            .as_ref()
+            .is_some_and(|p| tsox_frontend::ast::is_nullish_coalesce(p));
+        if constant_contradiction {
+            return self.unreachable_flow();
+        }
         self.has_flow_effects = true;
         Arc::new(FlowNode {
             flags,
