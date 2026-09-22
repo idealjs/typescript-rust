@@ -330,10 +330,12 @@ impl Checker {
         }
     }
 
-    /// 元素访问的属性键：字符串字面量按文本，`Symbol.<well-known>` 按内部名
+    /// 元素访问的属性键：字符串/数字字面量按文本，`Symbol.<well-known>` 按内部名
     fn element_access_property_key(arg: &Arc<Node>) -> Option<String> {
         match arg.kind {
-            SyntaxKind::StringLiteral => Some(arg.text().to_string()),
+            SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral => {
+                Some(arg.text().to_string())
+            }
             _ => crate::binder::symbols_binder_4::well_known_symbol_member_name(arg),
         }
     }
