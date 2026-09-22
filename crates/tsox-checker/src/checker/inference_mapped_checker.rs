@@ -289,7 +289,8 @@ impl Checker {
         let mut new_props: Vec<Arc<Symbol>> = Vec::with_capacity(props.len());
         for prop in props {
             let mut sym = Symbol::new(prop.flags, prop.name.clone());
-            sym.check_flags = tsox_frontend::ast::CheckFlags::ReverseMapped;
+            sym.check_flags = tsox_frontend::ast::CheckFlags::ReverseMapped
+                | (prop.check_flags & tsox_frontend::ast::CheckFlags::Readonly);
             sym.declarations = prop.declarations.clone();
             let sym = Arc::new(sym);
             let raw_prop_type = self.get_type_of_symbol(&prop);
