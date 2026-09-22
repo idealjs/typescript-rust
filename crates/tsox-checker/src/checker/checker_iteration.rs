@@ -646,11 +646,11 @@ impl Checker {
         }
         let for_await = data.await_modifier.is_some();
         let expression_type = self.get_type_of_node(&data.expression);
-        self.get_iterated_type_or_element_type(
+        Some(self.check_iterated_type_or_element_type(
             IterationUse::ForOf { for_await },
             &expression_type,
             Some(&data.expression),
-        )
+        ))
     }
 
     pub(crate) fn check_for_of_reference_expression(&mut self, var_expr: &Arc<Node>) {
