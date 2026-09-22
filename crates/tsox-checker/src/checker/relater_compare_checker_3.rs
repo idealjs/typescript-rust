@@ -357,6 +357,20 @@ impl Checker {
         {
             return true;
         }
+        if _is_comparing_jsx_attributes
+            && target.flags.contains(TypeFlags::Intersection)
+            && target.types().is_some_and(|types| {
+                types.iter().any(|t| {
+                    t.flags.contains(TypeFlags::Object)
+                        && t
+                            .symbol
+                            .as_ref()
+                            .is_some_and(|s| s.flags.contains(SymbolFlags::Interface))
+                })
+            })
+        {
+            return true;
+        }
         false
     }
 

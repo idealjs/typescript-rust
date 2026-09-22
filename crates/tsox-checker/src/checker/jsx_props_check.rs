@@ -63,6 +63,22 @@ impl Checker {
         );
     }
 
+    fn intersect_intrinsic_attributes(&mut self, props: Arc<Type>) -> Arc<Type> {
+        if props.flags.contains(TypeFlags::Any) || self.is_error_type(&props) {
+            return props;
+        }
+        let Some(sym) = self
+            .get_jsx_type(crate::checker::jsx_impl_chunk::JsxNames::INTRINSIC_ATTRIBUTES)
+        else {
+            return props;
+        };
+        let intrinsic = self.get_declared_type_of_symbol(&sym);
+        if self.is_error_type(&intrinsic) {
+            return props;
+        }
+        self.get_intersection_type(vec![intrinsic, props])
+    }
+
     fn intrinsic_props_type(&mut self, tag_name: &Arc<Node>) -> Option<Arc<Type>> {
         let intrinsic_elements = self.get_jsx_intrinsic_elements()?;
         let tag_text = tag_name.text().to_string();
@@ -71,7 +87,8 @@ impl Checker {
             .get(&tag_text)
             .or_else(|| intrinsic_elements.exports.get(&tag_text))
         {
-            return Some(self.get_type_of_symbol(member));
+            let props = self.get_type_of_symbol(member);
+            return Some(self.intersect_intrinsic_attributes(props));
         }
         let elements_type = self.get_type_of_symbol(&intrinsic_elements);
         for info in self.get_index_infos_of_type(&elements_type) {
@@ -79,7 +96,7 @@ impl Checker {
                 && self.is_type_assignable_to(&self.get_string_type(), key)
                 && let Some(value) = &info.value_type
             {
-                return Some(Arc::clone(value));
+                return Some(self.intersect_intrinsic_attributes(Arc::clone(value)));
             }
         }
         None
@@ -108,9 +125,8 @@ impl Checker {
             self.class_props_type(opening, &sig, attrs_type)
         } else {
             let props = self.get_type_at_position(&sig, 0);
-            Some(self.instantiate_jsx_props_from_attributes(
-                &sig, props, attrs_type,
-            ))
+            let props = self.instantiate_jsx_props_from_attributes(&sig, props, attrs_type);
+            Some(self.intersect_intrinsic_attributes(props))
         }
     }
 
@@ -171,9 +187,8 @@ impl Checker {
         let sigs = self.get_signatures_of_type(&apparent, crate::checker::types::SignatureKind::Call);
         let sig = sigs.into_iter().next()?;
         let props = self.get_type_at_position(&sig, 0);
-        Some(self.instantiate_jsx_props_from_attributes(
-            &sig, props, attrs_type,
-        ))
+        let props = self.instantiate_jsx_props_from_attributes(&sig, props, attrs_type);
+        Some(self.intersect_intrinsic_attributes(props))
     }
 
     fn instantiate_jsx_props_from_attributes(
