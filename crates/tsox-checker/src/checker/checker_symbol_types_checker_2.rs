@@ -675,7 +675,12 @@ impl Checker {
             let prop_type = self.get_type_of_property_of_contextual_type(&ctx, &method_name)?;
             let sigs =
                 self.get_signatures_of_type(&prop_type, crate::checker::SignatureKind::Call);
-            let sig = sigs.first()?.clone();
+            // Go getContextualSignatureForObjectLiteralMethod：getSingleSignature
+            //（恰一个调用签名才用，多重载不给上下文参数型）
+            if sigs.len() != 1 {
+                return None;
+            }
+            let sig = sigs[0].clone();
             let is_rest = matches!(&param.data, NodeData::ParameterDeclaration(pd) if pd.dot_dot_dot_token.is_some());
             let is_this_param = param_index == 0
                 && matches!(&param.data, NodeData::ParameterDeclaration(pd)
@@ -727,8 +732,10 @@ impl Checker {
             _ => None,
         };
         let ctx = call_ctx.or_else(|| self.get_contextual_type(&host, ContextFlags::None))?;
-        let sigs = self.get_signatures_of_type(&ctx, crate::checker::SignatureKind::Call);
-        let sig = self.substitute_explicit_call_type_args(&call, &sigs.first()?.clone());
+        // Go getContextuallyTypedParameterType：经 getContextualSignature 门控
+        //（多重载且 noImplicitAny 关闭时无上下文签名，参数走隐式 any）
+        let gated = self.get_contextual_call_signature(&ctx, &host)?;
+        let sig = self.substitute_explicit_call_type_args(&call, &gated);
         let is_rest = matches!(&param.data, NodeData::ParameterDeclaration(pd) if pd.dot_dot_dot_token.is_some());
         let is_this_param = param_index == 0
             && matches!(&param.data, NodeData::ParameterDeclaration(pd)
