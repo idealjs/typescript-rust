@@ -287,6 +287,17 @@ impl Checker {
             SyntaxKind::PropertyAssignment | SyntaxKind::ShorthandPropertyAssignment => {
                 self.get_contextual_type_for_object_literal_element(&parent, _context_flags)
             }
+            // Go getContextualType：对象字面量展开操作数继承外层字面量的
+            // 上下文型（属性字面量在展开内得以保字面量）；本前端解析器对
+            // 对象展开统一产 SpreadElement（无 SpreadAssignment 形态）
+            SyntaxKind::SpreadAssignment | SyntaxKind::SpreadElement
+                if matches!(
+                    parent.parent().as_ref().map(|p| p.kind),
+                    Some(SyntaxKind::ObjectLiteralExpression)
+                ) =>
+            {
+                self.get_contextual_type(&parent.parent()?, _context_flags)
+            }
             // 对象字面量方法成员：方法节点自身的上下文型（参数定型经此）
             SyntaxKind::ObjectLiteralExpression
                 if node.kind == SyntaxKind::MethodDeclaration =>
