@@ -485,7 +485,16 @@ impl Checker {
         let mut ns_path = segments[0].text().to_string();
         for (i, seg) in segments.iter().enumerate().skip(1) {
             let text = seg.text();
-            let next = symbol.exports.get(text).cloned();
+            // Go binder 将枚举成员放 Exports 表（declareSymbolAndAddToSymbolTable
+            // 的 KindEnumDeclaration 分支），resolveQualifiedName 经
+            // getExportsOfSymbol 可命中；移植版枚举成员在 members 表
+            let next = symbol.exports.get(text).cloned().or_else(|| {
+                if symbol.flags.intersects(SymbolFlags::ENUM) {
+                    symbol.members.get(text).cloned()
+                } else {
+                    None
+                }
+            });
             match next {
                 Some(found) => {
                     if i + 1 < segments.len() {
