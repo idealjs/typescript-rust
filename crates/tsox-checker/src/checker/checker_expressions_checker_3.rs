@@ -211,6 +211,12 @@ impl Checker {
                 self.check_binding_pattern_element_types(&pd.name);
                 return;
             }
+            // Go getTypeOfVariableOrParameterOrPropertyWorker 对无注解参数的符号型
+            // 是 widened initializer 型,与初始化式比较恒真;上下文定型只发生在
+            // 签名实例化位,声明检查期不可见
+            if pd.type_node.is_none() {
+                return;
+            }
             let Some(symbol) = self.get_symbol_of_declaration(param) else {
                 return;
             };
