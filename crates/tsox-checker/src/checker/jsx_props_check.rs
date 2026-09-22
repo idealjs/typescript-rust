@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker::*;
+use crate::checker::inference::{InferenceContext, InferenceInfo, InferencePriority};
 use crate::checker::jsx_impl_chunk_2::*;
 use crate::checker::relater_relation::RelationKind;
 use crate::checker::types::*;
@@ -37,8 +38,9 @@ impl Checker {
             NodeData::JsxSelfClosingElement(d) => Some(Arc::clone(&d.attributes)),
             _ => None,
         };
+        let attrs_type = self.create_jsx_attributes_type(opening);
         let props = if opening.kind == SyntaxKind::JsxOpeningFragment {
-            self.jsx_fragment_props_type(opening)
+            self.jsx_fragment_props_type(opening, &attrs_type)
         } else {
             let tag_name = match jsx_tag_name(opening) {
                 Some(t) => t,
@@ -47,7 +49,7 @@ impl Checker {
             if is_jsx_intrinsic_tag_name(&tag_name) {
                 self.intrinsic_props_type(&tag_name)
             } else {
-                self.component_props_type(opening, &tag_name)
+                self.component_props_type(opening, &tag_name, &attrs_type)
             }
         };
         let Some(props) = props else { return };
@@ -98,6 +100,7 @@ impl Checker {
         &mut self,
         opening: &Arc<Node>,
         tag_name: &Arc<Node>,
+        attrs_type: &Arc<Type>,
     ) -> Option<Arc<Type>> {
         self.check_expression(tag_name);
         let tag_type = self.get_type_of_node(tag_name);
@@ -105,17 +108,20 @@ impl Checker {
             return None;
         }
         let apparent = self.get_apparent_type(&tag_type);
-        let construct = self.get_signatures_of_type(&apparent, crate::checker::SignatureKind::Construct);
+        let construct = self.get_signatures_of_type(&apparent, crate::checker::types::SignatureKind::Construct);
         let (sig, is_class) = if !construct.is_empty() {
             (construct.into_iter().next()?, true)
         } else {
-            let call = self.get_signatures_of_type(&apparent, crate::checker::SignatureKind::Call);
+            let call = self.get_signatures_of_type(&apparent, crate::checker::types::SignatureKind::Call);
             (call.into_iter().next()?, false)
         };
         if is_class {
-            self.class_props_type(opening, &sig)
+            self.class_props_type(opening, &sig, attrs_type)
         } else {
-            Some(self.get_type_at_position(&sig, 0))
+            let props = self.get_type_at_position(&sig, 0);
+            Some(self.instantiate_jsx_props_from_attributes(
+                &sig, props, attrs_type,
+            ))
         }
     }
 
@@ -123,6 +129,7 @@ impl Checker {
         &mut self,
         opening: &Arc<Node>,
         sig: &Arc<crate::checker::types::Signature>,
+        attrs_type: &Arc<Type>,
     ) -> Option<Arc<Type>> {
         let ns = self.get_jsx_namespace()?;
         let forced = self.get_name_from_jsx_element_attributes_container(
@@ -130,13 +137,13 @@ impl Checker {
             &ns,
         );
         let instance = self.get_return_type_of_signature(sig)?;
-        match forced {
-            None => Some(self.get_type_at_position(sig, 0)),
-            Some(name) if name.is_empty() => Some(instance),
+        let props = match forced {
+            None => self.get_type_at_position(sig, 0),
+            Some(name) if name.is_empty() => instance,
             Some(name) => {
                 let attr_type = self.get_type_of_property_of_type(&instance, &name);
                 match attr_type {
-                    Some(t) => Some(t),
+                    Some(t) => t,
                     None => {
                         let has_attrs = match &opening.data {
                             NodeData::JsxOpeningElement(d) => {
@@ -155,19 +162,56 @@ impl Checker {
                                 &[name],
                             );
                         }
-                        None
+                        return None;
                     }
                 }
             }
-        }
+        };
+        Some(self.instantiate_jsx_props_from_attributes(
+            sig, props, attrs_type,
+        ))
     }
 
-    fn jsx_fragment_props_type(&mut self, opening: &Arc<Node>) -> Option<Arc<Type>> {
+    fn jsx_fragment_props_type(
+        &mut self,
+        opening: &Arc<Node>,
+        attrs_type: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
         let frag_type = self.get_jsx_fragment_type_for_props(opening)?;
         let apparent = self.get_apparent_type(&frag_type);
-        let sigs = self.get_signatures_of_type(&apparent, crate::checker::SignatureKind::Call);
+        let sigs = self.get_signatures_of_type(&apparent, crate::checker::types::SignatureKind::Call);
         let sig = sigs.into_iter().next()?;
-        Some(self.get_type_at_position(&sig, 0))
+        let props = self.get_type_at_position(&sig, 0);
+        Some(self.instantiate_jsx_props_from_attributes(
+            &sig, props, attrs_type,
+        ))
+    }
+
+    fn instantiate_jsx_props_from_attributes(
+        &mut self,
+        sig: &Arc<crate::checker::types::Signature>,
+        props: Arc<Type>,
+        attrs_type: &Arc<Type>,
+    ) -> Arc<Type> {
+        if sig.type_parameters.is_empty() || !self.could_contain_type_variables(&props) {
+            return props;
+        }
+        let inferences: Vec<InferenceInfo> = sig
+            .type_parameters
+            .iter()
+            .map(|p| InferenceInfo::new(Arc::clone(p)))
+            .collect();
+        let mut context = InferenceContext::new(inferences);
+        context.signature = Some(Arc::clone(sig));
+        self.infer_types(
+            &mut context.inferences,
+            Some(Arc::clone(attrs_type)),
+            Some(Arc::clone(&props)),
+            InferencePriority::None,
+            false,
+        );
+        let inferred = self.get_inferred_types(&context);
+        self.substitute_infer_type_parameters(&props, &sig.type_parameters, &inferred)
     }
 
     fn get_jsx_fragment_type_for_props(&mut self, opening: &Arc<Node>) -> Option<Arc<Type>> {
