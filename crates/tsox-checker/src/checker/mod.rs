@@ -141,6 +141,7 @@ pub(crate) mod checker_prop_access_checker;
 pub(crate) mod checker_prop_access_checker_2;
 pub(crate) mod checker_prop_access_checker_3;
 pub(crate) mod checker_prop_access_checker_4;
+pub(crate) mod alias_import_context;
 pub(crate) mod checker_resolve;
 pub(crate) mod checker_resolve_checker;
 pub(crate) mod checker_resolve_access;

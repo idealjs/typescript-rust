@@ -1,5 +1,6 @@
 #![allow(unused_imports)]
 
+use crate::checker::alias_import_context::is_alias_declaration;
 use crate::checker::checker_resolve::*;
 use tsox_frontend::ast::{Node, NodeData, Symbol, SymbolFlags, SyntaxKind};
 
@@ -42,8 +43,56 @@ impl Checker {
                 self.resolve_module_member_symbol(&module, &name, 8)
             }
             NodeData::NamespaceImport(_) => {
-                let (module, _) = self.import_declaration_context(&decl)?;
-                Some(module)
+                let ctx = self.import_declaration_context(&decl);
+                let import_decl = self.ancestor_of_kind(&decl, SyntaxKind::ImportDeclaration)?;
+                let NodeData::ImportDeclaration(d) = &import_decl.data else {
+                    return None;
+                };
+                // Go resolveExternalModule：目标文件解析成功但无模块指示
+                //（sourceFile.Symbol 为 nil 的脚本文件）时在说明符处报
+                // TS2306 并按未解析处理；判定文件以 program 级解析为准
+                let spec_loc = d.module_specifier.loc;
+                let spec_text = d
+                    .module_specifier
+                    .text()
+                    .trim_matches(['"', '\'', '`'])
+                    .to_string();
+                let cur = self.get_source_file_of_node(&import_decl)?;
+                let prog_path = self.program.resolve_external_module_path(
+                    &spec_text,
+                    &cur.file_name,
+                    tsox_core::core::compiler_options::ModuleKind::None,
+                );
+                let prog_file = prog_path.and_then(|path| {
+                    self.program.get_source_file(&path).map(|sf| {
+                        (
+                            sf.file_name.clone(),
+                            sf.external_module_indicator.is_some(),
+                            sf.common_js_module_indicator.is_some(),
+                        )
+                    })
+                });
+                let (resolved_name, is_module, is_cjs) = prog_file?;
+                if !is_module && !is_cjs {
+                    let report_file = self
+                        .get_source_file_of_node(&import_decl)
+                        .or_else(|| self.current_file.clone());
+                    if !self.diagnostics.get_all().iter().any(|dd| {
+                        dd.code == 2306
+                            && dd.loc == spec_loc
+                            && dd.file.as_ref().map(|f| f.file_name.as_str())
+                                == report_file.as_ref().map(|f| f.file_name.as_str())
+                    }) {
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            report_file,
+                            spec_loc,
+                            tsox_core::diagnostics::messages_generated::FILE_0_IS_NOT_A_MODULE,
+                            vec![resolved_name],
+                        ));
+                    }
+                    return None;
+                }
+                ctx.map(|(module, _)| module)
             }
             NodeData::ImportClause(d) => {
                 let (module, spec) = self.import_declaration_context(&decl)?;
@@ -179,60 +228,6 @@ impl Checker {
             _ => None,
         }
     }
-
-    /// import 声明上下文：(目标模块符号, 说明符文本)
-    pub(crate) fn import_declaration_context(
-        &mut self,
-        decl: &Arc<Node>,
-    ) -> Option<(Arc<Symbol>, String)> {
-        let import_decl = self
-            .ancestor_of_kind(decl, SyntaxKind::ImportDeclaration)?;
-        let NodeData::ImportDeclaration(d) = &import_decl.data else {
-            return None;
-        };
-        let spec = d
-            .module_specifier
-            .text()
-            .trim_matches(['"', '\'', '`'])
-            .to_string();
-        let file_module = self.module_symbol_of_containing_file(&import_decl)?;
-        let module = self.resolve_module_spec_from(&file_module, &spec)?;
-        Some((module, spec))
-    }
-
-    fn module_symbol_of_containing_file(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
-        let file = self.get_source_file_of_node(node)?;
-        let program = self.program.symbol_map();
-        program.symbol_of(&file.node).map(Arc::clone)
-    }
-
-    fn ancestor_of_kind<'a>(
-        &self,
-        node: &'a Arc<Node>,
-        kind: SyntaxKind,
-    ) -> Option<Arc<Node>> {
-        let mut cur = node.parent();
-        while let Some(n) = cur {
-            if n.kind == kind {
-                return Some(n);
-            }
-            cur = n.parent();
-        }
-        None
-    }
-}
-
-fn is_alias_declaration(node: &Arc<Node>) -> bool {
-    matches!(
-        node.kind,
-        SyntaxKind::ImportClause
-            | SyntaxKind::ImportSpecifier
-            | SyntaxKind::NamespaceImport
-            | SyntaxKind::ExportSpecifier
-            | SyntaxKind::ImportEqualsDeclaration
-            | SyntaxKind::NamespaceExport
-            | SyntaxKind::ExportAssignment
-    )
 }
 
 impl Checker {
