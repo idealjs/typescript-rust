@@ -64,6 +64,11 @@ pub(crate) fn apply_options(options: &HashMap<String, OptValue>, out: &mut Compi
                     };
                 }
             }
+            "ignoreDeprecations" | "ignoredeprecations" => {
+                if let Some(s) = value.as_str() {
+                    out.ignore_deprecations = s.to_string();
+                }
+            }
             "lib" => {
                 if let Some(list) = value.as_list() {
                     out.lib = list.to_vec();

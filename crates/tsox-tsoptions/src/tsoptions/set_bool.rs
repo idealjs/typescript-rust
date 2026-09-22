@@ -83,6 +83,11 @@ pub(crate) fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
         "build" => options.build = t,
         "singlethreaded" => options.single_threaded = t,
         "quiet" => options.quiet = t,
+        "allowunreachablecode" => options.allow_unreachable_code = t,
+        "allowunusedlabels" => options.allow_unused_labels = t,
+        "erasablesyntaxonly" => options.erasable_syntax_only = t,
+        "nouncheckedsideeffectimports" => options.no_unchecked_side_effect_imports = t,
+        "libreplacement" => options.lib_replacement = t,
         "strict" => {
             options.strict = t;
 
@@ -186,6 +191,11 @@ pub fn apply_test_settings_with_base(
         "quiet",
         "strict",
         "alwaysstrict",
+        "allowunreachablecode",
+        "allowunusedlabels",
+        "erasablesyntaxonly",
+        "nouncheckedsideeffectimports",
+        "libreplacement",
     ];
     const KNOWN_STR_OPTIONS: &[&str] = &[
         "target",
