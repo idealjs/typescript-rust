@@ -232,24 +232,25 @@ impl Checker {
         structured: &StructuredTypeData,
         index_type: &Arc<Type>,
     ) -> Option<Arc<Type>> {
+        let is_string_like = index_type
+            .flags
+            .intersects(TypeFlags::String | TypeFlags::StringLiteral);
+        let is_number_like = index_type
+            .flags
+            .intersects(TypeFlags::Number | TypeFlags::NumberLiteral);
+        let mut string_index: Option<Arc<Type>> = None;
         for info in &structured.index_infos {
-            let key_matches = match info.key_type.as_ref() {
-                Some(key) => {
-                    if key.flags.contains(TypeFlags::String) {
-                        index_type.flags.contains(TypeFlags::String)
-                            || index_type.flags.contains(TypeFlags::StringLiteral)
-                    } else if key.flags.contains(TypeFlags::Number) {
-                        index_type.flags.contains(TypeFlags::Number)
-                            || index_type.flags.contains(TypeFlags::NumberLiteral)
-                    } else {
-                        false
-                    }
-                }
-                None => true,
+            let Some(key) = info.key_type.as_ref() else {
+                continue;
             };
-            if key_matches {
+            if key.flags.contains(TypeFlags::String) {
+                string_index = info.value_type.clone();
+            } else if key.flags.contains(TypeFlags::Number) && is_number_like {
                 return info.value_type.clone();
             }
+        }
+        if (is_string_like || is_number_like) && string_index.is_some() {
+            return string_index;
         }
         None
     }

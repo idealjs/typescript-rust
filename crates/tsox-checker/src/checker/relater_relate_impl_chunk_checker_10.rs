@@ -211,14 +211,6 @@ impl Checker {
                         .unwrap_or_else(|| self.any_type());
                     if !self.is_type_related_to(&source_value, &target_value, relation) {
                         if self.relater_chain_active {
-                            let sv_str = self.type_to_string(&source_value);
-                            let tv_str = self.type_to_string(&target_value);
-                            self.push_relation_head_with_tp_note(
-                                &source_value,
-                                &target_value,
-                                msg::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                                vec![sv_str, tv_str],
-                            );
                             let same_key = source_info
                                 .key_type
                                 .as_ref()
