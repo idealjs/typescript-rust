@@ -116,8 +116,17 @@ impl Checker {
                     || container_sym.flags.intersects(SymbolFlags::Function)
                 {
                     if let Some(sym) = container_sym.members.get(name) {
-                        if sym.flags.intersects(meaning)
-                            || self.alias_chain_hits_meaning(&sym, meaning)
+                        // Go nameresolver Resolve 的 InterfaceDeclaration 容器分支：
+                        // 成员查找以 meaning&Type 限定且命中须为声明于本容器的类型参数，
+                        // 同名属性成员不可见（interface B3 { Date: Date } 的注解位
+                        // 须继续向外解析到全局 interface Date）
+                        let interface_member_visible = !container_sym
+                            .flags
+                            .intersects(SymbolFlags::Interface)
+                            || sym.flags.contains(SymbolFlags::TypeParameter);
+                        if interface_member_visible
+                            && (sym.flags.intersects(meaning)
+                                || self.alias_chain_hits_meaning(&sym, meaning))
                         {
                             return Some(Arc::clone(sym));
                         }
@@ -184,8 +193,15 @@ impl Checker {
                 }
 
                 if let Some(sym) = container_sym.members.get(name) {
-                    if sym.flags.intersects(meaning & SymbolFlags::TYPE)
-                        || self.alias_chain_hits_meaning(&sym, meaning)
+                    // 同上：Go nameresolver 的 interface/class 容器成员查找仅
+                    // 类型参数可见（meaning&Type + isTypeParameterSymbolDeclaredInContainer）
+                    let interface_member_visible = !container_sym
+                        .flags
+                        .intersects(SymbolFlags::Interface)
+                        || sym.flags.contains(SymbolFlags::TypeParameter);
+                    if interface_member_visible
+                        && (sym.flags.intersects(meaning & SymbolFlags::TYPE)
+                            || self.alias_chain_hits_meaning(&sym, meaning))
                     {
                         return Some(Arc::clone(sym));
                     }
@@ -238,11 +254,18 @@ impl Checker {
                 }
                 if let Some(a_sym) = symbol_map.symbols.get(&aid) {
                     if !a_sym.flags.intersects(SymbolFlags::Class) {
-                        if let Some(sym) = a_sym.members.get(name)
-                            && (sym.flags.intersects(meaning)
-                                || self.alias_chain_hits_meaning(&sym, meaning))
-                        {
-                            return Some(Arc::clone(sym));
+                        if let Some(sym) = a_sym.members.get(name) {
+                            // 同 scope 栈：interface 容器成员仅类型参数可见
+                            let interface_member_visible = !a_sym
+                                .flags
+                                .intersects(SymbolFlags::Interface)
+                                || sym.flags.contains(SymbolFlags::TypeParameter);
+                            if interface_member_visible
+                                && (sym.flags.intersects(meaning)
+                                    || self.alias_chain_hits_meaning(&sym, meaning))
+                            {
+                                return Some(Arc::clone(sym));
+                            }
                         }
                         if a_sym
                             .flags
