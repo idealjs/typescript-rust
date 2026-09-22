@@ -2,6 +2,46 @@
 
 use crate::checker::checker_resolve::*;
 
+const ANCESTRY_CONTAINERS: &[SyntaxKind] = &[
+    SyntaxKind::SourceFile,
+    SyntaxKind::ModuleDeclaration,
+    SyntaxKind::Block,
+    SyntaxKind::CatchClause,
+    SyntaxKind::ForStatement,
+    SyntaxKind::ForInStatement,
+    SyntaxKind::ForOfStatement,
+    SyntaxKind::FunctionDeclaration,
+    SyntaxKind::FunctionExpression,
+    SyntaxKind::ArrowFunction,
+    SyntaxKind::MethodDeclaration,
+    SyntaxKind::MethodSignature,
+    SyntaxKind::CallSignature,
+    SyntaxKind::ConstructSignature,
+    SyntaxKind::FunctionType,
+    SyntaxKind::ConstructorType,
+    SyntaxKind::MappedType,
+    SyntaxKind::Constructor,
+    SyntaxKind::GetAccessor,
+    SyntaxKind::SetAccessor,
+    SyntaxKind::InterfaceDeclaration,
+    SyntaxKind::ClassDeclaration,
+    SyntaxKind::ClassExpression,
+    SyntaxKind::TypeAliasDeclaration,
+    SyntaxKind::EnumDeclaration,
+];
+
+pub(crate) fn lexical_scope_chain_ids(node: &Arc<Node>) -> Vec<u64> {
+    let mut chain = Vec::new();
+    let mut ancestor = node.parent();
+    while let Some(a) = ancestor {
+        if ANCESTRY_CONTAINERS.contains(&a.kind) {
+            chain.push(a.id());
+        }
+        ancestor = a.parent();
+    }
+    chain
+}
+
 impl Checker {
     pub fn resolve_identifier(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
         self.resolve_identifier_with_meaning(node, SymbolFlags::all())
@@ -210,33 +250,6 @@ impl Checker {
         }
 
         {
-            const ANCESTRY_CONTAINERS: &[SyntaxKind] = &[
-                SyntaxKind::SourceFile,
-                SyntaxKind::ModuleDeclaration,
-                SyntaxKind::Block,
-                SyntaxKind::CatchClause,
-                SyntaxKind::ForStatement,
-                SyntaxKind::ForInStatement,
-                SyntaxKind::ForOfStatement,
-                SyntaxKind::FunctionDeclaration,
-                SyntaxKind::FunctionExpression,
-                SyntaxKind::ArrowFunction,
-                SyntaxKind::MethodDeclaration,
-                SyntaxKind::MethodSignature,
-                SyntaxKind::CallSignature,
-                SyntaxKind::ConstructSignature,
-                SyntaxKind::FunctionType,
-                SyntaxKind::ConstructorType,
-                SyntaxKind::MappedType,
-                SyntaxKind::Constructor,
-                SyntaxKind::GetAccessor,
-                SyntaxKind::SetAccessor,
-                SyntaxKind::InterfaceDeclaration,
-                SyntaxKind::ClassDeclaration,
-                SyntaxKind::ClassExpression,
-                SyntaxKind::TypeAliasDeclaration,
-                SyntaxKind::EnumDeclaration,
-            ];
             let mut ancestor = node.parent();
             while let Some(a) = ancestor {
                 if !ANCESTRY_CONTAINERS.contains(&a.kind) {

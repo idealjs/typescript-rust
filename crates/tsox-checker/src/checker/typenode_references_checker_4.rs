@@ -126,13 +126,19 @@ impl Checker {
                     );
                 }
 
-                self.push_scope(
+                let saved_scope_stack = std::mem::take(&mut self.scope_stack);
+                for scope_id in crate::checker::checker_resolve_checker::lexical_scope_chain_ids(
                     symbol
                         .declarations
                         .iter()
                         .next()
                         .expect("interface has a declaration"),
-                );
+                )
+                .into_iter()
+                .rev()
+                {
+                    self.scope_stack.push(scope_id);
+                }
 
                 let merged_members: Vec<Arc<Node>> = interface_decls
                     .iter()
@@ -198,7 +204,7 @@ impl Checker {
                 if heritage_base_degraded || base_shell {
                     heritage_degraded = true;
                 }
-                self.pop_scope();
+                self.scope_stack = saved_scope_stack;
                 self.type_argument_stack = saved_type_argument_stack;
                 let result = if base_types.is_empty() {
                     own_result.clone()

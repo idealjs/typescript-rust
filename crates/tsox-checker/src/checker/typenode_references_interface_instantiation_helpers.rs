@@ -137,7 +137,6 @@ impl Checker {
                         {
                             for type_ref in hc.types.iter() {
                                 let bt = self.get_type_from_type_node(type_ref);
-
                                 if crate::checker::utilities::is_type_error(&bt)
                                     && !*heritage_degraded
                                 {
