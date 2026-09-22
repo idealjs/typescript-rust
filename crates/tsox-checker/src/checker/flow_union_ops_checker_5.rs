@@ -392,6 +392,14 @@ impl Checker {
                 return Some(member);
             }
         }
+        // Go getBaseTypes→getTupleBaseType：元组结构化成员经
+        // Array/ReadonlyArray<元素并集> 基类型实例化解析，声明型泛型参数
+        // 不得外泄（inferFromProperties 会以外层类型参数污染候选集）
+        if let crate::checker::types::TypeData::Tuple(tuple) = &t.data
+            && let Some(member) = self.tuple_base_type_member(tuple, name)
+        {
+            return Some(member);
+        }
         if let Some(sym) = self.get_property_of_type_cached(t, name) {
             return Some(sym);
         }
@@ -485,6 +493,40 @@ impl Checker {
         let obj_type = self.get_declared_type_of_symbol(&obj_sym);
         obj_type
             .as_structured()
+            .and_then(|s| s.members.get(name).cloned())
+    }
+
+    fn tuple_base_type_member(
+        &mut self,
+        tuple: &crate::checker::types::TupleTypeData,
+        name: &str,
+    ) -> Option<Arc<Symbol>> {
+        let mut elements: Vec<Arc<Type>> = Vec::new();
+        for e in &tuple.element_infos {
+            let Some(ty) = &e.type_ else { continue };
+            if e.flags.intersects(
+                crate::checker::types::ElementFlags::Rest
+                    | crate::checker::types::ElementFlags::Variadic,
+            ) && self.is_array_type(ty)
+            {
+                elements.push(self.get_array_element_type(ty));
+            } else {
+                elements.push(Arc::clone(ty));
+            }
+        }
+        let union = if elements.is_empty() {
+            self.never_type()
+        } else {
+            self.get_union_type(elements)
+        };
+        let iface = if tuple.readonly {
+            "ReadonlyArray"
+        } else {
+            "Array"
+        };
+        let sym = self.globals.get(iface).cloned()?;
+        let base = self.resolve_interface_type_ex(&sym, Some(vec![union]));
+        base.as_structured()
             .and_then(|s| s.members.get(name).cloned())
     }
 
