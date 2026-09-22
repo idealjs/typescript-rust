@@ -25,6 +25,7 @@ impl Checker {
             if !crate::checker::utilities::is_unit_type(&prop_type) {
                 continue;
             }
+            let regular_prop = self.get_regular_type_of_literal_type(&prop_type);
             let mut matching = Vec::new();
             let mut distinct_seen = false;
             for t in &ui.types {
@@ -37,9 +38,8 @@ impl Checker {
                     matching.clear();
                     break;
                 }
-                if Arc::ptr_eq(&cprop_type, &prop_type)
-                    || cprop_type.id == prop_type.id
-                {
+                let regular_cprop = self.get_regular_type_of_literal_type(&cprop_type);
+                if regular_cprop.id == regular_prop.id {
                     matching.push(Arc::clone(t));
                 } else {
                     distinct_seen = true;

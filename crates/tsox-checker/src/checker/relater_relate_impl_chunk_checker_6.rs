@@ -159,22 +159,17 @@ impl Checker {
         let source = self.get_regular_type_of_object_literal(source);
         if let Some(ui) = target.as_union_or_intersection() {
             let save_len = self.relater_error_chain.len();
-            let mut best: Option<Vec<RelaterChainEntry>> = None;
             let matched = {
+                let was_active = self.silence_relation_chain();
                 let mut m = false;
                 for t in &ui.types {
                     if self.is_type_related_to(&source, t, relation) {
                         m = true;
                         break;
                     }
-                    if best
-                        .as_ref()
-                        .is_none_or(|b| b.len() < self.relater_error_chain.len())
-                    {
-                        best = Some(self.relater_error_chain.clone());
-                    }
-                    self.relater_error_chain.truncate(save_len);
                 }
+                self.restore_relation_chain(was_active);
+                self.relater_error_chain.truncate(save_len);
                 m
             };
             if matched {
@@ -184,20 +179,29 @@ impl Checker {
             if source.flags.contains(TypeFlags::Intersection)
                 && let Some(si) = source.as_union_or_intersection()
             {
-                self.relater_error_chain.truncate(save_len);
+                let was_active = self.silence_relation_chain();
+                let mut any = false;
                 for s in &si.types {
                     if self.is_type_related_to(s, target, relation) {
-                        return true;
+                        any = true;
+                        break;
                     }
                 }
+                self.restore_relation_chain(was_active);
+                if any {
+                    return true;
+                }
                 self.relater_error_chain.truncate(save_len);
-            }
-            if let Some(b) = best {
-                self.relater_error_chain = b;
             }
 
             if self.relater_chain_active
                 && self.speculation_depth == 0
+                && !source
+                    .flags
+                    .intersects(crate::checker::types_type_id::TYPE_FLAGS_PRIMITIVE)
+                && !target
+                    .flags
+                    .intersects(crate::checker::types_type_id::TYPE_FLAGS_PRIMITIVE)
                 && let Some(best_t) = self.get_best_matching_type_for_error(&source, target)
             {
                 self.relater_error_chain.truncate(save_len);

@@ -92,12 +92,14 @@ impl Checker {
                 );
             } else {
                 if !check_mode.intersects(SIGNATURE_CHECK_MODE_CALLBACK) && !strict_variance {
+                    let was_silent = self.silence_relation_chain();
                     related = self.compare_types(
                         source_type.clone(),
                         target_type.clone(),
                         relation,
                         false,
                     );
+                    self.restore_relation_chain(was_silent);
                 }
                 if related.is_false() {
                     related = self.compare_types(
