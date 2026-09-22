@@ -318,7 +318,7 @@ impl Checker {
             return false;
         }
         let mut count = 0usize;
-        let mut last_ptr: *const Type = std::ptr::null();
+        let mut last_id: u32 = 0;
         for s in stack {
             let same = match (&t.symbol, &s.symbol) {
                 (Some(a), Some(b)) => Arc::ptr_eq(a, b),
@@ -326,14 +326,13 @@ impl Checker {
                 _ => false,
             };
             if same {
-                let p = Arc::as_ptr(s);
-                if p != last_ptr {
+                if s.id >= last_id {
                     count += 1;
                     if count >= max_depth {
                         return true;
                     }
                 }
-                last_ptr = p;
+                last_id = s.id;
             }
         }
         false

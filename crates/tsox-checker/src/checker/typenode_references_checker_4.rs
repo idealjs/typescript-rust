@@ -65,6 +65,9 @@ impl Checker {
             if let Some(shell) = self.pending_interface_shells.get(&(key as usize)) {
                 let shell = Arc::clone(shell);
                 let args = type_args.unwrap_or_default();
+                if args.is_empty() {
+                    return shell;
+                }
                 // 壳让外层构建不完整：标记 degraded 使其不进缓存（重试拿完整版），
                 // relater 对 degraded 放行；空壳型自身也标 degraded
                 self.heritage_degraded_events += 1;
@@ -242,6 +245,15 @@ impl Checker {
             heritage_degraded = true;
         }
 
+        let result = if shell_inserted
+            && !has_type_args
+            && !crate::checker::utilities::is_type_error(&result)
+        {
+            self.fill_interface_shell(shell_key, result)
+        } else {
+            result
+        };
+
         let mut degraded_accepted = false;
         if heritage_degraded {
             let sym_key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol as usize;
@@ -267,5 +279,25 @@ impl Checker {
             }
         }
         result
+    }
+
+    fn fill_interface_shell(&mut self, shell_key: usize, result: Arc<Type>) -> Arc<Type> {
+        let Some(shell) = self.pending_interface_shells.get(&shell_key) else {
+            return result;
+        };
+        let shell = Arc::clone(shell);
+        let shell_empty = shell
+            .as_structured()
+            .is_some_and(|s| s.members.entries.is_empty() && s.index_infos.is_empty());
+        if !shell_empty {
+            return result;
+        }
+        let sptr = Arc::as_ptr(&shell) as *mut crate::checker::types::Type;
+        let rptr = Arc::as_ptr(&result) as *mut crate::checker::types::Type;
+        unsafe {
+            (*sptr).object_flags |= (*rptr).object_flags;
+            std::mem::swap(&mut (*sptr).data, &mut (*rptr).data);
+        }
+        shell
     }
 }

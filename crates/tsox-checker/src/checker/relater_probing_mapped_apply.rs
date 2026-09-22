@@ -52,7 +52,7 @@ impl Checker {
     /// 约束域（字面量并集/索引签名）展开为匿名对象
     pub(crate) fn expand_mapped_by_constraint(
         &mut self,
-        _t: &Arc<Type>,
+        t: &Arc<Type>,
         m: &crate::checker::types::MappedTypeData,
         constraint: &Arc<Type>,
         chain: &[(Vec<Arc<Type>>, Vec<Arc<Type>>)],
@@ -76,7 +76,7 @@ impl Checker {
                     index_symbol: None,
                     components: Vec::new(),
                 };
-                let obj = Type::new(
+                let mut obj = Type::new(
                     TypeFlags::Object,
                     TypeData::Object(crate::checker::types::ObjectTypeData {
                         structured: crate::checker::types::StructuredTypeData {
@@ -86,6 +86,7 @@ impl Checker {
                         ..Default::default()
                     }),
                 );
+                obj.symbol = t.symbol.clone();
                 return Some(Arc::new(obj));
             }
             return None;
@@ -126,7 +127,7 @@ impl Checker {
             members.insert(name, Arc::clone(&symbol));
             props.push(symbol);
         }
-        let obj = Type::new(
+        let mut obj = Type::new(
             TypeFlags::Object,
             TypeData::Object(crate::checker::types::ObjectTypeData {
                 structured: crate::checker::types::StructuredTypeData {
@@ -137,6 +138,7 @@ impl Checker {
                 ..Default::default()
             }),
         );
+        obj.symbol = t.symbol.clone();
         Some(Arc::new(obj))
     }
 
