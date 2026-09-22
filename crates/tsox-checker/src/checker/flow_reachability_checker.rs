@@ -262,6 +262,9 @@ impl Checker {
                 return;
             }
         }
+        if !self.compiler_options.no_implicit_returns.is_true() {
+            return;
+        }
         self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
             self.current_file.clone(),
             error_loc,
