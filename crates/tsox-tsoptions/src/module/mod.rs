@@ -16,6 +16,7 @@ pub struct ResolvedModule {
     pub package_id: Option<PackageId>,
     pub is_external_library_import: bool,
     pub alternate_result: Option<String>,
+    pub resolution_diagnostics: Vec<DiagAndArgs>,
 }
 
 impl ResolvedModule {

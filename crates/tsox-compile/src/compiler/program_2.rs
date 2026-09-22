@@ -315,6 +315,9 @@ impl Program {
                     }
                     ids
                 };
+                let mut resolution_diag_keys: std::collections::HashSet<
+                    (String, tsox_core::core::compiler_options::ModuleKind),
+                > = std::collections::HashSet::new();
                 for import_node in &file.imports {
                     let module_spec = import_node.text();
                     if module_spec.is_empty() {
@@ -340,13 +343,15 @@ impl Program {
                         resolution_mode,
                         None,
                     );
-                    for d in resolution_diags {
-                        diagnostics.push(Arc::new(Diagnostic::new(
-                            None,
-                            tsox_core::core::text::TextRange::new(0, 0),
-                            *d.message,
-                            d.args,
-                        )));
+                    if resolution_diag_keys.insert((module_spec.to_string(), resolution_mode)) {
+                        for d in resolution_diags {
+                            diagnostics.push(Arc::new(Diagnostic::new(
+                                None,
+                                tsox_core::core::text::TextRange::new(0, 0),
+                                *d.message,
+                                d.args,
+                            )));
+                        }
                     }
                     let is_resolved = resolved.as_ref().map(|m| m.is_resolved()).unwrap_or(false);
                     let lib_diagnostics_skipped = options.skip_lib_check.is_true()

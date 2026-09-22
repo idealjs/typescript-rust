@@ -45,7 +45,8 @@ impl Resolver {
         let trace = self.compiler_options.trace_resolution.is_true();
         if !trace {
             if let Some(cached) = self.module_cache.get(&cache_key) {
-                return (Some((*cached).clone()), Vec::new());
+                let diags = cached.resolution_diagnostics.clone();
+                return (Some((*cached).clone()), diags);
             }
         }
 
@@ -64,8 +65,9 @@ impl Resolver {
             self.host.fs(),
             self.host.get_current_directory(),
         );
-        let result = state.resolve_node_like();
+        let mut result = state.resolve_node_like();
         let diagnostics = std::mem::take(&mut state.resolution_diagnostics);
+        result.resolution_diagnostics = diagnostics.clone();
         let result_arc = Arc::new(result.clone());
         self.module_cache.set(cache_key, result_arc);
         (Some(result), diagnostics)
