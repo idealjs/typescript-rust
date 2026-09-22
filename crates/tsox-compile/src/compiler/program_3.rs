@@ -97,6 +97,20 @@ impl Program {
             // c/e 两份 TS1362）不可跨文件互吞
             let mut seen: std::collections::HashSet<(usize, usize, i32, String, String)> =
                 std::collections::HashSet::new();
+            for d in &self.diagnostics {
+                if is_program_phase_module_not_found(d) {
+                    seen.insert((
+                        d.loc.pos(),
+                        d.loc.end(),
+                        d.code,
+                        d.message_args.join("\u{1}"),
+                        d.file
+                            .as_ref()
+                            .map(|f| f.file_name.clone())
+                            .unwrap_or_default(),
+                    ));
+                }
+            }
             let mut deduped: Vec<Diagnostic> = Vec::with_capacity(diagnostics.len());
             for d in diagnostics.drain(..) {
                 let key = (
@@ -306,4 +320,15 @@ impl tsox_checker::checker::Program for Program {
             other => other,
         }
     }
+}
+
+fn is_program_phase_module_not_found(d: &Diagnostic) -> bool {
+    use tsox_core::diagnostics::messages_generated as msg;
+    const KEYS: &[&str] = &[
+        msg::CANNOT_FIND_MODULE_0_OR_ITS_CORRESPONDING_TYPE_DECLARATIONS.key,
+        msg::CANNOT_FIND_NAME_0_DO_YOU_NEED_TO_INSTALL_TYPE_DEFINITIONS_FOR_NODE_TRY_NPM_I_SAVE_DEV_TYPES_SLASHNODE.key,
+        msg::CANNOT_FIND_NAME_0_DO_YOU_NEED_TO_INSTALL_TYPE_DEFINITIONS_FOR_NODE_TRY_NPM_I_SAVE_DEV_TYPES_SLASHNODE_AND_THEN_ADD_NODE_TO_THE_TYPES_FIELD_IN_YOUR_TSCONFIG.key,
+        msg::CANNOT_FIND_MODULE_OR_TYPE_DECLARATIONS_FOR_SIDE_EFFECT_IMPORT_OF_0.key,
+    ];
+    KEYS.contains(&d.message_key)
 }
