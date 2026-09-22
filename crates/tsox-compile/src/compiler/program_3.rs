@@ -92,6 +92,7 @@ impl Program {
             });
         }
         diagnostics.extend(check_diagnostics);
+        let mut diagnostics = self.filter_diagnostics_with_preceding_directives(diagnostics);
         {
             // 键含文件名：多文件同偏移同码的诊断（exportNamespace7 的
             // c/e 两份 TS1362）不可跨文件互吞

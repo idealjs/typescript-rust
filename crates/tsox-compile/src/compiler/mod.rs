@@ -20,6 +20,7 @@ pub(crate) mod extract_reference_types_directives;
 pub(crate) mod impl_chunk;
 pub(crate) mod import_resolution_mode_override;
 pub(crate) mod package_dedupe;
+pub(crate) mod program_directive_filter;
 pub(crate) mod program_2;
 pub(crate) mod reference_path_directives;
 pub(crate) mod program_3;
@@ -31,6 +32,8 @@ pub use extract_reference_types_directives::*;
 pub use impl_chunk::*;
 #[allow(unused_imports)]
 pub use import_resolution_mode_override::*;
+#[allow(unused_imports)]
+pub use program_directive_filter::*;
 #[allow(unused_imports)]
 pub use program_2::*;
 #[allow(unused_imports)]
