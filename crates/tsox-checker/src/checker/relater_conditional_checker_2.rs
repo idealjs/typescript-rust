@@ -179,6 +179,18 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
     ) -> bool {
+        let was_silent = self.silence_relation_chain();
+        let r = self.conditional_fallback_related_probing(source, target, relation);
+        self.restore_relation_chain(was_silent);
+        r
+    }
+
+    fn conditional_fallback_related_probing(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
         if source.flags.contains(TypeFlags::Conditional)
             && self.deferred_constraint_depth < 100
             && let Some(constraint) = self.deferred_default_constraint_of_conditional(source)

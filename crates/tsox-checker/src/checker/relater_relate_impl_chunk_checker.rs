@@ -265,6 +265,7 @@ impl Checker {
                 return cached;
             }
         }
+        let is_top_level = self.relater_depth == 0;
         self.relation_in_progress.insert(key);
         self.relater_depth += 1;
 
@@ -295,6 +296,9 @@ impl Checker {
             && !self.relater_overflow
         {
             result = self.conditional_fallback_related(&source, &target, relation);
+        }
+        if !result && self.relater_chain_active && !is_top_level {
+            self.report_nested_relation_failure(&source, &target, relation);
         }
         self.relation_cache.insert(key, result);
         result

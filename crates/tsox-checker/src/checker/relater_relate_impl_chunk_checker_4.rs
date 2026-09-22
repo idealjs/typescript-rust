@@ -46,7 +46,10 @@ impl Checker {
             if let Some(constraint) = self.get_constraint_of_type_parameter(source)
                 && some_type_is_type_parameter(&constraint)
             {
-                return self.is_type_related_to(&constraint, target, relation);
+                let was_silent = self.silence_relation_chain();
+                let r = self.is_type_related_to(&constraint, target, relation);
+                self.restore_relation_chain(was_silent);
+                return r;
             }
             return false;
         }
@@ -55,7 +58,10 @@ impl Checker {
             let constraint = self
                 .get_constraint_of_type_parameter(source)
                 .unwrap_or_else(|| self.unknown_type());
-            if self.is_type_related_to(&constraint, target, relation) {
+            let was_silent = self.silence_relation_chain();
+            let related = self.is_type_related_to(&constraint, target, relation);
+            self.restore_relation_chain(was_silent);
+            if related {
                 return true;
             }
         }
@@ -73,10 +79,13 @@ impl Checker {
             && source_is_indexed_access
             && !t.contains(TypeFlags::IndexedAccess)
         {
-            if let Some(constraint) = self.constraint_of_indexed_access(source)
-                && self.is_type_related_to(&constraint, target, relation)
-            {
-                return true;
+            if let Some(constraint) = self.constraint_of_indexed_access(source) {
+                let was_silent = self.silence_relation_chain();
+                let related = self.is_type_related_to(&constraint, target, relation);
+                self.restore_relation_chain(was_silent);
+                if related {
+                    return true;
+                }
             }
         }
 

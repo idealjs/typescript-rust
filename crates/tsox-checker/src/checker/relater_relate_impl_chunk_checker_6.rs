@@ -140,55 +140,7 @@ impl Checker {
                             vec![member_str, target_str],
                         );
                     } else if let Some(t) = first_failed {
-                        self.is_type_related_to(&t, target, relation);
-                        let target_str = self.type_to_string(target);
-
-                        let head_source = if !self.type_could_have_top_level_singleton_types(target)
-                            && (crate::checker::is_fresh_literal_type(&t)
-                                || t.flags.intersects(TYPE_FLAGS_LITERAL))
-                        {
-                            let base = self.get_base_type_of_literal_type_for_display(&t);
-                            self.type_to_string(&base)
-                        } else {
-                            self.type_to_string(&t)
-                        };
-
-                        let mut suppress = false;
-                        if let Some(entry) = self.relater_error_chain.last() {
-                            let m = entry.message;
-                            let a = &entry.args;
-                            suppress = if m
-                                == tsox_core::diagnostics::messages_generated::
-                                    PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2
-                            {
-                                a.len() == 3 && a[1] == head_source && a[2] == target_str
-                            } else if m
-                                == tsox_core::diagnostics::messages_generated::
-                                    TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2
-                                || m
-                                    == tsox_core::diagnostics::messages_generated::
-                                        TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2_AND_3_MORE
-                            {
-                                a.len() >= 2 && a[0] == head_source && a[1] == target_str
-                            } else if m
-                                == tsox_core::diagnostics::messages_generated::
-                                    THE_TYPE_0_IS_READONLY_AND_CANNOT_BE_ASSIGNED_TO_THE_MUTABLE_TYPE_1
-                            {
-                                a.len() == 2 && a[0] == head_source && a[1] == target_str
-                            } else {
-                                false
-                            };
-                        }
-                        if !suppress {
-                            let msg = if head_source == target_str {
-                                tsox_core::diagnostics::messages_generated::
-                                    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_TWO_DIFFERENT_TYPES_WITH_THIS_NAME_EXIST_BUT_THEY_ARE_UNRELATED
-                            } else {
-                                tsox_core::diagnostics::messages_generated::
-                                    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1
-                            };
-                            self.relater_report_error(msg, vec![head_source, target_str]);
-                        }
+                        let _ = self.is_type_related_to(&t, target, relation);
                     }
                 }
                 return false;

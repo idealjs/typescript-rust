@@ -270,12 +270,6 @@ impl Checker {
             let source_type = self.get_type_of_symbol(&source_prop);
             let target_type = self.substituted_member_type_of(target, target_prop);
             if !self.is_type_related_to(&source_type, &target_type, relation) {
-                let prop_source_str = self.type_to_string(&source_type);
-                let prop_target_str = self.type_to_string(&target_type);
-                self.relater_report_error(
-                    tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                    vec![prop_source_str, prop_target_str],
-                );
                 self.relater_report_error(
                     tsox_core::diagnostics::messages_generated::TYPES_OF_PROPERTY_0_ARE_INCOMPATIBLE,
                     vec![self.chain_property_arg_name(target_prop)],

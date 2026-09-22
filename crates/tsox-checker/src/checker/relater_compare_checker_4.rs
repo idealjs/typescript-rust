@@ -182,6 +182,28 @@ impl Checker {
     // 链拼点分全限定名；外部模块文件符号输出 import("name")，ambient 模块
     // 名去引号
     pub fn fully_qualified_type_string(&mut self, t: &Arc<Type>) -> String {
+        if let TypeData::Tuple(tuple) = &t.data {
+            let rendered: Vec<String> = tuple
+                .element_infos
+                .iter()
+                .map(|info| {
+                    let inner = info
+                        .type_
+                        .as_ref()
+                        .map(|e| self.fully_qualified_type_string(e))
+                        .unwrap_or_default();
+                    if info.flags.contains(ElementFlags::Rest) {
+                        format!("...{inner}[]")
+                    } else if info.flags.contains(ElementFlags::Optional) {
+                        format!("{inner}?")
+                    } else {
+                        inner
+                    }
+                })
+                .collect();
+            let prefix = if tuple.readonly { "readonly " } else { "" };
+            return format!("{prefix}[{}]", rendered.join(", "));
+        }
         if t.flags.contains(TypeFlags::Union)
             && let Some(ui) = t.as_union_or_intersection()
             && ui.types.len() > 1

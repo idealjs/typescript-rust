@@ -196,6 +196,44 @@ impl Checker {
         self.relater_error_chain.push(RelaterChainEntry { message, args, related });
     }
 
+    pub(crate) fn report_nested_relation_failure(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: crate::checker::relater_relation::RelationKind,
+    ) {
+        use tsox_core::diagnostics::messages_generated as msg;
+        let (source_str, target_str) = self.get_type_names_for_error_display(source, target);
+        let generalized = if !target.flags.contains(TypeFlags::Never)
+            && (crate::checker::is_fresh_literal_type(source)
+                || source.flags.intersects(crate::checker::types::TYPE_FLAGS_LITERAL))
+            && !self.type_could_have_top_level_singleton_types(target)
+        {
+            let base = self.get_base_type_of_literal_type_for_display(source);
+            Some((self.type_to_string(&base), target_str.clone()))
+        } else {
+            None
+        };
+        let (head_source, head_target) =
+            generalized.unwrap_or_else(|| (source_str.clone(), target_str.clone()));
+        let head = if relation == crate::checker::relater_relation::RelationKind::Comparable {
+            msg::TYPE_0_IS_NOT_COMPARABLE_TO_TYPE_1
+        } else if head_source == head_target {
+            msg::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_TWO_DIFFERENT_TYPES_WITH_THIS_NAME_EXIST_BUT_THEY_ARE_UNRELATED
+        } else {
+            msg::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1
+        };
+        self.push_relation_head_with_tp_note(source, target, head, vec![head_source, head_target]);
+    }
+
+    pub(crate) fn silence_relation_chain(&mut self) -> bool {
+        std::mem::replace(&mut self.relater_chain_active, false)
+    }
+
+    pub(crate) fn restore_relation_chain(&mut self, was: bool) {
+        self.relater_chain_active = was;
+    }
+
     pub(crate) fn chain_property_arg_name(&self, prop: &Arc<tsox_frontend::ast::Symbol>) -> String {
         let decl = prop
             .value_declaration
