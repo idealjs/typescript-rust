@@ -155,6 +155,7 @@ impl Checker {
             pending_jsx_2875: None,
             relater_error_chain: Vec::new(),
             relater_excess_error_node: None,
+            relater_error_node: None,
             relater_chain_active: false,
             relater_pending_primitive_source: false,
             property_lookup_skips_index_synthesis: false,

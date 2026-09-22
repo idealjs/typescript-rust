@@ -35,6 +35,7 @@ impl Checker {
             return self.is_type_related_to(source, target, relation);
         }
         self.relater_excess_error_node = None;
+        self.relater_error_node = error_node.cloned();
         let saved_chain = std::mem::take(&mut self.relater_error_chain);
         let was_active = self.relater_chain_active;
         self.relater_chain_active = true;

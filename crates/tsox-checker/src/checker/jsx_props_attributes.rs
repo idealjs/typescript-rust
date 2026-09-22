@@ -9,6 +9,14 @@ use tsox_frontend::ast::{Node, NodeData, Symbol, SymbolFlags};
 
 impl Checker {
     pub(crate) fn create_jsx_attributes_type(&mut self, opening: &Arc<Node>) -> Arc<Type> {
+        self.create_jsx_attributes_type_with_context(opening, None)
+    }
+
+    pub(crate) fn create_jsx_attributes_type_with_context(
+        &mut self,
+        opening: &Arc<Node>,
+        context_props: Option<&Arc<Type>>,
+    ) -> Arc<Type> {
         let mut pairs: Vec<(String, Arc<Type>, Vec<Arc<Node>>)> = Vec::new();
         let mut spread: Option<Arc<Type>> = None;
         let children_name = self
@@ -37,6 +45,11 @@ impl Checker {
                                     _ => self.get_type_of_node(init),
                                 },
                                 None => self.true_type(),
+                            };
+                            let t = if a.initializer.is_some() {
+                                self.widen_jsx_attribute_type(&t, &name, context_props)
+                            } else {
+                                t
                             };
                             pairs.push((name, t, vec![Arc::clone(prop)]));
                         }
@@ -125,6 +138,25 @@ impl Checker {
             ),
             None => segment,
         }
+    }
+
+    fn widen_jsx_attribute_type(
+        &mut self,
+        t: &Arc<Type>,
+        name: &str,
+        context_props: Option<&Arc<Type>>,
+    ) -> Arc<Type> {
+        let contextual = context_props
+            .and_then(|p| self.get_type_of_property_of_type(p, name));
+        let literal_of_ctx = contextual
+            .as_ref()
+            .is_some_and(|c| self.is_literal_of_contextual_type(t, c));
+        let t = if literal_of_ctx {
+            Arc::clone(t)
+        } else {
+            self.get_widened_literal_type(t)
+        };
+        self.get_regular_type_of_literal_type(&t)
     }
 
     fn jsx_child_types(&mut self, children: &[Arc<Node>]) -> Vec<Arc<Type>> {

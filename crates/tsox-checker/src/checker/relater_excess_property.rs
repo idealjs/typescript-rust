@@ -73,13 +73,54 @@ impl Checker {
                     let error_target = self.excess_check_error_target(&reduced_target);
                     let prop_name = crate::checker::property_name_for_display(&prop.name);
                     let target_str = self.type_to_string(&error_target);
-                    if let Some(decl) = prop.value_declaration.as_ref() {
-                        self.relater_excess_error_node = decl.name().cloned();
+                    if self.excess_error_context_is_jsx() {
+                        let same_file = prop
+                            .value_declaration
+                            .as_ref()
+                            .and_then(|d| d.name())
+                            .zip(self.relater_error_node.clone())
+                            .and_then(|(prop_name_node, err)| {
+                                self.get_source_file_of_node(&prop_name_node)
+                                    .zip(self.get_source_file_of_node(&err))
+                                    .map(|(a, b)| a.file_name == b.file_name)
+                            })
+                            .unwrap_or(false);
+                        if same_file
+                            && let Some(name_node) =
+                                prop.value_declaration.as_ref().and_then(|d| d.name())
+                        {
+                            self.relater_excess_error_node = Some(Arc::clone(name_node));
+                        }
+                        match self
+                            .get_suggested_symbol_for_nonexistent_jsx_attribute(
+                                &prop_name,
+                                &error_target,
+                            )
+                            .as_ref()
+                            .map(|s| s.name.clone())
+                        {
+                            Some(suggestion) => {
+                                self.relater_report_error(
+                                    msg::PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1_DID_YOU_MEAN_2,
+                                    vec![prop_name, target_str, suggestion],
+                                );
+                            }
+                            None => {
+                                self.relater_report_error(
+                                    msg::PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+                                    vec![prop_name, target_str],
+                                );
+                            }
+                        }
+                    } else {
+                        if let Some(decl) = prop.value_declaration.as_ref() {
+                            self.relater_excess_error_node = decl.name().cloned();
+                        }
+                        self.relater_report_error(
+                            msg::OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
+                            vec![prop_name, target_str],
+                        );
                     }
-                    self.relater_report_error(
-                        msg::OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
-                        vec![prop_name, target_str],
-                    );
                 }
                 return true;
             }
@@ -103,6 +144,23 @@ impl Checker {
             }
         }
         false
+    }
+
+    fn excess_error_context_is_jsx(&self) -> bool {
+        use tsox_frontend::ast::SyntaxKind;
+        let is_opening_like = |k: SyntaxKind| {
+            matches!(
+                k,
+                SyntaxKind::JsxOpeningElement
+                    | SyntaxKind::JsxSelfClosingElement
+                    | SyntaxKind::JsxOpeningFragment
+            )
+        };
+        self.relater_error_node.as_ref().is_some_and(|n| {
+            n.kind == SyntaxKind::JsxAttributes
+                || is_opening_like(n.kind)
+                || n.parent().as_ref().is_some_and(|p| is_opening_like(p.kind))
+        })
     }
 
     pub(crate) fn excess_check_error_target(&mut self, t: &Arc<Type>) -> Arc<Type> {

@@ -42,7 +42,7 @@ impl Checker {
             }
         };
         let Some(props) = props else { return };
-        let attrs_type = self.create_jsx_attributes_type(opening);
+        let attrs_type = self.create_jsx_attributes_type_with_context(opening, Some(&props));
         let error_node = match jsx_tag_name(opening) {
             Some(t) => t,
             None => Arc::clone(opening),

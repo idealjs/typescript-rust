@@ -103,6 +103,7 @@ pub struct Checker {
     pub pending_jsx_2875: Option<(tsox_core::core::text::TextRange, String)>,
     pub relater_error_chain: Vec<RelaterChainEntry>,
     pub relater_excess_error_node: Option<Arc<tsox_frontend::ast::Node>>,
+    pub relater_error_node: Option<Arc<tsox_frontend::ast::Node>>,
     pub relater_chain_active: bool,
     pub relater_pending_primitive_source: bool,
     pub property_lookup_skips_index_synthesis: bool,

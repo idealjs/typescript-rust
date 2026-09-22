@@ -396,6 +396,13 @@ impl Binder {
                     INTERNAL_SYMBOL_NAME_TYPE,
                 );
             }
+            SyntaxKind::JsxAttributes => {
+                self.bind_anonymous_declaration(
+                    node,
+                    SymbolFlags::ObjectLiteral,
+                    INTERNAL_SYMBOL_NAME_JSX_ATTRIBUTES,
+                );
+            }
             _ => {}
         }
 
