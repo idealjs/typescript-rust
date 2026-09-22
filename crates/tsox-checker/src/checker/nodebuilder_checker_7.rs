@@ -368,10 +368,11 @@ impl Checker {
             }
         }
 
-        // Go createAnonymousTypeNodeEx shouldEmitTypeOfSymbol：内部名匿名符号
-        // （对象字面量等）不按符号名显示，走成员展开
+        // Go createAnonymousTypeNodeEx shouldEmitTypeOfSymbol：Class 符号
+        // （含匿名类表达式的 þclass 内部名）按符号名显示，其余内部名匿名符号
+        // （对象字面量等）走成员展开
         if let Some(sym) = &t.symbol
-            && !sym.name.starts_with('\u{FE}')
+            && (!sym.name.starts_with('\u{FE}') || sym.flags.contains(SymbolFlags::Class))
         {
             return self.symbol_type_to_string(t, sym, flags);
         }
