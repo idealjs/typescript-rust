@@ -2,6 +2,9 @@
 
 use crate::checker::flow_narrow_destructured::*;
 
+use tsox_frontend::ast::ElementAccessExpressionData;
+use tsox_frontend::ast::StringLiteralData;
+
 impl Checker {
     pub(crate) fn binding_pattern_sibling_access(
         &self,
@@ -75,7 +78,15 @@ impl Checker {
         let parent_type = self.type_for_binding_pattern_parent(&pattern_parent)?;
         let constraint = self.constituents_base_constraint_union(&parent_type);
         if !constraint.flags.contains(TypeFlags::Union) {
-            return None;
+            self.binding_pattern_narrowing_stack.push(pattern_parent_id);
+            let result = self.narrow_destructured_by_element_access(
+                &decl,
+                &pattern_parent,
+                &parent_type,
+                location_flow,
+            );
+            self.binding_pattern_narrowing_stack.pop();
+            return result;
         }
         self.binding_pattern_narrowing_stack.push(pattern_parent_id);
         let result = self.narrow_binding_pattern_reference(&pattern, location_flow, &constraint);
@@ -85,6 +96,73 @@ impl Checker {
             return Some(self.never_type());
         }
         self.binding_element_type_from_parent_type(&decl, &pattern_parent, &narrowed)
+    }
+
+    fn narrow_destructured_by_element_access(
+        &mut self,
+        decl: &Arc<Node>,
+        pattern_parent: &Arc<Node>,
+        parent_type: &Arc<Type>,
+        location_flow: &Arc<FlowNode>,
+    ) -> Option<Arc<Type>> {
+        if parent_type.flags.intersects(TypeFlags::Any | TypeFlags::Never) {
+            return Some(Arc::clone(parent_type));
+        }
+        let mut chain: Vec<String> = Vec::new();
+        let mut element = Arc::clone(decl);
+        loop {
+            let pattern = element.parent()?;
+            if pattern.kind != SyntaxKind::ObjectBindingPattern {
+                return None;
+            }
+            chain.push(Checker::binding_element_property_name(&element)?);
+            let up = pattern.parent()?;
+            if !matches!(up.data, NodeData::BindingElement(_)) {
+                break;
+            }
+            element = up;
+        }
+        let initializer = match &pattern_parent.data {
+            NodeData::VariableDeclaration(d) => d.initializer.clone(),
+            NodeData::ParameterDeclaration(d) => d.initializer.clone(),
+            _ => None,
+        }?;
+        let mut expr = initializer;
+        for name in chain.iter().rev() {
+            let literal = Arc::new(Node::new(
+                SyntaxKind::StringLiteral,
+                NodeData::StringLiteral(StringLiteralData {
+                    text: name.clone(),
+                    token_flags: 0,
+                }),
+            ));
+            let access = Arc::new(Node::new(
+                SyntaxKind::ElementAccessExpression,
+                NodeData::ElementAccessExpression(ElementAccessExpressionData {
+                    expression: expr,
+                    question_dot_token: None,
+                    argument_expression: Arc::clone(&literal),
+                }),
+            ));
+            literal.set_parent(&access);
+            expr = access;
+        }
+        let mut declared = Arc::clone(parent_type);
+        for name in chain.iter().rev() {
+            declared = self.get_property_type_of_type(&declared, name)?;
+        }
+        let declared = self.filter_binding_parent_undefined(pattern_parent, declared);
+        let target = FlowRef::Node(Arc::clone(&expr));
+        let key = self.flow_cache_key(&target, location_flow, &declared);
+        if let Some(cached) = self.flow_type_cache.get(&key) {
+            return Some(Arc::clone(cached));
+        }
+        self.flow_type_cache.insert(key, Arc::clone(&declared));
+        let mut query = FlowQuery::default();
+        let narrowed =
+            self.type_at_flow_node(&declared, &declared, location_flow, &target, 0, &mut query);
+        self.flow_type_cache.insert(key, Arc::clone(&narrowed));
+        Some(narrowed)
     }
 
     fn narrow_binding_pattern_reference(
