@@ -147,10 +147,15 @@ impl Checker {
                 }
                 if source_args.len() == target_args.len()
                     && !source_args.is_empty()
-                    && source_args.iter().zip(target_args.iter()).all(|(a, b)| {
-                        self.is_type_related_to(a, b, relation)
-                            && self.is_type_related_to(b, a, relation)
-                    })
+                    && {
+                        let was_silent = self.silence_relation_chain();
+                        let ok = source_args.iter().zip(target_args.iter()).all(|(a, b)| {
+                            self.is_type_related_to(a, b, relation)
+                                && self.is_type_related_to(b, a, relation)
+                        });
+                        self.restore_relation_chain(was_silent);
+                        ok
+                    }
                 {
                     return true;
                 }
