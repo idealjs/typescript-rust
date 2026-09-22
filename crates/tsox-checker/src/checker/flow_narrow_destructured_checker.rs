@@ -71,24 +71,25 @@ impl Checker {
         {
             return None;
         }
-        let pattern_parent_id = pattern_parent.id();
-        if self.binding_pattern_narrowing_stack.contains(&pattern_parent_id) {
+        let parent_type = self.type_for_binding_pattern_parent(&root)?;
+        let constraint = self.constituents_base_constraint_union(&parent_type);
+        let guard_id = root.id();
+        if self.binding_pattern_narrowing_stack.contains(&guard_id) {
             return None;
         }
-        let parent_type = self.type_for_binding_pattern_parent(&pattern_parent)?;
-        let constraint = self.constituents_base_constraint_union(&parent_type);
-        if !constraint.flags.contains(TypeFlags::Union) {
-            self.binding_pattern_narrowing_stack.push(pattern_parent_id);
+        let is_nested = matches!(&pattern_parent.data, NodeData::BindingElement(_));
+        if is_nested || !constraint.flags.contains(TypeFlags::Union) {
+            self.binding_pattern_narrowing_stack.push(guard_id);
             let result = self.narrow_destructured_by_element_access(
                 &decl,
-                &pattern_parent,
+                &root,
                 &parent_type,
                 location_flow,
             );
             self.binding_pattern_narrowing_stack.pop();
             return result;
         }
-        self.binding_pattern_narrowing_stack.push(pattern_parent_id);
+        self.binding_pattern_narrowing_stack.push(guard_id);
         let result = self.narrow_binding_pattern_reference(&pattern, location_flow, &constraint);
         self.binding_pattern_narrowing_stack.pop();
         let narrowed = result?;
