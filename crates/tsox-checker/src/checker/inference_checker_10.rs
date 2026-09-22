@@ -335,31 +335,21 @@ impl Checker {
     ) -> Option<Arc<Signature>> {
         let t = self.get_contextual_type(node, ContextFlags::Signature)?;
         if let TypeData::Union(u) = &t.data {
-            let mut signature_lists: Vec<Vec<Arc<Signature>>> = Vec::new();
+            let mut first: Option<Arc<Signature>> = None;
             for current in &u.union_or_intersection.types {
-                if let Some(signature) = self.get_contextual_call_signature(current, node) {
-                    signature_lists.push(vec![signature]);
+                let Some(signature) = self.get_contextual_call_signature(current, node) else {
+                    continue;
+                };
+                match &first {
+                    None => first = Some(signature),
+                    Some(f) => {
+                        if f.parameters.len() != signature.parameters.len() {
+                            return None;
+                        }
+                    }
                 }
             }
-            if signature_lists.is_empty() {
-                return None;
-            }
-            if signature_lists.len() == 1 {
-                return Some(Arc::clone(&signature_lists[0][0]));
-            }
-            let first_count = self.get_parameter_count(&signature_lists[0][0]);
-            if signature_lists
-                .iter()
-                .any(|l| self.get_parameter_count(&l[0]) != first_count)
-            {
-                return None;
-            }
-            let mut combined = self.get_union_signatures(&signature_lists);
-            return if combined.len() == 1 {
-                Some(combined.remove(0))
-            } else {
-                None
-            };
+            return first;
         }
         self.get_contextual_call_signature(&t, node)
     }
