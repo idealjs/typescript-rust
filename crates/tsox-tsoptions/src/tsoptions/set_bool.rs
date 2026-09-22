@@ -200,7 +200,12 @@ pub fn apply_test_settings_with_base(
         options.no_implicit_any = tsox_core::core::tristate::Tristate::True;
     }
 
-    for (name, raw_value) in settings {
+    let mut ordered_names: Vec<&String> = settings.keys().collect();
+    ordered_names.sort();
+    ordered_names.sort_by_key(|n| !n.eq_ignore_ascii_case("strict"));
+
+    for name in ordered_names {
+        let raw_value = &settings[name];
         let lower = name.to_lowercase();
         let trimmed = raw_value.trim().trim_end_matches(';').to_string();
 
@@ -237,5 +242,6 @@ pub fn apply_test_settings_with_base(
         }
     }
 
+    unrecognized.sort();
     (options, unrecognized)
 }
