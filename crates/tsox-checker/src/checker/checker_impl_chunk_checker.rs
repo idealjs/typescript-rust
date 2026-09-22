@@ -190,6 +190,7 @@ impl Checker {
             interface_shell_reify_cache: HashMap::new(),
             reverse_mapped_print_stack: Vec::new(),
             alias_args_resolution_stack: Vec::new(),
+            alias_type_instantiation_stack: Vec::new(),
             alias_instantiation_cache: HashMap::new(),
             current_alias_frame: None,
             reverse_mapped_depth: Vec::new(),

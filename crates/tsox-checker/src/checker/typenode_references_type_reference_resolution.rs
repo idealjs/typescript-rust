@@ -168,90 +168,7 @@ impl Checker {
                     .collect(),
                 None => Vec::new(),
             };
-            let frame = (key as usize, arg_types.iter().map(|t| t.id).collect::<Vec<_>>());
-            if let Some(cached) = self.alias_instantiation_cache.get(&frame).cloned() {
-                // 坏上下文（空作用域等）解析出的 error 驻留会永久掩盖正确结果，
-                // 命中即废弃重算
-                if cached.intrinsic_name() != Some("error") {
-                    // 提前返回也必须弹 frame，否则栈泄漏会让后续同引用被
-                    // in_progress 误判为循环
-                    self.alias_args_resolution_stack.pop();
-                    return cached;
-                }
-                self.alias_instantiation_cache.remove(&frame);
-            }
-            let declared = {
-                let cached = self
-                    .type_alias_links
-                    .get(&symbol)
-                    .and_then(|l| l.declared_type.clone());
-                cached.unwrap_or_else(|| {
-                    let saved_static = self.in_static_member_type;
-                    self.in_static_member_type = false;
-                    let found = self.resolve_alias_body(symbol);
-                    self.in_static_member_type = saved_static;
-                    if !crate::checker::utilities::is_type_error(&found) {
-                        self.type_alias_links.get_or_default(symbol).declared_type =
-                            Some(Arc::clone(&found));
-                    }
-                    found
-                })
-            };
-            let (tp_symbols, _type_node) = self.collect_alias_type_params_and_body(symbol);
-            let mut arg_types = arg_types;
-            arg_types.extend(self.alias_missing_default_type_arguments(
-                symbol,
-                &tp_symbols,
-                &arg_types,
-            ));
-            if let Some(mapped) = self.intrinsic_alias_instantiation(symbol, &arg_types) {
-                self.alias_args_resolution_stack.pop();
-                return mapped;
-            }
-            let tp_types: Vec<Arc<Type>> = tp_symbols
-                .iter()
-                .map(|tp| self.get_type_parameter_from_symbol(tp))
-                .collect();
-            let declared_is_conditional = matches!(&declared.data, TypeData::Conditional(_));
-            let found = if tp_types.is_empty() || arg_types.is_empty() {
-                Arc::clone(&declared)
-            } else {
-                self.substitute_infer_type_parameters(&declared, &tp_types, &arg_types)
-            };
-            // Go getConditionalType（checker.go 24784）：alias 传播到匿名对象/
-            // mapped/挂起条件的实例化结果，但**条件的解析分支**不带 alias
-            // （result = instantiateType(branch) 独立实例化），hover 显示为
-            // 展开形态
-            let found_is_deferred_conditional = matches!(
-                &found.data,
-                TypeData::Conditional(c)
-                    if c.resolved_true_type.get().is_none() && c.resolved_false_type.get().is_none()
-            );
-            if !declared_is_conditional || found_is_deferred_conditional {
-                // Go instantiateTypeWithAlias：泛型别名实例化仅当声明体本身
-                // 携带 alias（对象字面量/union/intersection/mapped/挂起条件/
-                // deferred 引用体）时传播实例化后的 alias；indexed access 等
-                // 无 alias 声明体（Go getAliasForTypeNode 不附着）不传播
-                if !tp_types.is_empty()
-                    && declared
-                        .alias
-                        .as_ref()
-                        .is_some_and(|a| a.symbol.is_some())
-                {
-                    let alias = crate::checker::types::TypeAlias::new(
-                        declared.alias.as_ref().and_then(|a| a.symbol.clone()),
-                        arg_types,
-                    );
-                    let ptr = Arc::as_ptr(&found) as *mut crate::checker::types::Type;
-                    unsafe {
-                        if (*ptr).alias.is_none() {
-                            (*ptr).alias = Some(Box::new(alias));
-                        }
-                    }
-                }
-            }
-            self.alias_instantiation_cache.insert(frame, Arc::clone(&found));
-            found
+            self.instantiate_alias_from_types(symbol, arg_types)
         };
         if args_frame.is_some() {
             self.alias_args_resolution_stack.pop();
@@ -259,6 +176,111 @@ impl Checker {
             self.pop_type_resolution();
         }
         resolved
+    }
+
+    pub(crate) fn instantiate_alias_from_types(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        arg_types: Vec<Arc<Type>>,
+    ) -> Arc<Type> {
+        let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol;
+        let frame = (key as usize, arg_types.iter().map(|t| t.id).collect::<Vec<_>>());
+        if let Some(cached) = self.alias_instantiation_cache.get(&frame).cloned() {
+            // 坏上下文（空作用域等）解析出的 error 驻留会永久掩盖正确结果，
+            // 命中即废弃重算
+            if cached.intrinsic_name() != Some("error") {
+                return cached;
+            }
+            self.alias_instantiation_cache.remove(&frame);
+        }
+        // 声明体携带自身 alias 元数据时，体内替换会以同参重入本入口：
+        // 按 (符号, 实参型) 判定进行中，同帧重入返回 error（Go 循环别名同策略）
+        if self.alias_type_instantiation_stack.contains(&frame) {
+            return self.error_type();
+        }
+        self.alias_type_instantiation_stack.push(frame.clone());
+        let result = self.instantiate_alias_from_types_inner(symbol, arg_types, frame);
+        self.alias_type_instantiation_stack.pop();
+        result
+    }
+
+    fn instantiate_alias_from_types_inner(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        arg_types: Vec<Arc<Type>>,
+        frame: (usize, Vec<u32>),
+    ) -> Arc<Type> {
+        let declared = {
+            let cached = self
+                .type_alias_links
+                .get(&symbol)
+                .and_then(|l| l.declared_type.clone());
+            cached.unwrap_or_else(|| {
+                let saved_static = self.in_static_member_type;
+                self.in_static_member_type = false;
+                let found = self.resolve_alias_body(symbol);
+                self.in_static_member_type = saved_static;
+                if !crate::checker::utilities::is_type_error(&found) {
+                    self.type_alias_links.get_or_default(symbol).declared_type =
+                        Some(Arc::clone(&found));
+                }
+                found
+            })
+        };
+        let (tp_symbols, _type_node) = self.collect_alias_type_params_and_body(symbol);
+        let mut arg_types = arg_types;
+        arg_types.extend(self.alias_missing_default_type_arguments(
+            symbol,
+            &tp_symbols,
+            &arg_types,
+        ));
+        if let Some(mapped) = self.intrinsic_alias_instantiation(symbol, &arg_types) {
+            return mapped;
+        }
+        let tp_types: Vec<Arc<Type>> = tp_symbols
+            .iter()
+            .map(|tp| self.get_type_parameter_from_symbol(tp))
+            .collect();
+        let declared_is_conditional = matches!(&declared.data, TypeData::Conditional(_));
+        let found = if tp_types.is_empty() || arg_types.is_empty() {
+            Arc::clone(&declared)
+        } else {
+            self.substitute_infer_type_parameters(&declared, &tp_types, &arg_types)
+        };
+        // Go getConditionalType（checker.go 24784）：alias 传播到匿名对象/
+        // mapped/挂起条件的实例化结果，但**条件的解析分支**不带 alias
+        // （result = instantiateType(branch) 独立实例化），hover 显示为
+        // 展开形态
+        let found_is_deferred_conditional = matches!(
+            &found.data,
+            TypeData::Conditional(c)
+                if c.resolved_true_type.get().is_none() && c.resolved_false_type.get().is_none()
+        );
+        if !declared_is_conditional || found_is_deferred_conditional {
+            // Go instantiateTypeWithAlias：泛型别名实例化仅当声明体本身
+            // 携带 alias（对象字面量/union/intersection/mapped/挂起条件/
+            // deferred 引用体）时传播实例化后的 alias；indexed access 等
+            // 无 alias 声明体（Go getAliasForTypeNode 不附着）不传播
+            if !tp_types.is_empty()
+                && declared
+                    .alias
+                    .as_ref()
+                    .is_some_and(|a| a.symbol.is_some())
+            {
+                let alias = crate::checker::types::TypeAlias::new(
+                    declared.alias.as_ref().and_then(|a| a.symbol.clone()),
+                    arg_types,
+                );
+                let ptr = Arc::as_ptr(&found) as *mut crate::checker::types::Type;
+                unsafe {
+                    if (*ptr).alias.is_none() {
+                        (*ptr).alias = Some(Box::new(alias));
+                    }
+                }
+            }
+        }
+        self.alias_instantiation_cache.insert(frame, Arc::clone(&found));
+        found
     }
 
 }

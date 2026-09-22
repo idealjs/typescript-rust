@@ -141,6 +141,7 @@ pub struct Checker {
     pub interface_shell_reify_cache: HashMap<usize, Arc<Type>>,
     pub reverse_mapped_print_stack: Vec<Arc<Symbol>>,
     pub alias_args_resolution_stack: Vec<(usize, Vec<u32>)>,
+    pub alias_type_instantiation_stack: Vec<(usize, Vec<u32>)>,
     pub alias_instantiation_cache: HashMap<(usize, Vec<u32>), Arc<Type>>,
     pub current_alias_frame: Option<(usize, Vec<u32>)>,
     pub reverse_mapped_depth: Vec<u32>,

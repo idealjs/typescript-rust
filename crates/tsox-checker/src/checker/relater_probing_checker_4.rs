@@ -31,6 +31,42 @@ impl Checker {
             }
         }
 
+        // Go instantiateType：别名实例化型的类型变量只存在于 alias 实参中
+        //（声明体惰性壳不直接持有外层参数），实参被替换即以新实参重实例化；
+        // 声明体自带的 alias 元数据（实参即别名自身类型参数）除外，走结构替换
+        if let Some(alias) = t.alias.as_ref()
+            && let Some(alias_sym) = alias.symbol.clone()
+            && alias_sym
+                .flags
+                .intersects(tsox_frontend::ast::SymbolFlags::TypeAlias)
+            && !alias.type_arguments.is_empty()
+        {
+            let (tp_symbols, _) = self.collect_alias_type_params_and_body(&alias_sym);
+            let self_form = alias.type_arguments.iter().all(|a| {
+                a.is_type_parameter()
+                    && a.symbol.as_ref().is_some_and(|s| {
+                        tp_symbols.iter().any(|tp| Arc::ptr_eq(tp, s))
+                    })
+            });
+            if !self_form {
+                let new_args: Vec<Arc<Type>> = alias
+                    .type_arguments
+                    .iter()
+                    .map(|a| {
+                        self.substitute_infer_type_parameters(a, params, substitutions)
+                    })
+                    .collect();
+                let changed = alias
+                    .type_arguments
+                    .iter()
+                    .zip(new_args.iter())
+                    .any(|(old, new)| !Arc::ptr_eq(old, new));
+                if changed {
+                    return self.instantiate_alias_from_types(&alias_sym, new_args);
+                }
+            }
+        }
+
         match &t.data {
             TypeData::Substitution(sub) => {
                 let new_base = sub
