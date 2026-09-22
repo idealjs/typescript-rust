@@ -95,6 +95,7 @@ impl Checker {
 
         let epoch_at_entry = self.heritage_degraded_events;
         let mut heritage_degraded = false;
+        let mut lineage_degraded = false;
         let result = match interface_decls.first() {
             Some(first) => {
                 let data = match &first.data {
@@ -204,6 +205,9 @@ impl Checker {
                 if heritage_base_degraded || base_shell {
                     heritage_degraded = true;
                 }
+                lineage_degraded = base_types
+                    .iter()
+                    .any(|(_, bt)| self.degraded_type_ptrs.contains(&bt.id));
                 self.scope_stack = saved_scope_stack;
                 self.type_argument_stack = saved_type_argument_stack;
                 let result = if base_types.is_empty() {
@@ -270,7 +274,7 @@ impl Checker {
         if degraded_accepted && self.heritage_degraded_events != epoch_at_entry {
             self.heritage_degraded_events = epoch_at_entry;
         }
-        if heritage_degraded {
+        if heritage_degraded || lineage_degraded {
             self.degraded_type_ptrs.insert(result.id);
         }
         if !has_type_args && cache_result {
