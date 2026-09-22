@@ -137,6 +137,7 @@ impl crate::parser::Parser {
                         modifiers: None,
                         keyword: SyntaxKind::NamespaceKeyword,
                         name: node,
+                        attributes: None,
                         body: Some(inner),
                     }),
                     TextRange::new(pos, end),

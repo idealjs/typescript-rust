@@ -265,6 +265,7 @@ pub(crate) fn test_get_innermost_name_namespace() {
         NodeData::ModuleDeclaration(ModuleDeclarationData {
             modifiers: None,
             keyword: SyntaxKind::NamespaceKeyword,
+            attributes: None,
             name: Arc::new(Node::with_loc(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData {
@@ -281,6 +282,7 @@ pub(crate) fn test_get_innermost_name_namespace() {
         NodeData::ModuleDeclaration(ModuleDeclarationData {
             modifiers: None,
             keyword: SyntaxKind::NamespaceKeyword,
+            attributes: None,
             name: Arc::new(Node::with_loc(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData {

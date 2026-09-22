@@ -1096,6 +1096,7 @@ pub struct ModuleDeclarationData {
     pub modifiers: Option<Arc<ModifierList>>,
     pub keyword: SyntaxKind,
     pub name: Arc<Node>,
+    pub attributes: Option<Arc<Node>>,
     pub body: Option<Arc<Node>>,
 }
 

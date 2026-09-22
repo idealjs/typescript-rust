@@ -372,7 +372,16 @@ impl Program {
                             &|p| host.fs().read_file(p),
                         ))
                         || (!module_spec.starts_with('.')
-                            && !ambient_module_exists(&source_files, module_spec)))
+                            && !ambient_module_exists(&source_files, module_spec)
+                            && !tsox_frontend::ast::pattern_ambient_module_with_attributes_exists(
+                                &source_files,
+                                module_spec,
+                                import_node
+                                    .parent()
+                                    .as_ref()
+                                    .and_then(tsox_frontend::ast::import_attributes_of_declaration)
+                                    .as_ref(),
+                            )))
                         && !lib_diagnostics_skipped
                     {
                         // TS2307 报告位：ImportType（含动态 import() 类型位）由

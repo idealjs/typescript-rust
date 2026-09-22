@@ -73,6 +73,7 @@ impl Parser {
                     modifiers: mods,
                     keyword,
                     name: Arc::clone(&name),
+                    attributes: None,
                     body: inner_body,
                 }),
                 TextRange::new(decl_pos, end),
@@ -98,12 +99,11 @@ impl Parser {
         } else {
             self.parse_string_literal_name()
         };
-        // Go parseModuleDeclaration：`declare module "x" with { type: "css" }`
-        // 的 attributes（AST 无对应字段，浅消费平衡块保跨度正确）
-        if self.token == SyntaxKind::WithKeyword {
-            self.next_token();
-            self.skip_balanced_brace_block();
-        }
+        let attributes = if self.token == SyntaxKind::WithKeyword {
+            Some(self.parse_import_attributes(self.token, false))
+        } else {
+            None
+        };
         let body = if self.token == SyntaxKind::OpenBraceToken {
             let body_pos = self.token_pos();
             self.next_token();
@@ -129,6 +129,7 @@ impl Parser {
                 modifiers,
                 keyword,
                 name,
+                attributes,
                 body,
             }),
             TextRange::new(pos, end),

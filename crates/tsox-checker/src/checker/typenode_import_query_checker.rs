@@ -214,7 +214,13 @@ impl Checker {
                         tsox_core::core::compiler_options::ModuleKind::None,
                     )
                 });
+                let pattern_ambient = tsox_frontend::ast::pattern_ambient_module_with_attributes_exists(
+                    self.program.source_files(),
+                    &trimmed,
+                    tsox_frontend::ast::import_attributes_of_declaration(&import_decl).as_ref(),
+                );
                 if disk_resolved.is_none()
+                    && !pattern_ambient
                     && !self
                         .diagnostics
                         .get_all()

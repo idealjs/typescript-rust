@@ -2,6 +2,7 @@ pub(crate) mod deep_clone_node;
 #[allow(unused_imports)]
 pub use deep_clone_node::*;
 pub mod diagnostic;
+pub mod module_pattern;
 pub mod node;
 pub mod node_data_generated;
 pub mod node_flags;
@@ -11,6 +12,7 @@ pub mod syntax_kind_generated;
 pub mod utilities;
 
 pub use diagnostic::*;
+pub use module_pattern::*;
 pub mod dynamic_imports;
 pub use dynamic_imports::*;
 pub use node::*;
