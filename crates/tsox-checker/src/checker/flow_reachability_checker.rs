@@ -209,6 +209,9 @@ impl Checker {
         node: &Arc<Node>,
         type_node: &Arc<Node>,
     ) {
+        if function_like_body(node).map(|b| b.kind) != Some(SyntaxKind::Block) {
+            return;
+        }
         let is_async = node.has_syntactic_modifier(ModifierFlags::Async);
         let raw = self.get_type_from_type_node(type_node);
         let unwrapped = self.unwrap_async_return_type(raw, is_async);
