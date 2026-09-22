@@ -82,6 +82,20 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
     ) -> bool {
+        // Go typeRelatedToDiscriminatedType：全部子探针 reportErrors=false
+        //（"We do not report errors here"），错误统一由 union 成员检查给出
+        let was_active = self.silence_relation_chain();
+        let result = self.type_related_to_discriminated_type_impl(source, target, relation);
+        self.restore_relation_chain(was_active);
+        result
+    }
+
+    fn type_related_to_discriminated_type_impl(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
         let source_properties = self.get_properties_of_type(source);
         let mut discriminant_props: Vec<Arc<Symbol>> = Vec::new();
         for prop in &source_properties {
