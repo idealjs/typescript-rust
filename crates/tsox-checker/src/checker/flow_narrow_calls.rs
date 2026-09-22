@@ -269,7 +269,7 @@ impl Checker {
     }
 
     pub(crate) fn narrow_by_truthiness(&self, type_: &Arc<Type>, kind: NarrowKind) -> Arc<Type> {
-        let constituents = self.constituent_types(type_);
+        let constituents = self.constituent_types(&self.split_intrinsic_boolean(type_));
         let kept: Vec<Arc<Type>> = constituents
             .into_iter()
             .filter(|t| match kind {
@@ -284,6 +284,13 @@ impl Checker {
             return kept.into_iter().next().expect("exactly one");
         }
         self.flow_union_of(&kept)
+    }
+
+    fn split_intrinsic_boolean(&self, type_: &Arc<Type>) -> Arc<Type> {
+        if type_.flags.contains(TypeFlags::Boolean) && !type_.is_union() {
+            return self.flow_union_of(&[self.false_type(), self.true_type()]);
+        }
+        Arc::clone(type_)
     }
 
     // Go getTypeFactsWorker 的 Truthy 位：字面量按值判定，非字面
