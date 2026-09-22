@@ -5,7 +5,11 @@ use crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
 
 impl Checker {
     pub fn type_to_string(&mut self, t: &Arc<Type>) -> String {
-        self.type_to_string_ex(t, TypeFormatFlags::ALLOW_UNIQUE_ES_SYMBOL_TYPE)
+        self.type_to_string_ex(
+            t,
+            TypeFormatFlags::ALLOW_UNIQUE_ES_SYMBOL_TYPE
+                .union(TypeFormatFlags::NO_TRUNCATION),
+        )
     }
 
     pub fn type_to_string_ex(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String {

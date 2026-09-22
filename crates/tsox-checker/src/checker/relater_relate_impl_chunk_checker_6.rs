@@ -129,7 +129,7 @@ impl Checker {
                 }
             }
             if any_failed {
-                if self.relater_chain_active && self.speculation_depth == 0 {
+                if self.relater_chain_active {
                     self.relater_error_chain.truncate(save_len);
                     if let Some(t) = failed_nullish {
                         let member_str = self.type_to_string(&t);

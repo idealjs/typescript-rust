@@ -209,7 +209,6 @@ impl Checker {
                     }
                     merged
                 };
-
                 if !has_type_args && !base_types.is_empty() {
                     self.report_interface_simultaneous_extends(
                         symbol,

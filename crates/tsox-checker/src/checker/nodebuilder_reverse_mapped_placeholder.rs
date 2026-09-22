@@ -93,8 +93,8 @@ impl Checker {
         if let Some(last) = self.reverse_mapped_print_stack.last() {
             if let Some(links) = self.reverse_mapped_symbol_links.get(last) {
                 if let Some(pt) = &links.property_type {
-                    // 我们构建的命名接口带 symbol；匿名字面量无符号
-                    if pt.symbol.is_some() {
+                    // Go：嵌在非匿名源（原始类型/接口/联合等）内的反向映射属性省略
+                    if !pt.object_flags.contains(ObjectFlags::Anonymous) {
                         return true;
                     }
                 }

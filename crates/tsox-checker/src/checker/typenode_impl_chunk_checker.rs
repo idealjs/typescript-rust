@@ -6,7 +6,15 @@ impl Checker {
     pub fn get_type_from_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let key = (node.id() as usize, self.type_argument_stack_hash());
         if let Some(t) = self.type_node_subst_cache.get(&key) {
-            return Arc::clone(t);
+            let stale_shell = self
+                .pending_interface_shells
+                .values()
+                .any(|s| Arc::ptr_eq(s, t));
+            if stale_shell {
+                self.type_node_subst_cache.remove(&key);
+            } else {
+                return Arc::clone(t);
+            }
         }
 
         let degraded_epoch = self.heritage_degraded_events;
@@ -46,7 +54,11 @@ impl Checker {
         };
         self.type_node_resolving.remove(&key);
         self.type_node_query_epochs.pop();
-        if self.heritage_degraded_events == degraded_epoch {
+        let result_pending_shell = self
+            .pending_interface_shells
+            .values()
+            .any(|s| Arc::ptr_eq(s, &result));
+        if self.heritage_degraded_events == degraded_epoch && !result_pending_shell {
             if self.type_node_subst_cache.len() >= self.type_node_subst_cache_limit {
                 self.type_node_subst_cache.clear();
             }

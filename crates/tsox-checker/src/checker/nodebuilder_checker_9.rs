@@ -113,16 +113,42 @@ impl Checker {
             parts.push(format!("{readonly}[{key_name}: {key_str}]: {val_str}"));
         }
 
-        // Go resolveStructuredTypeMembers：匿名成员按名排序后参与显示
-        let mut sorted_props: Vec<&Arc<Symbol>> = structured.properties.iter().collect();
-        sorted_props.sort_by(|a, b| a.name.cmp(&b.name));
-        for prop in sorted_props {
-            // Go symbolToString：well-known symbol 内部名 __@x 渲染为 [Symbol.x]
-            let name = if let Some(stripped) = prop.name.strip_prefix("__@") {
-                format!("[Symbol.{stripped}]")
+        // Go setStructuredTypeMembers → getNamedMembers：类/接口容器声明成员先于继承成员，
+        // 两段各自按 compareSymbols（声明位置优先、名字回退）排序后参与显示
+        let container = _t.symbol.clone();
+        let class_like = container.as_ref().is_some_and(|s| {
+            s.flags.intersects(
+                tsox_frontend::ast::SymbolFlags::Class
+                    | tsox_frontend::ast::SymbolFlags::Interface,
+            )
+        });
+        let mut contained: Vec<&Arc<Symbol>> = Vec::new();
+        let mut rest: Vec<&Arc<Symbol>> = Vec::new();
+        for prop in &structured.properties {
+            let owned = class_like
+                && prop
+                    .value_declaration
+                    .as_ref()
+                    .zip(container.as_ref())
+                    .is_some_and(|(d, c)| {
+                        c.declarations.iter().any(|cd| {
+                            cd.loc.pos() <= d.loc.pos() && d.loc.end() <= cd.loc.end()
+                        })
+                    });
+            if owned {
+                contained.push(prop);
             } else {
-                prop.name.clone()
-            };
+                rest.push(prop);
+            }
+        }
+        contained.sort_by(|a, b| self.compare_symbols_for_display(a, b));
+        rest.sort_by(|a, b| self.compare_symbols_for_display(a, b));
+        let sorted_props: Vec<&Arc<Symbol>> = contained.into_iter().chain(rest).collect();
+        for prop in sorted_props {
+            // Go symbolToString：well-known symbol 内部名 __@x 渲染为计算属性名
+            // [Symbol.x]（不引号）
+            let well_known = prop.name.strip_prefix("__@").map(|s| format!("[Symbol.{s}]"));
+            let name = well_known.clone().unwrap_or_else(|| prop.name.clone());
 
             // Go nodebuilder classifyPropertyName：identifier 原样/数值名非 stringNamed 不加引号
             let string_named = !prop.declarations.is_empty()
@@ -130,7 +156,8 @@ impl Checker {
                     .declarations
                     .iter()
                     .all(|d| d.name().is_some_and(|n| n.kind == SyntaxKind::StringLiteral));
-            let name = if crate::checker::checker_get_excluded_symbol_flags::is_valid_identifier_text(&name)
+            let name = if well_known.is_some()
+                || crate::checker::checker_get_excluded_symbol_flags::is_valid_identifier_text(&name)
                 || (!string_named && crate::checker::nodecopy_property_name::is_numeric_literal_name(&name))
             {
                 name
@@ -148,7 +175,15 @@ impl Checker {
                 self.reverse_mapped_print_stack.push(Arc::clone(prop));
             }
             let type_str = if use_placeholder {
-                "...".to_string()
+                // Go createElidedInformationPlaceholder：NoTruncation 打印 any，
+                // 否则省略号
+                if flags.contains(
+                    crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags::NO_TRUNCATION,
+                ) {
+                    "any".to_string()
+                } else {
+                    "...".to_string()
+                }
             } else {
                 self.type_to_string_ex(&prop_type, flags)
             };
@@ -793,5 +828,31 @@ impl Checker {
         let ret_str = self.type_to_string_ex(&ret_type, flags);
         let tp = self.signature_type_param_prefix(sig);
         Some(format!("{tp}({}): {}", params.join(", "), ret_str))
+    }
+
+    /// Go utilities.go compareSymbols：声明位置优先（跨文件按程序内文件序），
+    /// 无声明回退名字
+    fn compare_symbols_for_display(&self, a: &Arc<Symbol>, b: &Arc<Symbol>) -> std::cmp::Ordering {
+        match (a.declarations.first(), b.declarations.first()) {
+            (Some(da), Some(db)) => self
+                .compare_nodes_for_display(da, db)
+                .then_with(|| a.name.cmp(&b.name)),
+            (Some(_), None) => std::cmp::Ordering::Less,
+            (None, Some(_)) => std::cmp::Ordering::Greater,
+            (None, None) => a.name.cmp(&b.name),
+        }
+    }
+
+    fn compare_nodes_for_display(&self, a: &Arc<Node>, b: &Arc<Node>) -> std::cmp::Ordering {
+        let fa = self.get_source_file_of_node(a);
+        let fb = self.get_source_file_of_node(b);
+        if let (Some(fa), Some(fb)) = (&fa, &fb) {
+            if !Arc::ptr_eq(fa, fb) {
+                let ia = self.file_index_map.get(&fa.id()).copied().unwrap_or(usize::MAX);
+                let ib = self.file_index_map.get(&fb.id()).copied().unwrap_or(usize::MAX);
+                return ia.cmp(&ib);
+            }
+        }
+        a.loc.pos().cmp(&b.loc.pos())
     }
 }

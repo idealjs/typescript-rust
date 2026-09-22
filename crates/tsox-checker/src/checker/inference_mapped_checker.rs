@@ -125,8 +125,9 @@ impl Checker {
             });
         let has_props = apparent
             .as_structured()
-            .is_some_and(|s| !s.properties.is_empty());
-                if !has_index && !has_props {
+            .is_some_and(|s| !s.properties.is_empty())
+            || self.primitive_interface_members(source).is_some();
+        if !has_index && !has_props {
             return None;
         }
         if self.is_array_type(source) {
@@ -161,6 +162,18 @@ impl Checker {
         let reversed = Arc::new(reversed);
         self.resolve_reverse_mapped_type_members(&reversed);
         Some(reversed)
+    }
+
+    /// Go apparentType：原始类型的成员来自对应全局接口（Number/String/Boolean）
+    fn primitive_interface_members(&mut self, t: &Arc<Type>) -> Option<Vec<Arc<Symbol>>> {
+        let name = self.primitive_interface_name(t)?;
+        let sym = self.globals.get(name)?.clone();
+        let declared = self
+            .type_alias_links
+            .get(&sym)
+            .and_then(|l| l.declared_type.clone())
+            .unwrap_or_else(|| self.resolve_interface_type(&sym, None));
+        declared.as_structured().map(|s| s.properties.clone())
     }
 
     /// Go inferReverseMappedType：按 T[P] ← X 推断 source 属性形态
@@ -258,6 +271,8 @@ impl Checker {
         let props: Vec<Arc<Symbol>> = apparent
             .as_structured()
             .map(|s| s.properties.clone())
+            .filter(|p| !p.is_empty())
+            .or_else(|| self.primitive_interface_members(&source))
             .unwrap_or_default();
         // Go resolveReverseMappedTypeMembers：约束目标是 T[K_1]（对象/索引均类型参数）时
         // 归一为 T（replaceIndexedAccess），使各层 links 三元组恒等、缓存收敛自引用
