@@ -411,3 +411,5 @@ pub(crate) mod checker_enum_numeric_names;
 pub(crate) mod utilities_tests;
 pub(crate) mod utilities_token_is_identifier_or_keyword;
 pub(crate) mod flow_reachability_checker;
+pub(crate) mod flow_reachability_returns;
+pub(crate) mod flow_reachability_switch;
