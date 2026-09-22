@@ -82,7 +82,7 @@ impl Checker {
             && self.relater_intersection_target_depth == 0
             && !source_struct.properties.is_empty()
             && self.is_weak_type(target)
-            && !self.has_common_properties(source, target, false)
+            && !self.has_common_properties(source, target, source.object_flags.contains(crate::checker::types::ObjectFlags::JsxAttributes))
         {
             let has_calls = !source_struct.call_signatures().is_empty();
             let has_constructs = !source_struct.construct_signatures().is_empty();

@@ -53,13 +53,19 @@ impl Checker {
         self.ensure_jsx_implicit_container(opening);
         let tag_name = match jsx_tag_name(opening) {
             Some(t) => t,
-            None => return,
+            None => {
+                if matches!(opening.kind, tsox_frontend::ast::SyntaxKind::JsxOpeningFragment) {
+                    self.check_jsx_element_props(opening);
+                }
+                return;
+            }
         };
         if is_jsx_intrinsic_tag_name(&tag_name) {
             self.check_jsx_intrinsic_element(opening);
         } else {
             self.check_jsx_component(opening);
         }
+        self.check_jsx_element_props(opening);
 
         if let Some((loc, module_ref)) = self.pending_jsx_2875.take() {
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(

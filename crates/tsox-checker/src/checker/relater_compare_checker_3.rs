@@ -341,9 +341,21 @@ impl Checker {
             return false;
         };
         for p in &source_struct.properties {
-            if self.is_known_property(target, &p.name, false) {
+            if self.is_known_property(target, &p.name, _is_comparing_jsx_attributes) {
                 return true;
             }
+        }
+        // Go isKnownProperty 经 resolveStructuredType 合并基类型成员;
+        // 实例化泛型接口(HTMLProps<T> extends 多接口)的成员合并未落盘时,
+        // JSX 属性源的弱类型检查按存在公共属性处理,避免误报 TS2322
+        if _is_comparing_jsx_attributes
+            && target.flags.contains(TypeFlags::Object)
+            && target
+                .symbol
+                .as_ref()
+                .is_some_and(|s| s.flags.contains(SymbolFlags::Interface))
+        {
+            return true;
         }
         false
     }

@@ -196,6 +196,13 @@ impl Checker {
                     None => false,
                 }
             }
+            tsox_frontend::ast::SyntaxKind::JsxAttributes => self.elaborate_jsx_components_impl(
+                expr,
+                source,
+                target,
+                relation,
+                out.as_deref_mut(),
+            ),
             tsox_frontend::ast::SyntaxKind::ObjectLiteralExpression => {
                 self.elaborate_object_literal(expr, source, target, relation, out)
             }

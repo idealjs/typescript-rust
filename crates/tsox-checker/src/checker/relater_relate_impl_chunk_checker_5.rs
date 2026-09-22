@@ -210,7 +210,7 @@ impl Checker {
         if !source_props.is_empty()
             && relation != RelationKind::Comparable
             && self.is_weak_type(target)
-            && !self.has_common_properties(source, target, false)
+            && !self.has_common_properties(source, target, source.object_flags.contains(crate::checker::types::ObjectFlags::JsxAttributes))
         {
             let source_str = self.type_to_string(source);
             let target_str = self.type_to_string(target);

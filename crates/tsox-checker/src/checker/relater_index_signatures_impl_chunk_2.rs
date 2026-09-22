@@ -30,9 +30,9 @@ impl Checker {
             }
         }
 
-        if t.object_flags
-            .intersects(ObjectFlags::JSLiteral | ObjectFlags::ObjectRestType)
-        {
+        if t.object_flags.intersects(
+            ObjectFlags::JSLiteral | ObjectFlags::ObjectRestType | ObjectFlags::JsxAttributes,
+        ) {
             return true;
         }
 
@@ -64,6 +64,11 @@ impl Checker {
         let props = self.get_properties_of_type(source);
         let mut result = Ternary::True;
         for prop in props {
+            if source.object_flags.contains(ObjectFlags::JsxAttributes)
+                && crate::checker::relater_predicates::is_hyphenated_jsx_name(&prop.name)
+            {
+                continue;
+            }
             let literal_key = self.get_literal_type_from_property(&prop);
             if !self.is_applicable_index_type(&literal_key, target_key) {
                 continue;

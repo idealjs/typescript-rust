@@ -38,7 +38,9 @@ impl Checker {
         let container = jsx_namespace
             .exports
             .get(name_of_attrib_prop_container)
-            .or_else(|| jsx_namespace.members.get(name_of_attrib_prop_container))?;
+            .or_else(|| jsx_namespace.members.get(name_of_attrib_prop_container))
+            .cloned()
+            .or_else(|| self.ambient_namespace_local(jsx_namespace, name_of_attrib_prop_container))?;
         let mut names = container.members.entries.keys().cloned();
         let first = names.next()?;
         if names.next().is_some() {
@@ -160,7 +162,7 @@ impl Checker {
         }
     }
 
-    fn jsx_mark_namespace(&self, is_fragment: bool) -> String {
+    pub(crate) fn jsx_mark_namespace(&self, is_fragment: bool) -> String {
         let pragma_first = |pragma: &str| {
             self.local_jsx_pragma_factory(pragma)
                 .and_then(|f| f.split('.').next().map(str::to_string))
