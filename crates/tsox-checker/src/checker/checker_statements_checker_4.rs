@@ -200,7 +200,13 @@ impl Checker {
                         let at = Arc::clone(&annotation_type);
                         self.check_contextual_elements(init, &at, init.loc);
                     }
-                    let init_type = self.get_type_of_node(init);
+                    let mut init_type = self.get_type_of_node(init);
+                    let literal_of_ctx =
+                        self.is_literal_of_contextual_type(&init_type, &annotation_type);
+                    if !literal_of_ctx {
+                        init_type = self.get_widened_literal_type(&init_type);
+                    }
+                    init_type = self.get_regular_type_of_literal_type(&init_type);
                     let assignable = self.is_type_assignable_to(&init_type, &annotation_type);
                     let mut reported_error = false;
 
