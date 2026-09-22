@@ -607,6 +607,7 @@ fn parent_statements_of(node: &Arc<Node>) -> Option<Vec<Arc<Node>>> {
         NodeData::Block(data) => Some(data.statements.iter().cloned().collect()),
         NodeData::SourceFile(data) => Some(data.statements.iter().cloned().collect()),
         NodeData::ModuleBlock(data) => Some(data.statements.iter().cloned().collect()),
+        NodeData::CaseOrDefaultClause(data) => Some(data.statements.iter().cloned().collect()),
         _ => None,
     }
 }
