@@ -182,6 +182,21 @@ impl Checker {
     // 链拼点分全限定名；外部模块文件符号输出 import("name")，ambient 模块
     // 名去引号
     pub fn fully_qualified_type_string(&mut self, t: &Arc<Type>) -> String {
+        if self.is_array_type(t)
+            && !matches!(t.data, TypeData::Tuple(_))
+            && let Some(elem) = self.get_element_type_of_array_type(t)
+        {
+            let inner = self.fully_qualified_type_string(&elem);
+            let prefix = if t
+                .object_flags
+                .contains(crate::checker::types::ObjectFlags::IsReadonlyArray)
+            {
+                "readonly "
+            } else {
+                ""
+            };
+            return format!("{prefix}{inner}[]");
+        }
         if let TypeData::Tuple(tuple) = &t.data {
             let rendered: Vec<String> = tuple
                 .element_infos

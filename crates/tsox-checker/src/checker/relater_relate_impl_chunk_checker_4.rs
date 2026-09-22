@@ -543,16 +543,7 @@ impl Checker {
 
         let source_elem = &source_args[0];
         let target_elem = &target_args[0];
-        let related = self.is_type_related_to(source_elem, target_elem, relation);
-        if !related && self.relater_chain_active {
-            let elem_source_str = self.type_to_string(source_elem);
-            let elem_target_str = self.type_to_string(target_elem);
-            self.relater_report_error(
-                tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                vec![elem_source_str, elem_target_str],
-            );
-        }
-        related
+        self.is_type_related_to(source_elem, target_elem, relation)
     }
 
     /// Array/ReadonlyArray 接口实例（含关系判定中途惰性解析的 Anonymous 形态）
