@@ -126,7 +126,22 @@ impl Checker {
         } else {
             let props = self.get_type_at_position(&sig, 0);
             let props = self.instantiate_jsx_props_from_attributes(&sig, props, attrs_type);
+            let props = self.apply_jsx_managed_attributes(opening, &props);
             Some(self.intersect_intrinsic_attributes(props))
+        }
+    }
+
+    fn apply_jsx_managed_attributes(
+        &mut self,
+        opening: &Arc<Node>,
+        props: &Arc<Type>,
+    ) -> Arc<Type> {
+        let Some(ns) = self.get_jsx_namespace() else {
+            return Arc::clone(props);
+        };
+        match self.get_jsx_managed_attributes_from_located_attributes(opening, &ns, props) {
+            Some(managed) => managed,
+            None => Arc::clone(props),
         }
     }
 
@@ -144,7 +159,7 @@ impl Checker {
         let instance = self.get_return_type_of_signature(sig)?;
         let props = match forced {
             None => self.get_type_at_position(sig, 0),
-            Some(name) if name.is_empty() => instance,
+            Some(name) if name.is_empty() => instance.clone(),
             Some(name) => {
                 let attr_type = self.get_type_of_property_of_type(&instance, &name);
                 match attr_type {
@@ -172,9 +187,37 @@ impl Checker {
                 }
             }
         };
-        Some(self.instantiate_jsx_props_from_attributes(
-            sig, props, attrs_type,
-        ))
+        let props = self.instantiate_jsx_props_from_attributes(sig, props, attrs_type);
+        let props = self.apply_jsx_managed_attributes(opening, &props);
+        if props.flags.contains(TypeFlags::Any) {
+            return Some(props);
+        }
+        let mut apparent = props;
+        if let Some(class_attrs_sym) =
+            self.get_jsx_type(crate::checker::jsx_impl_chunk::JsxNames::INTRINSIC_CLASS_ATTRIBUTES)
+        {
+            let declared = self.get_declared_type_of_symbol(&class_attrs_sym);
+            if !self.is_error_type(&declared) {
+                let tp_count = class_attrs_sym
+                    .declarations
+                    .iter()
+                    .filter_map(|d| match &d.data {
+                        NodeData::InterfaceDeclaration(data) => {
+                            data.type_parameters.as_ref().map(|tps| tps.len())
+                        }
+                        _ => None,
+                    })
+                    .max()
+                    .unwrap_or(0);
+                let library_attrs = if tp_count >= 1 {
+                    self.resolve_interface_type_ex(&class_attrs_sym, Some(vec![instance]))
+                } else {
+                    declared
+                };
+                apparent = self.get_intersection_type(vec![library_attrs, apparent]);
+            }
+        }
+        Some(self.intersect_intrinsic_attributes(apparent))
     }
 
     fn jsx_fragment_props_type(

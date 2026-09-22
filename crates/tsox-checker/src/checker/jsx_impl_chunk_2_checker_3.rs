@@ -51,9 +51,21 @@ impl Checker {
 
     pub fn get_static_type_of_referenced_jsx_constructor(
         &mut self,
-        _context: &Arc<Node>,
+        context: &Arc<Node>,
     ) -> Option<Arc<crate::checker::types::Type>> {
-        None
+        if context.kind == crate::checker::jsx_impl_chunk_2::SyntaxKind::JsxOpeningFragment {
+            return Some(self.get_jsx_fragment_type(context));
+        }
+        let tag_name = crate::checker::jsx_impl_chunk::jsx_tag_name(context)?;
+        if crate::checker::jsx_impl_chunk::is_jsx_intrinsic_tag_name(&tag_name) {
+            return None;
+        }
+        self.check_expression(&tag_name);
+        let tag_type = self.get_type_of_node(&tag_name);
+        if tag_type.flags.intersects(crate::checker::types::TypeFlags::Any) {
+            return None;
+        }
+        Some(tag_type)
     }
 
     pub fn get_intrinsic_attributes_type_from_string_literal_type(

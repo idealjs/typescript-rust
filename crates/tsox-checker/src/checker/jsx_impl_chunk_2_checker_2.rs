@@ -344,20 +344,67 @@ impl Checker {
 
     pub fn get_jsx_managed_attributes_from_located_attributes(
         &mut self,
-        _context: &Arc<Node>,
-        _ns: &Arc<tsox_frontend::ast::Symbol>,
-        _attributes_type: &Arc<crate::checker::types::Type>,
+        context: &Arc<Node>,
+        ns: &Arc<tsox_frontend::ast::Symbol>,
+        attributes_type: &Arc<crate::checker::types::Type>,
     ) -> Option<Arc<crate::checker::types::Type>> {
-        None
+        let managed_sym = self
+            .get_jsx_type(crate::checker::jsx_impl_chunk::JsxNames::LIBRARY_MANAGED_ATTRIBUTES)
+            .filter(|s| s.flags.intersects(tsox_frontend::ast::SymbolFlags::TYPE))?;
+        let ctor_type = self.get_static_type_of_referenced_jsx_constructor(context)?;
+        self.instantiate_alias_or_interface_with_defaults(
+            &managed_sym,
+            &[ctor_type, Arc::clone(attributes_type)],
+            false,
+        )
     }
 
     pub fn instantiate_alias_or_interface_with_defaults(
         &mut self,
-        _managed_sym: &Arc<tsox_frontend::ast::Symbol>,
-        _type_arguments: &[Arc<crate::checker::types::Type>],
+        managed_sym: &Arc<tsox_frontend::ast::Symbol>,
+        type_arguments: &[Arc<crate::checker::types::Type>],
         _in_java_script: bool,
     ) -> Option<Arc<crate::checker::types::Type>> {
-        None
+        let declared = self.get_declared_type_of_symbol(managed_sym);
+        if managed_sym
+            .flags
+            .intersects(tsox_frontend::ast::SymbolFlags::TypeAlias)
+        {
+            let (tp_symbols, _) = self.collect_alias_type_params_and_body(managed_sym);
+            if tp_symbols.len() < type_arguments.len() || type_arguments.is_empty() {
+                return None;
+            }
+            let mut args = type_arguments.to_vec();
+            args.extend(self.alias_missing_default_type_arguments(
+                managed_sym,
+                &tp_symbols,
+                &args,
+            ));
+            if args.is_empty() {
+                return Some(declared);
+            }
+            let tp_types: Vec<Arc<crate::checker::types::Type>> = tp_symbols
+                .iter()
+                .map(|tp| self.get_type_parameter_from_symbol(tp))
+                .collect();
+            return Some(self.substitute_infer_type_parameters(&declared, &tp_types, &args));
+        }
+        let tp_count = managed_sym
+            .declarations
+            .iter()
+            .filter_map(|d| match &d.data {
+                tsox_frontend::ast::NodeData::InterfaceDeclaration(data) => data
+                    .type_parameters
+                    .as_ref()
+                    .map(|tps| tps.len()),
+                _ => None,
+            })
+            .max()
+            .unwrap_or(0);
+        if tp_count == 0 || tp_count < type_arguments.len() {
+            return None;
+        }
+        Some(self.resolve_interface_type_ex(managed_sym, Some(type_arguments.to_vec())))
     }
 
     pub fn get_jsx_library_managed_attributes(
