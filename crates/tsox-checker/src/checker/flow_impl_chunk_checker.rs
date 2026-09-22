@@ -98,6 +98,16 @@ impl Checker {
             }
             return false;
         }
+        if t.flags.contains(TypeFlags::Union) {
+            if let crate::checker::types::TypeData::Union(u) = &t.data {
+                return u
+                    .union_or_intersection
+                    .types
+                    .iter()
+                    .any(|c| self.has_generic_with_union_constraint(c));
+            }
+            return false;
+        }
         t.flags.intersects(TYPE_FLAGS_INSTANTIABLE)
             && self
                 .get_base_constraint_of_type(t)
