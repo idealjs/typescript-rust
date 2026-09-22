@@ -60,6 +60,7 @@ pub struct CompilerOptions {
     pub no_implicit_this: Tristate,
     pub no_implicit_returns: Tristate,
     pub no_emit_helpers: Tristate,
+    pub run_external_code: Tristate,
     pub no_lib: Tristate,
     pub no_property_access_from_index_signature: Tristate,
     pub no_unchecked_indexed_access: Tristate,

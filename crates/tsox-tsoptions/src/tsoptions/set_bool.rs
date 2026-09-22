@@ -50,6 +50,18 @@ pub(crate) fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
         "verbatimmodulesyntax" => options.verbatim_module_syntax = t,
         "preserveconstenums" => options.preserve_const_enums = t,
         "importhelpers" => options.import_helpers = t,
+        "noemithelpers" => options.no_emit_helpers = t,
+        "runexternalcode" => options.run_external_code = t,
+        "downleveliteration" => options.downlevel_iteration = t,
+        "emitbom" => options.emit_bom = t,
+        "stripinternal" => options.strip_internal = t,
+        "rewriterelativeimportextensions" => options.rewrite_relative_import_extensions = t,
+        "preservesymlinks" => options.preserve_symlinks = t,
+        "deduplicatepackages" => options.deduplicate_packages = t,
+        "stabletypeordering" => options.stable_type_ordering = t,
+        "allowarbitraryextensions" => options.allow_arbitrary_extensions = t,
+        "allowimportingtsextensions" => options.allow_importing_ts_extensions = t,
+        "resolvepackagejsonexports" => options.resolve_package_json_exports = t,
         "experimentaldecorators" => options.experimental_decorators = t,
         "emitdecoratormetadata" => options.emit_decorator_metadata = t,
         "forceconsistentcasinginfilenames" => options.force_consistent_casing_in_file_names = t,
@@ -139,6 +151,18 @@ pub fn apply_test_settings_with_base(
         "verbatimmodulesyntax",
         "preserveconstenums",
         "importhelpers",
+        "noemithelpers",
+        "runexternalcode",
+        "downleveliteration",
+        "emitbom",
+        "stripinternal",
+        "rewriterelativeimportextensions",
+        "preservesymlinks",
+        "deduplicatepackages",
+        "stabletypeordering",
+        "allowarbitraryextensions",
+        "allowimportingtsextensions",
+        "resolvepackagejsonexports",
         "experimentaldecorators",
         "emitdecoratormetadata",
         "forceconsistencingcasingfilenames",
@@ -186,6 +210,8 @@ pub fn apply_test_settings_with_base(
         "modulosuffixes",
         "customconditions",
         "jsxmode",
+        "maxnodemodulejsdepth",
+        "ignoredeprecations",
     ];
     const KNOWN_LIST_OPTIONS: &[&str] = &["lib", "types", "typeroots", "rootdirs"];
 
@@ -223,6 +249,11 @@ pub fn apply_test_settings_with_base(
 
         let canonical = find_option(&lower)
             .map(|o| o.name.to_string())
+            .or_else(|| match lower.as_str() {
+                "maxnodemodulejsdepth" => Some("maxNodeModuleJsDepth".to_string()),
+                "ignoredeprecations" => Some("ignoreDeprecations".to_string()),
+                _ => None,
+            })
             .unwrap_or_else(|| lower.clone());
         if is_bool_val {
             set_bool(&mut options, &lower, trimmed.eq_ignore_ascii_case("true"));

@@ -154,6 +154,16 @@ pub(crate) fn apply_options(options: &HashMap<String, OptValue>, out: &mut Compi
                     out.react_namespace = s.to_string();
                 }
             }
+            "maxNodeModuleJsDepth" => {
+                if let Some(s) = value.as_str() {
+                    out.max_node_module_js_depth = s.trim().parse::<i32>().ok();
+                }
+            }
+            "ignoreDeprecations" => {
+                if let Some(s) = value.as_str() {
+                    out.ignore_deprecations = s.to_string();
+                }
+            }
             "locale" => {
                 if let Some(s) = value.as_str() {
                     out.locale = s.to_string();
