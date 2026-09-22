@@ -80,16 +80,31 @@ impl Checker {
 
         if relation != RelationKind::Comparable
             && self.relater_intersection_target_depth == 0
-            && !source_struct.properties.is_empty()
+            && (!source_struct.properties.is_empty()
+                || self.type_has_call_or_construct_signatures(source))
+            && !source
+                .symbol
+                .as_ref()
+                .is_some_and(|sym| self.globals.get("Object").is_some_and(|g| Arc::ptr_eq(g, sym)))
             && self.is_weak_type(target)
             && !self.has_common_properties(source, target, source.object_flags.contains(crate::checker::types::ObjectFlags::JsxAttributes))
         {
-            let has_calls = !source_struct.call_signatures().is_empty();
-            let has_constructs = !source_struct.construct_signatures().is_empty();
+            let calls = source_struct.call_signatures().to_vec();
+            let constructs = source_struct.construct_signatures().to_vec();
+            let return_related = |checker: &mut Checker, target: &Arc<Type>| {
+                calls
+                    .first()
+                    .and_then(|sig| checker.get_return_type_of_signature(sig))
+                    .is_some_and(|rt| checker.is_type_related_to(&rt, target, relation))
+                    || constructs
+                        .first()
+                        .and_then(|sig| checker.get_return_type_of_signature(sig))
+                        .is_some_and(|rt| checker.is_type_related_to(&rt, target, relation))
+            };
             if self.relater_chain_active {
                 let source_str = self.type_to_string(source);
                 let target_str = self.type_to_string(target);
-                if has_calls || has_constructs {
+                if return_related(self, target) {
                     self.relater_report_error(
                         tsox_core::diagnostics::messages_generated::
                             VALUE_OF_TYPE_0_HAS_NO_PROPERTIES_IN_COMMON_WITH_TYPE_1_DID_YOU_MEAN_TO_CALL_IT,
