@@ -139,9 +139,7 @@ impl Checker {
             } else {
                 first_type = Some(Arc::clone(&t));
             }
-            if crate::checker::utilities_token_is_identifier_or_keyword::is_literal_type(&t)
-                || t.flags.contains(TypeFlags::TemplateLiteral)
-            {
+            if self.is_go_literal_type(&t) || self.is_pattern_literal_type(&t) {
                 has_literal = true;
             }
             prop_types.push(t);
@@ -191,6 +189,56 @@ impl Checker {
             },
         );
         Some(symbol)
+    }
+
+    fn is_go_literal_type(&self, t: &Arc<Type>) -> bool {
+        if t.flags.contains(TypeFlags::Boolean) {
+            return true;
+        }
+        if t.flags.contains(TypeFlags::Union) {
+            if t.flags.intersects(TypeFlags::EnumLiteral) {
+                return true;
+            }
+            return t
+                .types()
+                .is_some_and(|ts| {
+                    ts.iter()
+                        .all(|m| crate::checker::is_unit_type(m))
+                });
+        }
+        crate::checker::is_unit_type(t)
+    }
+
+    fn is_pattern_literal_type(&self, t: &Arc<Type>) -> bool {
+        if let TypeData::TemplateLiteral(data) = &t.data {
+            return data.types.iter().all(|p| self.is_pattern_literal_placeholder_type(p));
+        }
+        if let TypeData::StringMapping(data) = &t.data {
+            return data
+                .target
+                .as_ref()
+                .is_some_and(|target| self.is_pattern_literal_placeholder_type(target));
+        }
+        false
+    }
+
+    fn is_pattern_literal_placeholder_type(&self, t: &Arc<Type>) -> bool {
+        if t.flags.contains(TypeFlags::Intersection) {
+            let mut seen_placeholder = false;
+            for s in t.types().into_iter().flatten() {
+                if s.flags.intersects(TYPE_FLAGS_LITERAL | TYPE_FLAGS_NULLABLE)
+                    || self.is_pattern_literal_placeholder_type(&s)
+                {
+                    seen_placeholder = true;
+                } else if !s.flags.contains(TypeFlags::Object) {
+                    return false;
+                }
+            }
+            return seen_placeholder;
+        }
+        t.flags.intersects(
+            TypeFlags::Any | TypeFlags::String | TypeFlags::Number | TypeFlags::BigInt,
+        ) || self.is_pattern_literal_type(t)
     }
 
     fn parent_symbol_of_declaration_chain(
