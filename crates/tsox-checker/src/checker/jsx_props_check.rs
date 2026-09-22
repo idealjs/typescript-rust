@@ -20,17 +20,6 @@ pub(crate) fn semantic_jsx_children(children: &[Arc<Node>]) -> Vec<Arc<Node>> {
         .collect()
 }
 
-fn jsx_attribute_name_text(attr: &Arc<Node>) -> Option<String> {
-    match &attr.data {
-        NodeData::JsxAttribute(d) => Some(d.name.text().to_string()),
-        _ => None,
-    }
-}
-
-fn is_hyphenated_jsx_name(name: &str) -> bool {
-    name.contains('-') || name.contains(':')
-}
-
 impl Checker {
     pub(crate) fn check_jsx_element_props(&mut self, opening: &Arc<Node>) {
         let attributes = match &opening.data {

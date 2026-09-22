@@ -23,7 +23,11 @@ impl Checker {
                 for prop in data.properties.iter() {
                     match &prop.data {
                         NodeData::JsxAttribute(a) => {
-                            let name = prop.name().map(|n| n.text().to_string()).unwrap_or_default();
+                            let name = prop
+                                .name()
+                                .and_then(|n| n.jsx_namespaced_name_text())
+                                .or_else(|| prop.name().map(|n| n.text().to_string()))
+                                .unwrap_or_default();
                             let t = match &a.initializer {
                                 Some(init) => match &init.data {
                                     NodeData::JsxExpression(e) => match &e.expression {
