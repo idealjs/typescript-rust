@@ -291,19 +291,14 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
     ) {
-        let source_struct = source.as_structured();
-        let target_struct = target.as_structured();
-        if let (Some(source_s), Some(target_s)) = (source_struct, target_struct) {
-            for target_prop in &target_s.properties {
-                for source_prop in &source_s.properties {
-                    if source_prop.name == target_prop.name {
-                        let source_type = self.get_type_of_symbol(source_prop);
-                        let target_type = self.get_type_of_symbol(target_prop);
-                        self.infer_from_types(state, &source_type, &target_type);
-                        break;
-                    }
-                }
-            }
+        let target_props = self.get_properties_of_type(target);
+        for target_prop in &target_props {
+            let Some(source_prop) = self.get_property_of_type(source, &target_prop.name) else {
+                continue;
+            };
+            let source_type = self.get_type_of_symbol(&source_prop);
+            let target_type = self.get_type_of_symbol(target_prop);
+            self.infer_from_types(state, &source_type, &target_type);
         }
     }
 
