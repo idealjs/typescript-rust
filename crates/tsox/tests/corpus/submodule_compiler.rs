@@ -563,16 +563,6 @@ fn run_case(
         };
         let label = if suffix.is_empty() { "default" } else { suffix };
 
-        if baseline::flavor() == baseline::Flavor::Go
-            && !suffix.is_empty()
-            && !std::path::Path::new(baseline::reference_root())
-                .join(subfolder())
-                .join(format!("{name}{ext}"))
-                .is_file()
-        {
-            notes.push(format!("{label}: skip (config baseline missing in tsgo tree)"));
-            continue;
-        }
         if let Some(reason) = entry["skip"].as_str() {
             notes.push(format!("{label}: skip ({reason})"));
             continue;
