@@ -41,8 +41,9 @@ impl Binder {
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return Arc::clone(antecedent);
         }
+        self.set_flow_node_referenced(antecedent);
         self.has_flow_effects = true;
-        Arc::new(FlowNode {
+        let result = Arc::new(FlowNode {
             flags: FlowFlags::ASSIGNMENT,
             node: Some(Arc::clone(node)),
             antecedent: Some(Arc::clone(antecedent)),
@@ -50,7 +51,11 @@ impl Binder {
             switch_statement: None,
             clause_range: None,
             reduce_target: None,
-        })
+        });
+        if let Some(target) = &self.current_exception_target {
+            self.add_antecedent_to_flow(target, &result);
+        }
+        result
     }
 
     pub(crate) fn create_flow_call(
