@@ -143,9 +143,9 @@ impl Checker {
             let combined = if members.is_empty() {
                 self.unknown_type()
             } else if is_union {
-                self.get_intersection_type(members)
-            } else {
                 self.get_union_type(members)
+            } else {
+                self.get_intersection_type(members)
             };
             let is_rest = either_has_rest && !needs_extra_rest && i == longest_count - 1;
             let is_optional = i >= left_min && i >= right_min;
