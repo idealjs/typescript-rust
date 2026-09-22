@@ -190,11 +190,17 @@ impl Checker {
             }
             SyntaxKind::TemplateExpression => {
                 if let tsox_frontend::ast::NodeData::TemplateExpression(data) = &node.data {
+                    let in_tagged_template = matches!(
+                        node.parent().map(|p| p.kind),
+                        Some(SyntaxKind::TaggedTemplateExpression)
+                    );
                     for span in data.template_spans.iter() {
                         if let tsox_frontend::ast::NodeData::TemplateSpan(span_data) = &span.data {
                             self.check_expression(&span_data.expression);
                             let t = self.get_type_of_node(&span_data.expression);
-                            if self.maybe_essymbol_considering_constraint(&t) {
+                            if !in_tagged_template
+                                && self.maybe_essymbol_considering_constraint(&t)
+                            {
                                 self.diagnostics.add(
                                     tsox_frontend::ast::Diagnostic::new(
                                         self.current_file.clone(),
