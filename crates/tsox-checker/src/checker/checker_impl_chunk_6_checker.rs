@@ -149,9 +149,7 @@ impl Checker {
                 if let tsox_frontend::ast::NodeData::ConditionalExpression(data) = &node.data {
                     let true_type = self.get_type_of_node(&data.when_true);
                     let false_type = self.get_type_of_node(&data.when_false);
-                    let true_widened = self.get_widened_type_of_literal(&true_type);
-                    let false_widened = self.get_widened_type_of_literal(&false_type);
-                    let types = vec![true_widened, false_widened];
+                    let types = vec![true_type, false_type];
                     // Go checkConditionalExpression：UnionReductionSubtype（移除可赋给
                     // 其他成员的 structured 成员，如 any[] ⊑ number[] → number[]）
                     let reduced = self.remove_subtype_redundant_members(types);
