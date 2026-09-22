@@ -41,6 +41,22 @@ impl Checker {
 
                     if matches!(
                         data.operator,
+                        SyntaxKind::PlusToken | SyntaxKind::MinusToken | SyntaxKind::TildeToken
+                    ) {
+                        let t = self.get_type_of_node(&data.operand);
+                        if self.maybe_essymbol_considering_constraint(&t) {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                data.operand.loc,
+                                tsox_core::diagnostics::messages_generated::
+                                    THE_0_OPERATOR_CANNOT_BE_APPLIED_TO_TYPE_SYMBOL,
+                                vec![Checker::op_display(data.operator).to_string()],
+                            ));
+                        }
+                    }
+
+                    if matches!(
+                        data.operator,
                         SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
                     ) {
                         self.check_unary_arithmetic_operand(&data.operand);
@@ -177,6 +193,18 @@ impl Checker {
                     for span in data.template_spans.iter() {
                         if let tsox_frontend::ast::NodeData::TemplateSpan(span_data) = &span.data {
                             self.check_expression(&span_data.expression);
+                            let t = self.get_type_of_node(&span_data.expression);
+                            if self.maybe_essymbol_considering_constraint(&t) {
+                                self.diagnostics.add(
+                                    tsox_frontend::ast::Diagnostic::new(
+                                        self.current_file.clone(),
+                                        span_data.expression.loc,
+                                        tsox_core::diagnostics::messages_generated::
+                                            IMPLICIT_CONVERSION_OF_A_SYMBOL_TO_A_STRING_WILL_FAIL_AT_RUNTIME_CONSIDER_WRAPPING_THIS_EXPRESSION_IN_STRING,
+                                        Vec::new(),
+                                    ),
+                                );
+                            }
                         }
                     }
                 }

@@ -60,7 +60,7 @@ impl Checker {
         self.is_type_assignable_to(t, &b)
     }
 
-    fn check_for_disallowed_es_symbol_operand(
+    pub(crate) fn check_for_disallowed_es_symbol_operand(
         &mut self,
         left: &Arc<Node>,
         right: &Arc<Node>,
@@ -90,16 +90,29 @@ impl Checker {
         }
     }
 
-    fn maybe_essymbol_considering_constraint(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn maybe_essymbol_considering_constraint(&self, t: &Arc<Type>) -> bool {
+        self.maybe_essymbol_considering_constraint_at(t, 10)
+    }
+
+    fn maybe_essymbol_considering_constraint_at(&self, t: &Arc<Type>, depth: u32) -> bool {
+        if depth == 0 {
+            return false;
+        }
         let symbol_like = TypeFlags::ESSymbol | TypeFlags::UniqueESSymbol;
-        if self.type_contains_flags(t, symbol_like) {
+        if t.flags.intersects(symbol_like) {
             return true;
+        }
+        if let TypeData::Union(u) = &t.data {
+            return u
+                .union_or_intersection
+                .types
+                .iter()
+                .any(|c| self.maybe_essymbol_considering_constraint_at(c, depth - 1));
         }
         if t.flags.contains(TypeFlags::TypeParameter)
             && let Some(constraint) = self.get_constraint_of_type_parameter(t)
-            && self.type_contains_flags(&constraint, symbol_like)
         {
-            return true;
+            return self.maybe_essymbol_considering_constraint_at(&constraint, depth - 1);
         }
         false
     }

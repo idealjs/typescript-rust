@@ -231,27 +231,29 @@ impl Checker {
                 || lt.flags.contains(TypeFlags::Any)
                 || rt.flags.contains(TypeFlags::Any)
         };
-        if !valid_pair(&lt, &rt) {
-            // Go getBaseTypesIfUnrelated：基类型仍不相关时按基类型展示
-            //（true→boolean、E.a→E 等字面量提升）
-            let base_lt = self.get_base_type_of_literal_type(&lt);
-            let base_rt = self.get_base_type_of_literal_type(&rt);
-            let (el, er) = if valid_pair(&base_lt, &base_rt) {
-                (&lt, &rt)
-            } else {
-                (&base_lt, &base_rt)
-            };
-            let lt_str = self.type_to_string(el);
-            let rt_str = self.type_to_string(er);
-            let file = self.current_file.clone();
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                file,
-                node.loc,
-                tsox_core::diagnostics::messages_generated::
-                    OPERATOR_0_CANNOT_BE_APPLIED_TO_TYPES_1_AND_2,
-                vec!["+".to_string(), lt_str, rt_str],
-            ));
+        if valid_pair(&lt, &rt) {
+            self.check_for_disallowed_es_symbol_operand(&data.left, &data.right, &lt, &rt, op);
+            return;
         }
+        // Go getBaseTypesIfUnrelated：基类型仍不相关时按基类型展示
+        //（true→boolean、E.a→E 等字面量提升）
+        let base_lt = self.get_base_type_of_literal_type(&lt);
+        let base_rt = self.get_base_type_of_literal_type(&rt);
+        let (el, er) = if valid_pair(&base_lt, &base_rt) {
+            (&lt, &rt)
+        } else {
+            (&base_lt, &base_rt)
+        };
+        let lt_str = self.type_to_string(el);
+        let rt_str = self.type_to_string(er);
+        let file = self.current_file.clone();
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            file,
+            node.loc,
+            tsox_core::diagnostics::messages_generated::
+                OPERATOR_0_CANNOT_BE_APPLIED_TO_TYPES_1_AND_2,
+            vec!["+".to_string(), lt_str, rt_str],
+        ));
     }
 
     pub(crate) fn logical_rhs_frame(
