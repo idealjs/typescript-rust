@@ -128,18 +128,20 @@ impl Checker {
                 }
 
                 let saved_scope_stack = std::mem::take(&mut self.scope_stack);
+                let first_decl = symbol
+                    .declarations
+                    .iter()
+                    .next()
+                    .expect("interface has a declaration");
                 for scope_id in crate::checker::checker_resolve_checker::lexical_scope_chain_ids(
-                    symbol
-                        .declarations
-                        .iter()
-                        .next()
-                        .expect("interface has a declaration"),
+                    first_decl,
                 )
                 .into_iter()
                 .rev()
                 {
                     self.scope_stack.push(scope_id);
                 }
+                self.scope_stack.push(first_decl.id());
 
                 let merged_members: Vec<Arc<Node>> = interface_decls
                     .iter()
