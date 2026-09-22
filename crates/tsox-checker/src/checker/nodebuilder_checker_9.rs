@@ -708,12 +708,6 @@ impl Checker {
             return None;
         }
         let decl = sym.declarations.first()?;
-        if let Some(parent) = decl.parent()
-            && parent.kind == SyntaxKind::VariableDeclaration
-            && let Some(name) = parent.name()
-        {
-            return Some(name.text().to_string());
-        }
         match decl.kind {
             SyntaxKind::ClassExpression => Some("(Anonymous class)".to_string()),
             SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => {
