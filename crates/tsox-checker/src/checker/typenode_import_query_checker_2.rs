@@ -320,6 +320,26 @@ impl Checker {
                     .collect();
                 return self.instantiate_value_type_for_type_query(&t, &arg_types);
             }
+            // Go getTypeFromTypeQueryNode：typeof 值经 checkExpressionWithTypeArguments
+            // 求值（标识符取控制流收窄型）后 getWidenedType + getRegularTypeOfLiteralType
+            if symbol.flags.intersects(
+                SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable,
+            ) {
+                let flow = self
+                    .program
+                    .symbol_map()
+                    .flow_node_of(&d.expr_name)
+                    .map(Arc::clone);
+                let narrowable = self.get_narrowable_type_for_reference(&t, &d.expr_name);
+                let narrowed = self.get_narrowed_type_of_symbol_with_declared(
+                    &symbol,
+                    flow.as_ref(),
+                    narrowable,
+                    Some(&d.expr_name),
+                );
+                let widened = self.get_widened_type(&narrowed);
+                return self.get_regular_type_of_literal_type(&widened);
+            }
             return t;
         }
         self.error_type()
