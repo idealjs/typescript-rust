@@ -209,7 +209,33 @@ impl Checker {
                 SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
             ) {
                 self.check_binding_pattern_element_types(&pd.name);
+                return;
             }
+            let Some(symbol) = self.get_symbol_of_declaration(param) else {
+                return;
+            };
+            if symbol
+                .value_declaration
+                .as_ref()
+                .is_some_and(|vd| !Arc::ptr_eq(vd, param))
+            {
+                return;
+            }
+            let declared = self.get_type_of_symbol(&symbol);
+            let declared = if declared.intrinsic_name() == Some("auto") {
+                self.get_any_type()
+            } else {
+                declared
+            };
+            let init_type = self.get_type_of_node(init);
+            self.check_type_assignable_to_and_optionally_elaborate(
+                &init_type,
+                &declared,
+                Some(param),
+                Some(init),
+                None,
+                None,
+            );
         }
     }
 }
