@@ -204,8 +204,7 @@ impl Checker {
                 return None;
             }
             if s.has_rest_parameter() {
-                let rest_param = s.parameters.last()?;
-                let rest_type = self.get_type_of_symbol(rest_param);
+                let rest_type = self.effective_rest_param_type(s)?;
                 let TypeData::Tuple(t) = &rest_type.data else {
                     return None;
                 };
@@ -221,8 +220,7 @@ impl Checker {
             let mut count = s.parameters.len();
             if s.has_rest_parameter() {
                 count -= 1;
-                let rest_param = s.parameters.last().unwrap();
-                let rest_type = self.get_type_of_symbol(rest_param);
+                let rest_type = self.effective_rest_param_type(s)?;
                 if let TypeData::Tuple(t) = &rest_type.data {
                     count += t.fixed_length;
                 }
@@ -290,5 +288,13 @@ impl Checker {
             let _ = combined.resolved_return_type.set(rt);
         }
         Some(Arc::new(combined))
+    }
+
+    fn effective_rest_param_type(&mut self, s: &Arc<Signature>) -> Option<Arc<Type>> {
+        if let Some(overrides) = &s.instantiated_parameter_types {
+            return overrides.last().cloned();
+        }
+        let rest_param = s.parameters.last()?;
+        Some(self.get_type_of_symbol(rest_param))
     }
 }

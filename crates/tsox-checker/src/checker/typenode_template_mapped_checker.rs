@@ -117,6 +117,7 @@ impl Checker {
             _ => return self.error_type(),
         };
         let constraint_type = self.get_type_from_type_node(&constraint_node);
+        let mapped_symbol = self.program.symbol_map().symbol_of(node).map(Arc::clone);
 
         if data.type_node.is_none()
             && self.no_implicit_any
@@ -158,7 +159,7 @@ impl Checker {
                 flags: TypeFlags::Object,
                 object_flags: crate::checker::types::ObjectFlags::Mapped,
                 id: crate::checker::types::next_type_id(),
-                symbol: None,
+                symbol: mapped_symbol.clone(),
                 alias: None,
                 data: TypeData::Mapped(MappedTypeData {
                     object: ObjectTypeData {
@@ -245,7 +246,7 @@ impl Checker {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
             id: crate::checker::types::next_type_id(),
-            symbol: None,
+            symbol: mapped_symbol,
             alias: None,
             data: TypeData::Object(ObjectTypeData {
                 structured: StructuredTypeData {

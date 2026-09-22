@@ -389,7 +389,7 @@ impl Binder {
                     INTERNAL_SYMBOL_NAME_OBJECT,
                 );
             }
-            SyntaxKind::TypeLiteral => {
+            SyntaxKind::TypeLiteral | SyntaxKind::MappedType => {
                 self.bind_anonymous_declaration(
                     node,
                     SymbolFlags::TypeLiteral,

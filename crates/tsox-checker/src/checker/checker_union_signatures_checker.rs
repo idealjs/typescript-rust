@@ -82,6 +82,33 @@ impl Checker {
         self.has_effective_rest_parameter(left) || self.has_effective_rest_parameter(right)
     }
 
+    pub(crate) fn get_intersected_signatures(
+        &mut self,
+        signatures: &[Arc<Signature>],
+    ) -> Option<Arc<Signature>> {
+        if !self.no_implicit_any {
+            return None;
+        }
+        let mut combined: Option<Arc<Signature>> = None;
+        for sig in signatures {
+            match &combined {
+                None => combined = Some(Arc::clone(sig)),
+                Some(c) if Arc::ptr_eq(c, sig) => {}
+                Some(c) => {
+                    if self.compare_type_parameters_identical(
+                        &c.type_parameters,
+                        &sig.type_parameters,
+                    ) {
+                        combined = Some(self.combine_union_member_signature(c, sig, false));
+                    } else {
+                        return None;
+                    }
+                }
+            }
+        }
+        combined
+    }
+
     fn combine_union_parameters(
         &mut self,
         left: &Arc<Signature>,

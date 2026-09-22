@@ -349,9 +349,14 @@ impl Checker {
         node: &Arc<tsox_frontend::ast::Node>,
     ) -> Option<Arc<Signature>> {
         let signatures = self.get_signatures_of_type(t, SignatureKind::Call);
-        signatures
+        let applicable: Vec<Arc<Signature>> = signatures
             .into_iter()
-            .find(|s| !self.is_arity_smaller(s, node))
+            .filter(|s| !self.is_arity_smaller(s, node))
+            .collect();
+        if applicable.len() == 1 {
+            return applicable.into_iter().next();
+        }
+        self.get_intersected_signatures(&applicable)
     }
 
     pub(crate) fn is_arity_smaller(

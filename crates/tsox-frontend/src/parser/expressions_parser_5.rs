@@ -290,8 +290,9 @@ impl Parser {
     }
 
     pub(crate) fn parse_argument(&mut self) -> Arc<Node> {
-        if self.parse_optional(SyntaxKind::DotDotDotToken) {
+        if self.token == SyntaxKind::DotDotDotToken {
             let pos = self.token_pos();
+            self.parse_optional(SyntaxKind::DotDotDotToken);
             let expression = self.allow_in(|p| p.parse_assignment_expression());
             let end = expression.end();
             return Arc::new(Node::with_loc(

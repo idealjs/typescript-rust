@@ -156,7 +156,20 @@ impl Checker {
     }
 
     pub fn get_non_array_rest_type(&mut self, sig: &Arc<Signature>) -> Option<Arc<Type>> {
-        let rest_type = self.get_effective_rest_type(sig)?;
+        if !sig.has_rest_parameter() {
+            return None;
+        }
+        let rest_type = if let Some(overrides) = &sig.instantiated_parameter_types {
+            overrides.last().cloned()?
+        } else {
+            let last = sig.parameters.last()?;
+            self.get_type_of_symbol(last)
+        };
+        if let TypeData::Tuple(t) = &rest_type.data
+            && !t.combined_flags.contains(ElementFlags::Variadic)
+        {
+            return None;
+        }
         if !self.is_array_type(&rest_type) && !rest_type.flags.intersects(TypeFlags::Any) {
             return Some(rest_type);
         }
