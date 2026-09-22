@@ -127,10 +127,6 @@ impl Checker {
         Vec::new()
     }
 
-    pub fn is_discriminant_property(&mut self, _t: &Arc<Type>, _name: &str) -> bool {
-        false
-    }
-
     pub fn get_matching_union_constituent_for_type(
         &mut self,
         _union_type: &Arc<Type>,

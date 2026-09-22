@@ -195,6 +195,15 @@ impl Checker {
 
         let contextual_type = self.get_contextual_type(&object_literal, _context_flags)?;
 
+        // Go getContextualTypeForObjectLiteralElement 经
+        // getApparentTypeOfContextualType：对象字面量的联合上下文型先经
+        // 判别式成员筛选（discriminateContextualTypeByObjectMembers）
+        let contextual_type = if contextual_type.is_union() {
+            self.discriminate_contextual_type_by_object_members(&object_literal, &contextual_type)
+        } else {
+            contextual_type
+        };
+
         let name = match &node.data {
             // Go getContextualTypeForObjectLiteralElement：统一走
             // getLiteralTypeFromPropertyName（well-known `Symbol.x` 计算名映射
