@@ -368,17 +368,25 @@ impl Binder {
         let is_static_block = node.kind == SyntaxKind::ClassStaticBlockDeclaration;
         let is_function_like =
             flags.contains(ContainerFlags::IS_FUNCTION_LIKE) && !is_static_block;
-        let prev_flow = if is_function_like {
+        let is_flow_transparent_iife =
+            is_function_like && is_flow_transparent_function_expression(node);
+        let prev_flow = if is_function_like && !is_flow_transparent_iife {
             self.current_flow.take()
         } else {
             None
         };
-        if is_function_like {
+        if is_function_like && !is_flow_transparent_iife {
             self.current_flow = Some(Arc::new(FlowNode::new(FlowFlags::START)));
         }
         // Go bindWorker 控制流容器分支：进入时清空跳转目标/活跃标签/返回目标，
-        // 静态块按 IIFE 处理（不重置 currentFlow，挂 return 分支标签）
+        // 静态块与非 async/非 generator 的立即调用函数表达式按 IIFE 处理
+        //（不重置 currentFlow，挂 return 分支标签）
         let static_block_return = if is_static_block {
+            Some(Self::new_flow_accumulator())
+        } else {
+            None
+        };
+        let iife_return = if is_flow_transparent_iife {
             Some(Self::new_flow_accumulator())
         } else {
             None
@@ -410,6 +418,9 @@ impl Binder {
             None
         };
         if let Some(rl) = &static_block_return {
+            self.current_return_target = Some(Arc::clone(rl));
+        }
+        if let Some(rl) = &iife_return {
             self.current_return_target = Some(Arc::clone(rl));
         }
 
@@ -444,7 +455,15 @@ impl Binder {
             {
                 self.symbol_map.set_flow_node(node, Arc::clone(flow));
             }
-            self.current_flow = prev_flow;
+            if let Some(rl) = &iife_return {
+                if let Some(current) = &self.current_flow {
+                    self.add_antecedent_to_flow(rl, current);
+                }
+                self.current_flow =
+                    Some(Self::finish_flow_node(rl, &self.unreachable_flow()));
+            } else {
+                self.current_flow = prev_flow;
+            }
         }
         if save_jump_reset {
             self.current_break_target = save_break;
@@ -558,4 +577,13 @@ pub(crate) fn function_like_body_is_present(node: &Arc<Node>) -> bool {
         NodeData::SetAccessorDeclaration(d) => d.body.is_some(),
         _ => false,
     }
+}
+
+pub(crate) fn is_flow_transparent_function_expression(node: &Arc<Node>) -> bool {
+    let NodeData::FunctionExpression(data) = &node.data else {
+        return false;
+    };
+    data.asterisk_token.is_none()
+        && !has_syntactic_modifier(node, ModifierFlags::Async)
+        && crate::checker::checker_prop_access_checker_4::is_immediately_invoked(node)
 }
