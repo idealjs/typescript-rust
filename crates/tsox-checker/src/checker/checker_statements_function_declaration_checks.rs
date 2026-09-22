@@ -163,42 +163,18 @@ impl Checker {
             tsox_frontend::ast::NodeData::FunctionDeclaration(d) => d.asterisk_token.is_some(),
             _ => false,
         };
-        if let Some(ret_type) = &declared_return {
-            if is_generator {
-                self.return_type_stack.pop();
-                self.in_ctor_body_stack.pop();
-                self.break_continue_context_stack.pop();
-                self.pop_function_scope();
-                return;
-            }
-            if !self.maybe_type_of_kind(ret_type, TypeFlags::Void)
-                && !ret_type
-                    .flags
-                    .intersects(TypeFlags::Undefined | TypeFlags::Any)
-            {
-                if let tsox_frontend::ast::NodeData::FunctionDeclaration(data) = &node.data {
-                    if let Some(body) = &data.body {
-                        if !self.function_body_definitely_returns(body) {
-                            if !Self::function_body_has_explicit_return(body) {
-                                let loc = data.type_node.as_ref().map_or(node.loc, |tn| tn.loc);
-                                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                                        self.current_file.clone(),
-                                        loc,
-                                        A_FUNCTION_WHOSE_DECLARED_TYPE_IS_NEITHER_UNDEFINED_VOID_NOR_ANY_MUST_RETURN_A_VALUE,
-                                        vec![],
-                                    ));
-                            } else {
-                                let loc = data.type_node.as_ref().map_or(node.loc, |tn| tn.loc);
-                                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                                        self.current_file.clone(),
-                                        loc,
-                                        FUNCTION_LACKS_ENDING_RETURN_STATEMENT_AND_RETURN_TYPE_DOES_NOT_INCLUDE_UNDEFINED,
-                                        vec![],
-                                    ));
-                            }
-                        }
-                    }
-                }
+        if is_generator {
+            self.return_type_stack.pop();
+            self.in_ctor_body_stack.pop();
+            self.break_continue_context_stack.pop();
+            self.pop_function_scope();
+            return;
+        }
+        if let tsox_frontend::ast::NodeData::FunctionDeclaration(data) = &node.data {
+            if let Some(tn) = data.type_node.as_ref() {
+                self.check_all_code_paths_annotated(node, tn);
+            } else {
+                self.check_no_implicit_returns(node, None);
             }
         }
         self.return_type_stack.pop();

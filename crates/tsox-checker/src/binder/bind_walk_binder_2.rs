@@ -438,6 +438,12 @@ impl Binder {
             self.current_flow = Some(finished);
         }
         if is_function_like {
+            if let Some(flow) = self.current_flow.as_ref()
+                && !flow.flags.contains(FlowFlags::UNREACHABLE)
+                && function_like_body_is_present(node)
+            {
+                self.symbol_map.set_flow_node(node, Arc::clone(flow));
+            }
             self.current_flow = prev_flow;
         }
         if save_jump_reset {
@@ -539,5 +545,17 @@ impl Binder {
                 _ => return false,
             }
         }
+    }
+}
+
+pub(crate) fn function_like_body_is_present(node: &Arc<Node>) -> bool {
+    match &node.data {
+        NodeData::FunctionDeclaration(d) => d.body.is_some(),
+        NodeData::FunctionExpression(_) | NodeData::ArrowFunction(_) => true,
+        NodeData::MethodDeclaration(d) => d.body.is_some(),
+        NodeData::ConstructorDeclaration(d) => d.body.is_some(),
+        NodeData::GetAccessorDeclaration(d) => d.body.is_some(),
+        NodeData::SetAccessorDeclaration(d) => d.body.is_some(),
+        _ => false,
     }
 }

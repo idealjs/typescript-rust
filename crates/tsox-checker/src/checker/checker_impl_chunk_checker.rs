@@ -315,6 +315,7 @@ impl Checker {
             type_instantiation_count: 0,
             type_instantiation_limit_reported: false,
             flow_node_reachable: HashMap::new(),
+            switch_exhaustive_state: HashMap::new(),
             flow_inline_level: 0,
             in_static_member_type: false,
             suppress_cannot_find_name_in_type_nodes: 0,

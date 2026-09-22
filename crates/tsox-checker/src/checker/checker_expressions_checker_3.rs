@@ -56,6 +56,11 @@ impl Checker {
             } else {
                 self.pop_function_scope();
             }
+            if let Some(tn) = type_node.as_ref() {
+                self.check_all_code_paths_annotated(node, tn);
+            } else {
+                self.check_no_implicit_returns(node, None);
+            }
         }
     }
 

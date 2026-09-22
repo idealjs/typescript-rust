@@ -256,6 +256,7 @@ pub struct Checker {
     pub flow_invocation_count: i32,
     pub flow_type_cache: HashMap<u64, Arc<Type>>,
     pub flow_node_reachable: HashMap<u64, bool>,
+    pub switch_exhaustive_state: HashMap<u64, u8>,
     pub type_instantiation_count: u64,
     pub type_instantiation_limit_reported: bool,
     pub flow_inline_level: u32,

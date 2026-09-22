@@ -281,17 +281,45 @@ impl Checker {
         if then_type.flags.contains(TypeFlags::Any) {
             return None;
         }
-        let then_signatures = self.get_signatures_of_type(&then_type, SignatureKind::Call);
-        let then_sig = then_signatures.first()?;
-        let onfulfilled = then_sig.parameters.first()?;
-        let callback_type = self.get_type_of_symbol(onfulfilled);
-        if callback_type.flags.contains(TypeFlags::Any) {
+        let then_signatures = self.call_signatures_through_unions(&then_type);
+        let onfulfilled_types: Vec<Arc<Type>> = then_signatures
+            .iter()
+            .filter_map(|sig| {
+                sig.parameters.first().map(|p| self.get_type_of_symbol(p))
+            })
+            .collect();
+        let onfulfilled_types: Vec<Arc<Type>> = onfulfilled_types
+            .into_iter()
+            .filter(|t| !t.flags.contains(TypeFlags::Any))
+            .collect();
+        if onfulfilled_types.is_empty() {
             return None;
         }
-        let callback_signatures = self.get_signatures_of_type(&callback_type, SignatureKind::Call);
-        let callback_sig = callback_signatures.first()?;
-        let value_param = callback_sig.parameters.first()?;
-        Some(self.get_type_of_symbol(value_param))
+        let callback_type = self.get_union_type(onfulfilled_types);
+        let callback_signatures = self.call_signatures_through_unions(&callback_type);
+        let value_types: Vec<Arc<Type>> = callback_signatures
+            .iter()
+            .filter_map(|sig| {
+                sig.parameters.first().map(|p| self.get_type_of_symbol(p))
+            })
+            .collect();
+        if value_types.is_empty() {
+            return None;
+        }
+        Some(self.get_union_type(value_types))
+    }
+
+    fn call_signatures_through_unions(&self, t: &Arc<Type>) -> Vec<Arc<Signature>> {
+        if t.is_union()
+            && let Some(types) = t.types()
+        {
+            let mut all = Vec::new();
+            for m in types {
+                all.extend(self.call_signatures_through_unions(m));
+            }
+            return all;
+        }
+        self.get_signatures_of_type(t, SignatureKind::Call)
     }
 
     pub(crate) fn declared_annotation_type_of(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
