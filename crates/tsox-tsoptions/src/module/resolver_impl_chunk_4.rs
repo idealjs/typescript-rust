@@ -167,6 +167,71 @@ pub fn get_effective_type_roots(
     (type_roots, false)
 }
 
+pub(crate) fn compute_package_id(fs: &dyn FS, resolved_file_name: &str) -> Option<PackageId> {
+    if !resolved_file_name.contains("/node_modules/") {
+        return None;
+    }
+    let package_directory = crate::module::parse_node_module_from_path(resolved_file_name, false);
+    if package_directory.is_empty() {
+        return None;
+    }
+    let pkg_json_path = tsox_core::tspath::combine_paths(&package_directory, &["package.json"]);
+    let content = fs.read_file(&pkg_json_path)?;
+    let fields = packagejson::parse(&content).ok()?;
+    let name = fields.header_fields.name.get_value()?.clone();
+    let version = fields.header_fields.version.get_value()?.clone();
+    let sub_module_name = if resolved_file_name.len() > package_directory.len() {
+        resolved_file_name[package_directory.len() + 1..].to_string()
+    } else {
+        String::new()
+    };
+    let peer_dependencies = read_peer_dependencies(fs, &fields, &package_directory);
+    Some(PackageId {
+        name,
+        sub_module_name,
+        version,
+        peer_dependencies,
+    })
+}
+
+fn read_peer_dependencies(
+    fs: &dyn FS,
+    fields: &packagejson::Fields,
+    package_directory: &str,
+) -> String {
+    let Some(peers) = fields
+        .dependency_fields
+        .peer_dependencies
+        .get_value()
+        .filter(|p| !p.is_empty())
+    else {
+        return String::new();
+    };
+    let Some(idx) = package_directory.rfind("/node_modules") else {
+        return String::new();
+    };
+    let node_modules = &package_directory[..idx + "/node_modules".len()];
+    let mut names: Vec<&String> = peers.keys().collect();
+    names.sort();
+    let mut out = String::new();
+    for name in names {
+        let found = fs
+            .read_file(&tsox_core::tspath::combine_paths(
+                node_modules,
+                &[name, "package.json"],
+            ))
+            .and_then(|c| packagejson::parse(&c).ok())
+            .and_then(|f| f.header_fields.version.get_value().cloned());
+        if let Some(version) = found {
+            out.push('+');
+            out.push_str(name);
+            out.push('@');
+            out.push_str(&version);
+        }
+    }
+    out
+}
+
 pub(crate) struct ResolutionState<'a> {
     pub(crate) name: String,
     pub(crate) containing_directory: String,

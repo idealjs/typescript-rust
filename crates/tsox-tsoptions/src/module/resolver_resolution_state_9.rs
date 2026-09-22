@@ -356,13 +356,15 @@ impl<'a> ResolutionState<'a> {
         match resolved {
             Some(r) => {
                 let is_external = r.path.contains("/node_modules/");
+                let package_id =
+                    r.package_id.or_else(|| compute_package_id(self.fs, &r.path));
                 ResolvedModule {
                     resolved_file_name: r.path,
                     original_path: r.original_path,
                     extension: r.extension,
                     resolved_using_ts_extension: r.resolved_using_ts_extension,
                     is_external_library_import: is_external,
-                    package_id: r.package_id,
+                    package_id,
                     ..Default::default()
                 }
             }

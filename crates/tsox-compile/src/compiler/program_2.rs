@@ -155,6 +155,10 @@ impl Program {
             );
 
             let mut visited: std::collections::HashSet<String> = by_name.keys().cloned().collect();
+            let mut package_id_to_source_file: HashMap<
+                tsox_tsoptions::module::PackageId,
+                Arc<SourceFile>,
+            > = HashMap::new();
             let mut stack: Vec<Arc<SourceFile>> = Vec::new();
 
             let expanded_types: Vec<String> = if options.types.iter().any(|t| t == "*") {
@@ -351,6 +355,17 @@ impl Program {
                         let resolved_path = host
                             .fs()
                             .realpath(resolved_module.resolved_file_name.as_str());
+                        if let Some(existing) = resolved_module
+                            .package_id
+                            .as_ref()
+                            .and_then(|pid| package_id_to_source_file.get(pid))
+                        {
+                            visited.insert(resolved_path.clone());
+                            let normalized = tsox_core::tspath::normalize_path(&resolved_path);
+                            by_name.insert(normalized, Arc::clone(existing));
+                            by_name.insert(resolved_path, Arc::clone(existing));
+                            continue;
+                        }
                         if visited.insert(resolved_path.clone()) {
                             let pre = source_files.len();
                             load_source_file_with_references(
@@ -362,6 +377,12 @@ impl Program {
                                 allow_js,
                             );
                             stack.extend(source_files[pre..].iter().cloned());
+                            if let Some(pid) = resolved_module.package_id.clone() {
+                                let key = tsox_core::tspath::normalize_path(&resolved_path);
+                                if let Some(f) = by_name.get(&key) {
+                                    package_id_to_source_file.insert(pid, Arc::clone(f));
+                                }
+                            }
                         }
                     } else if ((module_spec.starts_with('.')
                         && !pattern_ambient_module_exists(&source_files, module_spec)
