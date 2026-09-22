@@ -155,10 +155,14 @@ impl Program {
             );
 
             let mut visited: std::collections::HashSet<String> = by_name.keys().cloned().collect();
-            let mut package_id_to_source_file: HashMap<
-                tsox_tsoptions::module::PackageId,
-                Arc<SourceFile>,
-            > = HashMap::new();
+            let mut pid_first_path: HashMap<tsox_tsoptions::module::PackageId, String> =
+                HashMap::new();
+            package_dedupe::prewalk_package_first_paths(
+                &resolver,
+                host.as_ref(),
+                &source_files,
+                &mut pid_first_path,
+            );
             let mut stack: Vec<Arc<SourceFile>> = Vec::new();
 
             let expanded_types: Vec<String> = if options.types.iter().any(|t| t == "*") {
@@ -355,16 +359,41 @@ impl Program {
                         let resolved_path = host
                             .fs()
                             .realpath(resolved_module.resolved_file_name.as_str());
-                        if let Some(existing) = resolved_module
+                        let first_path = resolved_module
                             .package_id
                             .as_ref()
-                            .and_then(|pid| package_id_to_source_file.get(pid))
-                        {
-                            visited.insert(resolved_path.clone());
-                            let normalized = tsox_core::tspath::normalize_path(&resolved_path);
-                            by_name.insert(normalized, Arc::clone(existing));
-                            by_name.insert(resolved_path, Arc::clone(existing));
-                            continue;
+                            .and_then(|pid| pid_first_path.get(pid))
+                            .cloned();
+                        if first_path.as_deref() != Some(resolved_path.as_str()) {
+                            let target = first_path.as_deref().and_then(|first| {
+                                let key = tsox_core::tspath::normalize_path(first);
+                                by_name
+                                    .get(&key)
+                                    .or_else(|| by_name.get(first))
+                                    .cloned()
+                                    .or_else(|| {
+                                        load_source_file_with_references(
+                                            first,
+                                            host.as_ref(),
+                                            &mut source_files,
+                                            &mut by_name,
+                                            &mut diagnostics,
+                                            allow_js,
+                                        );
+                                        by_name
+                                            .get(&key)
+                                            .or_else(|| by_name.get(first))
+                                            .cloned()
+                                    })
+                            });
+                            if let Some(existing) = target {
+                                visited.insert(resolved_path.clone());
+                                let normalized =
+                                    tsox_core::tspath::normalize_path(&resolved_path);
+                                by_name.insert(normalized, Arc::clone(&existing));
+                                by_name.insert(resolved_path, existing);
+                                continue;
+                            }
                         }
                         if visited.insert(resolved_path.clone()) {
                             let pre = source_files.len();
@@ -377,12 +406,6 @@ impl Program {
                                 allow_js,
                             );
                             stack.extend(source_files[pre..].iter().cloned());
-                            if let Some(pid) = resolved_module.package_id.clone() {
-                                let key = tsox_core::tspath::normalize_path(&resolved_path);
-                                if let Some(f) = by_name.get(&key) {
-                                    package_id_to_source_file.insert(pid, Arc::clone(f));
-                                }
-                            }
                         }
                     } else if ((module_spec.starts_with('.')
                         && !pattern_ambient_module_exists(&source_files, module_spec)
