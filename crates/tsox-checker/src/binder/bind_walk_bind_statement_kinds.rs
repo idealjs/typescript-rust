@@ -70,6 +70,19 @@ impl Binder {
                 return true;
             }
             SyntaxKind::LabeledStatement => {
+                // Go checkStrictModeLabeledStatement：标签修饰声明/变量语句报 TS1344
+                //（tsgo oracle 无条件分发，sloppy 同报）
+                if let NodeData::LabeledStatement(d) = &node.data
+                    && (is_declaration_statement(&d.statement)
+                        || is_variable_statement(&d.statement))
+                {
+                    self.symbol_map.binder_diagnostics.push(Diagnostic::new(
+                        self.current_source_file.clone(),
+                        d.label.loc,
+                        tsox_core::diagnostics::messages_generated::A_LABEL_IS_NOT_ALLOWED_HERE,
+                        vec![],
+                    ));
+                }
                 self.bind_labeled_statement(node);
                 return true;
             }
