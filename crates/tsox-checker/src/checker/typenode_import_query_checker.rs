@@ -53,8 +53,20 @@ impl Checker {
                     NodeData::ExternalModuleReference(ext) => ext.expression.loc,
                     _ => data.module_reference.loc,
                 };
+                let decl_file = self
+                    .get_source_file_of_node(decl)
+                    .or_else(|| self.current_file.clone());
                 let module_sym = match if spec.starts_with("./") || spec.starts_with("../") {
-                    self.resolve_module_file_symbol_relative(&spec)
+                    match decl_file.as_ref() {
+                        Some(f) => {
+                            let dir = match f.file_name.rfind('/') {
+                                Some(i) => f.file_name[..i].to_string(),
+                                None => String::new(),
+                            };
+                            self.resolve_module_file_symbol_in(&dir, &spec)
+                        }
+                        None => self.resolve_module_file_symbol_relative(&spec),
+                    }
                 } else {
                     self.resolve_module_file_symbol(&spec)
                 } {
@@ -82,7 +94,7 @@ impl Checker {
                                 .any(|d| d.code == 2306 && d.loc == spec_loc)
                         {
                             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                                self.current_file.clone(),
+                                decl_file.clone(),
                                 spec_loc,
                                 tsox_core::diagnostics::messages_generated::FILE_0_IS_NOT_A_MODULE,
                                 vec![file_name],
@@ -99,11 +111,20 @@ impl Checker {
                                 &self.compiler_options,
                                 &trimmed,
                             );
-                        if !self.diagnostics.get_all().iter().any(|d| {
-                            d.code == message.code && d.loc == spec_loc
-                        }) {
+                        let disk_resolved = decl_file.as_ref().and_then(|f| {
+                            self.program.resolve_external_module_path(
+                                &trimmed,
+                                &f.file_name,
+                                tsox_core::core::compiler_options::ModuleKind::None,
+                            )
+                        });
+                        if disk_resolved.is_none()
+                            && !self.diagnostics.get_all().iter().any(|d| {
+                                d.code == message.code && d.loc == spec_loc
+                            })
+                        {
                             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                                self.current_file.clone(),
+                                decl_file.clone(),
                                 spec_loc,
                                 message.clone(),
                                 args,
@@ -152,9 +173,24 @@ impl Checker {
             _ => return None,
         };
         let module_spec = module_spec_node.text().to_string();
-        let module_sym = self.resolve_module_file_symbol(&module_spec).or_else(|| {
+        let decl_file = self
+            .get_source_file_of_node(&import_decl)
+            .or_else(|| self.current_file.clone());
+        let module_sym = if module_spec.starts_with("./") || module_spec.starts_with("../") {
+            let dir = decl_file.as_ref().map(|f| match f.file_name.rfind('/') {
+                Some(i) => f.file_name[..i].to_string(),
+                None => String::new(),
+            });
+            match dir {
+                Some(dir) => self.resolve_module_file_symbol_in(&dir, &module_spec),
+                None => self.resolve_module_file_symbol(&module_spec),
+            }
+        } else {
+            self.resolve_module_file_symbol(&module_spec)
+        }
+        .or_else(|| {
             let trimmed = module_spec.trim_matches(['"', '\'', '`']).to_string();
-            let cur = self.current_file.clone()?;
+            let cur = decl_file.clone()?;
             let path = self.program.resolve_external_module_path(
                 &trimmed,
                 &cur.file_name,
@@ -171,14 +207,22 @@ impl Checker {
                 let trimmed = module_spec.trim_matches(['"', '\'', '`']).to_string();
                 let (message, args) =
                     tsox_frontend::parser::cannot_resolve_module_error(&self.compiler_options, &trimmed);
-                if !self
-                    .diagnostics
-                    .get_all()
-                    .iter()
-                    .any(|d| d.code == message.code && d.loc == module_spec_node.loc)
+                let disk_resolved = decl_file.as_ref().and_then(|f| {
+                    self.program.resolve_external_module_path(
+                        &trimmed,
+                        &f.file_name,
+                        tsox_core::core::compiler_options::ModuleKind::None,
+                    )
+                });
+                if disk_resolved.is_none()
+                    && !self
+                        .diagnostics
+                        .get_all()
+                        .iter()
+                        .any(|d| d.code == message.code && d.loc == module_spec_node.loc)
                 {
                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                        self.current_file.clone(),
+                        decl_file.clone(),
                         module_spec_node.loc,
                         message.clone(),
                         args,
