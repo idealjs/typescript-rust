@@ -165,6 +165,7 @@ impl Checker {
             relater_overflow: false,
             new_call_fallback_signature: false,
             relater_intersection_target_depth: 0,
+            relation_reference_canon: HashMap::new(),
             subst_object_in_progress: std::collections::HashMap::new(),
             in_return_substitution: false,
             relater_source_stack: Vec::new(),

@@ -112,6 +112,8 @@ pub struct Checker {
     pub relation_count: u32,
     pub relater_overflow: bool,
     pub relater_intersection_target_depth: u32,
+    pub relation_reference_canon:
+        HashMap<(usize, Vec<u32>), u32>,
     pub subst_object_in_progress: std::collections::HashMap<u32, Arc<crate::checker::types::Type>>,
     pub in_return_substitution: bool,
     pub relater_source_stack: Vec<Arc<Type>>,

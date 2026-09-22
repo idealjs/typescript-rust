@@ -241,9 +241,11 @@ impl Checker {
 
             self.relation_count = 2_000_000;
         }
+        let source_id = self.canonical_relation_type_id(&source);
+        let target_id = self.canonical_relation_type_id(&target);
         let key = RelationCacheKey {
-            source_id: source.id,
-            target_id: target.id,
+            source_id,
+            target_id,
             relation,
             intersection_target: self.relater_intersection_target_depth > 0,
         };
@@ -302,6 +304,25 @@ impl Checker {
         }
         self.relation_cache.insert(key, result);
         result
+    }
+
+    pub(crate) fn canonical_relation_type_id(&mut self, t: &Arc<Type>) -> u32 {
+        if let (TypeData::Object(o), Some(sym)) = (&t.data, t.symbol.as_ref())
+            && !o.type_arguments.is_empty()
+        {
+            let mut arg_ids = Vec::with_capacity(o.type_arguments.len());
+            for a in &o.type_arguments {
+                arg_ids.push(self.canonical_relation_type_id(a));
+            }
+            let shape = (Arc::as_ptr(sym) as *const tsox_frontend::ast::Symbol as usize, arg_ids);
+            let own = t.id;
+            *self
+                .relation_reference_canon
+                .entry(shape)
+                .or_insert(own)
+        } else {
+            t.id
+        }
     }
 
     pub(crate) fn chain_message_key(&self, index: usize) -> Option<&'static str> {
