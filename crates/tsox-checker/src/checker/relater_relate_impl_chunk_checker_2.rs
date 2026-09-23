@@ -280,9 +280,15 @@ impl Checker {
             };
             let generalized_source = generalized.as_ref().unwrap_or(source);
             let constraint = self.get_base_constraint_of_type(target);
+            let saved_excess_node = self.relater_excess_error_node.take();
             let constraint_ok = constraint
                 .as_ref()
                 .is_some_and(|c| self.is_type_assignable_to(generalized_source, c));
+            let constraint_ok_source = !constraint_ok
+                && constraint
+                    .as_ref()
+                    .is_some_and(|c| self.is_type_assignable_to(source, c));
+            self.relater_excess_error_node = saved_excess_node;
             if constraint_ok {
                 let c = constraint.unwrap();
                 let s = self.type_to_string(generalized_source);
@@ -292,10 +298,7 @@ impl Checker {
                     msg::X_0_IS_ASSIGNABLE_TO_THE_CONSTRAINT_OF_TYPE_1_BUT_1_COULD_BE_INSTANTIATED_WITH_A_DIFFERENT_SUBTYPE_OF_CONSTRAINT_2,
                     vec![s, t, c_str],
                 );
-            } else if constraint
-                .as_ref()
-                .is_some_and(|c| self.is_type_assignable_to(source, c))
-            {
+            } else if constraint_ok_source {
                 let c = constraint.unwrap();
                 let s = self.type_to_string(source);
                 let t = self.type_to_string(target);

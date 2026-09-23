@@ -268,14 +268,6 @@ impl Checker {
             }
         }
         let is_top_level = self.relater_depth == 0;
-        if std::env::var("TSOX_RELATER_DEBUG").is_ok() {
-            use std::io::Write;
-            if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("/tmp/relater_debug.log") {
-                let ss = self.type_to_string(&source);
-                let ts = self.type_to_string(&target);
-                let _ = writeln!(f, "[irt enter] depth={} active={} rel={:?} {} -> {}", self.relater_depth, self.relater_chain_active, relation, ss, ts);
-            }
-        }
         self.relation_in_progress.insert(key);
         self.relater_depth += 1;
 
