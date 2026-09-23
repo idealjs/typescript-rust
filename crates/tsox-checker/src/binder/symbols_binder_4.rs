@@ -32,6 +32,10 @@ impl Binder {
             NodeData::TypeAliasDeclaration(data) => self.node_text(&data.name),
             NodeData::EnumDeclaration(data) => self.node_text(&data.name),
             NodeData::ModuleDeclaration(data) => {
+                // Go getDeclarationName：global scope 增强用内部名，裸名 global 不可解析
+                if tsox_frontend::ast::is_global_scope_augmentation(node) {
+                    return INTERNAL_SYMBOL_NAME_GLOBAL.to_string();
+                }
                 let name_text = self.node_text(&data.name);
                 // Go getDeclarationName：带 import attributes 的 pattern ambient 模块
                 // 用唯一名（~pattern@id）避免同名 pattern 在 bind 期合并
