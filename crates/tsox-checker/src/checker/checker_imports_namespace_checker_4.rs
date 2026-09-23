@@ -3,6 +3,111 @@
 use crate::checker::checker_imports_namespace::*;
 
 impl Checker {
+    /// Go resolveESModuleSymbol：namespace import 的模块类型先揭示 export=
+    /// 目标（resolveExternalModuleSymbol），目标带调用/构造签名或已有 default
+    /// 时合成 {default: 目标} 包装并克隆符号承接显示身份（class → typeof Foo，
+    /// function 无驻留签名 → 成员展开 { default: () => any; }），否则直接取
+    /// 目标类型（interface 等纯类型目标 → any，值对象/模块 → 原成员表）
+    pub(crate) fn namespace_import_module_type(&mut self, module_sym: &Arc<Symbol>) -> Arc<Type> {
+        let export_equals = module_sym
+            .exports
+            .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
+            .cloned();
+        let base = match export_equals {
+            Some(eq) => {
+                let resolved = if eq.flags.contains(SymbolFlags::Alias) {
+                    self.resolve_alias_base(eq)
+                } else {
+                    eq
+                };
+                if Arc::ptr_eq(&resolved, module_sym) {
+                    Arc::clone(module_sym)
+                } else {
+                    resolved
+                }
+            }
+            None => Arc::clone(module_sym),
+        };
+        let typ = self.get_type_of_symbol(&base);
+        let has_signatures = typ.as_structured().is_some_and(|s| {
+            !s.call_signatures().is_empty() || !s.construct_signatures().is_empty()
+        });
+        if !has_signatures && self.get_property_of_type(&typ, "default").is_none() {
+            return typ;
+        }
+        let mut wrapper_members = SymbolTable::new();
+        let mut wrapper_props: Vec<Arc<Symbol>> = Vec::new();
+        if let Some(st) = typ.as_structured() {
+            for p in &st.properties {
+                wrapper_members.insert(p.name.clone(), Arc::clone(p));
+                wrapper_props.push(Arc::clone(p));
+            }
+        }
+        let mut default_alias = Symbol::new(SymbolFlags::Alias, "default");
+        default_alias.set_parent(module_sym);
+        let default_alias = Arc::new(default_alias);
+        self.alias_symbol_links.insert(
+            &default_alias,
+            crate::checker::types::AliasSymbolLinks {
+                alias_target: Some(Arc::clone(&base)),
+                ..Default::default()
+            },
+        );
+        wrapper_members.insert("default".to_string(), Arc::clone(&default_alias));
+        wrapper_props.push(default_alias);
+        let mut clone = Symbol::new(
+            if base.flags.contains(SymbolFlags::Class) {
+                base.flags
+            } else {
+                SymbolFlags::TypeLiteral
+            },
+            base.name.clone(),
+        );
+        clone.declarations = base.declarations.clone();
+        clone.value_declaration = base.value_declaration.clone();
+        clone.members = base.members.clone();
+        clone.exports = base.exports.clone();
+        if base.flags.contains(SymbolFlags::Class) && let Some(parent) = base.parent() {
+            clone.set_parent(&parent);
+        }
+        let clone = Arc::new(clone);
+        let construct_sigs = if base.flags.contains(SymbolFlags::Class) {
+            typ
+                .as_structured()
+                .map(|s| s.construct_signatures().to_vec())
+                .unwrap_or_default()
+        } else {
+            Vec::new()
+        };
+        let result = Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: crate::checker::types::ObjectFlags::Anonymous,
+            id: crate::checker::types::next_type_id(),
+            symbol: Some(Arc::clone(&clone)),
+            alias: None,
+            data: crate::checker::types::TypeData::Object(
+                crate::checker::types::ObjectTypeData {
+                    structured: crate::checker::types::StructuredTypeData {
+                        members: wrapper_members,
+                        properties: wrapper_props,
+                        signatures: construct_sigs,
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                },
+            ),
+        });
+        self.value_symbol_links.insert(
+            &clone,
+            crate::checker::types::ValueSymbolLinks {
+                resolved_type: Some(Arc::clone(&result)),
+                target: Some(Arc::clone(&base)),
+                ..Default::default()
+            },
+        );
+        result
+    }
+
     pub(crate) fn namespace_member_recursive(
         &mut self,
         namespace: &Arc<Symbol>,
