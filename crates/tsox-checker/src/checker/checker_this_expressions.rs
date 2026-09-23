@@ -156,6 +156,26 @@ impl Checker {
         }
         if self.no_implicit_this || tsox_frontend::ast::is_in_js_file(container) {
             if let Some(literal) = containing_object_literal(container) {
+                // Go getThisTypeOfObjectLiteralFromContextualType：沿属性赋值
+                // 链上溯字面量，上下文型内 ThisType<T> 标记的实参 T 即 this 型
+                let mut lit = Arc::clone(&literal);
+                loop {
+                    let marker = self
+                        .get_contextual_type(&lit, ContextFlags::None)
+                        .as_ref()
+                        .and_then(|t| self.this_type_marker_argument(t, 0));
+                    if let Some(t) = marker {
+                        return Some(t);
+                    }
+                    match lit
+                        .parent()
+                        .as_ref()
+                        .and_then(|p| p.parent().map(|pp| (p.kind, pp)))
+                    {
+                        Some((SyntaxKind::PropertyAssignment, pp)) => lit = Arc::clone(&pp),
+                        _ => break,
+                    }
+                }
                 return match self.get_contextual_type(&literal, ContextFlags::None) {
                     Some(t) => Some(self.get_non_nullable_type_of(&t)),
                     None => {
