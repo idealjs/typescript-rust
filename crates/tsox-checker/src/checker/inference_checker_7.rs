@@ -182,6 +182,21 @@ impl Checker {
             return;
         }
 
+        // Go inferFromTypes switch：双侧均 keyof（Index）时对操作数做反变推断
+        //（keyof T 对 keyof U 产生 T→U 的 contra 候选，f3 形态
+        // {[K in keyof T]: T[K]} 对 {[K in keyof U]: U[K]} 的成分推断依赖）
+        if source.flags.contains(TypeFlags::Index)
+            && target.flags.contains(TypeFlags::Index)
+            && let (TypeData::Index(si), TypeData::Index(ti)) = (&source.data, &target.data)
+            && let (Some(so), Some(to)) = (si.target.clone(), ti.target.clone())
+        {
+            let saved_contra = state.contravariant;
+            state.contravariant = true;
+            self.infer_from_types(state, &so, &to);
+            state.contravariant = saved_contra;
+            return;
+        }
+
         // Go inferFromTypes switch 的 source-union 分发：source 为联合而
         // target 非联合时按成分推断（如 ActionFunction<X> | undefined →
         // 带调用签名的结构目标）

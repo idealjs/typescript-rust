@@ -90,6 +90,71 @@ impl Checker {
         false
     }
 
+    /// Go getGenericObjectFlags 的 IsGenericIndexType 位（union/intersection
+    /// 递归合并、substitution 合并 base 与 constraint，其余按 Instantiable 位判定）
+    pub(crate) fn is_generic_index_type(&self, t: &Arc<Type>) -> bool {
+        match &t.data {
+            TypeData::Union(u) => u
+                .union_or_intersection
+                .types
+                .iter()
+                .any(|x| self.is_generic_index_type(x)),
+            TypeData::Intersection(i) => i
+                .union_or_intersection
+                .types
+                .iter()
+                .any(|x| self.is_generic_index_type(x)),
+            TypeData::Substitution(s) => {
+                s.base_type.as_ref().is_some_and(|b| self.is_generic_index_type(b))
+                    || s.constraint.as_ref().is_some_and(|c| self.is_generic_index_type(c))
+            }
+            _ => t.flags.intersects(
+                TypeFlags::TypeParameter
+                    | TypeFlags::IndexedAccess
+                    | TypeFlags::Conditional
+                    | TypeFlags::TemplateLiteral
+                    | TypeFlags::Index,
+            ),
+        }
+    }
+
+    /// Go isGenericMappedType 的约束判定路径（nameType 路径未移植：
+    /// as 子句引用泛型的形态不在本簇用例域内）
+    pub(crate) fn is_generic_mapped_type_by_constraint(&self, t: &Arc<Type>) -> bool {
+        match &t.data {
+            TypeData::Mapped(m) => m
+                .constraint_type
+                .as_ref()
+                .is_some_and(|c| self.is_generic_index_type(c)),
+            _ => false,
+        }
+    }
+
+    /// Go inferFromGenericMappedTypes（inference.go:687）：{ [P in S]: X } 对
+    /// { [P in T]: Y } 时推 S→T 与 X→Y（nameType 双侧存在时再推一次）
+    pub(crate) fn infer_from_generic_mapped_types(
+        &mut self,
+        state: &mut InferenceState,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) {
+        let s_constraint = self.get_constraint_type_from_mapped_type(source);
+        let t_constraint = self.get_constraint_type_from_mapped_type(target);
+        if let (Some(s), Some(t)) = (&s_constraint, &t_constraint) {
+            self.infer_from_types(state, s, t);
+        }
+        let s_template = self.get_template_type_from_mapped_type(source);
+        let t_template = self.get_template_type_from_mapped_type(target);
+        if let (Some(s), Some(t)) = (&s_template, &t_template) {
+            self.infer_from_types(state, s, t);
+        }
+        let s_name = self.get_name_type_from_mapped_type(source);
+        let t_name = self.get_name_type_from_mapped_type(target);
+        if let (Some(s), Some(t)) = (&s_name, &t_name) {
+            self.infer_from_types(state, s, t);
+        }
+    }
+
     /// Go inferTypeForHomomorphicMappedType：构造 source 的反向映射型
     pub(crate) fn infer_type_for_homomorphic_mapped_type(
         &mut self,

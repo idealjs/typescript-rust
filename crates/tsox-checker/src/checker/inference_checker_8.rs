@@ -29,6 +29,13 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
     ) {
+        // Go inferFromObjectTypes：双侧均为泛型映射型时先做成分推断
+        //（inferFromGenericMappedTypes），不提前返回
+        if self.is_generic_mapped_type_by_constraint(source)
+            && self.is_generic_mapped_type_by_constraint(target)
+        {
+            self.infer_from_generic_mapped_types(state, source, target);
+        }
         // Go inferFromObjectTypes：目标是 { [P in keyof T]: X } / { [P in K]: X }
         // 时走映射型推理（命中则短路普通成员推断）
         if let TypeData::Mapped(m) = &target.data
@@ -619,6 +626,8 @@ impl Checker {
             || t.flags.intersects(TypeFlags::IndexedAccess)
             || t.flags.intersects(TypeFlags::Conditional)
             || t.flags.intersects(TypeFlags::Substitution)
+            || t.flags.intersects(TypeFlags::Index)
+            || t.flags.intersects(TypeFlags::TemplateLiteral)
     }
     pub(crate) fn is_no_infer_type(&self, t: &Type) -> bool {
         // Go isNoInferType：内置 NoInfer 表示为 unknown 约束的 Substitution
