@@ -130,6 +130,10 @@ impl Checker {
         }
     }
 
+    fn meaning_hit(&self, sym: &Arc<Symbol>, meaning: SymbolFlags) -> bool {
+        sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(sym, meaning)
+    }
+
     pub(crate) fn resolve_identifier_scope_symbol(
         &self,
         node: &Arc<Node>,
@@ -141,198 +145,332 @@ impl Checker {
         };
         let symbol_map = self.program.symbol_map();
 
+        let mut chain: std::collections::HashMap<u64, (Arc<Node>, Arc<Node>)> =
+            std::collections::HashMap::new();
+        {
+            let mut child = Arc::clone(node);
+            let mut ancestor = node.parent();
+            while let Some(a) = ancestor {
+                chain.insert(a.id(), (Arc::clone(&a), Arc::clone(&child)));
+                child = Arc::clone(&a);
+                ancestor = a.parent();
+            }
+        }
+        let module_meaning = meaning & SymbolFlags::MODULE_MEMBER;
+        let enum_meaning = meaning & SymbolFlags::EnumMember;
+        let type_meaning = meaning & SymbolFlags::TYPE;
+
         for &container_id in self.scope_stack.iter().rev() {
             if let Some(locals) = symbol_map.locals.get(&container_id) {
-                if let Some(sym) = locals.get(name) {
-                    if sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(&sym, meaning)
-                    {
-                        return Some(Arc::clone(sym));
-                    }
+                if let Some(sym) = locals.get(name)
+                    && chain.get(&container_id).is_none_or(|(c, child)| {
+                        self.locals_symbol_visible_at(c, child, sym, meaning)
+                    })
+                    && self.meaning_hit(sym, meaning)
+                {
+                    return Some(Arc::clone(sym));
                 }
             }
 
-            if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
-                if !container_sym.flags.intersects(SymbolFlags::Class)
-                    || container_sym.flags.intersects(SymbolFlags::Function)
-                {
-                    if let Some(sym) = container_sym.members.get(name) {
-                        // Go nameresolver Resolve 的 InterfaceDeclaration 容器分支：
-                        // 成员查找以 meaning&Type 限定且命中须为声明于本容器的类型参数，
-                        // 同名属性成员不可见（interface B3 { Date: Date } 的注解位
-                        // 须继续向外解析到全局 interface Date）
-                        let interface_member_visible = !container_sym
-                            .flags
-                            .intersects(SymbolFlags::Interface)
-                            || sym.flags.contains(SymbolFlags::TypeParameter);
-                        if interface_member_visible
-                            && (sym.flags.intersects(meaning)
-                                || self.alias_chain_hits_meaning(&sym, meaning))
+            let Some(container_sym) = symbol_map.symbols.get(&container_id) else {
+                continue;
+            };
+            if let Some((c, _)) = chain.get(&container_id) {
+                match c.kind {
+                    SyntaxKind::EnumDeclaration => {
+                        if let Some(sym) = container_sym
+                            .members
+                            .get(name)
+                            .or_else(|| container_sym.exports.get(name))
+                            && self.meaning_hit(sym, enum_meaning)
                         {
                             return Some(Arc::clone(sym));
                         }
+                        continue;
                     }
-                }
-
-                if container_sym.flags.intersects(SymbolFlags::MODULE)
-                    && !container_sym.flags.intersects(SymbolFlags::Class)
-                {
-                    if let Some(sym) = container_sym.exports.get(name) {
-                        let is_export_specifier = sym.flags == SymbolFlags::Alias
-                            && sym
-                                .declarations
-                                .iter()
-                                .any(|d| {
-                                    d.kind == SyntaxKind::ExportSpecifier
-                                        || d.kind == SyntaxKind::NamespaceExport
-                                });
-                        if !is_export_specifier {
+                    SyntaxKind::ModuleDeclaration | SyntaxKind::SourceFile => {
+                        if c.kind == SyntaxKind::SourceFile
+                            && let Some(sym) = container_sym.members.get(name)
+                            && self.meaning_hit(sym, meaning)
+                        {
                             return Some(Arc::clone(sym));
                         }
-                    }
-
-                    // Go resolver：declare module "foo" 增强块内的名字可见性
-                    // 延伸到被增强模块的 exports
-                    if let Some(sym) = self.augmentation_target_member(container_sym, name) {
-                        if sym.flags.intersects(meaning)
-                            || self.alias_chain_hits_meaning(&sym, meaning)
+                        if container_sym.flags.intersects(SymbolFlags::MODULE)
+                            && !container_sym.flags.intersects(SymbolFlags::Class)
                         {
-                            return Some(sym);
-                        }
-                    }
-
-                    if let Some(merged) = self.globals.get(container_sym.name.as_str()) {
-                        if !Arc::ptr_eq(merged, container_sym)
-                            && merged.flags.intersects(SymbolFlags::MODULE)
-                        {
-                            if let Some(sym) = merged.exports.get(name) {
-                                if sym.flags.intersects(meaning)
-                                    || self.alias_chain_hits_meaning(&sym, meaning)
+                            if let Some(sym) = container_sym.exports.get(name) {
+                                let is_export_specifier = sym.flags == SymbolFlags::Alias
+                                    && sym.declarations.iter().any(|d| {
+                                        d.kind == SyntaxKind::ExportSpecifier
+                                            || d.kind == SyntaxKind::NamespaceExport
+                                    });
+                                if !is_export_specifier && self.meaning_hit(sym, module_meaning)
                                 {
                                     return Some(Arc::clone(sym));
                                 }
                             }
-                            if let Some(sym) = self.ambient_namespace_local(merged, name) {
-                                if sym.flags.intersects(meaning)
-                                    || self.alias_chain_hits_meaning(&sym, meaning)
+                            if let Some(sym) =
+                                self.augmentation_target_member(container_sym, name)
+                                && self.meaning_hit(&sym, meaning)
+                            {
+                                return Some(sym);
+                            }
+                            if let Some(merged) = self.globals.get(container_sym.name.as_str())
+                                && !Arc::ptr_eq(merged, container_sym)
+                                && merged.flags.intersects(SymbolFlags::MODULE)
+                            {
+                                if let Some(sym) = merged.exports.get(name)
+                                    && self.meaning_hit(sym, module_meaning)
+                                {
+                                    return Some(Arc::clone(sym));
+                                }
+                                if let Some(sym) = self.ambient_namespace_local(merged, name)
+                                    && self.meaning_hit(&sym, meaning)
                                 {
                                     return Some(sym);
                                 }
                             }
                         }
+                        continue;
                     }
-                }
-
-                if container_sym.flags.intersects(SymbolFlags::ENUM) {
-                    if let Some(sym) = container_sym.exports.get(name) {
-                        if sym.flags.intersects(meaning)
-                            || self.alias_chain_hits_meaning(&sym, meaning)
+                    SyntaxKind::ClassDeclaration
+                    | SyntaxKind::ClassExpression
+                    | SyntaxKind::InterfaceDeclaration => {
+                        if let Some(sym) = container_sym.members.get(name)
+                            && self.meaning_hit(sym, type_meaning)
                         {
                             return Some(Arc::clone(sym));
                         }
+                        continue;
                     }
+                    _ => {}
                 }
+            }
 
+            if !container_sym.flags.intersects(SymbolFlags::Class)
+                || container_sym.flags.intersects(SymbolFlags::Function)
+            {
                 if let Some(sym) = container_sym.members.get(name) {
-                    // 同上：Go nameresolver 的 interface/class 容器成员查找仅
-                    // 类型参数可见（meaning&Type + isTypeParameterSymbolDeclaredInContainer）
+                    // Go nameresolver Resolve 的 InterfaceDeclaration 容器分支：
+                    // 成员查找以 meaning&Type 限定且命中须为声明于本容器的类型参数，
+                    // 同名属性成员不可见（interface B3 { Date: Date } 的注解位
+                    // 须继续向外解析到全局 interface Date）
                     let interface_member_visible = !container_sym
                         .flags
                         .intersects(SymbolFlags::Interface)
                         || sym.flags.contains(SymbolFlags::TypeParameter);
-                    if interface_member_visible
-                        && (sym.flags.intersects(meaning & SymbolFlags::TYPE)
-                            || self.alias_chain_hits_meaning(&sym, meaning))
-                    {
+                    if interface_member_visible && self.meaning_hit(sym, meaning) {
                         return Some(Arc::clone(sym));
                     }
+                }
+            }
+
+            if container_sym.flags.intersects(SymbolFlags::MODULE)
+                && !container_sym.flags.intersects(SymbolFlags::Class)
+                && !chain.contains_key(&container_id)
+            {
+                if let Some(sym) = container_sym.exports.get(name) {
+                    let is_export_specifier = sym.flags == SymbolFlags::Alias
+                        && sym
+                            .declarations
+                            .iter()
+                            .any(|d| {
+                                d.kind == SyntaxKind::ExportSpecifier
+                                    || d.kind == SyntaxKind::NamespaceExport
+                            });
+                    if !is_export_specifier && self.meaning_hit(sym, meaning) {
+                        return Some(Arc::clone(sym));
+                    }
+                }
+
+                // Go resolver：declare module "foo" 增强块内的名字可见性
+                // 延伸到被增强模块的 exports
+                if let Some(sym) = self.augmentation_target_member(container_sym, name) {
+                    if self.meaning_hit(&sym, meaning) {
+                        return Some(sym);
+                    }
+                }
+
+                if let Some(merged) = self.globals.get(container_sym.name.as_str()) {
+                    if !Arc::ptr_eq(merged, container_sym)
+                        && merged.flags.intersects(SymbolFlags::MODULE)
+                    {
+                        if let Some(sym) = merged.exports.get(name)
+                            && self.meaning_hit(sym, meaning)
+                        {
+                            return Some(Arc::clone(sym));
+                        }
+                        if let Some(sym) = self.ambient_namespace_local(merged, name)
+                            && self.meaning_hit(&sym, meaning)
+                        {
+                            return Some(sym);
+                        }
+                    }
+                }
+            }
+
+            if container_sym.flags.intersects(SymbolFlags::ENUM)
+                && !chain.contains_key(&container_id)
+            {
+                if let Some(sym) = container_sym.exports.get(name)
+                    && self.meaning_hit(sym, meaning)
+                {
+                    return Some(Arc::clone(sym));
+                }
+            }
+
+            if let Some(sym) = container_sym.members.get(name) {
+                // 同上：Go nameresolver 的 interface/class 容器成员查找仅
+                // 类型参数可见（meaning&Type + isTypeParameterSymbolDeclaredInContainer）
+                let interface_member_visible = !container_sym
+                    .flags
+                    .intersects(SymbolFlags::Interface)
+                    || sym.flags.contains(SymbolFlags::TypeParameter);
+                if interface_member_visible && self.meaning_hit(sym, meaning & SymbolFlags::TYPE) {
+                    return Some(Arc::clone(sym));
                 }
             }
         }
 
         {
+            let mut child = Arc::clone(node);
             let mut ancestor = node.parent();
             while let Some(a) = ancestor {
-                if !ANCESTRY_CONTAINERS.contains(&a.kind) {
-                    ancestor = a.parent();
-                    continue;
-                }
-                let aid = a.id();
-                if let Some(locals) = symbol_map.locals.get(&aid) {
-                    if let Some(sym) = locals.get(name)
-                        && (sym.flags.intersects(meaning)
-                            || self.alias_chain_hits_meaning(&sym, meaning))
-                    {
-                        return Some(Arc::clone(sym));
-                    }
-                }
-                if let Some(a_sym) = symbol_map.symbols.get(&aid) {
-                    if !a_sym.flags.intersects(SymbolFlags::Class) {
-                        if let Some(sym) = a_sym.members.get(name) {
-                            // 同 scope 栈：interface 容器成员仅类型参数可见
-                            let interface_member_visible = !a_sym
-                                .flags
-                                .intersects(SymbolFlags::Interface)
-                                || sym.flags.contains(SymbolFlags::TypeParameter);
-                            if interface_member_visible
-                                && (sym.flags.intersects(meaning)
-                                    || self.alias_chain_hits_meaning(&sym, meaning))
-                            {
-                                return Some(Arc::clone(sym));
-                            }
-                        }
-                        if a_sym
-                            .flags
-                            .intersects(SymbolFlags::MODULE | SymbolFlags::ENUM)
-                            && let Some(sym) = a_sym.exports.get(name)
+                let child_below = Arc::clone(&child);
+                child = Arc::clone(&a);
+                let next = a.parent();
+                if ANCESTRY_CONTAINERS.contains(&a.kind) {
+                    let aid = a.id();
+                    if let Some(locals) = symbol_map.locals.get(&aid) {
+                        if let Some(sym) = locals.get(name)
+                            && self.locals_symbol_visible_at(&a, &child_below, sym, meaning)
+                            && self.meaning_hit(sym, meaning)
                         {
-                            // Go resolver：模块导出含纯 alias 的 export specifier
-                            //（export * as ns 亦同）不视为作用域内名字
-                            let is_export_specifier = sym.flags == SymbolFlags::Alias
-                                && sym
-                                    .declarations
-                                    .iter()
-                                    .any(|d| {
-                                        d.kind == SyntaxKind::ExportSpecifier
-                                            || d.kind == SyntaxKind::NamespaceExport
-                                    });
-                            if !is_export_specifier
-                                && (sym.flags.intersects(meaning)
-                                    || self.alias_chain_hits_meaning(&sym, meaning))
-                            {
-                                return Some(Arc::clone(sym));
-                            }
+                            return Some(Arc::clone(sym));
                         }
-
-                        if a_sym.flags.intersects(SymbolFlags::MODULE) {
-                            if let Some(merged) = self.globals.get(a_sym.name.as_str()) {
-                                if !Arc::ptr_eq(merged, a_sym)
-                                    && merged.flags.intersects(SymbolFlags::MODULE)
+                    }
+                    if let Some(a_sym) = symbol_map.symbols.get(&aid) {
+                        match a.kind {
+                            SyntaxKind::EnumDeclaration => {
+                                if let Some(sym) = a_sym
+                                    .members
+                                    .get(name)
+                                    .or_else(|| a_sym.exports.get(name))
+                                    && self.meaning_hit(sym, enum_meaning)
                                 {
-                                    if let Some(sym) = merged.exports.get(name)
-                                        && (sym.flags.intersects(meaning)
-                                            || self.alias_chain_hits_meaning(&sym, meaning))
-                                    {
-                                        return Some(Arc::clone(sym));
+                                    return Some(Arc::clone(sym));
+                                }
+                            }
+                            SyntaxKind::ModuleDeclaration | SyntaxKind::SourceFile => {
+                                if a.kind == SyntaxKind::SourceFile
+                                    && let Some(sym) = a_sym.members.get(name)
+                                    && self.meaning_hit(sym, meaning)
+                                {
+                                    return Some(Arc::clone(sym));
+                                }
+                                if a_sym.flags.intersects(SymbolFlags::MODULE)
+                                    && !a_sym.flags.intersects(SymbolFlags::Class)
+                                {
+                                    if let Some(sym) = a_sym.exports.get(name) {
+                                        // Go resolver：模块导出含纯 alias 的 export specifier
+                                        //（export * as ns 亦同）不视为作用域内名字
+                                        let is_export_specifier = sym.flags == SymbolFlags::Alias
+                                            && sym.declarations.iter().any(|d| {
+                                                d.kind == SyntaxKind::ExportSpecifier
+                                                    || d.kind == SyntaxKind::NamespaceExport
+                                            });
+                                        if !is_export_specifier
+                                            && self.meaning_hit(sym, module_meaning)
+                                        {
+                                            return Some(Arc::clone(sym));
+                                        }
                                     }
-                                    if let Some(sym) = self.ambient_namespace_local(merged, name)
-                                        && (sym.flags.intersects(meaning)
-                                            || self.alias_chain_hits_meaning(&sym, meaning))
+
+                                    if let Some(merged) = self.globals.get(a_sym.name.as_str())
+                                        && !Arc::ptr_eq(merged, a_sym)
+                                        && merged.flags.intersects(SymbolFlags::MODULE)
                                     {
-                                        return Some(sym);
+                                        if let Some(sym) = merged.exports.get(name)
+                                            && self.meaning_hit(sym, module_meaning)
+                                        {
+                                            return Some(Arc::clone(sym));
+                                        }
+                                        if let Some(sym) =
+                                            self.ambient_namespace_local(merged, name)
+                                            && self.meaning_hit(&sym, meaning)
+                                        {
+                                            return Some(sym);
+                                        }
                                     }
+                                }
+                            }
+                            SyntaxKind::ClassDeclaration
+                            | SyntaxKind::ClassExpression
+                            | SyntaxKind::InterfaceDeclaration => {
+                                if let Some(sym) = a_sym.members.get(name)
+                                    && self.meaning_hit(sym, type_meaning)
+                                {
+                                    return Some(Arc::clone(sym));
+                                }
+                            }
+                            _ => {
+                                if !a_sym.flags.intersects(SymbolFlags::Class) {
+                                    if let Some(sym) = a_sym.members.get(name) {
+                                        let interface_member_visible = !a_sym
+                                            .flags
+                                            .intersects(SymbolFlags::Interface)
+                                            || sym.flags.contains(SymbolFlags::TypeParameter);
+                                        if interface_member_visible
+                                            && self.meaning_hit(sym, meaning)
+                                        {
+                                            return Some(Arc::clone(sym));
+                                        }
+                                    }
+                                    if a_sym
+                                        .flags
+                                        .intersects(SymbolFlags::MODULE | SymbolFlags::ENUM)
+                                        && let Some(sym) = a_sym.exports.get(name)
+                                    {
+                                        let is_export_specifier = sym.flags == SymbolFlags::Alias
+                                            && sym.declarations.iter().any(|d| {
+                                                d.kind == SyntaxKind::ExportSpecifier
+                                                    || d.kind == SyntaxKind::NamespaceExport
+                                            });
+                                        if !is_export_specifier && self.meaning_hit(sym, meaning)
+                                        {
+                                            return Some(Arc::clone(sym));
+                                        }
+                                    }
+
+                                    if a_sym.flags.intersects(SymbolFlags::MODULE)
+                                        && let Some(merged) = self.globals.get(a_sym.name.as_str())
+                                        && !Arc::ptr_eq(merged, a_sym)
+                                        && merged.flags.intersects(SymbolFlags::MODULE)
+                                    {
+                                        if let Some(sym) = merged.exports.get(name)
+                                            && self.meaning_hit(sym, meaning)
+                                        {
+                                            return Some(Arc::clone(sym));
+                                        }
+                                        if let Some(sym) =
+                                            self.ambient_namespace_local(merged, name)
+                                            && self.meaning_hit(&sym, meaning)
+                                        {
+                                            return Some(sym);
+                                        }
+                                    }
+                                }
+
+                                if let Some(sym) = a_sym.members.get(name)
+                                    && self.meaning_hit(sym, type_meaning)
+                                {
+                                    return Some(Arc::clone(sym));
                                 }
                             }
                         }
                     }
-
-                    if let Some(sym) = a_sym.members.get(name)
-                        && (sym.flags.intersects(meaning & SymbolFlags::TYPE)
-                            || self.alias_chain_hits_meaning(&sym, meaning))
-                    {
-                        return Some(Arc::clone(sym));
-                    }
                 }
-                ancestor = a.parent();
+                ancestor = next;
             }
         }
 
@@ -364,7 +502,6 @@ impl Checker {
 
         None
     }
-
     pub fn follow_alias(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
         if !symbol.flags.intersects(SymbolFlags::Alias) {
             return Some(Arc::clone(symbol));

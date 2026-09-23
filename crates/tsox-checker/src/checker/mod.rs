@@ -148,6 +148,7 @@ pub(crate) mod checker_resolve_checker;
 pub(crate) mod checker_resolve_access;
 pub(crate) mod checker_resolve_checker_2;
 pub(crate) mod checker_resolve_checker_3;
+pub(crate) mod checker_resolve_checker_visibility;
 pub(crate) mod checker_statements;
 pub(crate) mod checker_statements_alias_symbol;
 pub(crate) mod checker_statements_checker;
