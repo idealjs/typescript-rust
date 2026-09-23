@@ -58,16 +58,8 @@ impl Checker {
             return flattened.into_iter().next().expect("exactly one");
         }
 
-        {
-            let rank = |t: &Arc<Type>| -> u32 {
-                if t.flags.intersects(TypeFlags::EnumLiteral | TypeFlags::Enum) {
-                    return TypeFlags::Enum.bits();
-                }
-                let b = t.flags.bits();
-                b & b.wrapping_neg()
-            };
-            flattened.sort_by_key(rank);
-        }
+        flattened
+            .sort_by(|a, b| crate::checker::utilities_has_only_expression_initialization::compare_union_members(a, b));
         // Go getUnionType 默认 Literal 归约（removeSubtypes）：字面量成员被
         // 同族原始类型成员吸收（"john" | string → string）
         let has_primitive = |ts: &[Arc<Type>], flag: TypeFlags| {

@@ -248,6 +248,12 @@ pub fn type_parameters_match(a: &Type, b: &Type) -> bool {
     }
 }
 
+pub fn compare_union_members(t1: &Type, t2: &Type) -> std::cmp::Ordering {
+    get_sort_order_flags(t1)
+        .cmp(&get_sort_order_flags(t2))
+        .then_with(|| compare_type_names(t1, t2))
+}
+
 pub fn compare_types(t1: &Type, t2: &Type) -> std::cmp::Ordering {
     if t1.id == t2.id {
         return std::cmp::Ordering::Equal;
