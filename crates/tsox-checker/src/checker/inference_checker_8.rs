@@ -778,6 +778,8 @@ impl Checker {
         args: &[Arc<tsox_frontend::ast::Node>],
         context: &mut InferenceContext,
     ) -> Vec<Arc<Type>> {
+        let mut return_mapper: Option<crate::checker::contextual_type_stack::ContextualReturnMapper> =
+            None;
         if matches!(
             node.kind,
             SyntaxKind::CallExpression | SyntaxKind::NewExpression
@@ -804,10 +806,15 @@ impl Checker {
                         };
                         self.infer_types(
                             &mut context.inferences,
-                            Some(inference_source),
-                            Some(return_type),
+                            Some(Arc::clone(&inference_source)),
+                            Some(Arc::clone(&return_type)),
                             InferencePriority::ReturnType,
                             false,
+                        );
+                        return_mapper = self.build_return_type_mapper(
+                            &signature.type_parameters,
+                            inference_source,
+                            return_type,
                         );
                     }
                 }
@@ -886,7 +893,13 @@ impl Checker {
                         &signature.type_parameters,
                         &partial,
                     );
+                    let frame = self.push_contextual_frame(
+                        args[i].id(),
+                        Arc::clone(&inst_param),
+                        return_mapper.clone(),
+                    );
                     let arg_type = self.type_of_context_sensitive_arg(&args[i], &inst_param);
+                    self.pop_contextual_frame(frame);
                     self.infer_types(
                         &mut context.inferences,
                         Some(arg_type),
@@ -905,7 +918,18 @@ impl Checker {
                         }
                     }
                 } else {
+                    // Go checkExpressionWorker 不读节点缓存，每次推断尝试
+                    // 在各自语境帧下重定型实参；Rust get_type_of_node 有缓存，
+                    // 前一候选（如重载序早期分支）的劣化定型会污染本候选，
+                    // 压帧前失效实参子树缓存
+                    self.clear_node_type_cache_under(&args[i]);
+                    let frame = self.push_contextual_frame(
+                        args[i].id(),
+                        Arc::clone(&param_type),
+                        return_mapper.clone(),
+                    );
                     let mut arg_type = self.get_type_of_node(&args[i]);
+                    self.pop_contextual_frame(frame);
                     if let Some(inst) =
                         self.instantiate_generic_call_arg_type(&arg_type, &param_type, context)
                     {

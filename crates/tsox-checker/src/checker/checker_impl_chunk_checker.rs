@@ -197,6 +197,7 @@ impl Checker {
             alias_args_resolution_stack: Vec::new(),
             alias_type_instantiation_stack: Vec::new(),
             infer_subst_ancestor_stack: Vec::new(),
+            contextual_arg_frames: Vec::new(),
             alias_instantiation_cache: HashMap::new(),
             current_alias_frame: None,
             reverse_mapped_depth: Vec::new(),
