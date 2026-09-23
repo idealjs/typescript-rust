@@ -57,6 +57,20 @@ pub fn is_unit_type(t: &Type) -> bool {
     t.flags.intersects(TYPE_FLAGS_UNIT)
 }
 
+pub fn is_literal_or_all_literal_union(t: &Type) -> bool {
+    if t.flags.contains(TypeFlags::Boolean) {
+        return true;
+    }
+    if t.flags.contains(TypeFlags::Union) {
+        if t.flags.contains(TypeFlags::EnumLiteral) {
+            return true;
+        }
+        return t.types()
+            .is_some_and(|members| members.iter().all(|m| is_unit_type(m)));
+    }
+    is_unit_type(t)
+}
+
 pub fn is_string_like_type(t: &Type) -> bool {
     t.flags.intersects(TYPE_FLAGS_STRING_LIKE)
 }

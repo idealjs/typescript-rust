@@ -194,6 +194,7 @@ pub struct Checker {
     pub global_number_type: OnceLock<Arc<Type>>,
     pub global_boolean_type: OnceLock<Arc<Type>>,
     pub global_reg_exp_type: OnceLock<Arc<Type>>,
+    pub typeof_type: OnceLock<Arc<Type>>,
     pub global_this_type: OnceLock<Arc<Type>>,
     pub global_promise_type: OnceLock<Arc<Type>>,
     pub array_type_cache: std::collections::HashMap<(usize, usize), Arc<Type>>,

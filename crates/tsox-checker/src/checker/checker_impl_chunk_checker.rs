@@ -247,6 +247,7 @@ impl Checker {
             global_number_type: OnceLock::new(),
             global_boolean_type: OnceLock::new(),
             global_reg_exp_type: OnceLock::new(),
+            typeof_type: OnceLock::new(),
             global_this_type: OnceLock::new(),
             global_promise_type: OnceLock::new(),
             array_type_cache: std::collections::HashMap::new(),

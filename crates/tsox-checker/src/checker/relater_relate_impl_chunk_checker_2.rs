@@ -157,12 +157,6 @@ impl Checker {
                 }
             }
         }
-        if let Some(last) = self.relater_error_chain.last()
-            && last.message.key == message.key
-            && last.args == args
-        {
-            return;
-        }
         // Go reportFailureRules：TYPE_0 行在其链下一位是实参匹配的缺属性行时
         // 抑制（嵌套层 headMessage 为 nil，转换/接口实现例外不适用）
         if (message.key == msg::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1.key
@@ -205,8 +199,7 @@ impl Checker {
         use tsox_core::diagnostics::messages_generated as msg;
         let (source_str, target_str) = self.get_type_names_for_error_display(source, target);
         let generalized = if !target.flags.contains(TypeFlags::Never)
-            && (crate::checker::is_fresh_literal_type(source)
-                || source.flags.intersects(crate::checker::types::TYPE_FLAGS_LITERAL))
+            && crate::checker::is_literal_or_all_literal_union(source)
             && !self.type_could_have_top_level_singleton_types(target)
         {
             let base = self.get_base_type_of_literal_type_for_display(source);
@@ -278,10 +271,7 @@ impl Checker {
         };
         if target_flags_view.contains(TypeFlags::TypeParameter) {
             let generalized: Option<Arc<Type>> = if !target.flags.contains(TypeFlags::Never)
-                && (crate::checker::is_fresh_literal_type(source)
-                    || source
-                        .flags
-                        .intersects(crate::checker::types::TYPE_FLAGS_LITERAL))
+                && crate::checker::is_literal_or_all_literal_union(source)
                 && !self.type_could_have_top_level_singleton_types(target)
             {
                 Some(self.get_base_type_of_literal_type_for_display(source))

@@ -297,6 +297,28 @@ impl Checker {
         t
     }
 
+    pub fn typeof_type(&mut self) -> Arc<Type> {
+        if let Some(t) = self.typeof_type.get() {
+            return Arc::clone(t);
+        }
+        let literals: Vec<Arc<Type>> = [
+            "bigint",
+            "boolean",
+            "function",
+            "number",
+            "object",
+            "string",
+            "symbol",
+            "undefined",
+        ]
+        .iter()
+        .map(|s| self.get_string_literal_type(s))
+        .collect();
+        let t = self.get_union_type(literals);
+        let _ = self.typeof_type.set(Arc::clone(&t));
+        t
+    }
+
     pub fn get_number_literal_type(&mut self, value: tsox_core::jsnum::Number) -> Arc<Type> {
         if let Some(t) = self.number_literal_types.get(&value) {
             return Arc::clone(t);

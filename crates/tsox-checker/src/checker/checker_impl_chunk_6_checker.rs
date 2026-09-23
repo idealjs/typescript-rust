@@ -174,6 +174,7 @@ impl Checker {
             }
             SyntaxKind::DeleteExpression => self.boolean_type(),
             SyntaxKind::VoidExpression => self.undefined_type(),
+            SyntaxKind::TypeOfExpression => self.typeof_type(),
             SyntaxKind::YieldExpression => {
                 // Go checkYieldExpression：yield* 的类型 = 操作数迭代器的 TReturn
                 if let tsox_frontend::ast::NodeData::YieldExpression(data) = &node.data

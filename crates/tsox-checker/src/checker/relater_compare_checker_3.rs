@@ -102,8 +102,7 @@ impl Checker {
         {
             (source_str.clone(), target_str.clone())
         } else if !target.flags.contains(TypeFlags::Never)
-            && (crate::checker::is_fresh_literal_type(source)
-                || source.flags.intersects(TYPE_FLAGS_LITERAL))
+            && crate::checker::is_literal_or_all_literal_union(source)
         {
             let base = self.get_base_type_of_literal_type_for_display(source);
             (self.type_to_string(&base), target_str.clone())
@@ -284,6 +283,17 @@ impl Checker {
             self.bigint_type()
         } else if t.flags.contains(TypeFlags::BooleanLiteral) {
             self.boolean_type()
+        } else if t.flags.contains(TypeFlags::Union) {
+            let mapped: Vec<Arc<Type>> = t
+                .types()
+                .map(|members| {
+                    members
+                        .iter()
+                        .map(|m| self.get_base_type_of_literal_type_for_display(m))
+                        .collect()
+                })
+                .unwrap_or_default();
+            self.get_union_type(mapped)
         } else {
             Arc::clone(t)
         }
