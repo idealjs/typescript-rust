@@ -66,7 +66,7 @@ impl Checker {
                     }
                     result = result.and(related);
                     if result.is_false() {
-                        if self.relater_chain_active {
+                        if self.relater_chain_active && relation != RelationKind::Identity {
                             let no_args =
                                 source.parameters.is_empty() && target.parameters.is_empty();
                             let construct = source

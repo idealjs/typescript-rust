@@ -111,7 +111,7 @@ impl Checker {
                 }
             }
             if related.is_false() {
-                if self.relater_chain_active {
+                if self.relater_chain_active && relation != RelationKind::Identity {
                     let sn = source.parameters.get(i).map(|p| p.name.clone());
                     let tn = target.parameters.get(i).map(|p| p.name.clone());
                     self.relater_report_error(
