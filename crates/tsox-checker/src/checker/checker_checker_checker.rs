@@ -148,7 +148,6 @@ pub struct Checker {
     pub alias_args_resolution_stack: Vec<(usize, Vec<u32>)>,
     pub alias_type_instantiation_stack: Vec<(usize, Vec<u32>)>,
     pub infer_subst_ancestor_stack: Vec<usize>,
-    pub contextual_arg_frames: Vec<crate::checker::contextual_type_stack::ContextualFrame>,
     pub alias_instantiation_cache: HashMap<(usize, Vec<u32>), Arc<Type>>,
     pub current_alias_frame: Option<(usize, Vec<u32>)>,
     pub reverse_mapped_depth: Vec<u32>,

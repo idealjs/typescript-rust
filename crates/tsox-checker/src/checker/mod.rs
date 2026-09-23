@@ -237,7 +237,6 @@ pub(crate) mod grammarchecks_modifier_kind_checks_a;
 pub(crate) mod grammarchecks_modifier_kind_checks_b;
 pub(crate) mod grammarchecks_modifier_tail_checks;
 pub(crate) mod grammarchecks_object_literal_members;
-pub(crate) mod contextual_type_stack;
 pub(crate) mod grammarchecks_await_context;
 pub mod inference;
 pub(crate) mod inference_checker_10;
