@@ -103,6 +103,71 @@ impl Checker {
                 }
             }
         } else {
+            // Go checkQualifiedName(checker.go:8300)：typeof 限定名最左标识符
+            // 先按表达式（值位）检查，无值含义的 namespace 此处报 TS2708，
+            // 纯类型符号报 TS2693（名字取最左标识符，限定名节点无文本）
+            let leftmost = {
+                let mut n = &d.expr_name;
+                while let NodeData::QualifiedName(q) = &n.data {
+                    n = &q.left;
+                }
+                Arc::clone(n)
+            };
+            if let Some(sym) = self.resolve_identifier(&leftmost) {
+                let base = if sym.flags == tsox_frontend::ast::SymbolFlags::Alias {
+                    self.resolve_alias_base(Arc::clone(&sym))
+                } else {
+                    sym
+                };
+                let is_true_namespace = base.declarations.iter().any(|dd| {
+                    dd.kind == SyntaxKind::ModuleDeclaration
+                        && dd
+                            .name()
+                            .is_some_and(|n| !matches!(n.kind, SyntaxKind::StringLiteral))
+                });
+                let module_without_value_meaning = base
+                    .flags
+                    .contains(tsox_frontend::ast::SymbolFlags::NamespaceModule)
+                    && !base
+                        .flags
+                        .intersects(tsox_frontend::ast::SymbolFlags::VALUE);
+                if is_true_namespace && module_without_value_meaning {
+                    let file = self
+                        .get_source_file_of_node(&leftmost)
+                        .or_else(|| self.current_file.clone());
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        leftmost.loc,
+                        tsox_core::diagnostics::messages_generated::CANNOT_USE_NAMESPACE_0_AS_A_VALUE,
+                        vec![leftmost.text().to_string()],
+                    ));
+                    return self.error_type();
+                }
+                if !base.flags.intersects(tsox_frontend::ast::SymbolFlags::VALUE)
+                    && base
+                        .flags
+                        .intersects(tsox_frontend::ast::SymbolFlags::TYPE)
+                {
+                    let name = leftmost.text().to_string();
+                    let message = if Checker::is_es2015_or_later_constructor_name(&name) {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_ES2015_OR_LATER
+                    } else {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE
+                    };
+                    let file = self
+                        .get_source_file_of_node(&leftmost)
+                        .or_else(|| self.current_file.clone());
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        leftmost.loc,
+                        message,
+                        vec![name],
+                    ));
+                    return self.error_type();
+                }
+            }
             match self.resolve_qualified_symbol(&d.expr_name) {
                 Some(s) => s,
                 // Go checkExpressionWithTypeArguments：限定名按值位解析最左实体后
