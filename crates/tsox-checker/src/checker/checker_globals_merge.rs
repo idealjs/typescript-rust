@@ -19,25 +19,34 @@ impl Checker {
     }
 
     // Go mergeSymbol 冲突面：target.Flags 与 source 的 excludes 相交即冲突；
-    // 冲突时不合并符号（target 声明集不增长），对双侧声明各报一条错误并互挂 related
+    // 冲突时不合并符号（target 声明集不增长），对双侧声明各报一条错误并互挂 related。
+    // target 为别名时先按 Go resolveSymbol 揭示真身再判定（UMD global 与
+    // declare global const 的 TS2451 依赖真身的 ValueModuleExcludes）
     pub(crate) fn report_global_merge_conflict(
         &mut self,
         target: &Arc<Symbol>,
         source: &Arc<Symbol>,
     ) -> bool {
-        if (source.flags | target.flags).intersects(SymbolFlags::Assignment) {
+        // Go mergeSymbol：target 为别名时以 resolveSymbol 真身的 flags 判定，
+        // 但 reportMergeSymbolError 仍以原别名符号的声明集定位报错
+        let judge_flags = if target.flags.contains(SymbolFlags::Alias) {
+            self.umd_global_alias_target(target).flags
+        } else {
+            target.flags
+        };
+        if (source.flags | judge_flags).intersects(SymbolFlags::Assignment) {
             return false;
         }
-        if target.flags & get_excluded_symbol_flags(source.flags) == SymbolFlags::empty() {
+        if judge_flags & get_excluded_symbol_flags(source.flags) == SymbolFlags::empty() {
             return false;
         }
         let message = if source.flags.intersects(SymbolFlags::ENUM)
-            || target.flags.intersects(SymbolFlags::ENUM)
+            || judge_flags.intersects(SymbolFlags::ENUM)
         {
             tsox_core::diagnostics::messages_generated::
                 ENUM_DECLARATIONS_CAN_ONLY_MERGE_WITH_NAMESPACE_OR_OTHER_ENUM_DECLARATIONS
         } else if source.flags.contains(SymbolFlags::BlockScopedVariable)
-            || target.flags.contains(SymbolFlags::BlockScopedVariable)
+            || judge_flags.contains(SymbolFlags::BlockScopedVariable)
         {
             tsox_core::diagnostics::messages_generated::CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0
         } else {
@@ -53,6 +62,23 @@ impl Checker {
             self.push_dup_error_with_related(file, *loc, message, &name, &target_nodes);
         }
         true
+    }
+
+
+    // Go getTargetOfNamespaceExportDeclaration：`export as namespace X` 的别名
+    // 目标是所在文件的外部模块符号（resolveExternalModuleSymbol(parent)），
+    // populate_globals 时点通用别名解析未发生，就地按声明形态揭示
+    pub(crate) fn umd_global_alias_target(&self, alias: &Arc<Symbol>) -> Arc<Symbol> {
+        for d in &alias.declarations {
+            if d.kind == SyntaxKind::NamespaceExportDeclaration {
+                if let Some(parent) = d.parent() {
+                    if let Some(sym) = self.program.symbol_map().symbol_of(&parent) {
+                        return Arc::clone(sym);
+                    }
+                }
+            }
+        }
+        Arc::clone(alias)
     }
 
     fn declaration_name_nodes(

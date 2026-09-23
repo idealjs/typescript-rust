@@ -12,13 +12,34 @@ impl Binder {
     /// （declare namespace 内未加 export 的声明自动入 exports）
     fn set_export_context_flag(&mut self, node: &Arc<Node>) {
         let is_ambient = node.has_syntactic_modifier(ModifierFlags::Ambient)
-            || node.flags.contains(NodeFlags::Ambient);
+            || node.flags.contains(NodeFlags::Ambient)
+            || self.in_ambient_context(node);
         if is_ambient && !Self::has_export_declarations(node) {
             let ptr = Arc::as_ptr(node) as *mut tsox_frontend::ast::Node;
             unsafe {
                 (*ptr).flags |= NodeFlags::ExportContext;
             }
         }
+    }
+
+    /// Go parser 的 NodeFlagsAmbient 由解析器上下文注入（d.ts 整文件、declare
+    /// 声明子树），Rust parser 未承载该位，此处按容器链等价重建
+    fn in_ambient_context(&self, node: &Arc<Node>) -> bool {
+        if self
+            .current_source_file
+            .as_ref()
+            .is_some_and(|f| f.is_declaration_file)
+        {
+            return true;
+        }
+        let mut parent = node.parent();
+        while let Some(p) = parent {
+            if p.has_syntactic_modifier(ModifierFlags::Ambient) {
+                return true;
+            }
+            parent = p.parent();
+        }
+        false
     }
 
     fn bind_module_declaration_inner(&mut self, node: &Arc<Node>) {
