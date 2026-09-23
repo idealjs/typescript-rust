@@ -25,30 +25,37 @@ impl Checker {
             return None;
         }
 
-        let (access_node, value_node) = if let Some(symbol) = &symbol {
+        let (access_node, value_node, pattern_prop_name) = if let Some(symbol) = &symbol {
             if let Some(alias) = self.discriminant_alias_access(&bin.left, symbol) {
-                (alias, &bin.right)
+                (alias, &bin.right, None)
             } else if let Some(alias) = self.discriminant_alias_access(&bin.right, symbol) {
-                (alias, &bin.left)
+                (alias, &bin.left, None)
             } else if self.is_property_access_on_symbol(&bin.left, symbol) {
-                (Arc::clone(&bin.left), &bin.right)
+                (Arc::clone(&bin.left), &bin.right, None)
             } else if self.is_property_access_on_symbol(&bin.right, symbol) {
-                (Arc::clone(&bin.right), &bin.left)
+                (Arc::clone(&bin.right), &bin.left, None)
             } else {
                 return None;
             }
         } else if let Some(reference) = node_reference.as_ref() {
             if self.is_property_access_on_reference(&bin.left, reference) {
-                (Arc::clone(&bin.left), &bin.right)
+                (Arc::clone(&bin.left), &bin.right, None)
             } else if self.is_property_access_on_reference(&bin.right, reference) {
-                (Arc::clone(&bin.right), &bin.left)
+                (Arc::clone(&bin.right), &bin.left, None)
+            } else if let Some(name) = self.binding_pattern_element_name(&bin.left, reference) {
+                (Arc::clone(&bin.left), &bin.right, Some(name))
+            } else if let Some(name) = self.binding_pattern_element_name(&bin.right, reference) {
+                (Arc::clone(&bin.right), &bin.left, Some(name))
             } else {
                 return None;
             }
         } else {
             unreachable!()
         };
-        let prop_name = Self::get_accessed_property_name_from_node(&access_node)?;
+        let prop_name = match pattern_prop_name {
+            Some(name) => name,
+            None => Self::get_accessed_property_name_from_node(&access_node)?,
+        };
         let value_type = self.get_type_of_node(value_node);
         let is_equality = op == SyntaxKind::EqualsEqualsEqualsToken;
         let keep_matching = if is_equality {
@@ -292,5 +299,38 @@ impl Checker {
         }
 
         Arc::clone(type_)
+    }
+}
+
+impl Checker {
+    // Go getCandidateDiscriminantPropertyAccess（flow.go:1457）：reference 是
+    // binding pattern（getNarrowedTypeOfSymbol 的伪引用）时，同一 pattern 内
+    // 声明、无初始化式、非 rest 的解构元素标识符可作判别候选
+    fn binding_pattern_element_name(
+        &self,
+        expr: &Arc<Node>,
+        pattern: &Arc<Node>,
+    ) -> Option<String> {
+        if !matches!(
+            pattern.kind,
+            SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+        ) || expr.kind != SyntaxKind::Identifier
+        {
+            return None;
+        }
+        let symbol = self.resolve_identifier(expr)?;
+        let decl = symbol.value_declaration.as_ref()?;
+        let NodeData::BindingElement(be) = &decl.data else {
+            return None;
+        };
+        if !decl
+            .parent()
+            .is_some_and(|p| Arc::ptr_eq(&p, pattern))
+            || be.initializer.is_some()
+            || be.dot_dot_dot_token.is_some()
+        {
+            return None;
+        }
+        Checker::binding_element_property_name(decl)
     }
 }
