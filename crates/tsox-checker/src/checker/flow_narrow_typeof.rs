@@ -244,13 +244,29 @@ impl Checker {
     }
 
     pub(crate) fn is_empty_object_type(&self, t: &Arc<Type>) -> bool {
-        let Some(structured) = t.as_structured() else {
-            return false;
-        };
-        structured.members.entries.is_empty()
-            && structured.signatures.is_empty()
-            && structured.index_infos.is_empty()
-            && structured.properties.is_empty()
+        if t.flags.contains(TypeFlags::Object) {
+            let Some(structured) = t.as_structured() else {
+                return false;
+            };
+            return structured.members.entries.is_empty()
+                && structured.signatures.is_empty()
+                && structured.index_infos.is_empty()
+                && structured.properties.is_empty();
+        }
+        if t.flags.contains(TypeFlags::NonPrimitive) {
+            return true;
+        }
+        if t.flags.contains(TypeFlags::Union) {
+            return t
+                .types()
+                .is_some_and(|ts| ts.iter().any(|m| self.is_empty_object_type(m)));
+        }
+        if t.flags.contains(TypeFlags::Intersection) {
+            return t
+                .types()
+                .is_some_and(|ts| ts.iter().all(|m| self.is_empty_object_type(m)));
+        }
+        false
     }
 
     pub(crate) fn is_function_like_object_type(&mut self, t: &Arc<Type>) -> bool {
