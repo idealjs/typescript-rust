@@ -2,6 +2,10 @@ pub(crate) use crate::checker::checker::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_resolve_checker::*;
 pub use crate::checker::checker_resolve_checker_visibility::*;
+pub use crate::checker::checker_resolve_checker_walk::*;
+pub use crate::checker::checker_resolve_checker_walk_scopes::*;
+pub use crate::checker::checker_resolve_checker_walk_ancestry::*;
+pub use crate::checker::checker_resolve_checker_walk_legacy::*;
 pub use crate::checker::checker_resolve_access::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_resolve_checker_2::*;
