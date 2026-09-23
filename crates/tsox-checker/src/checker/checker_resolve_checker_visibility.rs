@@ -152,7 +152,7 @@ impl Checker {
         if fn_like_body(container).is_some_and(|body| Arc::ptr_eq(&body, child_below)) {
             return true;
         }
-        let mut use_result = true;
+        let mut type_verdict: Option<bool> = None;
         if meaning.intersects(sym.flags.intersection(SymbolFlags::TYPE))
             && child_below.kind != SyntaxKind::JSDoc
         {
@@ -169,24 +169,32 @@ impl Checker {
                         | SyntaxKind::JSDocReturnTag
                         | SyntaxKind::TypeParameter
                 );
-            use_result =
-                sym.flags.contains(SymbolFlags::TypeParameter) && last_in_type_position;
+            type_verdict =
+                Some(sym.flags.contains(SymbolFlags::TypeParameter) && last_in_type_position);
         }
+        let mut value_verdict: Option<bool> = None;
         if meaning.intersects(sym.flags.intersection(SymbolFlags::VARIABLE)) {
             if self.use_outer_variable_scope_in_parameter(sym, container, child_below) {
-                use_result = false;
+                value_verdict = Some(false);
             } else if sym.flags.intersects(SymbolFlags::FunctionScopedVariable) {
-                use_result = child_below.kind == SyntaxKind::Parameter
-                    || child_below.flags.intersects(NodeFlags::Synthesized)
-                    || (container
-                        .type_node()
-                        .is_some_and(|t| Arc::ptr_eq(t, child_below))
-                        && sym
-                            .value_declaration
-                            .as_ref()
-                            .is_some_and(declaration_is_in_parameter));
+                value_verdict = Some(
+                    child_below.kind == SyntaxKind::Parameter
+                        || child_below.flags.intersects(NodeFlags::Synthesized)
+                        || (container
+                            .type_node()
+                            .is_some_and(|t| Arc::ptr_eq(t, child_below))
+                            && sym
+                                .value_declaration
+                                .as_ref()
+                                .is_some_and(declaration_is_in_parameter)),
+                );
             }
         }
-        use_result
+        match (type_verdict, value_verdict) {
+            (Some(t), Some(v)) => t || v,
+            (Some(t), None) => t,
+            (None, Some(v)) => v,
+            (None, None) => true,
+        }
     }
 }

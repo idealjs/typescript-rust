@@ -14,8 +14,15 @@ impl Checker {
             let NodeData::TypeParameterDeclaration(pd) = &param.data else {
                 continue;
             };
-            if let Some(constraint) = &pd.constraint {
-                self.get_type_from_type_node(constraint);
+            if pd.constraint.is_some() {
+                let sym = self
+                    .program
+                    .symbol_map()
+                    .symbol_of(param)
+                    .map(Arc::clone);
+                if let Some(sym) = sym {
+                    self.get_type_parameter_from_symbol(&sym);
+                }
             }
             match &pd.default_type {
                 Some(default_type) => {
