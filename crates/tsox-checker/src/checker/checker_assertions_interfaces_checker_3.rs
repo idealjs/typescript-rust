@@ -535,7 +535,17 @@ impl Checker {
         }
         let exports = self.get_exports_of_module_table(&module_symbol);
         for (name, symbol) in exports.entries.iter() {
-            if name == "export*" || name == "export=" || name == "default" {
+            if name == tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_STAR
+                || name == tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS
+                || name == "default"
+            {
+                continue;
+            }
+            let umd_global = symbol
+                .declarations
+                .iter()
+                .any(|d| d.kind == SyntaxKind::NamespaceExportDeclaration);
+            if umd_global {
                 continue;
             }
             let flags = self.get_symbol_flags(symbol);
