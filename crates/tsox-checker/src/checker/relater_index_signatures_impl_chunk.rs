@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::relater_index_signatures::*;
+use crate::checker::nodecopy_property_name::is_numeric_literal_name;
 
 impl Checker {
     pub fn index_signatures_related_to(
@@ -284,6 +285,7 @@ impl Checker {
         key_type: &Arc<Type>,
     ) -> Option<Arc<IndexInfo>> {
         let infos = self.get_index_infos_of_type(source);
+        let string_type = self.string_type();
         let mut string_index: Option<Arc<IndexInfo>> = None;
         for info in infos {
             let Some(info_key) = &info.key_type else {
@@ -293,11 +295,14 @@ impl Checker {
                 string_index = Some(info);
                 continue;
             }
-            if Arc::ptr_eq(info_key, key_type) || info_key.flags == key_type.flags {
+            if self.is_applicable_index_type(key_type, info_key) {
                 return Some(info);
             }
         }
-        string_index.filter(|_| key_type.flags.intersects(TypeFlags::String | TypeFlags::Number))
+        if string_index.is_some() && self.is_applicable_index_type(key_type, &string_type) {
+            return string_index;
+        }
+        None
     }
 
     pub fn is_generic_mapped_type(&self, t: &Arc<Type>) -> bool {
