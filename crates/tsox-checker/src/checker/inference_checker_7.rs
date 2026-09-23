@@ -22,11 +22,48 @@ impl Checker {
             expanding_flags: ExpandingFlags::None,
             propagation_type: None,
             visited: HashMap::new(),
+            once_visited: HashMap::new(),
             depth: 0,
         };
         if let (Some(source), Some(target)) = (original_source, original_target) {
             self.infer_from_types(&mut state, &source, &target);
         }
+    }
+
+    fn min_priority(a: InferencePriority, b: InferencePriority) -> InferencePriority {
+        if a.bits() < b.bits() {
+            a
+        } else {
+            b
+        }
+    }
+
+    fn invoke_once_enter(
+        state: &mut InferenceState,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) -> Option<InferencePriority> {
+        let key = (source.id, target.id);
+        if let Some(&status) = state.once_visited.get(&key) {
+            state.inference_priority = Self::min_priority(state.inference_priority, status);
+            return None;
+        }
+        state.once_visited.insert(key, InferencePriority::Circularity);
+        let save = state.inference_priority;
+        state.inference_priority = InferencePriority::MaxValue;
+        Some(save)
+    }
+
+    fn invoke_once_exit(
+        state: &mut InferenceState,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        save: InferencePriority,
+    ) {
+        state
+            .once_visited
+            .insert((source.id, target.id), state.inference_priority);
+        state.inference_priority = Self::min_priority(state.inference_priority, save);
     }
 
     pub(crate) fn infer_from_types(
@@ -158,12 +195,18 @@ impl Checker {
         }
 
         if target.flags.contains(TypeFlags::Conditional) {
-            self.infer_to_conditional_type(state, source, target);
+            if let Some(save) = Self::invoke_once_enter(state, source, target) {
+                self.infer_to_conditional_type(state, source, target);
+                Self::invoke_once_exit(state, source, target, save);
+            }
             return;
         }
 
         if target.flags.contains(TypeFlags::Object) {
-            self.infer_from_object_types(state, source, target);
+            if let Some(save) = Self::invoke_once_enter(state, source, target) {
+                self.infer_from_object_types(state, source, target);
+                Self::invoke_once_exit(state, source, target, save);
+            }
             return;
         }
     }

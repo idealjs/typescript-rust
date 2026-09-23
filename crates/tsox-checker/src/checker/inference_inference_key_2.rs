@@ -119,5 +119,6 @@ pub(crate) struct InferenceState<'a> {
     pub(crate) propagation_type: Option<Arc<Type>>,
 
     pub(crate) visited: HashMap<(u32, u32), InferencePriority>,
+    pub(crate) once_visited: HashMap<(u32, u32), InferencePriority>,
     pub(crate) depth: i32,
 }
