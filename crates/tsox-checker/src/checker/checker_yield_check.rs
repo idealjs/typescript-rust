@@ -180,7 +180,7 @@ impl Checker {
         } else {
             Some(fn_node)
         }?;
-        let contextual_return = self.contextual_return_type_of(&fn_node)?;
+        let mut contextual_return = self.contextual_return_type_of(&fn_node)?;
         let is_async = fn_node.has_syntactic_modifier(ModifierFlags::Async);
         let is_yield_star = match &yield_node.data {
             NodeData::YieldExpression(d) => d.asterisk_token.is_some(),
@@ -205,10 +205,7 @@ impl Checker {
                         .is_some()
                 })
                 .collect();
-            if let Some(t) = self.union_or_opt(&kept) {
-                return Some(t);
-            }
-            return Some(contextual_return);
+            contextual_return = self.get_union_type(kept);
         }
         if is_yield_star {
             let types = self.iteration_types_of_generator_function_return_type(
@@ -229,16 +226,6 @@ impl Checker {
         }
         self.iteration_types_of_generator_function_return_type(&contextual_return, is_async)
             .yield_type
-    }
-
-    fn union_or_opt(&mut self, parts: &[Arc<Type>]) -> Option<Arc<Type>> {
-        if parts.is_empty() {
-            None
-        } else if parts.len() == 1 {
-            Some(Arc::clone(&parts[0]))
-        } else {
-            Some(self.get_union_type(parts.to_vec()))
-        }
     }
 
     fn create_generator_type_for_yield(
