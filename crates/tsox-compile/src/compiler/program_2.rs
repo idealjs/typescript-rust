@@ -116,6 +116,15 @@ impl Program {
             }
         }
 
+        let resolution_host: Arc<dyn tsox_tsoptions::module::ResolutionHost + Send + Sync> =
+            Arc::new(ResolutionHostAdapter::new(host.as_ref()));
+        let resolver = tsox_tsoptions::module::Resolver::new(
+            resolution_host,
+            Arc::new(options.clone()),
+            String::new(),
+            String::new(),
+        );
+
         if !opts.config.file_names.is_empty() && !options.no_lib.is_true() {
             let lib_names = default_lib_file_names(&options);
             let mut visited: std::collections::HashSet<String> = std::collections::HashSet::new();
@@ -123,6 +132,8 @@ impl Program {
                 load_lib_recursive(
                     lib_name,
                     host.as_ref(),
+                    &options,
+                    &resolver,
                     &mut source_files,
                     &mut by_name,
                     &mut default_lib_names,
@@ -145,14 +156,7 @@ impl Program {
         }
 
         {
-            let resolution_host: Arc<dyn tsox_tsoptions::module::ResolutionHost + Send + Sync> =
-                Arc::new(ResolutionHostAdapter::new(host.as_ref()));
-            let resolver = tsox_tsoptions::module::Resolver::new(
-                resolution_host,
-                Arc::new(options.clone()),
-                String::new(),
-                String::new(),
-            );
+            let resolver = &resolver;
 
             let mut visited: std::collections::HashSet<String> = by_name.keys().cloned().collect();
             let mut pid_first_path: HashMap<tsox_tsoptions::module::PackageId, String> =

@@ -67,6 +67,8 @@ pub(crate) fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTyp
 pub(crate) fn load_lib_recursive(
     lib_name: &str,
     host: &dyn CompilerHost,
+    options: &CompilerOptions,
+    resolver: &tsox_tsoptions::module::Resolver,
     source_files: &mut Vec<Arc<SourceFile>>,
     by_name: &mut HashMap<String, Arc<SourceFile>>,
     default_lib_names: &mut std::collections::HashSet<String>,
@@ -76,7 +78,7 @@ pub(crate) fn load_lib_recursive(
     if !visited.insert(lib_name.to_string()) {
         return;
     }
-    let path = tsox_core::tspath::combine_paths(host.default_library_path(), &[lib_name]);
+    let path = super::lib_replacement::resolve_lib_file_path(lib_name, options, resolver, host);
     let text = match host.fs().read_file(&path) {
         Some(t) => t,
         None => {
@@ -90,6 +92,8 @@ pub(crate) fn load_lib_recursive(
         load_lib_recursive(
             &ref_name,
             host,
+            options,
+            resolver,
             source_files,
             by_name,
             default_lib_names,

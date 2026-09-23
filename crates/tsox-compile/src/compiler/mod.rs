@@ -19,6 +19,7 @@ pub(crate) mod compiler_host_2;
 pub(crate) mod extract_reference_types_directives;
 pub(crate) mod impl_chunk;
 pub(crate) mod import_resolution_mode_override;
+pub(crate) mod lib_replacement;
 pub(crate) mod package_dedupe;
 pub(crate) mod program_directive_filter;
 pub(crate) mod program_2;
