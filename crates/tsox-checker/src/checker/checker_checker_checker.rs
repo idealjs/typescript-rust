@@ -144,6 +144,7 @@ pub struct Checker {
     pub variance_links: LinkStore<Symbol, VarianceLinks>,
     pub reverse_mapped_symbol_links: LinkStore<Symbol, ReverseMappedSymbolLinks>,
     pub reverse_mapped_cache: HashMap<(u32, u32, u32), Option<Arc<Type>>>,
+    pub generic_index_type_cache: HashMap<u32, bool>,
     pub primitive_apparent_types: HashMap<&'static str, Arc<Type>>,
     pub template_resolving_ids: std::collections::HashSet<u32>,
     pub template_resolution_letway: bool,

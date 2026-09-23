@@ -23,6 +23,8 @@ impl Checker {
             propagation_type: None,
             visited: HashMap::new(),
             once_visited: HashMap::new(),
+            source_stack: Vec::new(),
+            target_stack: Vec::new(),
             depth: 0,
         };
         if let (Some(source), Some(target)) = (original_source, original_target) {
@@ -38,32 +40,40 @@ impl Checker {
         }
     }
 
-    fn invoke_once_enter(
+    fn invoke_once(
+        &mut self,
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> Option<InferencePriority> {
+        action: impl FnOnce(&mut Self, &mut InferenceState, &Arc<Type>, &Arc<Type>),
+    ) {
         let key = (source.id, target.id);
         if let Some(&status) = state.once_visited.get(&key) {
             state.inference_priority = Self::min_priority(state.inference_priority, status);
-            return None;
+            return;
         }
         state.once_visited.insert(key, InferencePriority::Circularity);
-        let save = state.inference_priority;
+        let save_priority = state.inference_priority;
+        let save_expanding = state.expanding_flags;
         state.inference_priority = InferencePriority::MaxValue;
-        Some(save)
-    }
-
-    fn invoke_once_exit(
-        state: &mut InferenceState,
-        source: &Arc<Type>,
-        target: &Arc<Type>,
-        save: InferencePriority,
-    ) {
-        state
-            .once_visited
-            .insert((source.id, target.id), state.inference_priority);
-        state.inference_priority = Self::min_priority(state.inference_priority, save);
+        state.source_stack.push(Arc::clone(source));
+        state.target_stack.push(Arc::clone(target));
+        if self.is_deeply_nested_type(source, &state.source_stack, 2) {
+            state.expanding_flags |= ExpandingFlags::Source;
+        }
+        if self.is_deeply_nested_type(target, &state.target_stack, 2) {
+            state.expanding_flags |= ExpandingFlags::Target;
+        }
+        if state.expanding_flags != ExpandingFlags::Both {
+            action(self, state, source, target);
+        } else {
+            state.inference_priority = InferencePriority::Circularity;
+        }
+        state.target_stack.pop();
+        state.source_stack.pop();
+        state.expanding_flags = save_expanding;
+        state.once_visited.insert(key, state.inference_priority);
+        state.inference_priority = Self::min_priority(state.inference_priority, save_priority);
     }
 
     pub(crate) fn infer_from_types(
@@ -210,18 +220,16 @@ impl Checker {
         }
 
         if target.flags.contains(TypeFlags::Conditional) {
-            if let Some(save) = Self::invoke_once_enter(state, source, target) {
-                self.infer_to_conditional_type(state, source, target);
-                Self::invoke_once_exit(state, source, target, save);
-            }
+            self.invoke_once(state, source, target, |c, s, src, tgt| {
+                c.infer_to_conditional_type(s, src, tgt)
+            });
             return;
         }
 
         if target.flags.contains(TypeFlags::Object) {
-            if let Some(save) = Self::invoke_once_enter(state, source, target) {
-                self.infer_from_object_types(state, source, target);
-                Self::invoke_once_exit(state, source, target, save);
-            }
+            self.invoke_once(state, source, target, |c, s, src, tgt| {
+                c.infer_from_object_types(s, src, tgt)
+            });
             return;
         }
     }

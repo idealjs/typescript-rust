@@ -91,22 +91,27 @@ impl Checker {
     }
 
     /// Go getGenericObjectFlags 的 IsGenericIndexType 位（union/intersection
-    /// 递归合并、substitution 合并 base 与 constraint，其余按 Instantiable 位判定）
-    pub(crate) fn is_generic_index_type(&self, t: &Arc<Type>) -> bool {
-        match &t.data {
-            TypeData::Union(u) => u
-                .union_or_intersection
-                .types
-                .iter()
-                .any(|x| self.is_generic_index_type(x)),
-            TypeData::Intersection(i) => i
-                .union_or_intersection
-                .types
-                .iter()
-                .any(|x| self.is_generic_index_type(x)),
+    /// 递归合并、substitution 合并 base 与 constraint，其余按 Instantiable 位判定）。
+    /// Go 经 ObjectFlagsIsGenericMappedTypeComputed 将计算位永久写回
+    /// t.objectFlags，Type 为不可变 Arc，等价落地为 checker 级 TypeId 永久缓存
+    pub(crate) fn is_generic_index_type(&mut self, t: &Arc<Type>) -> bool {
+        if let Some(&cached) = self.generic_index_type_cache.get(&t.id) {
+            return cached;
+        }
+        let result = match &t.data {
+            TypeData::Union(u) => {
+                let members = u.union_or_intersection.types.clone();
+                members.iter().any(|x| self.is_generic_index_type(x))
+            }
+            TypeData::Intersection(i) => {
+                let members = i.union_or_intersection.types.clone();
+                members.iter().any(|x| self.is_generic_index_type(x))
+            }
             TypeData::Substitution(s) => {
-                s.base_type.as_ref().is_some_and(|b| self.is_generic_index_type(b))
-                    || s.constraint.as_ref().is_some_and(|c| self.is_generic_index_type(c))
+                let base = s.base_type.clone();
+                let constraint = s.constraint.clone();
+                base.as_ref().is_some_and(|b| self.is_generic_index_type(b))
+                    || constraint.as_ref().is_some_and(|c| self.is_generic_index_type(c))
             }
             _ => t.flags.intersects(
                 TypeFlags::TypeParameter
@@ -115,17 +120,19 @@ impl Checker {
                     | TypeFlags::TemplateLiteral
                     | TypeFlags::Index,
             ),
-        }
+        };
+        self.generic_index_type_cache.insert(t.id, result);
+        result
     }
 
     /// Go isGenericMappedType 的约束判定路径（nameType 路径未移植：
     /// as 子句引用泛型的形态不在本簇用例域内）
-    pub(crate) fn is_generic_mapped_type_by_constraint(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_generic_mapped_type_by_constraint(&mut self, t: &Arc<Type>) -> bool {
         match &t.data {
-            TypeData::Mapped(m) => m
-                .constraint_type
-                .as_ref()
-                .is_some_and(|c| self.is_generic_index_type(c)),
+            TypeData::Mapped(m) => {
+                let constraint = m.constraint_type.clone();
+                constraint.as_ref().is_some_and(|c| self.is_generic_index_type(c))
+            }
             _ => false,
         }
     }

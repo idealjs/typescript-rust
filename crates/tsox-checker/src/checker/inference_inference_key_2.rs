@@ -118,6 +118,9 @@ pub(crate) struct InferenceState<'a> {
     pub(crate) expanding_flags: ExpandingFlags,
     pub(crate) propagation_type: Option<Arc<Type>>,
 
+    pub(crate) source_stack: Vec<Arc<Type>>,
+    pub(crate) target_stack: Vec<Arc<Type>>,
+
     pub(crate) visited: HashMap<(u32, u32), InferencePriority>,
     pub(crate) once_visited: HashMap<(u32, u32), InferencePriority>,
     pub(crate) depth: i32,
