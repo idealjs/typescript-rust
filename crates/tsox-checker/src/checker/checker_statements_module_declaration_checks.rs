@@ -70,7 +70,7 @@ impl Checker {
                     self.current_file.clone(),
                     name_loc,
                     tsox_core::diagnostics::messages_generated::
-                        AUGMENTATIONS_FOR_THE_GLOBAL_SCOPE_SHOULD_HAVE_DECLARE_MODIFIER_UNLESS_THEY_APPEAR_IN_ALREADY_AMBIENT_CONTEXT,
+                        AUGMENTATIONS_FOR_THE_GLOBAL_SCOPE_CAN_ONLY_BE_DIRECTLY_NESTED_IN_EXTERNAL_MODULES_OR_AMBIENT_MODULE_DECLARATIONS,
                     Vec::new(),
                 ));
             }
