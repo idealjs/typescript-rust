@@ -58,6 +58,7 @@ impl Checker {
             instantiation_depth: 0,
             imported_type_resolution: Vec::new(),
             alias_type_resolution_stack: Vec::new(),
+            cs_echo_inference: false,
 
             language_version,
             module_kind,

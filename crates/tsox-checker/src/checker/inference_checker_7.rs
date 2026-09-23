@@ -248,9 +248,17 @@ impl Checker {
         }
         if !inference.is_fixed {
             let candidate = propagation_type.unwrap_or_else(|| Arc::clone(source));
-            // 自引用推断（T←T）无信息量：Go 用 non-fixing mapper 让上下文化实参的类型参数
-            // 引用脱离推断跟踪，此处以候选与被推断类型参数符号等价拦截
-            if crate::checker::utilities::type_parameters_match(&candidate, &inference.type_parameter) {
+            // CS 实参部分代入后的回声域内自引用推断（T←T）无信息量：Go 用
+            // non-fixing mapper 让上下文化实参的类型参数引用替换为已推断值，
+            // 此处以候选与被推断类型参数符号等价拦截；域外（如递归泛型调用
+            // Generator<U> → Generator<U> 的实参推断）自引用候选合法，
+            // Go getCovariantInference 取其公共超类型即类型参数自身
+            if self.cs_echo_inference
+                && crate::checker::utilities::type_parameters_match(
+                    &candidate,
+                    &inference.type_parameter,
+                )
+            {
                 return;
             }
             if priority.bits() < inference.priority.bits() {

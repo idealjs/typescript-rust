@@ -15,6 +15,8 @@ pub struct Checker {
     /// type_of_imported_symbol 访问中环守卫（Go symbolLinks 解析中缓存）
     pub imported_type_resolution: Vec<u64>,
     pub alias_type_resolution_stack: Vec<u64>,
+    /// CS 实参部分代入后的回声推断域：此域内自引用候选（T←T）拦截生效
+    pub cs_echo_inference: bool,
     pub language_version: ScriptTarget,
     pub module_kind: ModuleKind,
     pub module_resolution_kind: ModuleResolutionKind,

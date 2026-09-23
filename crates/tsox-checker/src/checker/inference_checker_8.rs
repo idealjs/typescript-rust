@@ -887,6 +887,8 @@ impl Checker {
                         &partial,
                     );
                     let arg_type = self.type_of_context_sensitive_arg(&args[i], &inst_param);
+                    let saved_echo = self.cs_echo_inference;
+                    self.cs_echo_inference = true;
                     self.infer_types(
                         &mut context.inferences,
                         Some(arg_type),
@@ -894,6 +896,7 @@ impl Checker {
                         InferencePriority::None,
                         false,
                     );
+                    self.cs_echo_inference = saved_echo;
                     // 固定结果为最终值：仅锁定快照时已有候选（is_fixed）的类型参数；
                     // 快照时无候选的（约束回退是占位）由本阶段新候选参与最终推断
                     let fixed = cs_fixed.as_ref().expect("fixed types exist");
