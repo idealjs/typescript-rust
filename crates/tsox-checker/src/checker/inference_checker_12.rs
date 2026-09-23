@@ -92,6 +92,15 @@ impl Checker {
             return None;
         }
 
+        // Go getContextualTypeForArgumentAtIndex：rest 实参位的上下文型是
+        // rest 参数型[argIndex-restIndex] 索引访问;泛型调用须先代入推断
+        // 实参再取索引(未代入的延迟别名/条件型上取元素型会塌成 any)
+        let rest_raw: Option<Arc<Type>> = if sig.has_rest_parameter() && arg_index >= sig.parameters.len() - 1 {
+            sig.parameters.last().map(|p| self.get_type_of_symbol(p))
+        } else {
+            None
+        };
+
         let base_param_type = self
             .try_get_type_at_position(&sig, arg_index)
             .or_else(|| {
@@ -136,14 +145,22 @@ impl Checker {
                     _ => self.infer_call_type_arguments(call_node, &sig, &sibling_args),
                 };                self.resolving_contextual_calls.remove(&key);
                 if !inferred.is_empty() {
+                    let subst_base = rest_raw.as_ref().unwrap_or(&base_param_type);
                     let substed = self.substitute_infer_type_parameters(
-                        &base_param_type,
+                        subst_base,
                         &sig.type_parameters,
                         &inferred,
-                    );                    return Some(substed);
+                    );
+                    if rest_raw.is_some() {
+                        let lit = self.get_number_literal_type(tsox_core::jsnum::Number(
+                            (arg_index - (sig.parameters.len() - 1)) as f64,
+                        ));
+                        return Some(self.get_indexed_access_type(&substed, &lit));
+                    }                    return Some(substed);
                 }
             }
-        }        Some(base_param_type)
+        }
+        Some(base_param_type)
     }
 
     pub(crate) fn get_contextual_type_for_binary_operand(
