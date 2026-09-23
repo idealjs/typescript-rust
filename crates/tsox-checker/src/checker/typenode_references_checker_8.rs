@@ -248,7 +248,17 @@ impl Checker {
                 Arc::clone(member_sym)
             };
             symbol_table.insert(name.clone(), Arc::clone(&prop_sym));
-            props.push(prop_sym);
+            // Go setStructuredTypeMembers→getNamedMembers→symbolIsValue：
+            // properties 列表只收值成员（纯类型 namespace/接口/类型别名不入列），
+            // members 表保持全量供按名查找
+            let is_value = member_sym.flags.intersects(SymbolFlags::VALUE)
+                || (member_sym.flags.contains(SymbolFlags::Alias) && {
+                    let base = self.resolve_alias_base(Arc::clone(member_sym));
+                    base.flags.intersects(SymbolFlags::VALUE)
+                });
+            if is_value {
+                props.push(prop_sym);
+            }
         }
         let result = Arc::new(Type {
             flags: TypeFlags::Object,
