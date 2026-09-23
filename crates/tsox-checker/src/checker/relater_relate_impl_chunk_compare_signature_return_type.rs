@@ -67,21 +67,6 @@ impl Checker {
                     result = result.and(related);
                     if result.is_false() {
                         if self.relater_chain_active {
-                            let sr_head = self.type_to_string(&source_return);
-                            let tr_head = self.type_to_string(&target_return);
-                            let head_msg = if relation == RelationKind::Comparable {
-                                tsox_core::diagnostics::messages_generated::
-                                    TYPE_0_IS_NOT_COMPARABLE_TO_TYPE_1
-                            } else {
-                                tsox_core::diagnostics::messages_generated::
-                                    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1
-                            };
-                            self.push_relation_head_with_tp_note(
-                            &source_return,
-                            &target_return,
-                            head_msg,
-                            vec![sr_head, tr_head],
-                        );
                             let no_args =
                                 source.parameters.is_empty() && target.parameters.is_empty();
                             let construct = source

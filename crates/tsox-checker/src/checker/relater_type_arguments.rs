@@ -84,19 +84,6 @@ impl Checker {
                 }
             };
             if related.is_false() {
-                if relation != RelationKind::Identity {
-                    let (a, b) = if variance == VarianceFlags::Contravariant {
-                        (self.type_to_string(t), self.type_to_string(s))
-                    } else {
-                        (self.type_to_string(s), self.type_to_string(t))
-                    };
-                    let message = if relation == RelationKind::Comparable {
-                        tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_COMPARABLE_TO_TYPE_1
-                    } else {
-                        tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1
-                    };
-                    self.relater_report_error(message, vec![a, b]);
-                }
                 return Ternary::False;
             }
             result = result.and(related);

@@ -94,12 +94,6 @@ impl Checker {
                             && self.chain_args(i).is_some_and(|a| a.first() == Some(&name))
                     });
                     if !already {
-                        let source_str = self.type_to_string(&compared);
-                        let target_str = self.type_to_string(&target_value);
-                        self.relater_report_error(
-                            msg::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                            vec![source_str, target_str],
-                        );
                         self.relater_report_error(
                             msg::PROPERTY_0_IS_INCOMPATIBLE_WITH_INDEX_SIGNATURE,
                             vec![name],

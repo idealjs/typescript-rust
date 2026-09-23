@@ -206,15 +206,6 @@ impl Checker {
             {
                 self.relater_error_chain.truncate(save_len);
                 self.is_type_related_to(&source, &best_t, relation);
-                let source_str = self.type_to_string(&source);
-                let target_str = self.type_to_string(&best_t);
-                let msg = if source_str == target_str {
-                    tsox_core::diagnostics::messages_generated::
-                        TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_TWO_DIFFERENT_TYPES_WITH_THIS_NAME_EXIST_BUT_THEY_ARE_UNRELATED
-                } else {
-                    tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1
-                };
-                self.relater_report_error(msg, vec![source_str, target_str]);
             }
         }
         false
