@@ -199,7 +199,11 @@ impl Checker {
         }
         if let TypeData::Substitution(sub) = &t.data {
             if let Some(base) = &sub.base_type {
-                return self.type_to_string_ex(base, flags);
+                let base_str = self.type_to_string_ex(base, flags);
+                if self.is_no_infer_type(t) {
+                    return format!("NoInfer<{base_str}>");
+                }
+                return base_str;
             }
             if let Some(c) = &sub.constraint {
                 return self.type_to_string_ex(c, flags);

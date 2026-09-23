@@ -209,10 +209,11 @@ impl Checker {
     }
 
     fn type_of_property_in_type(&mut self, t: &Arc<Type>, name: &str) -> Arc<Type> {
-        if let Some(prop) = self.get_property_of_type(t, name) {
+        let apparent = self.apparent_type_for_property_lookup(t);
+        if let Some(prop) = self.get_property_of_type(&apparent, name) {
             return self.get_type_of_symbol(&prop);
         }
-        if let Some(structured) = t.as_structured() {
+        if let Some(structured) = apparent.as_structured() {
             let numeric = name.parse::<f64>().is_ok();
             for info in &structured.index_infos {
                 if let Some(key) = &info.key_type {
@@ -227,6 +228,23 @@ impl Checker {
             }
         }
         self.undefined_type()
+    }
+
+    fn apparent_type_for_property_lookup(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        if !t.flags.contains(TypeFlags::Substitution) {
+            return Arc::clone(t);
+        }
+        if let TypeData::Substitution(s) = &t.data {
+            if self.is_no_infer_type(t) {
+                if let Some(base) = &s.base_type {
+                    return Arc::clone(base);
+                }
+            }
+            let constraint = s.constraint.clone().unwrap_or_else(|| self.unknown_type());
+            let base = s.base_type.clone().unwrap_or_else(|| self.unknown_type());
+            return self.get_intersection_type(vec![constraint, base]);
+        }
+        Arc::clone(t)
     }
 
     fn matching_discriminant_constituents(
@@ -321,10 +339,11 @@ impl Checker {
         t: &Arc<Type>,
         name: &str,
     ) -> Option<Arc<Type>> {
-        if let Some(prop) = self.get_property_of_type(t, name) {
+        let apparent = self.apparent_type_for_property_lookup(t);
+        if let Some(prop) = self.get_property_of_type(&apparent, name) {
             return Some(self.get_type_of_symbol(&prop));
         }
-        if let Some(structured) = t.as_structured() {
+        if let Some(structured) = apparent.as_structured() {
             let numeric = name.parse::<f64>().is_ok();
             for info in &structured.index_infos {
                 if let Some(key) = &info.key_type {

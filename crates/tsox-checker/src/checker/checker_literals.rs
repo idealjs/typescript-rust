@@ -387,6 +387,11 @@ impl Checker {
         if matches!(&t.data, TypeData::Mapped(m) if m.type_parameter.is_some()) {
             return true;
         }
+        if let TypeData::Substitution(s) = &t.data
+            && let Some(base) = &s.base_type
+        {
+            return self.target_has_property(base, name);
+        }
         if let Some(structured) = t.as_structured() {
             if structured.members.get(name).is_some() {
                 return true;
