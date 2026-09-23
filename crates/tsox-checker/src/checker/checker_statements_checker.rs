@@ -431,6 +431,11 @@ impl Checker {
                 if node.kind == SyntaxKind::ImportEqualsDeclaration {
                     // Go checkImportEqualsDeclaration：先跑修饰符文法
                     self.check_grammar_modifiers(node);
+                    // Go checkImportEqualsDeclaration：非 ambient 的 import =
+                    // 在 erasableSyntaxOnly 下报 TS1294（整节点 span）
+                    if !self.declaration_is_ambient(node) {
+                        self.erasable_syntax_error(node, node.loc);
+                    }
                     self.check_import_equals_esm_grammar(node);
                 }
                 // Go checkExportDeclaration/checkImportEqualsDeclaration：

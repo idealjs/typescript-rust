@@ -114,6 +114,13 @@ impl Checker {
     pub fn check_enum_declaration(&mut self, node: &Arc<Node>) {
         self.check_grammar_modifiers(node);
         self.check_exports_on_merged_declarations(node);
+        // Go checkEnumDeclaration：非 ambient 枚举在 erasableSyntaxOnly 下报
+        // TS1294（span 取名字，GetErrorRangeForNode 声明类规则）
+        if !self.declaration_is_ambient(node)
+            && let tsox_frontend::ast::NodeData::EnumDeclaration(data) = &node.data
+        {
+            self.erasable_syntax_error(node, data.name.loc);
+        }
         self.compute_enum_member_values(node);
 
         if let tsox_frontend::ast::NodeData::EnumDeclaration(data) = &node.data {

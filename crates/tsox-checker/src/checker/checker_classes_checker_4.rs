@@ -19,6 +19,16 @@ impl Checker {
             let Some(modifiers) = &pd.modifiers else {
                 continue;
             };
+            // Go checkParameter：参数属性在 erasableSyntaxOnly 下报 TS1294
+            //（整参数 span，先于构造器实现位置检查）
+            if modifiers.modifier_flags.intersects(
+                ModifierFlags::Public
+                    | ModifierFlags::Private
+                    | ModifierFlags::Protected
+                    | ModifierFlags::Readonly,
+            ) {
+                self.erasable_syntax_error(param, param.loc);
+            }
             if is_ctor_impl {
                 continue;
             }

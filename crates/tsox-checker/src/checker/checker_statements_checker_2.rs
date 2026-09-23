@@ -32,6 +32,27 @@ impl Checker {
         false
     }
 
+    // Go shouldCheckErasableSyntax + c.error：erasableSyntaxOnly 且非 JS 文件时
+    // 在指定 span 报 TS1294
+    pub(crate) fn erasable_syntax_error(
+        &mut self,
+        node: &Arc<Node>,
+        loc: tsox_core::core::text::TextRange,
+    ) {
+        if !self.compiler_options.erasable_syntax_only.is_true()
+            || tsox_frontend::ast::is_in_js_file(node)
+        {
+            return;
+        }
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            self.current_file.clone(),
+            loc,
+            tsox_core::diagnostics::messages_generated::
+                THIS_SYNTAX_IS_NOT_ALLOWED_WHEN_ERASABLESYNTAXONLY_IS_ENABLED,
+            Vec::new(),
+        ));
+    }
+
     pub(crate) fn check_cjs_reserved_top_level_name(&mut self, node: &Arc<Node>, name: &Arc<Node>) {
         use tsox_core::core::compiler_options::ModuleKind;
         if !matches!(name.kind, SyntaxKind::Identifier) {

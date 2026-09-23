@@ -58,6 +58,11 @@ impl Checker {
         if !d.is_export_equals {
             return;
         }
+        // Go checkExportAssignment：非 ambient 的 export = 在
+        // erasableSyntaxOnly 下报 TS1294（整节点 span）
+        if !self.declaration_is_ambient(node) {
+            self.erasable_syntax_error(node, node.loc);
+        }
         let module_kind = self.compiler_options.get_emit_module_kind();
         let ambient = self.declaration_is_ambient(node);
         let implied_format = self

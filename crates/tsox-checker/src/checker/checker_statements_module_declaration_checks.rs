@@ -70,11 +70,26 @@ impl Checker {
                     self.current_file.clone(),
                     name_loc,
                     tsox_core::diagnostics::messages_generated::
-                        AUGMENTATIONS_FOR_THE_GLOBAL_SCOPE_CAN_ONLY_BE_DIRECTLY_NESTED_IN_EXTERNAL_MODULES_OR_AMBIENT_MODULE_DECLARATIONS,
+                        AUGMENTATIONS_FOR_THE_GLOBAL_SCOPE_SHOULD_HAVE_DECLARE_MODIFIER_UNLESS_THEY_APPEAR_IN_ALREADY_AMBIENT_CONTEXT,
                     Vec::new(),
                 ));
             }
         }
+
+        // Go checkModuleDeclaration：非 ambient 实例化命名空间在
+        // erasableSyntaxOnly 下报 TS1294（span 取名字）
+        if !self.declaration_is_ambient(node)
+            && let Some(sym) = self.program.symbol_map().symbol_of(node)
+            && sym.flags.contains(SymbolFlags::ValueModule)
+            && tsox_frontend::ast::is_instantiated_module(
+                node,
+                self.compiler_options.should_preserve_const_enums(),
+            )
+            && let tsox_frontend::ast::NodeData::ModuleDeclaration(data) = &node.data
+        {
+            self.erasable_syntax_error(node, data.name.loc);
+        }
+
 
         if let tsox_frontend::ast::NodeData::ModuleDeclaration(data) = &node.data
             && data.name.kind == SyntaxKind::Identifier
