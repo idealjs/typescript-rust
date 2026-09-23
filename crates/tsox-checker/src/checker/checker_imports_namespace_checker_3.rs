@@ -88,7 +88,7 @@ impl Checker {
                             &module_sym.name,
                         ),
                     );
-                    return Some(self.get_type_of_symbol(&module_sym));
+                    return Some(self.namespace_import_module_type(&module_sym));
                 }
                 cur = n.parent();
             }
