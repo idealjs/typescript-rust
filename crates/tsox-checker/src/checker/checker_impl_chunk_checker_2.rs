@@ -144,21 +144,19 @@ impl Checker {
                 }
                 let symbol_map = self.program.symbol_map();
                 if let Some(module_sym) = symbol_map.symbol_of(&module_node) {
+                    if module_sym
+                        .declarations
+                        .first()
+                        .is_some_and(|d| d.id() != module_node.id())
+                    {
+                        continue;
+                    }
                     global_aug_members.extend(
                         module_sym
                             .exports
                             .iter()
                             .map(|(k, v)| (k.clone(), Arc::clone(v))),
                     );
-                    global_aug_members.extend(
-                        module_sym
-                            .members
-                            .iter()
-                            .map(|(k, v)| (k.clone(), Arc::clone(v))),
-                    );
-                }
-                if let Some(locals) = symbol_map.locals_of(&module_node) {
-                    global_aug_members.extend(locals.iter().map(|(k, v)| (k.clone(), Arc::clone(v))));
                 }
             }
         }
