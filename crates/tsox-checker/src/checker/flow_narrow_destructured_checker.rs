@@ -109,6 +109,7 @@ impl Checker {
         if parent_type.flags.intersects(TypeFlags::Any | TypeFlags::Never) {
             return Some(Arc::clone(parent_type));
         }
+        let parent_type = self.filter_binding_parent_undefined(pattern_parent, Arc::clone(parent_type));
         let mut chain: Vec<String> = Vec::new();
         let mut element = Arc::clone(decl);
         loop {
@@ -148,11 +149,10 @@ impl Checker {
             literal.set_parent(&access);
             expr = access;
         }
-        let mut declared = Arc::clone(parent_type);
+        let mut declared = parent_type;
         for name in chain.iter().rev() {
             declared = self.get_property_type_of_type(&declared, name)?;
         }
-        let declared = self.filter_binding_parent_undefined(pattern_parent, declared);
         let target = FlowRef::Node(Arc::clone(&expr));
         let key = self.flow_cache_key(&target, location_flow, &declared);
         if let Some(cached) = self.flow_type_cache.get(&key) {
@@ -245,7 +245,6 @@ impl Checker {
             }
             _ => None,
         };
-        let t = self.filter_binding_parent_undefined(pattern_parent, t?);
-        Some(t)
+        Some(t?)
     }
 }
