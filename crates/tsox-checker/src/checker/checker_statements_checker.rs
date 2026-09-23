@@ -473,6 +473,10 @@ impl Checker {
                         for el in ne.elements.iter() {
                             self.check_alias_symbol(el);
                         }
+                    } else if let tsox_frontend::ast::NodeData::ExportDeclaration(d) = &node.data
+                        && let Some(spec) = &d.module_specifier
+                    {
+                        self.check_export_star_export_equals(spec);
                     }
                     self.check_export_declaration_namespace(node);
                 }
