@@ -207,6 +207,13 @@ impl Checker {
                 .as_ref()
                 .is_some_and(|f| f.has_parse_diagnostics)
             {
+                // Go checkReturnStatement：表达式先于一切容器检查（错位 return 也要
+                // 解析标识符）；hasParseDiagnostics 只抑制 TS1109（grammarErrorOnFirstToken）
+                if let tsox_frontend::ast::NodeData::ReturnStatement(data) = &node.data
+                    && let Some(expr) = &data.expression
+                {
+                    self.check_expression(expr);
+                }
                 return;
             }
             let file = self.current_file.clone();
