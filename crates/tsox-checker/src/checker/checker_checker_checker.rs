@@ -17,6 +17,10 @@ pub struct Checker {
     pub alias_type_resolution_stack: Vec<u64>,
     /// CS 实参部分代入后的回声推断域：此域内自引用候选（T←T）拦截生效
     pub cs_echo_inference: bool,
+    /// 推断期实参检查的活动上下文型（node id → 类型）：Go
+    /// checkExpressionWithContextualType 的 pushContextualType 等价物，
+    /// 值为按当前推断候选代入后的参数型
+    pub active_inferential_contextual: Option<(u64, std::sync::Arc<crate::checker::types::Type>)>,
     pub language_version: ScriptTarget,
     pub module_kind: ModuleKind,
     pub module_resolution_kind: ModuleResolutionKind,

@@ -778,6 +778,11 @@ impl Checker {
         args: &[Arc<tsox_frontend::ast::Node>],
         context: &mut InferenceContext,
     ) -> Vec<Arc<Type>> {
+        let before_return_inference: Vec<bool> = context
+            .inferences
+            .iter()
+            .map(|info| !info.candidates.is_empty() || !info.contra_candidates.is_empty())
+            .collect();
         if matches!(
             node.kind,
             SyntaxKind::CallExpression | SyntaxKind::NewExpression
@@ -811,6 +816,26 @@ impl Checker {
                         );
                     }
                 }
+            }
+        }
+        // Go checker.go:9634/1266：returnMapper 仅含返回位预推断产出候选的
+        // 类型参数（cloneInferredPartOfContext 按 hasInferenceCandidates 过滤，
+        // 无候选参数不在 mapper 内即恒等）；实参期 instantiateContextualType
+        // (checker.go:31188) 只代入该 mapper，实参自身候选不参与
+        let mut return_pre_types: Vec<Arc<Type>> =
+            Vec::with_capacity(context.inferences.len());
+        let mut return_pre_hit = false;
+        for idx in 0..context.inferences.len() {
+            let info = &context.inferences[idx];
+            let has_candidates =
+                !info.candidates.is_empty() || !info.contra_candidates.is_empty();
+            if has_candidates {
+                if !before_return_inference[idx] {
+                    return_pre_hit = true;
+                }
+                return_pre_types.push(self.get_inferred_type(context, idx));
+            } else {
+                return_pre_types.push(Arc::clone(&info.type_parameter));
             }
         }
 
@@ -908,7 +933,31 @@ impl Checker {
                         }
                     }
                 } else {
+                    // Go checkExpressionWithContextualType(checker.go:7662)
+                    // pushContextualType：实参检查期经 instantiateContextualType
+                    // 以 returnMapper 代入参数型，返回位预推断已有候选时字面量
+                    // 实参按代入后形态定型
+                    let substituted = if return_pre_hit {
+                        self.substitute_infer_type_parameters(
+                            &param_type,
+                            &signature.type_parameters,
+                            &return_pre_types,
+                        )
+                    } else {
+                        Arc::clone(&param_type)
+                    };
+                    let pushed = if Arc::ptr_eq(&substituted, &param_type) {
+                        None
+                    } else {
+                        self.clear_node_type_cache_under(&args[i]);
+                        self.active_inferential_contextual =
+                            Some((args[i].id(), Arc::clone(&substituted)));
+                        Some(())
+                    };
                     let mut arg_type = self.get_type_of_node(&args[i]);
+                    if pushed.is_some() {
+                        self.active_inferential_contextual = None;
+                    }
                     if let Some(inst) =
                         self.instantiate_generic_call_arg_type(&arg_type, &param_type, context)
                     {

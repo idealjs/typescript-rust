@@ -232,6 +232,11 @@ impl Checker {
         node: &Arc<tsox_frontend::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
+        if let Some((id, t)) = self.active_inferential_contextual.as_ref() {
+            if *id == node.id() {
+                return Some(Arc::clone(t));
+            }
+        }
         let parent = match node.parent() {
             Some(p) => Arc::clone(&p),
             None => return None,

@@ -59,6 +59,7 @@ impl Checker {
             imported_type_resolution: Vec::new(),
             alias_type_resolution_stack: Vec::new(),
             cs_echo_inference: false,
+            active_inferential_contextual: None,
 
             language_version,
             module_kind,
