@@ -221,6 +221,15 @@ fn split_option_values(value: &str, option: &str) -> Option<Vec<String>> {
     Some(raws)
 }
 
+// tsgo 已移除的选项值（TS5108: alwaysStrict=false），对应变体在
+// 再生参考基线中不存在，枚举时按无效变体剔除
+fn is_removed_option_value(option: &str, raw: &str) -> bool {
+    matches!(
+        (option, canonical_value(option, raw).as_str()),
+        ("alwaysstrict", "false")
+    )
+}
+
 fn compute_configurations(
     settings: &std::collections::HashMap<String, String>,
 ) -> Result<Vec<(String, std::collections::HashMap<String, String>)>, String> {
@@ -238,7 +247,18 @@ fn compute_configurations(
         let Some(values) = split_option_values(value, key) else {
             continue;
         };
-        if values.len() <= 1 {
+        // 已移除的选项值（alwaysStrict=false）不参与枚举；原注解多值时
+        // 保持变体结构（剔除后单值仍按变体生成，不折叠进 base，否则产物
+        // 文件名失去变体后缀与参考基线错位）
+        let raw_len = values.len();
+        let values: Vec<String> = values
+            .into_iter()
+            .filter(|v| !is_removed_option_value(key, v))
+            .collect();
+        if values.is_empty() {
+            continue;
+        }
+        if raw_len <= 1 {
             if let [only] = values.as_slice() {
                 base.insert(key.clone(), only.clone());
             }
