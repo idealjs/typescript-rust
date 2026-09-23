@@ -14,6 +14,9 @@ impl Checker {
             let NodeData::TypeParameterDeclaration(pd) = &param.data else {
                 continue;
             };
+            if let Some(constraint) = &pd.constraint {
+                self.get_type_from_type_node(constraint);
+            }
             match &pd.default_type {
                 Some(default_type) => {
                     seen_default = true;
