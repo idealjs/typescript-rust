@@ -355,6 +355,7 @@ impl Checker {
             }
             SyntaxKind::SatisfiesExpression => {
                 if let tsox_frontend::ast::NodeData::SatisfiesExpression(data) = &node.data {
+                    self.get_type_from_type_node(&data.type_node);
                     self.check_expression(&data.expression);
                 }
             }
