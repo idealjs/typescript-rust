@@ -120,28 +120,7 @@ impl Checker {
             .flags
             .intersects(TypeFlags::TypeParameter | TypeFlags::IndexedAccess)
         {
-            let both_indexed = source.flags.contains(TypeFlags::IndexedAccess)
-                && target.flags.contains(TypeFlags::IndexedAccess);
-            let matched = state.inferences.iter().any(|info| {
-                crate::checker::utilities::type_parameters_match(&info.type_parameter, target)
-            });
-            if !both_indexed || matched {
-                self.infer_to_type_variable(state, source, target);
-                return;
-            }
-            // Go inferFromTypes：source/target 均为索引访问且 target 非推断目标
-            // （如 U[L]，被推断的是 U 与 L）时分解成分推断 —— T[K] 对 U[L]
-            // 产生 T→U、K→L 两组候选（higherOrder 签名关系推断依赖）
-            if let (TypeData::IndexedAccess(sd), TypeData::IndexedAccess(td)) =
-                (&source.data, &target.data)
-            {
-                if let (Some(so), Some(to)) = (&sd.object_type, &td.object_type) {
-                    self.infer_from_types(state, so, to);
-                }
-                if let (Some(si), Some(ti)) = (&sd.index_type, &td.index_type) {
-                    self.infer_from_types(state, si, ti);
-                }
-            }
+            self.infer_to_type_variable(state, source, target);
             return;
         }
 
