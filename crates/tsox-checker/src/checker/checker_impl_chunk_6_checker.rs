@@ -285,12 +285,14 @@ impl Checker {
             if module_without_value {
                 return self.error_type();
             }
-            if symbol.flags == SymbolFlags::Alias {
-                if let Some(t) = self.type_of_imported_symbol(&symbol) {
-                    return t;
+            let declared = if symbol.flags == SymbolFlags::Alias {
+                match self.type_of_imported_symbol(&symbol) {
+                    Some(t) => t,
+                    None => self.get_type_of_symbol(&symbol),
                 }
-            }
-            let declared = self.get_type_of_symbol(&symbol);
+            } else {
+                self.get_type_of_symbol(&symbol)
+            };
             let narrowed =
                 if self.type_resolution_stack.is_empty()
                     && symbol.flags.intersects(
