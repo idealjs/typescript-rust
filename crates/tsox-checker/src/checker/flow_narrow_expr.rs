@@ -249,7 +249,10 @@ impl Checker {
                 _ => {}
             }
         }
-        if kept.is_empty() || kept.len() == constituents.len() {
+        if kept.is_empty() {
+            return self.never_type();
+        }
+        if kept.len() == constituents.len() {
             return Arc::clone(type_);
         }
         self.flow_union_of(&kept)
