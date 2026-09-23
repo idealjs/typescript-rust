@@ -298,6 +298,12 @@ impl Checker {
                     }
                 }
             };
+            // Go getIndexedAccessTypeOrUndefined：泛型目标上的属性访问是
+            // 延迟 IndexedAccess，elaborateElement 对其直接 bail（不在泛型
+            // 变量上展开属性详述），交由外层主链在赋值目标处报告
+            if crate::checker::relater_type_params::type_contains_type_parameter(&prop_owner) {
+                continue;
+            }
             // Go getIndexedAccessType：可选属性取声明型（不含 undefined），
             // 此处属性查询合成了 `| undefined`，按声明型剥除
             let target_prop_type = match self.get_property_of_type(&prop_owner, &name) {
