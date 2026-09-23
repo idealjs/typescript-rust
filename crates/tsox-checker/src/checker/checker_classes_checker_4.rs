@@ -16,6 +16,7 @@ impl Checker {
             if pd.modifiers.is_some() {
                 self.check_grammar_modifiers(param);
             }
+            self.check_node_decorators(param);
             let Some(modifiers) = &pd.modifiers else {
                 continue;
             };
