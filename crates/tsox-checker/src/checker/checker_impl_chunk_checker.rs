@@ -33,6 +33,7 @@ impl Checker {
             .get_strict_option_value(compiler_options.use_unknown_in_catch_variables);
         let exact_optional_property_types =
             compiler_options.exact_optional_property_types.is_true();
+        let no_unchecked_indexed_access = compiler_options.no_unchecked_indexed_access.is_true();
         let can_collect_symbol_alias_accessibility_data = compiler_options
             .verbatim_module_syntax
             .is_false_or_unknown();
@@ -73,6 +74,7 @@ impl Checker {
             no_implicit_this,
             use_unknown_in_catch_variables,
             exact_optional_property_types,
+            no_unchecked_indexed_access,
             can_collect_symbol_alias_accessibility_data,
 
             globals: SymbolTable::default(),

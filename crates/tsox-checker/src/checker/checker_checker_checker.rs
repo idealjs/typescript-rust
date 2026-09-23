@@ -34,6 +34,7 @@ pub struct Checker {
     pub no_implicit_this: bool,
     pub use_unknown_in_catch_variables: bool,
     pub exact_optional_property_types: bool,
+    pub no_unchecked_indexed_access: bool,
     pub can_collect_symbol_alias_accessibility_data: bool,
     pub globals: SymbolTable,
     pub undefined_symbol: Option<Arc<Symbol>>,

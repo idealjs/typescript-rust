@@ -135,8 +135,18 @@ impl Checker {
         self.element_access_result_type(node, &obj_type, arg_expr, &effective_arg, true)
     }
 
-    fn member_allows_dynamic_index(&self, m: &Arc<Type>, want_string: bool) -> bool {
-        if m.flags.intersects(TypeFlags::Any | TypeFlags::Unknown | TypeFlags::Never) {
+    fn index_access_with_no_unchecked_undefined(
+        &mut self,
+        t: Arc<Type>,
+        from_index_signature: bool,
+    ) -> Arc<Type> {
+        if self.no_unchecked_indexed_access && from_index_signature {
+            return self.get_union_type(vec![t, self.undefined_type()]);
+        }
+        t
+    }
+
+    fn member_allows_dynamic_index(&self, m: &Arc<Type>, want_string: bool) -> bool {        if m.flags.intersects(TypeFlags::Any | TypeFlags::Unknown | TypeFlags::Never) {
             return true;
         }
         let has = |string: bool| {
@@ -188,7 +198,12 @@ impl Checker {
             {
                 self.report_element_access_implicit_any(node, obj_type, arg_expr, effective_arg);
             }
-            return self.get_array_element_type(obj_type);
+            let element = self.get_array_element_type(obj_type);
+            if self.no_unchecked_indexed_access {
+                let union = self.get_union_type(vec![element, self.undefined_type()]);
+                return self.flow_type_of_access_expression(node, None, union);
+            }
+            return element;
         }
 
         let prop_name = self
@@ -200,11 +215,19 @@ impl Checker {
                     let self_access = self.is_self_type_access(&data.expression, obj_type);
                     self.mark_property_as_referenced_ex(&sym, Some(node), Some(self_access));
                 }
+                let from_index_signature = !matches!(&obj_type.data, crate::checker::types::TypeData::Tuple(_))
+                    && element_name_resolved_from_index(obj_type, &member_name);
                 if let Some(substituted) = self.instantiate_array_member_type(obj_type, &sym) {
-                    return self.flow_type_of_access_expression(node, Some(&sym), substituted);
+                    let t = self.index_access_with_no_unchecked_undefined(
+                        substituted,
+                        from_index_signature,
+                    );
+                    return self.flow_type_of_access_expression(node, Some(&sym), t);
                 }
                 let prop_type = self.get_type_of_symbol(&sym);
-                return self.flow_type_of_access_expression(node, Some(&sym), prop_type);
+                let t =
+                    self.index_access_with_no_unchecked_undefined(prop_type, from_index_signature);
+                return self.flow_type_of_access_expression(node, Some(&sym), t);
             }
         }
 
@@ -250,6 +273,14 @@ impl Checker {
                         || key_type.flags.contains(crate::checker::TypeFlags::Number)
                     {
                         if let Some(val_type) = &info.value_type {
+                            if self.no_unchecked_indexed_access {
+                                let union = self.get_union_type(vec![
+                                    Arc::clone(val_type),
+                                    self.undefined_type(),
+                                ]);
+                                return self
+                                    .flow_type_of_access_expression(node, None, union);
+                            }
                             let val_type = Arc::clone(val_type);
                             return self.flow_type_of_access_expression(node, None, val_type);
                         }
@@ -266,4 +297,25 @@ impl Checker {
         }
         self.get_any_type()
     }
+}
+
+fn element_name_resolved_from_index(obj_type: &Arc<Type>, name: &str) -> bool {
+    let Some(structured) = obj_type.as_structured() else {
+        return false;
+    };
+    if structured.members.get(name).is_some() {
+        return false;
+    }
+    let numeric = name.parse::<f64>().is_ok();
+    structured.index_infos.iter().any(|info| {
+        let Some(key) = &info.key_type else {
+            return false;
+        };
+        let applicable = if numeric {
+            key.flags.contains(TypeFlags::Number)
+        } else {
+            key.flags.contains(TypeFlags::String)
+        };
+        applicable && info.value_type.is_some()
+    })
 }
