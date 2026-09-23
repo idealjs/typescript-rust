@@ -213,8 +213,10 @@ pub struct Checker {
     pub array_type_parameter_symbols: Option<Vec<Arc<tsox_frontend::ast::Symbol>>>,
     pub array_member_type_cache: std::collections::HashMap<(usize, usize), Arc<Type>>,
     pub array_type_intern_cache: std::collections::HashMap<(u32, bool), Arc<Type>>,
-    pub instantiated_member_type_cache:
-        std::collections::HashMap<(usize, usize), (Arc<Type>, Arc<Type>)>,
+    pub instantiated_member_type_cache: std::collections::HashMap<
+        (usize, usize),
+        (Arc<Type>, Arc<tsox_frontend::ast::Symbol>, Arc<Type>),
+    >,
     pub instantiated_member_type_cache_limit: usize,
     pub instantiated_member_owner: std::collections::HashMap<usize, u64>,
     pub any_signature: OnceLock<Arc<Signature>>,

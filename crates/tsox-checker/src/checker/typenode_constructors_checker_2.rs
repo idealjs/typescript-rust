@@ -22,7 +22,7 @@ impl Checker {
             Arc::as_ptr(prop) as *const tsox_frontend::ast::Symbol as usize,
         );
         if let Some(cached) = self.instantiated_member_type_cache.get(&key) {
-            return Arc::clone(&cached.1);
+            return Arc::clone(&cached.2);
         }
 
         let result = if owner_sym.flags.contains(SymbolFlags::Interface) {
@@ -43,8 +43,10 @@ impl Checker {
             self.instantiated_member_type_cache.clear();
         }
 
-        self.instantiated_member_type_cache
-            .insert(key, (Arc::clone(owner), Arc::clone(&result)));
+        self.instantiated_member_type_cache.insert(
+            key,
+            (Arc::clone(owner), Arc::clone(prop), Arc::clone(&result)),
+        );
         result
     }
 
