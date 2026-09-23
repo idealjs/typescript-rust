@@ -339,6 +339,27 @@ impl Checker {
                 );
                 return false;
             }
+
+            // Go propertyRelatedTo：源可选属性对目标必选属性（ClassMember 组合位）
+            // 不成立，报 TS2327；类型不兼容优先于此报
+            if source_prop.flags.contains(SymbolFlags::Optional)
+                && target_prop.flags.intersects(
+                    SymbolFlags::Property
+                        | SymbolFlags::Method
+                        | SymbolFlags::GetAccessor
+                        | SymbolFlags::SetAccessor,
+                )
+                && !target_prop.flags.contains(SymbolFlags::Optional)
+            {
+                let source_str = self.type_to_string(source);
+                let target_str = self.type_to_string(target);
+                self.relater_report_error(
+                    tsox_core::diagnostics::messages_generated::
+                        PROPERTY_0_IS_OPTIONAL_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
+                    vec![target_prop.name.clone(), source_str, target_str],
+                );
+                return false;
+            }
         }
 
         if !missing_props.is_empty() {
