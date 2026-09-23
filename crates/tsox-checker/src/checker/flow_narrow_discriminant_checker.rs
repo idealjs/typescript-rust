@@ -257,6 +257,28 @@ impl Checker {
             return self.narrow_by_switch_on_discriminant_property(type_, switch_stmt, range, &access);
         }
 
+        // switch (<同模式解构位>.prop)：接收者是模式的解构位成员，判别式
+        // 落在该属性访问上（Go x.length 经解构目标链映射到模式的属性路径）
+        if let FlowRef::Node(reference) = target
+            && matches!(
+                reference.kind,
+                SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+            )
+            && matches!(
+                discriminant.kind,
+                SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression
+            )
+            && let Some(receiver) = discriminant.expression()
+            && self.binding_pattern_sibling_access(&receiver, reference).is_some()
+        {
+            return self.narrow_by_switch_on_discriminant_property(
+                type_,
+                switch_stmt,
+                range,
+                &discriminant,
+            );
+        }
+
         if discriminant.kind == SyntaxKind::TypeOfExpression {
             if let NodeData::TypeOfExpression(typeof_data) = &discriminant.data {
                 if self.expr_matches_target(&typeof_data.expression, target) {

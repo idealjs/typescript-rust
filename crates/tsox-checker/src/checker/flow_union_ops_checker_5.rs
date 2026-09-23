@@ -283,6 +283,18 @@ impl Checker {
         index: usize,
         error_node: Option<&Arc<Node>>,
     ) -> Option<Arc<Type>> {
+        if parent_type.is_union() {
+            // Go 解构位元素逐联合成分按下标取（联合元组各成分各自取元素），
+            // 整体走 array-like 会拍平全部位置的元素
+            let mut results: Vec<Arc<Type>> = Vec::new();
+            for t in self.constituent_types(parent_type) {
+                results.push(self.destructured_array_element_type(&t, index, error_node)?);
+            }
+            if results.len() == 1 {
+                return results.into_iter().next();
+            }
+            return Some(self.get_union_type(results));
+        }
         if self.is_tuple_type(parent_type) {
             return self.get_tuple_element_type(parent_type, index);
         }
@@ -391,6 +403,20 @@ impl Checker {
             {
                 return Some(member);
             }
+        }
+        // Go createTupleTargetType：无 rest/variadic 元素的元组 length 成员
+        // 是固定长度的数字字面量（判别式收窄依赖它），带 rest 回落 number
+        if let crate::checker::types::TypeData::Tuple(tuple) = &t.data
+            && name == "length"
+            && !tuple
+                .element_infos
+                .iter()
+                .any(|e| e.flags.intersects(crate::checker::types::ELEMENT_FLAGS_VARIABLE))
+        {
+            let len_type = self.get_number_literal_type(tsox_core::jsnum::Number::from(
+                tuple.fixed_length as f64,
+            ));
+            return Some(self.synthetic_property_of_type(name, len_type));
         }
         // Go getBaseTypes→getTupleBaseType：元组结构化成员经
         // Array/ReadonlyArray<元素并集> 基类型实例化解析，声明型泛型参数

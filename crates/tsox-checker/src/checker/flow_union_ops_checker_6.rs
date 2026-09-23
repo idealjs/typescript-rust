@@ -184,11 +184,20 @@ impl Checker {
                 Self::get_accessed_property_name_from_node(&ea.argument_expression)
             }
 
-            NodeData::BindingElement(be) => be
-                .property_name
-                .as_ref()
-                .map(|pn| pn.text().to_string())
-                .or_else(|| be.name.as_ref().map(|n| n.text().to_string())),
+            NodeData::BindingElement(be) => {
+                // 数组解构位成员的判别式名是数字下标（元组数字名成员），
+                // 对象解构位才是属性名（propertyName 或名字）
+                if let Some(pattern) = node.parent()
+                    && pattern.kind == SyntaxKind::ArrayBindingPattern
+                {
+                    return Checker::binding_element_index(&pattern, node)
+                        .map(|i| i.to_string());
+                }
+                be.property_name
+                    .as_ref()
+                    .map(|pn| pn.text().to_string())
+                    .or_else(|| be.name.as_ref().map(|n| n.text().to_string()))
+            }
             _ => None,
         }
     }
