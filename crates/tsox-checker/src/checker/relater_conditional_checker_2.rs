@@ -49,8 +49,10 @@ impl Checker {
         let check_actual = get_actual_type_variable(&check_type);
         let restrictive_check = self.get_restrictive_instantiation(&check_type);
         let restrictive_extends = self.get_restrictive_instantiation(&extends_type);
+        let was_silent = self.silence_relation_chain();
         let check_assignable_extends =
             self.is_type_assignable_to(&restrictive_check, &restrictive_extends);
+        self.restore_relation_chain(was_silent);
         let parts_empty = self.conditional_parts_intersection_empty(&check_type, &extends_type);
         let mut result: Option<Arc<Type>> = None;
         if false_type.flags.contains(TypeFlags::Never)

@@ -139,7 +139,10 @@ impl Checker {
         } else {
             let permissive_check = self.get_permissive_instantiation(&check_type);
             let permissive_extends = self.get_permissive_instantiation(&inferred_extends);
-            !self.is_type_assignable_to(&permissive_check, &permissive_extends)
+            let was_silent = self.silence_relation_chain();
+            let r = !self.is_type_assignable_to(&permissive_check, &permissive_extends);
+            self.restore_relation_chain(was_silent);
+            r
         };
         let take_true = if !definitely_false {
             let definitely_true = if extends_any_or_unknown {
@@ -147,7 +150,10 @@ impl Checker {
             } else {
                 let restrictive_check = self.get_restrictive_instantiation(&check_type);
                 let restrictive_extends = self.get_restrictive_instantiation(&inferred_extends);
-                self.is_type_assignable_to(&restrictive_check, &restrictive_extends)
+                let was_silent = self.silence_relation_chain();
+                let r = self.is_type_assignable_to(&restrictive_check, &restrictive_extends);
+                self.restore_relation_chain(was_silent);
+                r
             };
             if !definitely_true {
                 return None;

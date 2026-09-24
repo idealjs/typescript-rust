@@ -36,7 +36,10 @@ impl Checker {
             (Some(check), Some(extends)) => {
                 let pc = self.get_permissive_instantiation(check);
                 let pe = self.get_permissive_instantiation(extends);
-                !self.is_type_assignable_to(&pc, &pe)
+                let was_silent = self.silence_relation_chain();
+                let r = !self.is_type_assignable_to(&pc, &pe);
+                self.restore_relation_chain(was_silent);
+                r
             }
             _ => false,
         };
@@ -47,7 +50,10 @@ impl Checker {
                 (Some(check), Some(extends)) => {
                     let rc = self.get_restrictive_instantiation(check);
                     let re = self.get_restrictive_instantiation(extends);
-                    self.is_type_assignable_to(&rc, &re)
+                    let was_silent = self.silence_relation_chain();
+                    let r = self.is_type_assignable_to(&rc, &re);
+                    self.restore_relation_chain(was_silent);
+                    r
                 }
                 _ => false,
             }
