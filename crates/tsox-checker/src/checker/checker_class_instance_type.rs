@@ -248,6 +248,20 @@ impl Checker {
             if Arc::ptr_eq(&bt, &cur) || bt.symbol.as_ref().is_none_or(|s| Arc::ptr_eq(s, &sym)) {
                 break;
             }
+            let cur_args = cur
+                .as_object()
+                .map(|o| o.type_arguments.clone())
+                .unwrap_or_default();
+            let bt = if cur_args.is_empty() {
+                bt
+            } else {
+                let decl_tps = self.declared_type_parameter_types(&sym);
+                if decl_tps.len() == cur_args.len() {
+                    self.substitute_infer_type_parameters(&bt, &decl_tps, &cur_args)
+                } else {
+                    bt
+                }
+            };
             cur = bt;
         }
         cur

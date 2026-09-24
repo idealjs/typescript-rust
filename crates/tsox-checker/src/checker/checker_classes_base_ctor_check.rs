@@ -166,28 +166,57 @@ impl Checker {
             Arc::clone(&value_type)
         };
         let derived_is_abstract = class_node.has_syntactic_modifier(ModifierFlags::Abstract);
+        let heritage_args: Vec<Arc<Type>> = match &heritage_element.data {
+            NodeData::ExpressionWithTypeArguments(ewa) => ewa
+                .type_arguments
+                .as_ref()
+                .map(|n| {
+                    n.iter()
+                        .map(|a| self.get_type_from_type_node(a))
+                        .collect()
+                })
+                .unwrap_or_default(),
+            _ => Vec::new(),
+        };
+        let class_tps = self.class_type_parameter_types_of(class_node);
         for sig in self.get_signatures_of_type(&base_type, SignatureKind::Construct) {
+            let type_param_count = sig.type_parameters.len();
+            let min_type_arg_count = self.get_min_type_argument_count(&sig.type_parameters);
+            if heritage_args.len() < min_type_arg_count || heritage_args.len() > type_param_count {
+                continue;
+            }
             let mut flags = sig.flags;
             if derived_is_abstract {
                 flags |= SignatureFlags::Abstract;
             } else {
                 flags.remove(SignatureFlags::Abstract);
             }
+            let instantiated = if type_param_count != 0 {
+                let filled = self.fill_missing_type_arguments(
+                    &heritage_args,
+                    &sig.type_parameters,
+                    min_type_arg_count,
+                    false,
+                );
+                self.get_signature_instantiation(&sig, &filled)
+            } else {
+                sig
+            };
             let inherited = Signature {
-                id: sig.id,
+                id: instantiated.id,
                 flags,
-                min_argument_count: sig.min_argument_count,
-                resolved_min_argument_count: sig.resolved_min_argument_count,
-                declaration: sig.declaration.clone(),
-                type_parameters: sig.type_parameters.clone(),
-                parameters: sig.parameters.clone(),
-                this_parameter: sig.this_parameter.clone(),
+                min_argument_count: instantiated.min_argument_count,
+                resolved_min_argument_count: instantiated.resolved_min_argument_count,
+                declaration: instantiated.declaration.clone(),
+                type_parameters: class_tps.clone(),
+                parameters: instantiated.parameters.clone(),
+                this_parameter: instantiated.this_parameter.clone(),
                 resolved_return_type: OnceLock::from(Arc::clone(instance_type)),
-                resolved_type_predicate: sig.resolved_type_predicate.clone(),
-                target: Some(Arc::clone(&sig)),
-                mapper: sig.mapper.clone(),
+                resolved_type_predicate: instantiated.resolved_type_predicate.clone(),
+                target: Some(Arc::clone(&instantiated)),
+                mapper: instantiated.mapper.clone(),
                 isolated_signature_type: OnceLock::new(),
-                instantiated_parameter_types: sig.instantiated_parameter_types.clone(),
+                instantiated_parameter_types: instantiated.instantiated_parameter_types.clone(),
             };
             out.push(Arc::new(inherited));
         }
