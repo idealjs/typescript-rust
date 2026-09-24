@@ -190,7 +190,17 @@ impl Checker {
             }),
         );
         rebuilt.symbol = t.symbol.clone();
-        rebuilt.alias = t.alias.clone();
+        rebuilt.alias = t.alias.as_ref().map(|a| {
+            let new_args: Vec<Arc<Type>> = a
+                .type_arguments
+                .iter()
+                .map(|arg| self.substitute_infer_type_parameters(arg, params, substitutions))
+                .collect();
+            Box::new(crate::checker::types::TypeAlias::new(
+                a.symbol.clone(),
+                new_args,
+            ))
+        });
         rebuilt.object_flags = t.object_flags;
         Arc::new(rebuilt)
     }

@@ -54,10 +54,12 @@ impl Checker {
             }
         }
 
-        // Go instantiateType：别名实例化型的类型变量只存在于 alias 实参中
-        //（声明体惰性壳不直接持有外层参数），实参被替换即以新实参重实例化；
-        // 声明体自带的 alias 元数据（实参即别名自身类型参数）除外，走结构替换
-        if let Some(alias) = t.alias.as_ref()
+        // Go instantiateTypeWorker(checker.go:22562)：别名实参重实例化只适用于
+        // 惰性壳（Object，类型变量仅存于 alias 实参）；Conditional/Union/
+        // IndexedAccess 等结构内直接持有类型变量，走下方结构替换分支
+        //（Conditional 经 rebuild 携带代入后的 alias）
+        if let TypeData::Object(_) = &t.data
+            && let Some(alias) = t.alias.as_ref()
             && let Some(alias_sym) = alias.symbol.clone()
             && alias_sym
                 .flags
