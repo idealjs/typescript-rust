@@ -29,6 +29,7 @@ impl Checker {
                         src_prop.check_flags & tsox_frontend::ast::CheckFlags::Readonly;
 
                     (*sym_mut).declarations = src_prop.declarations.clone();
+                    (*sym_mut).value_declaration = src_prop.value_declaration.clone();
                 }
             }
             members.insert(name, Arc::clone(&symbol));
