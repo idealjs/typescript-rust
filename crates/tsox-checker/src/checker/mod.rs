@@ -386,6 +386,7 @@ pub(crate) mod typenode_references_checker_8;
 pub(crate) mod typenode_references_interface_extends_check;
 pub(crate) mod typenode_references_interface_instantiation_helpers;
 pub(crate) mod typenode_references_interface_members_accessors;
+pub(crate) mod typenode_references_accessor_cycles;
 pub(crate) mod typenode_references_interface_members_properties;
 pub(crate) mod typenode_references_qualified_name_diagnostics;
 pub(crate) mod typenode_references_type_reference_resolution;

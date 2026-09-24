@@ -178,6 +178,12 @@ impl Checker {
                         return self.get_regular_type_of_literal_type(&widened);
                     }
                     None => {
+                        // Go checkPropertyAccessExpression：根符号已解析而其声明
+                        // 型在途（容器注解构造期 error 预置）时静默回落 error，
+                        // 不报 TS2304（环由 accessor 帧统一报 TS2502）
+                        if self.type_query_root_in_flight(&d.expr_name) {
+                            return self.error_type();
+                        }
                         report_unresolved(self, &d.expr_name);
                         return self.error_type();
                     }

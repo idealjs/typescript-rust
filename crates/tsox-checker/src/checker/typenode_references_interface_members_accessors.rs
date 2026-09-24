@@ -128,7 +128,13 @@ impl Checker {
             return;
         }
 
-        let prop_type = self.resolve_accessor_pair_type(member);
+        let prop_type = self.accessor_member_prop_type(
+            member,
+            &name,
+            member
+                .parent()
+                .is_some_and(|p| p.kind == SyntaxKind::TypeLiteral),
+        );
         match symbol_table.get(&name).cloned() {
             Some(existing) => {
                 let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
@@ -181,20 +187,9 @@ impl Checker {
             return;
         }
 
-        let prop_type = data
-            .parameters
-            .iter()
-            .next()
-            .and_then(|p| {
-                if let NodeData::ParameterDeclaration(pd) = &p.data {
-                    pd.type_node
-                        .as_ref()
-                        .map(|tn| self.get_type_from_type_node(tn))
-                } else {
-                    None
-                }
-            })
-            .unwrap_or_else(|| self.get_any_type());
+        let in_type_literal = member
+            .parent()
+            .is_some_and(|p| p.kind == SyntaxKind::TypeLiteral);
         match symbol_table.get(&name).cloned() {
             Some(existing) => {
                 let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
@@ -210,7 +205,7 @@ impl Checker {
                     .and_then(|l| l.resolved_type.clone())
                     .is_some_and(|t| !t.flags.contains(TypeFlags::Any));
                 if !already_typed {
-                    let prop_type = self.resolve_accessor_pair_type(member);
+                    let prop_type = self.accessor_member_prop_type(member, &name, in_type_literal);
                     self.value_symbol_links.insert(
                         &existing,
                         ValueSymbolLinks {
@@ -227,6 +222,7 @@ impl Checker {
                 );
                 symbol.declarations.push(Arc::clone(member));
                 let symbol = Arc::new(symbol);
+                let prop_type = self.accessor_member_prop_type(member, &name, in_type_literal);
                 self.value_symbol_links.insert(
                     &symbol,
                     ValueSymbolLinks {
@@ -237,6 +233,19 @@ impl Checker {
                 symbol_table.insert(name, Arc::clone(&symbol));
                 props.push(symbol);
             }
+        }
+    }
+
+    fn accessor_member_prop_type(
+        &mut self,
+        member: &Arc<Node>,
+        name: &str,
+        in_type_literal: bool,
+    ) -> Arc<Type> {
+        if in_type_literal {
+            self.type_literal_accessor_member_type(member, name)
+        } else {
+            self.resolve_accessor_pair_type(member)
         }
     }
 
