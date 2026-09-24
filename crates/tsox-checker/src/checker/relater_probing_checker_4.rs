@@ -3,6 +3,23 @@
 use crate::checker::relater_probing::*;
 
 impl Checker {
+    /// 推断替换的参数匹配：指针恒等，或同为类型参数且符号等价
+    ///（实例化语境下 shell 内的参数实例与签名参数列表非同一 Arc）
+    pub(crate) fn infer_param_matches(&self, p: &Arc<Type>, t: &Arc<Type>) -> bool {
+        if Arc::ptr_eq(p, t) {
+            return true;
+        }
+        p.is_type_parameter()
+            && t.is_type_parameter()
+            && p.symbol
+                .as_ref()
+                .zip(t.symbol.as_ref())
+                .is_some_and(|(ps, ts)| {
+                    Arc::ptr_eq(ps, ts)
+                        || (ps.name == ts.name && self.type_param_symbols_equivalent(ps, ts))
+                })
+    }
+
     pub fn substitute_infer_type_parameters(
         &mut self,
         t: &Arc<Type>,
@@ -32,19 +49,7 @@ impl Checker {
     ) -> Arc<Type> {
 
         for (i, p) in params.iter().enumerate() {
-            if Arc::ptr_eq(p, t)
-                || (p.is_type_parameter()
-                    && t.is_type_parameter()
-                    && (p
-                        .symbol
-                        .as_ref()
-                        .zip(t.symbol.as_ref())
-                        .is_some_and(|(ps, ts)| {
-                            Arc::ptr_eq(ps, ts)
-                                || (ps.name == ts.name
-                                    && self.type_param_symbols_equivalent(ps, ts))
-                        })))
-            {
+            if self.infer_param_matches(p, t) {
                 return Arc::clone(&substitutions[i.min(substitutions.len() - 1)]);
             }
         }

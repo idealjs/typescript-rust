@@ -161,7 +161,7 @@ impl Checker {
     }
 
     fn type_mentions_param(&self, t: &Arc<Type>, p: &Arc<Type>) -> bool {
-        if Arc::ptr_eq(t, p) {
+        if self.infer_param_matches(p, t) {
             return true;
         }
         match &t.data {
@@ -209,7 +209,7 @@ impl Checker {
         if !target.flags.contains(TypeFlags::TypeParameter) {
             return None;
         }
-        let pos = params.iter().position(|p| Arc::ptr_eq(p, target))?;
+        let pos = params.iter().position(|p| self.infer_param_matches(p, target))?;
         let s = &substitutions[pos.min(substitutions.len() - 1)];
         if self.type_is_generic(s) {
             return None;
