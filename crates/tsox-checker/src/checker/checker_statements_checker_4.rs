@@ -468,6 +468,7 @@ impl Checker {
             if let tsox_frontend::ast::NodeData::BindingElement(be) = &element.data {
                 if let Some(default) = &be.initializer {
                     self.check_expression(default);
+                    self.check_binding_element_default_assignability(element, default);
                 }
                 if let Some(inner) = &be.name
                     && matches!(
@@ -479,6 +480,50 @@ impl Checker {
                 }
             }
         }
+    }
+
+    fn check_binding_element_default_assignability(
+        &mut self,
+        element: &Arc<Node>,
+        default: &Arc<Node>,
+    ) {
+        let tsox_frontend::ast::NodeData::BindingElement(be) = &element.data else {
+            return;
+        };
+        let name_is_pattern = be.name.as_ref().is_some_and(|n| {
+            matches!(
+                n.kind,
+                SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+            )
+        });
+        if name_is_pattern {
+            return;
+        }
+        let Some(symbol) = self.get_symbol_of_declaration(element) else {
+            return;
+        };
+        if symbol
+            .value_declaration
+            .as_ref()
+            .is_some_and(|vd| !Arc::ptr_eq(vd, element))
+        {
+            return;
+        }
+        let declared = self.get_type_of_symbol(&symbol);
+        let declared = if declared.intrinsic_name() == Some("auto") {
+            self.get_any_type()
+        } else {
+            declared
+        };
+        let init_type = self.get_type_of_node(default);
+        self.check_type_assignable_to_and_optionally_elaborate(
+            &init_type,
+            &declared,
+            Some(element),
+            Some(default),
+            None,
+            None,
+        );
     }
 
     pub(crate) fn check_binding_pattern_element_types(&mut self, pattern: &Arc<Node>) {

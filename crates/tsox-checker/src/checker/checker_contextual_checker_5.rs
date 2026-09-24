@@ -82,6 +82,25 @@ impl Checker {
             }
         }
 
+        // Go assumeInitialized 的 isSameScopedBindingElement：声明为绑定元素且
+        // 引用位于同根声明的绑定元素内（如兄弟元素初始化式）时不做未初始化检查
+        if declaration.kind == SyntaxKind::BindingElement {
+            let mut cur = node.parent();
+            let mut same_root = false;
+            while let Some(a) = cur {
+                if a.kind == SyntaxKind::BindingElement {
+                    same_root = Self::root_declaration(&a).is_some_and(|r| {
+                        Self::root_declaration(&declaration).is_some_and(|d| Arc::ptr_eq(&r, &d))
+                    });
+                    break;
+                }
+                cur = a.parent();
+            }
+            if same_root {
+                return None;
+            }
+        }
+
         // 纯声明（let x;）auto 型走下面类型守卫；此处只拦 ambient/断言声明
         let has_exclamation = matches!(
             &declaration.data,

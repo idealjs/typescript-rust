@@ -209,6 +209,7 @@ impl Checker {
                 SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
             ) {
                 self.check_binding_pattern_element_types(&pd.name);
+                self.check_binding_pattern_element_initializers(&pd.name);
                 return;
             }
             // Go getTypeOfVariableOrParameterOrPropertyWorker 对无注解参数的符号型

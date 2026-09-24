@@ -126,7 +126,6 @@ impl Checker {
         }
         let initializer = match &pattern_parent.data {
             NodeData::VariableDeclaration(d) => d.initializer.clone(),
-            NodeData::ParameterDeclaration(d) => d.initializer.clone(),
             _ => None,
         }?;
         let mut expr = initializer;

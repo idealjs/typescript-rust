@@ -53,16 +53,17 @@ impl Binder {
                 self.bind_children(node);
                 return true;
             }
-            SyntaxKind::VariableDeclaration | SyntaxKind::BindingElement => {
+            SyntaxKind::VariableDeclaration => {
                 self.bind_children(node);
-                let has_initializer = match &node.data {
-                    NodeData::VariableDeclaration(d) => d.initializer.is_some(),
-                    NodeData::BindingElement(d) => d.initializer.is_some(),
-                    _ => false,
-                };
+                let has_initializer =
+                    matches!(&node.data, NodeData::VariableDeclaration(d) if d.initializer.is_some());
                 if has_initializer || Self::is_in_for_in_or_of_head(node) {
                     self.bind_initialized_variable_flow(node);
                 }
+                return true;
+            }
+            SyntaxKind::BindingElement => {
+                self.bind_children(node);
                 return true;
             }
             SyntaxKind::TryStatement => {

@@ -566,8 +566,10 @@ impl Checker {
                         }
                     };
                     t = self.filter_binding_parent_undefined(&cur, t);
+                    let root_has_type = d.type_node.is_some();
                     for (seg_elem, seg) in path.iter().rev() {
                         t = self.binding_path_step(seg_elem, t, seg)?;
+                        t = self.binding_default_value_tail(seg_elem, t, root_has_type);
                     }
                     return Some(t);
                 }
@@ -604,8 +606,10 @@ impl Checker {
                         (None, None) => self.initial_type_of_declaration(&cur)?,
                     };
                     t = self.filter_binding_parent_undefined(&cur, t);
+                    let root_has_type = d.type_node.is_some();
                     for (seg_elem, seg) in path.iter().rev() {
                         t = self.binding_path_step(seg_elem, t, seg)?;
+                        t = self.binding_default_value_tail(seg_elem, t, root_has_type);
                     }
                     return Some(t);
                 }
@@ -801,6 +805,32 @@ impl Checker {
         let pn = be.property_name.as_ref()?;
         (pn.kind == tsox_frontend::ast::SyntaxKind::ComputedPropertyName)
             .then(|| Arc::clone(pn))
+    }
+
+    fn binding_default_value_tail(
+        &mut self,
+        seg_elem: &Arc<Node>,
+        t: Arc<Type>,
+        root_has_type: bool,
+    ) -> Arc<Type> {
+        let tsox_frontend::ast::NodeData::BindingElement(be) = &seg_elem.data else {
+            return t;
+        };
+        let Some(default) = &be.initializer else {
+            return t;
+        };
+        let default_type = self.get_type_of_node(default);
+        if root_has_type {
+            if self.strict_null_checks && !default_type.flags.contains(TypeFlags::Undefined) {
+                return self.remove_undefined_from_union(&t);
+            }
+            return t;
+        }
+        let non_undefined = self.remove_undefined_from_union(&t);
+        let widened = self.get_widened_literal_type_for_initializer(seg_elem, &default_type);
+        let regularized = self.get_regular_type_of_literal_type(&widened);
+        let regularized = self.widen_initializer_type(&regularized);
+        self.get_union_type(vec![non_undefined, regularized])
     }
 
     fn binding_path_step(
