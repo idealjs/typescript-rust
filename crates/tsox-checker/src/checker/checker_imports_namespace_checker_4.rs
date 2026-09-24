@@ -45,11 +45,19 @@ impl Checker {
         }
         let mut default_alias = Symbol::new(SymbolFlags::Alias, "default");
         default_alias.set_parent(module_sym);
+        default_alias.export_symbol = Some(Arc::clone(&base));
         let default_alias = Arc::new(default_alias);
         self.alias_symbol_links.insert(
             &default_alias,
             crate::checker::types::AliasSymbolLinks {
                 alias_target: Some(Arc::clone(&base)),
+                ..Default::default()
+            },
+        );
+        self.value_symbol_links.insert(
+            &default_alias,
+            crate::checker::types::ValueSymbolLinks {
+                resolved_type: Some(Arc::clone(&typ)),
                 ..Default::default()
             },
         );
