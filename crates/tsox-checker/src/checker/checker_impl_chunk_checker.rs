@@ -140,6 +140,7 @@ impl Checker {
             type_resolution_stack: Vec::new(),
             rt_infer_boundary_marks: Vec::new(),
             call_return_query_depth: 0,
+            in_flight_object_literal_types: HashMap::new(),
             type_argument_stack: Vec::new(),
             type_argument_name_frames: Vec::new(),
             type_node_subst_cache: HashMap::new(),

@@ -143,7 +143,13 @@ impl Checker {
         let mut spread_acc: Option<Arc<Type>> = None;
         let mut spread_error = false;
         let literal_symbol = self.program.symbol_map().symbol_of(node).map(Arc::clone);
+        let empty_snapshot =
+            self.object_literal_type_from_pairs(Vec::new(), literal_symbol.clone());
+        self.in_flight_object_literal_types.insert(node.id(), empty_snapshot);
         for prop in properties.iter() {
+            let snapshot =
+                self.object_literal_type_from_pairs(prop_pairs.clone(), literal_symbol.clone());
+            self.in_flight_object_literal_types.insert(node.id(), snapshot);
             let is_accessor = matches!(
                 &prop.data,
                 NodeData::GetAccessorDeclaration(_) | NodeData::SetAccessorDeclaration(_)
@@ -251,44 +257,48 @@ impl Checker {
                 }
             }
         }
-        if spread_error {
-            return self.error_type();
-        }
-        if let Some(spread) = spread_acc {
+        let result = if spread_error {
+            self.error_type()
+        } else if let Some(spread) = spread_acc {
             if !prop_pairs.is_empty() {
                 let segment =
                     self.object_literal_type_from_pairs(prop_pairs, literal_symbol.clone());
-                return self.get_spread_type(
+                self.get_spread_type(
                     &spread,
                     &segment,
                     literal_symbol,
                     ObjectFlags::None,
                     false,
-                );
-            }
-            return spread;
-        }
-        if fell_back_to_any {
-            return self.get_any_type();
-        }
-
-        // Go getTypeOfAccessors 解析序：getter 注解 → setter 参数注解 →
-        // getter 体返回推断（加宽）
-        for idx in 0..prop_pairs.len() {
-            if !prop_pairs[idx].2.iter().any(|d| {
-                matches!(
-                    d.data,
-                    NodeData::GetAccessorDeclaration(_) | NodeData::SetAccessorDeclaration(_)
                 )
-            }) {
-                continue;
+            } else {
+                spread
             }
-            let name = prop_pairs[idx].0.clone();
-            let t = self.object_literal_accessor_type(node, &name);
-            prop_pairs[idx].1 = t;
-        }
+        } else if fell_back_to_any {
+            self.get_any_type()
+        } else {
+            // Go getTypeOfAccessors 解析序：getter 注解 → setter 参数注解 →
+            // getter 体返回推断（加宽）
+            for idx in 0..prop_pairs.len() {
+                if !prop_pairs[idx].2.iter().any(|d| {
+                    matches!(
+                        d.data,
+                        NodeData::GetAccessorDeclaration(_) | NodeData::SetAccessorDeclaration(_)
+                    )
+                }) {
+                    continue;
+                }
+                let name = prop_pairs[idx].0.clone();
+                let t = self.object_literal_accessor_type(node, &name);
+                prop_pairs[idx].1 = t;
+                let snapshot =
+                    self.object_literal_type_from_pairs(prop_pairs.clone(), literal_symbol.clone());
+                self.in_flight_object_literal_types.insert(node.id(), snapshot);
+            }
 
-        self.object_literal_type_from_pairs(prop_pairs, literal_symbol)
+            self.object_literal_type_from_pairs(prop_pairs, literal_symbol)
+        };
+        self.in_flight_object_literal_types.remove(&node.id());
+        result
     }
 
     fn object_literal_accessor_type(&mut self, node: &Arc<Node>, name: &str) -> Arc<Type> {

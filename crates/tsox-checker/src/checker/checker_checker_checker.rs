@@ -91,6 +91,7 @@ pub struct Checker {
     pub type_resolution_stack: Vec<TypeResolutionEntry>,
     pub rt_infer_boundary_marks: Vec<usize>,
     pub call_return_query_depth: u32,
+    pub in_flight_object_literal_types: HashMap<u64, Arc<Type>>,
     pub type_argument_stack: Vec<HashMap<*const tsox_frontend::ast::Symbol, Arc<Type>>>,
     pub type_argument_name_frames: Vec<Vec<(Arc<Symbol>, Arc<Type>)>>,
     pub type_node_subst_cache: HashMap<(usize, u64), Arc<Type>>,

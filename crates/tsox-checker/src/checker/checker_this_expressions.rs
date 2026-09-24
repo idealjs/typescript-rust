@@ -179,7 +179,13 @@ impl Checker {
                 return match self.get_contextual_type(&literal, ContextFlags::None) {
                     Some(t) => Some(self.get_non_nullable_type_of(&t)),
                     None => {
-                        let literal_type = self.get_type_of_node(&literal);
+                        let literal_type = match self
+                            .in_flight_object_literal_types
+                            .get(&literal.id())
+                        {
+                            Some(t) => Arc::clone(t),
+                            None => self.get_type_of_node(&literal),
+                        };
                         Some(self.get_widened_type(&literal_type))
                     }
                 };
