@@ -372,11 +372,10 @@ impl Checker {
             }
         }
 
-        // Go createAnonymousTypeNodeEx：TypeLiteral 符号（合成 __type wrapper、
-        // 对象字面量）一律结构展开成员表；其余具名符号（含 Class/接口式库
-        // 类型）按符号显示，内部名匿名符号（þobject 等）走成员展开
+        // Go createAnonymousTypeNodeEx shouldEmitTypeOfSymbol：Class 符号
+        // （含匿名类表达式的 þclass 内部名）按符号名显示，其余内部名匿名符号
+        // （对象字面量等）走成员展开
         if let Some(sym) = &t.symbol
-            && !sym.flags.contains(SymbolFlags::TypeLiteral)
             && (!sym.name.starts_with('\u{FE}') || sym.flags.contains(SymbolFlags::Class))
         {
             return self.symbol_type_to_string(t, sym, flags);
@@ -391,11 +390,11 @@ impl Checker {
                 return self.object_literal_to_string(t, structured, flags);
             }
             // 空匿名对象字面量形态（Go createTypeNodeFromObjectType 无成员 TypeLiteral）：
-            // 内部名匿名符号（þobject 等）与 TypeLiteral 符号同按 {} 展示
+            // 内部名匿名符号（þobject 等）同按 {} 展示
             if t
                 .symbol
                 .as_ref()
-                .is_none_or(|s| s.name.starts_with('\u{FE}') || s.flags.contains(SymbolFlags::TypeLiteral))
+                .is_none_or(|s| s.name.starts_with('\u{FE}'))
             {
                 return "{}".to_string();
             }
