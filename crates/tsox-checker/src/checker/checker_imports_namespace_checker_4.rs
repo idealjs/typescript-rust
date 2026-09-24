@@ -5,9 +5,11 @@ use crate::checker::checker_imports_namespace::*;
 impl Checker {
     /// Go resolveESModuleSymbol：namespace import 的模块类型先揭示 export=
     /// 目标（resolveExternalModuleSymbol），目标带调用/构造签名或已有 default
-    /// 时合成 {default: 目标} 包装并克隆符号承接显示身份（class → typeof Foo，
-    /// function 无驻留签名 → 成员展开 { default: () => any; }），否则直接取
-    /// 目标类型（interface 等纯类型目标 → any，值对象/模块 → 原成员表）
+    /// 且模块可合成 default（canHaveSyntheticDefault：.ts 须有 export=，声明
+    /// 文件不得有语法 default/__esModule）时合成 {default: 目标} 包装并克隆符
+    /// 号承接显示身份（class → typeof Foo，function 无驻留签名 → 成员展开
+    /// { default: () => any; }），否则直接取目标类型（interface 等纯类型目
+    /// 标 → any，值对象/模块 → 原成员表）
     pub(crate) fn namespace_import_module_type(&mut self, module_sym: &Arc<Symbol>) -> Arc<Type> {
         let export_equals = module_sym
             .exports
@@ -33,6 +35,9 @@ impl Checker {
             !s.call_signatures().is_empty() || !s.construct_signatures().is_empty()
         });
         if !has_signatures && self.get_property_of_type(&typ, "default").is_none() {
+            return typ;
+        }
+        if !self.module_can_have_synthetic_default(module_sym) {
             return typ;
         }
         let mut wrapper_members = SymbolTable::new();
@@ -269,3 +274,4 @@ enum FileSymbolKind {
     Script,
     Other,
 }
+
