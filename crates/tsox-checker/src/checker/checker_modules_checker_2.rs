@@ -228,36 +228,52 @@ impl Checker {
             };
             let var_name = vd.name.text().to_string();
             let t = self.get_type_of_symbol(&sym);
-            let Some(target) = t.symbol.clone() else {
-                continue;
-            };
-            let Some(target_file) = target
-                .declarations
-                .first()
-                .and_then(|dn| self.get_source_file_of_node(dn))
-            else {
-                continue;
-            };
-            if target_file.file_name == file.file_name
-                || !target_file.file_name.contains("/node_modules/")
-                || imported_files.contains(&target_file.file_name)
-            {
-                continue;
-            }
-
-            if self.symbol_in_ambient_module_named(&target, &spec_names) {
-                continue;
-            }
-
-            let spec = relative_emit_specifier(&file.file_name, &target_file.file_name);
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                Some(file.clone()),
-                vd.name.loc,
-                tsox_core::diagnostics::messages_generated::
-                    THE_INFERRED_TYPE_OF_0_CANNOT_BE_NAMED_WITHOUT_A_REFERENCE_TO_2_FROM_1_THIS_IS_LIKELY_NOT_PORTABLE_A_TYPE_ANNOTATION_IS_NECESSARY,
-                vec![var_name, spec, target.name.clone()],
-            ));
+            let imported_symbol_ids = self.imported_binding_symbol_ids(&file);
+            self.check_type_nameability(
+                &file,
+                &vd.name,
+                &var_name,
+                &t,
+                &imported_files,
+                &spec_names,
+                &imported_symbol_ids,
+            );
         }
+    }
+
+    fn imported_binding_symbol_ids(&self, file: &Arc<SourceFile>) -> Vec<u64> {
+        let NodeData::SourceFile(sfd) = &file.node.data else {
+            return Vec::new();
+        };
+        let mut ids = Vec::new();
+        for st in sfd.statements.iter() {
+            let NodeData::ImportDeclaration(imp) = &st.data else {
+                continue;
+            };
+            let Some(clause) = &imp.import_clause else {
+                continue;
+            };
+            let NodeData::ImportClause(ic) = &clause.data else {
+                continue;
+            };
+            let mut bindings: Vec<Arc<Node>> = Vec::new();
+            if let Some(name) = &ic.name {
+                bindings.push(Arc::clone(name));
+            }
+            if let Some(named) = &ic.named_bindings {
+                if let NodeData::NamedImports(ni) = &named.data {
+                    for el in ni.elements.iter() {
+                        bindings.push(Arc::clone(el));
+                    }
+                }
+            }
+            for b in bindings {
+                if let Some(sym) = self.program.symbol_map().symbol_of(&b).cloned() {
+                    ids.push(sym.id());
+                }
+            }
+        }
+        ids
     }
 
     pub(crate) fn symbol_in_ambient_module_named(

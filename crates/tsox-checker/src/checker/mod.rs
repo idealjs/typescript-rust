@@ -61,6 +61,7 @@ pub(crate) mod checker_classes_accessor_signature_rules;
 pub(crate) mod checker_classes_checker;
 pub(crate) mod checker_classes_checker_2;
 pub(crate) mod checker_declaration_diagnostics;
+pub(crate) mod checker_decl_nameability;
 pub(crate) mod checker_classes_checker_3;
 pub(crate) mod checker_classes_checker_4;
 pub(crate) mod checker_type_predicate_checks;
