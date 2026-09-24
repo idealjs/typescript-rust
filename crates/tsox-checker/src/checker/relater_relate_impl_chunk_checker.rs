@@ -70,7 +70,10 @@ impl Checker {
         if Arc::ptr_eq(source, target) {
             return true;
         }
-        self.is_type_related_to(source, target, RelationKind::Assignable)
+        let was_silent = self.silence_relation_chain();
+        let r = self.is_type_related_to(source, target, RelationKind::Assignable);
+        self.restore_relation_chain(was_silent);
+        r
     }
 
     pub fn is_type_subtype_of(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {

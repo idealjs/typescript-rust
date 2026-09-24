@@ -79,7 +79,7 @@ impl Checker {
             && source_is_indexed_access
             && !t.contains(TypeFlags::IndexedAccess)
         {
-            if let Some(constraint) = self.constraint_of_indexed_access(source) {
+            if let Some(constraint) = self.indexed_access_constraint_for_chain(source) {
                 let was_silent = self.silence_relation_chain();
                 let related = self.is_type_related_to(&constraint, target, relation);
                 self.restore_relation_chain(was_silent);
@@ -490,20 +490,30 @@ impl Checker {
             }
         }
 
-        if s.contains(TypeFlags::TypeParameter)
+        if relation != RelationKind::Identity
+            && s.contains(TypeFlags::TypeParameter)
             && !t.contains(TypeFlags::TypeParameter)
-            && self.relater_chain_active
-            && self.speculation_depth == 0
-            && relation != RelationKind::Identity
             && let Some(constraint) = self.get_constraint_of_type_parameter(source)
             && !constraint.flags.contains(TypeFlags::Unknown)
         {
-            let cs = self.type_to_string(&constraint);
-            let ts = self.type_to_string(target);
-            self.relater_report_error(
-                tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                vec![cs, ts],
-            );
+            let chain_len = self.relater_error_chain.len();
+            if self.is_type_related_to(&constraint, target, relation) {
+                self.relater_error_chain.truncate(chain_len);
+                return true;
+            }
+        }
+
+        if relation != RelationKind::Identity
+            && source_is_indexed_access
+            && !t.contains(TypeFlags::IndexedAccess)
+            && let Some(constraint) = self.indexed_access_constraint_for_chain(source)
+            && !constraint.flags.contains(TypeFlags::Unknown)
+        {
+            let chain_len = self.relater_error_chain.len();
+            if self.is_type_related_to(&constraint, target, relation) {
+                self.relater_error_chain.truncate(chain_len);
+                return true;
+            }
         }
 
         false

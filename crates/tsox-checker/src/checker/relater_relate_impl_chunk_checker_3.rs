@@ -187,4 +187,100 @@ impl Checker {
         }
         Some(self.get_union_type(results))
     }
+
+    pub(crate) fn indexed_access_constraint_for_chain(
+        &mut self,
+        t: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        let ia = match &t.data {
+            TypeData::IndexedAccess(ia) => ia,
+            _ => return None,
+        };
+        let object = ia.object_type.as_ref()?;
+        let index = ia.index_type.as_ref()?;
+        if let Some(ic) = self.chain_simplified_or_constraint(index) {
+            if !Arc::ptr_eq(&ic, index) {
+                if let Some(access) = self.chain_indexed_access(object, &ic) {
+                    return Some(access);
+                }
+            }
+        }
+        if let Some(oc) = self.chain_simplified_or_constraint(object) {
+            if !Arc::ptr_eq(&oc, object) {
+                if let Some(access) = self.chain_indexed_access(&oc, index) {
+                    return Some(access);
+                }
+            }
+        }
+        None
+    }
+
+    fn chain_simplified_or_constraint(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        if t.flags.contains(TypeFlags::Index) || matches!(&t.data, TypeData::Index(_)) {
+            let parts = vec![
+                self.string_type(),
+                self.number_type(),
+                self.es_symbol_type(),
+            ];
+            return Some(self.get_union_type(parts));
+        }
+        if t.flags.contains(TypeFlags::TypeParameter) {
+            return self.get_constraint_of_type_parameter(t);
+        }
+        if t.flags.contains(TypeFlags::IndexedAccess)
+            || matches!(&t.data, TypeData::IndexedAccess(_))
+        {
+            return self.indexed_access_constraint_for_chain(t);
+        }
+        None
+    }
+
+    fn chain_indexed_access(
+        &mut self,
+        object: &Arc<Type>,
+        index: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        if object.flags.intersects(TypeFlags::Any | TypeFlags::Unknown) {
+            return Some(Arc::clone(object));
+        }
+        if index.flags.contains(TypeFlags::Union) {
+            let members = index.types()?.to_vec();
+            let mut parts = Vec::with_capacity(members.len());
+            for m in &members {
+                parts.push(self.chain_indexed_access(object, m)?);
+            }
+            return Some(self.get_union_type(parts));
+        }
+        if object.is_union() {
+            let members = object.types()?.to_vec();
+            let mut parts = Vec::with_capacity(members.len());
+            for m in &members {
+                parts.push(self.chain_indexed_access(m, index)?);
+            }
+            return Some(self.get_union_type(parts));
+        }
+        if self.chain_is_generic_type(object) {
+            return Some(self.deferred_indexed_access(object, index));
+        }
+        self.try_get_indexed_access_type(object, index, AccessFlags::None)
+    }
+
+    fn chain_is_generic_type(&self, t: &Arc<Type>) -> bool {
+        if t.flags
+            .intersects(TypeFlags::TypeParameter | TypeFlags::Index | TypeFlags::IndexedAccess)
+        {
+            return true;
+        }
+        if let TypeData::IndexedAccess(ia) = &t.data {
+            return ia
+                .object_type
+                .as_ref()
+                .is_some_and(|o| self.chain_is_generic_type(o))
+                || ia
+                    .index_type
+                    .as_ref()
+                    .is_some_and(|i| self.chain_is_generic_type(i));
+        }
+        false
+    }
 }
