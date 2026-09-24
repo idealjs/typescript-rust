@@ -84,7 +84,7 @@ impl Parser {
         let saved_yield = self.yield_context;
         let saved_await = self.await_context;
         self.yield_context = false;
-        self.await_context = false;
+        self.await_context = starts_with_async;
         let body = if self.token == SyntaxKind::OpenBraceToken {
             self.parse_block_ex(true)
         } else {

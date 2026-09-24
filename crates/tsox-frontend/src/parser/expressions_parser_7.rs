@@ -25,6 +25,10 @@ impl Parser {
                 let accessor_kind = self.token;
                 self.next_token();
                 let name = self.parse_property_name();
+                let saved_yield = self.yield_context;
+                let saved_await = self.await_context;
+                self.yield_context = false;
+                self.await_context = false;
                 let type_parameters = self.parse_optional_type_parameters();
                 let parameters = self.parse_parameter_list();
                 let type_node = self.parse_optional_return_type();
@@ -35,6 +39,8 @@ impl Parser {
                     self.parse_semicolon();
                     None
                 };
+                self.yield_context = saved_yield;
+                self.await_context = saved_await;
 
                 let end = body
                     .as_ref()
@@ -71,8 +77,14 @@ impl Parser {
             }
         }
 
-        let is_async = self.token == SyntaxKind::AsyncKeyword;
-        if is_async {
+        let is_async = element_modifiers
+            .as_ref()
+            .is_some_and(|m| {
+                m.flags()
+                    .contains(crate::ast::node_flags::ModifierFlags::Async)
+            })
+            || self.token == SyntaxKind::AsyncKeyword;
+        if self.token == SyntaxKind::AsyncKeyword {
             self.next_token();
         }
 
@@ -95,7 +107,7 @@ impl Parser {
             let type_node = self.parse_optional_return_type();
 
             let body = if self.token == SyntaxKind::OpenBraceToken {
-                Some(self.parse_block_ex(true))
+                Some(self.parse_function_block(asterisk_token.is_some(), is_async))
             } else {
                 self.expect(SyntaxKind::OpenBraceToken);
                 None
