@@ -72,7 +72,20 @@ impl Checker {
                 .as_ref()
                 .is_some_and(|f| f.file_name.starts_with("bundled://"))
             {
+                let alias_symbol = node
+                    .name()
+                    .and_then(|n| self.program.symbol_map().symbol_of(&n).cloned())
+                    .or_else(|| self.program.symbol_map().symbol_of(node).cloned());
+                let alias_guard_pushed = alias_symbol.as_ref().is_some_and(|sym| {
+                    self.push_type_resolution(
+                        Arc::as_ptr(sym) as *const tsox_frontend::ast::Symbol,
+                        crate::checker::TypeResolutionProperty::DeclaredType,
+                    )
+                });
                 let _ = self.get_type_from_type_node(&d.type_node);
+                if alias_guard_pushed {
+                    self.pop_type_resolution();
+                }
             }
         }
 

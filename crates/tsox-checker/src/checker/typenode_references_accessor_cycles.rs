@@ -121,8 +121,8 @@ impl Checker {
         t
     }
 
-    /// 索引访问对象位根 TypeReference 指向在途构造中的别名(其 type_node 缓存
-    /// 为 error 预置)判定
+    /// 索引访问对象位根 TypeReference 指向在途构造中的别名(声明型解析在途或
+    /// type_node 缓存为 error 预置)判定
     fn indexed_access_root_in_flight(&self, object_type: &Arc<Node>) -> bool {
         let NodeData::TypeReferenceNode(tr) = &object_type.data else {
             return false;
@@ -133,6 +133,19 @@ impl Checker {
         let Some(sym) = self.resolve_identifier(&tr.type_name) else {
             return false;
         };
+        if sym
+            .declarations
+            .iter()
+            .any(|d| matches!(d.data, NodeData::TypeAliasDeclaration(_)))
+        {
+            let key = Arc::as_ptr(&sym) as *const tsox_frontend::ast::Symbol;
+            if self.is_resolving(
+                key,
+                crate::checker::checker::TypeResolutionProperty::DeclaredType,
+            ) {
+                return true;
+            }
+        }
         let Some(decl) = sym.value_declaration.as_ref() else {
             return false;
         };
