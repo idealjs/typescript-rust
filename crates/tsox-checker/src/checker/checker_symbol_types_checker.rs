@@ -113,6 +113,29 @@ impl Checker {
             return result;
         }
 
+        if symbol.flags.intersects(SymbolFlags::ACCESSOR) {
+            if let Some(t) = self
+                .value_symbol_links
+                .get(symbol)
+                .and_then(|l| l.resolved_type.clone())
+            {
+                return t;
+            }
+            let Some(decl) = symbol
+                .declarations
+                .iter()
+                .find(|d| matches!(d.kind, SyntaxKind::GetAccessor | SyntaxKind::SetAccessor))
+                .cloned()
+            else {
+                return self.get_any_type();
+            };
+            let t = self.resolve_accessor_pair_type(&decl);
+            self.value_symbol_links
+                .get_or_default(symbol)
+                .resolved_type = Some(Arc::clone(&t));
+            return t;
+        }
+
         if symbol.flags.intersects(SymbolFlags::Method)
             && let Some(decl) = symbol
                 .declarations
