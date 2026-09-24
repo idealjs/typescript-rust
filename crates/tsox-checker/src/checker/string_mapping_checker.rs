@@ -56,7 +56,16 @@ fn map_str(kind: StringMappingKind, s: &str) -> String {
         let chars: Vec<char> = s.chars().collect();
         let mut out = String::with_capacity(s.len());
         let mut cased_before = false;
-        for (i, &c) in chars.iter().enumerate() {
+        let mut i = 0;
+        while i < chars.len() {
+            if let Some(len) = lone_surrogate_escape_len(&chars[i..]) {
+                for c in &chars[i..i + len] {
+                    out.push(*c);
+                }
+                i += len;
+                continue;
+            }
+            let c = chars[i];
             if c == 'Σ' && is_final_sigma(&chars, i, cased_before) {
                 out.push('ς');
             } else {
@@ -65,10 +74,41 @@ fn map_str(kind: StringMappingKind, s: &str) -> String {
             if !is_case_ignorable(c) {
                 cased_before = c.is_alphabetic();
             }
+            i += 1;
         }
         return out;
     }
-    s.chars().flat_map(|c| c.to_uppercase()).collect()
+    let mut out = String::with_capacity(s.len());
+    let mut chars: Vec<char> = s.chars().collect();
+    let mut i = 0;
+    while i < chars.len() {
+        if let Some(len) = lone_surrogate_escape_len(&chars[i..]) {
+            for c in &chars[i..i + len] {
+                out.push(*c);
+            }
+            i += len;
+            continue;
+        }
+        out.extend(chars[i].to_uppercase());
+        i += 1;
+    }
+    out
+}
+
+fn lone_surrogate_escape_len(chars: &[char]) -> Option<usize> {
+    if chars.len() < 6 || chars[0] != '\\' || chars[1] != 'u' {
+        return None;
+    }
+    let hex: String = chars[2..6].iter().collect();
+    if !hex.chars().all(|c| c.is_ascii_hexdigit()) {
+        return None;
+    }
+    let n = u32::from_str_radix(&hex, 16).ok()?;
+    if (0xD800..=0xDFFF).contains(&n) {
+        Some(6)
+    } else {
+        None
+    }
 }
 
 pub fn apply_string_mapping(kind: StringMappingKind, s: &str) -> String {
@@ -78,9 +118,12 @@ pub fn apply_string_mapping(kind: StringMappingKind, s: &str) -> String {
             if s.is_empty() {
                 return s.to_string();
             }
-            let mut chars = s.chars();
-            let first = chars.next().expect("non-empty checked");
-            let rest: String = chars.collect();
+            let chars: Vec<char> = s.chars().collect();
+            if let Some(len) = lone_surrogate_escape_len(&chars) {
+                return chars.into_iter().collect();
+            }
+            let first = chars[0];
+            let rest: String = chars[1..].iter().collect();
             let mapped_first = if first.is_ascii() {
                 map_ascii_char(kind, first).to_string()
             } else {
