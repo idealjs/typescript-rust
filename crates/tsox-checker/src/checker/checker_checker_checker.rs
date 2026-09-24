@@ -117,6 +117,7 @@ pub struct Checker {
     pub property_lookup_skips_index_synthesis: bool,
     pub relater_depth: u32,
     pub deferred_constraint_depth: u32,
+    pub deferred_conditional_root_stack: Vec<u64>,
     pub relation_count: u32,
     pub relater_overflow: bool,
     pub relater_intersection_target_depth: u32,

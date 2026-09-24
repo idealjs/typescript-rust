@@ -166,6 +166,7 @@ impl Checker {
             property_lookup_skips_index_synthesis: false,
             relater_depth: 0,
             deferred_constraint_depth: 0,
+            deferred_conditional_root_stack: Vec::new(),
             relation_count: 0,
             relater_overflow: false,
             new_call_fallback_signature: false,

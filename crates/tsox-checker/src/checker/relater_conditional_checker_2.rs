@@ -184,6 +184,17 @@ impl Checker {
         self.conditional_fallback_related_probing(source, target, relation)
     }
 
+    fn conditional_root_node_id(t: &Arc<Type>) -> Option<u64> {
+        match &t.data {
+            TypeData::Conditional(tct) => tct
+                .root
+                .as_ref()
+                .and_then(|r| r.node.as_ref())
+                .map(|n| n.id()),
+            _ => None,
+        }
+    }
+
     fn conditional_fallback_related_probing(
         &mut self,
         source: &Arc<Type>,
@@ -192,13 +203,24 @@ impl Checker {
     ) -> bool {
         if source.flags.contains(TypeFlags::Conditional)
             && self.deferred_constraint_depth < 100
-            && let Some(constraint) = self.deferred_default_constraint_of_conditional(source)
         {
-            self.deferred_constraint_depth += 1;
-            let r = self.is_type_related_to(&constraint, target, relation);
-            self.deferred_constraint_depth -= 1;
-            if r {
-                return true;
+            if let Some(root_id) = Self::conditional_root_node_id(source) {
+                if self.deferred_conditional_root_stack.contains(&root_id) {
+                    return relation == RelationKind::Comparable;
+                }
+                self.deferred_conditional_root_stack.push(root_id);
+                let recursed = self
+                    .deferred_default_constraint_of_conditional(source)
+                    .is_some_and(|constraint| {
+                        self.deferred_constraint_depth += 1;
+                        let r = self.is_type_related_to(&constraint, target, relation);
+                        self.deferred_constraint_depth -= 1;
+                        r
+                    });
+                self.deferred_conditional_root_stack.pop();
+                if recursed {
+                    return true;
+                }
             }
         }
 
