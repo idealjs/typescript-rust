@@ -506,11 +506,28 @@ fn shallow_type_eq(a: &Type, b: &Type) -> bool {
     match (&a.data, &b.data) {
         (crate::checker::types::TypeData::Object(oa), crate::checker::types::TypeData::Object(ob)) => {
             // 无符号的匿名结构对象（映射应用/合成结果）无引用恒等可依，
-            // 仅 id 恒等视为同一型；具符号+实参的引用型按符号+实参判定
+            // 仅 id 恒等视为同一型；具符号+实参的引用型按符号+实参判定，
+            // 映射应用型的实参在 alias 上，须一并比较（同符号不同实参的
+            // Partial<{a}> 与 Partial<{b}> 不得去重）
             if a.symbol.is_none() {
                 return false;
             }
-            oa.type_arguments.len() == ob.type_arguments.len()
+            let alias_eq = match (&a.alias, &b.alias) {
+                (None, None) => true,
+                (Some(x), Some(y)) => {
+                    x.symbol.as_ref().map(|s| Arc::as_ptr(s))
+                        == y.symbol.as_ref().map(|s| Arc::as_ptr(s))
+                        && x.type_arguments.len() == y.type_arguments.len()
+                        && x
+                            .type_arguments
+                            .iter()
+                            .zip(y.type_arguments.iter())
+                            .all(|(u, v)| u.id == v.id)
+                }
+                _ => false,
+            };
+            alias_eq
+                && oa.type_arguments.len() == ob.type_arguments.len()
                 && oa
                     .type_arguments
                     .iter()

@@ -346,7 +346,7 @@ impl Checker {
     }
 }
 
-fn substitution_base_or_self(t: &Arc<Type>) -> Arc<Type> {
+pub(crate) fn substitution_base_or_self(t: &Arc<Type>) -> Arc<Type> {
     if t.flags.contains(TypeFlags::Substitution)
         && let TypeData::Substitution(sub) = &t.data
         && let Some(base) = &sub.base_type

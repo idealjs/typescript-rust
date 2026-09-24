@@ -39,6 +39,14 @@ impl Checker {
         let saved_chain = std::mem::take(&mut self.relater_error_chain);
         let was_active = self.relater_chain_active;
         self.relater_chain_active = true;
+        if self.weak_type_precheck_fires(source, target, relation) {
+            return self.emit_chain_diagnostic_and_restore(
+                error_node,
+                diagnostic_output,
+                was_active,
+                saved_chain,
+            );
+        }
         let ok = self.is_type_related_to(source, target, relation);
         if ok {
             self.relater_chain_active = was_active;
@@ -197,6 +205,26 @@ impl Checker {
             self.relater_error_chain = saved_chain;
             return false;
         };
+        self.emit_chain_diagnostic_and_restore(
+            Some(error_node),
+            diagnostic_output,
+            was_active,
+            saved_chain,
+        )
+    }
+
+    fn emit_chain_diagnostic_and_restore(
+        &mut self,
+        error_node: Option<&Arc<tsox_frontend::ast::Node>>,
+        mut diagnostic_output: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
+        was_active: bool,
+        saved_chain: Vec<crate::checker::relater_relation::RelaterChainEntry>,
+    ) -> bool {
+        let Some(error_node) = error_node else {
+            self.relater_chain_active = was_active;
+            self.relater_error_chain = saved_chain;
+            return false;
+        };
         let (pos_node, file) = match self.relater_excess_error_node.clone() {
             Some(n) => (
                 n.loc,
@@ -242,6 +270,109 @@ impl Checker {
         self.relater_chain_active = was_active;
         self.relater_error_chain = saved_chain;
         false
+    }
+
+    fn weak_type_precheck_fires(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        if matches!(relation, RelationKind::Comparable | RelationKind::Identity) {
+            return false;
+        }
+        let source = if crate::checker::is_fresh_literal_type(source) {
+            self.get_regular_type_of_literal_type(source)
+        } else {
+            Arc::clone(source)
+        };
+        let target = if crate::checker::is_fresh_literal_type(target) {
+            self.get_regular_type_of_literal_type(target)
+        } else {
+            Arc::clone(target)
+        };
+        let source =
+            crate::checker::relater_relate_impl_chunk_checker::substitution_base_or_self(&source);
+        let target =
+            crate::checker::relater_relate_impl_chunk_checker::substitution_base_or_self(&target);
+        let source = self.get_simplified_type_for_relation(&source, false);
+        let target = self.get_simplified_type_for_relation(&target, true);
+
+        if crate::checker::is_object_literal_type(&source)
+            && source.object_flags.contains(crate::checker::types::ObjectFlags::FreshLiteral)
+        {
+            let chain_len = self.relater_error_chain.len();
+            let excess = self.has_excess_properties(&source, &target, relation);
+            self.relater_error_chain.truncate(chain_len);
+            if excess {
+                return false;
+            }
+        }
+
+        let source_is_global_object = source
+            .symbol
+            .as_ref()
+            .is_some_and(|sym| self.globals.get("Object").is_some_and(|g| Arc::ptr_eq(g, sym)));
+        if source_is_global_object
+            || !source.flags.intersects(
+                crate::checker::types_type_id::TYPE_FLAGS_PRIMITIVE
+                    | TypeFlags::Object
+                    | TypeFlags::Intersection,
+            )
+            || !target
+                .flags
+                .intersects(TypeFlags::Object | TypeFlags::Intersection)
+            || !self.is_weak_type(&target)
+        {
+            return false;
+        }
+        if self.get_properties_of_type(&source).is_empty()
+            && !self.type_has_call_or_construct_signatures(&source)
+        {
+            return false;
+        }
+        if self.has_common_properties(&source, &target, false) {
+            return false;
+        }
+
+        let source_str = self.type_to_string(&source);
+        let target_str = self.type_to_string(&target);
+        let chain_len = self.relater_error_chain.len();
+        let saved_excess_node = self.relater_excess_error_node.clone();
+        let first_call_returns = self
+            .get_signatures_of_type(&source, crate::checker::types::SignatureKind::Call)
+            .first()
+            .cloned();
+        let first_construct_returns = self
+            .get_signatures_of_type(&source, crate::checker::types::SignatureKind::Construct)
+            .first()
+            .cloned();
+        let mut did_you_mean = false;
+        for sig in [first_call_returns, first_construct_returns].into_iter().flatten() {
+            if let Some(rt) = self.get_return_type_of_signature(&sig)
+                && self.is_type_related_to(&rt, &target, relation)
+            {
+                did_you_mean = true;
+            }
+            self.relater_error_chain.truncate(chain_len);
+            if did_you_mean {
+                break;
+            }
+        }
+        self.relater_excess_error_node = saved_excess_node;
+        use tsox_core::diagnostics::messages_generated as msg;
+        if did_you_mean {
+            self.relater_report_error(
+                msg::VALUE_OF_TYPE_0_HAS_NO_PROPERTIES_IN_COMMON_WITH_TYPE_1_DID_YOU_MEAN_TO_CALL_IT,
+                vec![source_str, target_str],
+            );
+        } else {
+            self.relater_report_error(
+                msg::TYPE_0_HAS_NO_PROPERTIES_IN_COMMON_WITH_TYPE_1,
+                vec![source_str, target_str],
+            );
+        }
+        true
     }
 
     // Go isRelatedToEx 前段：definitely non-nullable 源 + union 目标仅含一个
