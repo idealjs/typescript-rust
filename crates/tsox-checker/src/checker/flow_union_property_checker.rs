@@ -209,7 +209,7 @@ impl Checker {
         crate::checker::is_unit_type(t)
     }
 
-    fn is_pattern_literal_type(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_pattern_literal_type(&self, t: &Arc<Type>) -> bool {
         if let TypeData::TemplateLiteral(data) = &t.data {
             return data.types.iter().all(|p| self.is_pattern_literal_placeholder_type(p));
         }

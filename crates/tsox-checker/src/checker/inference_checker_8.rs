@@ -659,6 +659,29 @@ impl Checker {
         false
     }
 
+    pub(crate) fn is_no_infer_target_type(&self, t: &Arc<Type>) -> bool {
+        if t.flags.intersects(TypeFlags::Union | TypeFlags::Intersection)
+            && let Some(types) = t.types()
+        {
+            return types.iter().any(|m| self.is_no_infer_target_type(m));
+        }
+        if t.flags.contains(TypeFlags::Substitution) {
+            return !self.is_no_infer_type(t)
+                && match &t.data {
+                    TypeData::Substitution(sub) => sub
+                        .base_type
+                        .as_ref()
+                        .is_some_and(|b| self.is_no_infer_target_type(b)),
+                    _ => false,
+                };
+        }
+        if t.flags.contains(TypeFlags::Object) {
+            return !self.is_empty_anonymous_object_type(t);
+        }
+        t.flags.intersects(TYPE_FLAGS_INSTANTIABLE & !TypeFlags::Substitution)
+            && !self.is_pattern_literal_type(t)
+    }
+
     pub(crate) fn is_from_inference_blocked_source(&self, _source: &Type) -> bool {
         false
     }
