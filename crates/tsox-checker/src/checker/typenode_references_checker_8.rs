@@ -18,18 +18,7 @@ impl Checker {
         {
             return cached;
         }
-        if !self.push_type_resolution(
-            Arc::as_ptr(symbol) as *const Symbol,
-            crate::checker::TypeResolutionProperty::Type,
-        ) {
-            return self.error_type();
-        }
-        let result = self.resolve_namespace_type_uncached(symbol);
-        self.pop_type_resolution();
-        result
-    }
 
-    fn resolve_namespace_type_uncached(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
         let mut members: Vec<(String, Arc<Symbol>)> = symbol
             .exports
             .iter()
@@ -260,14 +249,12 @@ impl Checker {
             };
             symbol_table.insert(name.clone(), Arc::clone(&prop_sym));
             // Go setStructuredTypeMembers→getNamedMembers→symbolIsValue：
-            // properties 列表只收值成员；别名揭示落点无值义（Go 侧回落
-            // unknownSymbol，Property|Variable 属 Value）时按值成员计
+            // properties 列表只收值成员（纯类型 namespace/接口/类型别名不入列），
+            // members 表保持全量供按名查找
             let is_value = member_sym.flags.intersects(SymbolFlags::VALUE)
                 || (member_sym.flags.contains(SymbolFlags::Alias) && {
                     let base = self.resolve_alias_base(Arc::clone(member_sym));
                     base.flags.intersects(SymbolFlags::VALUE)
-                        || base.flags == SymbolFlags::Alias
-                        || base.flags == SymbolFlags::Alias.union(SymbolFlags::Assignment)
                 });
             if is_value {
                 props.push(prop_sym);
@@ -288,7 +275,6 @@ impl Checker {
                 ..Default::default()
             }),
         });
-        let merged_with_type_meaning = symbol.flags.contains(SymbolFlags::Interface);
         if merged_with_type_meaning {
             self.merged_ns_instance_type_cache
                 .insert(symbol.id(), Arc::clone(&result));
