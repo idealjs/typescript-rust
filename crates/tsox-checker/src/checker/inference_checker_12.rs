@@ -184,9 +184,9 @@ impl Checker {
             SyntaxKind::EqualsToken
             | SyntaxKind::AmpersandAmpersandEqualsToken
             | SyntaxKind::BarBarEqualsToken
-            | SyntaxKind::QuestionQuestionEqualsToken => self
-                .assignment_target_type(&binary.left)
-                .or_else(|| Some(self.get_type_of_node(&binary.left))),
+            | SyntaxKind::QuestionQuestionEqualsToken => {
+                self.get_contextual_type_for_assignment_expression(&parent)
+            }
             SyntaxKind::BarBarToken | SyntaxKind::QuestionQuestionToken => {
                 let binary_ctx = self.get_contextual_type(&parent, _context_flags);
                 if Arc::ptr_eq(node, &binary.right) && binary_ctx.is_none() {
@@ -199,6 +199,109 @@ impl Checker {
             }
             _ => None,
         }
+    }
+
+    fn assignment_fallback_target_type(&mut self, left: &Arc<Node>) -> Option<Arc<Type>> {
+        self.assignment_target_type(left)
+            .or_else(|| Some(self.get_type_of_node(left)))
+    }
+
+    fn binary_declares_assignment_target(
+        &self,
+        bin_node: &Arc<Node>,
+        left: &Arc<Node>,
+    ) -> bool {
+        use tsox_frontend::ast::NodeData;
+
+        let (base, member): (&Arc<Node>, Option<&str>) = match &left.data {
+            NodeData::PropertyAccessExpression(pa) => (&pa.expression, Some(pa.name.text())),
+            NodeData::ElementAccessExpression(ea) => {
+                let name = match &ea.argument_expression.data {
+                    NodeData::StringLiteral(s) => Some(s.text.as_str()),
+                    NodeData::NumericLiteral(n) => Some(n.text.as_str()),
+                    _ => None,
+                };
+                (&ea.expression, name)
+            }
+            _ => return false,
+        };
+        if !matches!(&base.data, NodeData::Identifier(_)) {
+            return false;
+        }
+        let Some(sym) = self.resolve_identifier(base) else {
+            return false;
+        };
+        let entry = match member {
+            Some(name) => sym.exports.get(name),
+            None => sym.exports.get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_ASSIGNMENT),
+        };
+        entry.is_some_and(|s| s.declarations.iter().any(|d| Arc::ptr_eq(d, bin_node)))
+    }
+
+    pub(crate) fn get_contextual_type_for_assignment_expression(
+        &mut self,
+        binary_node: &Arc<Node>,
+    ) -> Option<Arc<Type>> {
+        use tsox_frontend::ast::NodeData;
+
+        let NodeData::BinaryExpression(bin) = &binary_node.data else {
+            return self.assignment_fallback_target_type(&binary_node);
+        };
+        let left = &bin.left;
+
+        let (base, member_node): (&Arc<Node>, Option<&Arc<Node>>) = match &left.data {
+            NodeData::PropertyAccessExpression(pa) => (&pa.expression, Some(&pa.name)),
+            NodeData::ElementAccessExpression(ea) => (&ea.expression, Some(&ea.argument_expression)),
+            _ => return self.assignment_fallback_target_type(left),
+        };
+
+        if let NodeData::Identifier(_) = &base.data {
+            let Some(resolved) = self.resolve_identifier(base) else {
+                return self.assignment_fallback_target_type(left);
+            };
+            let sym = self.get_export_symbol_of_value_symbol_if_exported(&resolved);
+            if sym.flags.contains(SymbolFlags::ModuleExports) {
+                return None;
+            }
+            if self.binary_declares_assignment_target(binary_node, left) {
+                if let Some(vd) = sym.value_declaration.as_ref() {
+                    if let NodeData::VariableDeclaration(vdd) = &vd.data {
+                        if let Some(type_node) = vdd.type_node.as_ref() {
+                            let annotated = self.get_type_from_type_node(type_node);
+                            return match (&left.data, member_node) {
+                                (NodeData::PropertyAccessExpression(pa), _) => self
+                                    .get_type_of_property_of_contextual_type(
+                                        &annotated,
+                                        pa.name.text(),
+                                    ),
+                                (NodeData::ElementAccessExpression(_), Some(arg)) => {
+                                    let name_type = self.get_type_of_node(arg);
+                                    if crate::checker::utilities_token_is_identifier_or_keyword::is_type_usable_as_property_name(&name_type) {
+                                        let name = crate::checker::utilities_token_is_identifier_or_keyword::get_property_name_from_type(&name_type);
+                                        self.get_type_of_property_of_contextual_type(&annotated, &name)
+                                    } else {
+                                        Some(self.get_type_of_node(left))
+                                    }
+                                }
+                                _ => None,
+                            };
+                        }
+                    }
+                }
+                return None;
+            }
+            return self.assignment_fallback_target_type(left);
+        }
+
+        if matches!(
+            &base.data,
+            NodeData::PropertyAccessExpression(_) | NodeData::ElementAccessExpression(_)
+        ) && self.binary_declares_assignment_target(binary_node, left)
+        {
+            return None;
+        }
+
+        self.assignment_fallback_target_type(left)
     }
 
     pub(crate) fn get_contextual_type_for_object_literal_element(
