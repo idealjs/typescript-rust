@@ -253,6 +253,10 @@ pub fn compare_union_members(t1: &Type, t2: &Type) -> std::cmp::Ordering {
         .cmp(&get_sort_order_flags(t2))
         .then_with(|| compare_type_names(t1, t2))
         .then_with(|| {
+            let structural = compare_union_member_structure(t1, t2);
+            if structural != std::cmp::Ordering::Equal {
+                return structural;
+            }
             const RESIDENT_LITERALS: TypeFlags = TypeFlags::from_bits_truncate(
                 TypeFlags::StringLiteral.bits()
                     | TypeFlags::NumberLiteral.bits()
@@ -266,6 +270,61 @@ pub fn compare_union_members(t1: &Type, t2: &Type) -> std::cmp::Ordering {
                 t1.id.cmp(&t2.id)
             }
         })
+}
+
+fn compare_union_member_structure(t1: &Type, t2: &Type) -> std::cmp::Ordering {
+    if t1.id == t2.id {
+        return std::cmp::Ordering::Equal;
+    }
+    match (&t1.data, &t2.data) {
+        (TypeData::Substitution(s1), TypeData::Substitution(s2)) => {
+            compare_sub_terms(&s1.base_type, &s2.base_type)
+                .then_with(|| compare_sub_terms(&s1.constraint, &s2.constraint))
+        }
+        _ if t1.flags.contains(TypeFlags::Object) && t2.flags.contains(TypeFlags::Object) => {
+            match instantiated_signature_first(t1, t2) {
+                Some(ordering) => ordering,
+                None => std::cmp::Ordering::Equal,
+            }
+        }
+        _ => std::cmp::Ordering::Equal,
+    }
+}
+
+fn compare_sub_terms(
+    s1: &Option<Arc<Type>>,
+    s2: &Option<Arc<Type>>,
+) -> std::cmp::Ordering {
+    match (s1, s2) {
+        (Some(a), Some(b)) => compare_union_members(a, b),
+        (None, None) => std::cmp::Ordering::Equal,
+        (None, Some(_)) => std::cmp::Ordering::Less,
+        (Some(_), None) => std::cmp::Ordering::Greater,
+    }
+}
+
+fn instantiated_signature_first(t1: &Type, t2: &Type) -> Option<std::cmp::Ordering> {
+    let product_with_sigs = |t: &Type| {
+        let is_product = t.object_flags.contains(ObjectFlags::Instantiated)
+            || matches!(&t.data, TypeData::Object(o) if o.mapper.is_some());
+        is_product
+            && t.as_structured()
+                .is_some_and(|s| !s.signatures.is_empty())
+    };
+    let plain_without_sigs = |t: &Type| {
+        let is_product = t.object_flags.contains(ObjectFlags::Instantiated)
+            || matches!(&t.data, TypeData::Object(o) if o.mapper.is_some());
+        !is_product
+            && t.as_structured()
+                .is_none_or(|s| s.signatures.is_empty())
+    };
+    if product_with_sigs(t1) && plain_without_sigs(t2) {
+        Some(std::cmp::Ordering::Less)
+    } else if product_with_sigs(t2) && plain_without_sigs(t1) {
+        Some(std::cmp::Ordering::Greater)
+    } else {
+        None
+    }
 }
 
 pub fn compare_types(t1: &Type, t2: &Type) -> std::cmp::Ordering {

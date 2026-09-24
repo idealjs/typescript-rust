@@ -355,7 +355,14 @@ impl Checker {
                 return shell;
             }
             let is_construct = call_signature_count == 0;
-            return self.create_function_or_constructor_type(new_sigs, is_construct);
+            let instantiated = self.create_function_or_constructor_type(new_sigs, is_construct);
+            {
+                let t_mut = Arc::as_ptr(&instantiated) as *mut Type;
+                unsafe {
+                    (*t_mut).object_flags |= ObjectFlags::Instantiated;
+                }
+            }
+            return instantiated;
         }
 
         // Go instantiateType→getObjectTypeInstantiation：匿名对象类型的成员/索引签名按需实例化
