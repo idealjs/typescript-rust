@@ -19,6 +19,10 @@ impl Checker {
                         segments.push(Arc::clone(&q.right));
                         leftmost = &q.left;
                     }
+                    NodeData::PropertyAccessExpression(pa) => {
+                        segments.push(Arc::clone(&pa.name));
+                        leftmost = &pa.expression;
+                    }
                     _ => break,
                 }
             }

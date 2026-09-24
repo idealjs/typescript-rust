@@ -129,7 +129,57 @@ impl Checker {
             else {
                 return self.get_any_type();
             };
+            let key = Arc::as_ptr(symbol) as *const Symbol;
+            if !self.push_type_resolution(key, crate::checker::TypeResolutionProperty::Type) {
+                return self.error_type();
+            }
             let t = self.resolve_accessor_pair_type(&decl);
+            if !self.pop_type_resolution() {
+                let annotated = symbol.declarations.iter().find_map(|d| match &d.data {
+                    tsox_frontend::ast::NodeData::GetAccessorDeclaration(g) => {
+                        g.type_node.as_ref().map(|_| Arc::clone(&g.name))
+                    }
+                    tsox_frontend::ast::NodeData::SetAccessorDeclaration(s) => s
+                        .parameters
+                        .iter()
+                        .find_map(|p| match &p.data {
+                            tsox_frontend::ast::NodeData::ParameterDeclaration(pd)
+                                if pd.type_node.is_some() =>
+                            {
+                                Some(Arc::clone(&pd.name))
+                            }
+                            _ => None,
+                        }),
+                    _ => None,
+                });
+                if let Some(name) = annotated {
+                    let file = self
+                        .get_source_file_of_node(&name)
+                        .or_else(|| self.current_file.clone());
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        name.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_IS_REFERENCED_DIRECTLY_OR_INDIRECTLY_IN_ITS_OWN_TYPE_ANNOTATION,
+                        vec![symbol.name.clone()],
+                    ));
+                } else if decl.kind == SyntaxKind::GetAccessor && self.no_implicit_any {
+                    let tsox_frontend::ast::NodeData::GetAccessorDeclaration(g) = &decl.data else {
+                        return self.get_any_type();
+                    };
+                    let file = self
+                        .get_source_file_of_node(&decl)
+                        .or_else(|| self.current_file.clone());
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        g.name.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_IMPLICITLY_HAS_RETURN_TYPE_ANY_BECAUSE_IT_DOES_NOT_HAVE_A_RETURN_TYPE_ANNOTATION_AND_IS_REFERENCED_DIRECTLY_OR_INDIRECTLY_IN_ONE_OF_ITS_RETURN_EXPRESSIONS,
+                        vec![symbol.name.clone()],
+                    ));
+                }
+                return self.get_any_type();
+            }
             self.value_symbol_links
                 .get_or_default(symbol)
                 .resolved_type = Some(Arc::clone(&t));
