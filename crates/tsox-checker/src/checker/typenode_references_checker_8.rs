@@ -18,15 +18,7 @@ impl Checker {
         {
             return cached;
         }
-        if !self.push_type_resolution(
-            Arc::as_ptr(symbol) as *const Symbol,
-            crate::checker::TypeResolutionProperty::Type,
-        ) {
-            return self.error_type();
-        }
-        let result = self.resolve_namespace_type_uncached(symbol);
-        self.pop_type_resolution();
-        result
+        self.resolve_namespace_type_uncached(symbol)
     }
 
     fn resolve_namespace_type_uncached(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
