@@ -68,7 +68,7 @@ impl Checker {
         }
 
         if let Some(source_return) = self.get_return_type_of_signature(source) {
-            if type_contains_type_parameter(&source_return) {
+            if self.could_contain_type_variables(&source_return) {
                 if let Some(contextual_return) = self.get_return_type_of_signature(contextual) {
                     self.infer_types(
                         &mut context.inferences,
