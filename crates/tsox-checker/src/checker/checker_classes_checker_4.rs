@@ -266,6 +266,9 @@ impl Checker {
                     }
                 }
             }
+            SyntaxKind::TypePredicate => {
+                self.check_type_predicate(tn);
+            }
             _ => {}
         }
     }

@@ -13,6 +13,7 @@ pub use crate::checker::checker_classes_checker_2::*;
 pub use crate::checker::checker_classes_checker_3::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_classes_checker_4::*;
+pub use crate::checker::checker_type_predicate_checks::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_classes_checker_5::*;
 
