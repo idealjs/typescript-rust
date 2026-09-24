@@ -22,7 +22,6 @@ impl Checker {
             expanding_flags: ExpandingFlags::None,
             propagation_type: None,
             visited: HashMap::new(),
-            once_visited: HashMap::new(),
             source_stack: Vec::new(),
             target_stack: Vec::new(),
             depth: 0,
@@ -47,12 +46,6 @@ impl Checker {
         target: &Arc<Type>,
         action: impl FnOnce(&mut Self, &mut InferenceState, &Arc<Type>, &Arc<Type>),
     ) {
-        let key = (source.id, target.id);
-        if let Some(&status) = state.once_visited.get(&key) {
-            state.inference_priority = Self::min_priority(state.inference_priority, status);
-            return;
-        }
-        state.once_visited.insert(key, InferencePriority::Circularity);
         let save_priority = state.inference_priority;
         let save_expanding = state.expanding_flags;
         state.inference_priority = InferencePriority::MaxValue;
@@ -72,7 +65,6 @@ impl Checker {
         state.target_stack.pop();
         state.source_stack.pop();
         state.expanding_flags = save_expanding;
-        state.once_visited.insert(key, state.inference_priority);
         state.inference_priority = Self::min_priority(state.inference_priority, save_priority);
     }
 
