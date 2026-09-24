@@ -331,7 +331,13 @@ impl Checker {
         {
             return false;
         }
-        if self.has_common_properties(&source, &target, false) {
+        if self.has_common_properties(
+            &source,
+            &target,
+            source
+                .object_flags
+                .contains(crate::checker::types::ObjectFlags::JsxAttributes),
+        ) {
             return false;
         }
 
