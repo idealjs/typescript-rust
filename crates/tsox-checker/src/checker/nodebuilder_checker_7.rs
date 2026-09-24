@@ -376,12 +376,17 @@ impl Checker {
         // 对象字面量）一律结构展开成员表；其余具名符号（含 Class/接口式库
         // 类型）按符号显示，内部名匿名符号（þobject 等）走成员展开。
         // 函数符号的 Anonymous 类型（expando face，Go getTypeOfFuncClassEnumModule
-        // 的 newObjectType(Anonymous, symbol)）同 Go 一律结构展开
+        // 的 newObjectType(Anonymous, symbol)）同 Go 结构展开；但 Go
+        // shouldEmitTypeOfSymbol 的 nonFunctionResult（Class/Enum/ValueModule
+        // 合并符号，如 fundule function+namespace、function+class merge）
+        // 优先走 typeof X 符号显示
         let fn_symbol_anonymous = t.object_flags.contains(ObjectFlags::Anonymous)
-            && t
-                .symbol
-                .as_ref()
-                .is_some_and(|s| s.flags.contains(SymbolFlags::Function));
+            && t.symbol.as_ref().is_some_and(|s| {
+                s.flags.contains(SymbolFlags::Function)
+                    && !s
+                        .flags
+                        .intersects(SymbolFlags::Class | SymbolFlags::ENUM | SymbolFlags::ValueModule)
+            });
         if let Some(sym) = &t.symbol
             && !fn_symbol_anonymous
             && !sym.flags.contains(SymbolFlags::TypeLiteral)
