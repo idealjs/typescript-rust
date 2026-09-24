@@ -151,7 +151,13 @@ impl Checker {
                 continue;
             }
             if let Some(pred_type) = &predicate.t {
-                return self.intersect_or_narrow(type_, pred_type);
+                let instantiated_pred = if sig.type_parameters.is_empty() {
+                    Arc::clone(pred_type)
+                } else {
+                    let inferred = self.infer_call_type_arguments(call_expr, sig, &call.arguments.nodes);
+                    self.substitute_infer_type_parameters(pred_type, &sig.type_parameters, &inferred)
+                };
+                return self.intersect_or_narrow(type_, &instantiated_pred);
             }
 
             return self.remove_flags_from_union(type_, TYPE_FLAGS_NULLABLE);
