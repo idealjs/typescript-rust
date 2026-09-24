@@ -371,6 +371,15 @@ impl Checker {
             let member_name = name.clone();
             let rhs_type = self.with_declaring_file_context(&node, |c| {
                 let t = c.get_type_of_node(&bin.right);
+                let ctx = c.get_contextual_type(&bin.right, crate::checker::types::ContextFlags::None);
+                let literal_of_ctx =
+                    ctx.as_ref().is_some_and(|cx| c.is_literal_of_contextual_type(&t, cx));
+                let t = if literal_of_ctx {
+                    t
+                } else {
+                    c.get_widened_literal_type(&t)
+                };
+                let t = c.get_regular_type_of_literal_type(&t);
                 let empty_array_elem = c
                     .get_element_type_of_array_type(&t)
                     .is_some_and(|el| c.is_empty_literal_type(&el));
