@@ -252,6 +252,20 @@ pub fn compare_union_members(t1: &Type, t2: &Type) -> std::cmp::Ordering {
     get_sort_order_flags(t1)
         .cmp(&get_sort_order_flags(t2))
         .then_with(|| compare_type_names(t1, t2))
+        .then_with(|| {
+            const RESIDENT_LITERALS: TypeFlags = TypeFlags::from_bits_truncate(
+                TypeFlags::StringLiteral.bits()
+                    | TypeFlags::NumberLiteral.bits()
+                    | TypeFlags::BigIntLiteral.bits()
+                    | TypeFlags::BooleanLiteral.bits()
+                    | TypeFlags::UniqueESSymbol.bits(),
+            );
+            if t1.flags.intersects(RESIDENT_LITERALS) || t2.flags.intersects(RESIDENT_LITERALS) {
+                std::cmp::Ordering::Equal
+            } else {
+                t1.id.cmp(&t2.id)
+            }
+        })
 }
 
 pub fn compare_types(t1: &Type, t2: &Type) -> std::cmp::Ordering {
