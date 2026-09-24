@@ -407,12 +407,6 @@ impl Checker {
             }
             return t;
         }
-        if symbol
-            .flags
-            .intersects(SymbolFlags::ValueModule | SymbolFlags::NamespaceModule)
-        {
-            return self.get_type_of_symbol(&symbol);
-        }
         self.error_type()
     }
 
