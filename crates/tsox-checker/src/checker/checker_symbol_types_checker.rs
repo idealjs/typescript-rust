@@ -358,6 +358,7 @@ impl Checker {
         if entries.is_empty() {
             return base;
         }
+        entries.sort_by_key(|(_, node)| node.loc.pos());
         let mut table = tsox_frontend::ast::SymbolTable::new();
         let mut props: Vec<Arc<tsox_frontend::ast::Symbol>> = Vec::new();
         for (name, node) in entries {
@@ -367,14 +368,27 @@ impl Checker {
             let tsox_frontend::ast::NodeData::BinaryExpression(bin) = &node.data else {
                 continue;
             };
+            let member_name = name.clone();
             let rhs_type = self.with_declaring_file_context(&node, |c| {
                 let t = c.get_type_of_node(&bin.right);
-                c.get_regular_type_of_literal_type(&t)
+                let empty_array_elem = c
+                    .get_element_type_of_array_type(&t)
+                    .is_some_and(|el| c.is_empty_literal_type(&el));
+                if empty_array_elem && !c.expando_parent_has_type_annotation(symbol) {
+                    c.report_expando_implicit_any_array(&node, &member_name);
+                    c.create_array_type(c.get_any_type())
+                } else {
+                    c.get_widened_type(&t)
+                }
             });
             let prop = Arc::new(tsox_frontend::ast::Symbol::new(
                 SymbolFlags::Property,
                 name.clone(),
             ));
+            let prop_mut = Arc::as_ptr(&prop) as *mut tsox_frontend::ast::Symbol;
+            unsafe {
+                (*prop_mut).declarations.push(Arc::clone(&node));
+            }
             self.value_symbol_links.insert(
                 &prop,
                 ValueSymbolLinks {
@@ -388,6 +402,38 @@ impl Checker {
         if props.is_empty() {
             return base;
         }
+        let face_structured = |members, props, sigs, count, index_infos| StructuredTypeData {
+            members,
+            properties: props,
+            signatures: sigs,
+            call_signature_count: count,
+            index_infos,
+            ..Default::default()
+        };
+        if base.flags.contains(TypeFlags::Object)
+            && let Some(base_obj) = base.as_object()
+        {
+            let structured = face_structured(
+                table,
+                props,
+                base_obj.structured.signatures.clone(),
+                base_obj.structured.call_signature_count,
+                base_obj.structured.index_infos.clone(),
+            );
+            return Arc::new(Type {
+                flags: TypeFlags::Object,
+                object_flags: ObjectFlags::Anonymous,
+                id: crate::checker::types::next_type_id(),
+                symbol: Some(Arc::clone(symbol)),
+                alias: None,
+                data: TypeData::Object(ObjectTypeData {
+                    structured,
+                    target: None,
+                    mapper: None,
+                    type_arguments: Vec::new(),
+                }),
+            });
+        }
         let face = Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
@@ -395,12 +441,16 @@ impl Checker {
             symbol: Some(Arc::clone(symbol)),
             alias: None,
             data: TypeData::Object(ObjectTypeData {
-                structured: StructuredTypeData {
-                    members: table,
-                    properties: props,
-                    ..Default::default()
-                },
-                ..Default::default()
+                structured: face_structured(
+                    table,
+                    props,
+                    Vec::new(),
+                    0,
+                    Vec::new(),
+                ),
+                target: None,
+                mapper: None,
+                type_arguments: Vec::new(),
             }),
         });
         Arc::new(Type {

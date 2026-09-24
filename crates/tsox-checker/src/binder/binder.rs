@@ -1,5 +1,11 @@
 use super::*;
 
+pub(crate) struct ExpandoAssignmentInfo {
+    pub(crate) node: Arc<Node>,
+    pub(crate) block_scope_container: Option<Arc<Node>>,
+    pub(crate) container: Option<Arc<Node>>,
+}
+
 pub struct Binder {
     pub symbol_map: NodeSymbolMap,
 
@@ -17,7 +23,7 @@ pub struct Binder {
 
     pub(crate) symbol_count: usize,
 
-    pub(crate) expando_assignments: Vec<(Arc<Node>, Option<Arc<Node>>)>,
+    pub(crate) expando_assignments: Vec<ExpandoAssignmentInfo>,
 
     pub(crate) unreachable_flow: Option<Arc<FlowNode>>,
 

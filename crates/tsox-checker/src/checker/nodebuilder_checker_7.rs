@@ -374,8 +374,16 @@ impl Checker {
 
         // Go createAnonymousTypeNodeEx：TypeLiteral 符号（合成 __type wrapper、
         // 对象字面量）一律结构展开成员表；其余具名符号（含 Class/接口式库
-        // 类型）按符号显示，内部名匿名符号（þobject 等）走成员展开
+        // 类型）按符号显示，内部名匿名符号（þobject 等）走成员展开。
+        // 函数符号的 Anonymous 类型（expando face，Go getTypeOfFuncClassEnumModule
+        // 的 newObjectType(Anonymous, symbol)）同 Go 一律结构展开
+        let fn_symbol_anonymous = t.object_flags.contains(ObjectFlags::Anonymous)
+            && t
+                .symbol
+                .as_ref()
+                .is_some_and(|s| s.flags.contains(SymbolFlags::Function));
         if let Some(sym) = &t.symbol
+            && !fn_symbol_anonymous
             && !sym.flags.contains(SymbolFlags::TypeLiteral)
             && (!sym.name.starts_with('\u{FE}') || sym.flags.contains(SymbolFlags::Class))
         {

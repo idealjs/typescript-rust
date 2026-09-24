@@ -95,12 +95,38 @@ impl Binder {
             return;
         }
         self.expando_assignments
-            .push((Arc::clone(node), self.block_scope_container.clone()));
+            .push(crate::binder::binder::ExpandoAssignmentInfo {
+                node: Arc::clone(node),
+                block_scope_container: self.block_scope_container.clone(),
+                container: self.container.clone(),
+            });
+    }
+
+    fn lookup_entity_single_scope(
+        &self,
+        base_name: &str,
+        scope: &Option<Arc<Node>>,
+    ) -> Option<Arc<Symbol>> {
+        let sc = scope.as_ref()?;
+        if let Some(sym) = self
+            .symbol_map
+            .locals
+            .get(&sc.id())
+            .and_then(|l| l.get(base_name))
+        {
+            return Some(Arc::clone(sym));
+        }
+        let sym = self.symbol_map.symbol_of(sc)?;
+        sym.exports
+            .get(base_name)
+            .or_else(|| sym.members.get(base_name))
+            .cloned()
     }
 
     pub(crate) fn process_expando_assignments(&mut self) {
         let assignments = std::mem::take(&mut self.expando_assignments);
-        for (node, scope_start) in assignments {
+        for info in assignments {
+            let node = info.node;
             let NodeData::BinaryExpression(bin) = &node.data else {
                 continue;
             };
@@ -110,36 +136,9 @@ impl Binder {
                 _ => continue,
             };
             let base_name = base.text();
-            let mut target: Option<Arc<Symbol>> = None;
-            let mut scope = scope_start;
-            while let Some(sc) = scope {
-                if let Some(sym) = self
-                    .symbol_map
-                    .locals
-                    .get(&sc.id())
-                    .and_then(|l| l.get(base_name))
-                {
-                    target = Some(Arc::clone(sym));
-                    break;
-                }
-
-                if matches!(
-                    sc.kind,
-                    SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration
-                ) && let Some(sym) = self.symbol_map.symbol_of(&sc)
-                {
-                    let hit = sym
-                        .members
-                        .get(base_name)
-                        .or_else(|| sym.exports.get(base_name))
-                        .cloned();
-                    if let Some(h) = hit {
-                        target = Some(h);
-                        break;
-                    }
-                }
-                scope = sc.parent();
-            }
+            let target = self
+                .lookup_entity_single_scope(base_name, &info.block_scope_container)
+                .or_else(|| self.lookup_entity_single_scope(base_name, &info.container));
             let Some(sym) = target else { continue };
 
             // tsc getExpandoSymbol：函数声明，或初始化为函数表达式/箭头函数的变量
