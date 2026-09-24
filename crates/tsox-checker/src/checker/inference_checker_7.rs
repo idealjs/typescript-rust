@@ -47,8 +47,8 @@ impl Checker {
         action: impl FnOnce(&mut Self, &mut InferenceState, &Arc<Type>, &Arc<Type>),
     ) {
         let save_priority = state.inference_priority;
-        let save_expanding = state.expanding_flags;
         state.inference_priority = InferencePriority::MaxValue;
+        let save_expanding = state.expanding_flags;
         state.source_stack.push(Arc::clone(source));
         state.target_stack.push(Arc::clone(target));
         if self.is_deeply_nested_type(source, &state.source_stack, 2) {
@@ -218,11 +218,35 @@ impl Checker {
             return;
         }
 
-        if target.flags.contains(TypeFlags::Object) {
-            self.invoke_once(state, source, target, |c, s, src, tgt| {
+        let source = Arc::clone(source);
+        if self.is_generic_mapped_type_by_constraint(&source)
+            && self.is_generic_mapped_type_by_constraint(target)
+        {
+            self.invoke_once(state, &source, target, |c, s, src, tgt| {
+                c.infer_from_generic_mapped_types(s, src, tgt)
+            });
+        }
+        let mut source = source;
+        if !(state.priority.contains(InferencePriority::NoConstraints)
+            && source.flags.intersects(
+                crate::checker::types::TYPE_FLAGS_INSTANTIABLE | TypeFlags::Intersection,
+            ))
+        {
+            let apparent_source = self.get_apparent_type(&source);
+            if !Arc::ptr_eq(&apparent_source, &source)
+                && !apparent_source
+                    .flags
+                    .intersects(TypeFlags::Object | TypeFlags::Intersection)
+            {
+                self.infer_from_types(state, &apparent_source, target);
+                return;
+            }
+            source = apparent_source;
+        }
+        if source.flags.intersects(TypeFlags::Object | TypeFlags::Intersection) {
+            self.invoke_once(state, &source, target, |c, s, src, tgt| {
                 c.infer_from_object_types(s, src, tgt)
             });
-            return;
         }
     }
 
