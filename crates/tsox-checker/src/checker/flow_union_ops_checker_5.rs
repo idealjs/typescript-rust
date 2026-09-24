@@ -340,6 +340,13 @@ impl Checker {
         t: &Arc<Type>,
         name: &str,
     ) -> Option<Arc<Symbol>> {
+        if self.is_no_infer_type(t)
+            && let TypeData::Substitution(sub) = &t.data
+            && let Some(base) = sub.base_type.clone()
+            && !Arc::ptr_eq(&base, t)
+        {
+            return self.get_property_of_type(&base, name);
+        }
         if t.is_union() || t.is_intersection() {
             return self.get_property_of_union_or_intersection_type(t, name);
         }
