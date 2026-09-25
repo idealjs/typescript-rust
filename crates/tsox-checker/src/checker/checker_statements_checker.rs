@@ -503,6 +503,7 @@ impl Checker {
                 if let tsox_frontend::ast::NodeData::ExportAssignment(data) = &node.data {
                     self.check_expression(&data.expression);
                 }
+                self.check_declaration_nameability_export_default(node);
             }
             SyntaxKind::ModuleDeclaration => {
                 if !self.check_module_element_context(node) {
