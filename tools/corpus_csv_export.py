@@ -5,7 +5,7 @@
 日志默认依次尝试 fullrun.log 与 corpus run log。
 
 产出(仓库根):
-  corpus_results.csv        本轮失败用例,表头 key,seconds,按 key 字典序
+  corpus_results.csv        本轮失败用例,表头 key,seconds(向上取整整数秒),按 key 字典序
   corpus_skips.csv          SKIP 差异表:超出 Go 基准的 SKIP 用例
   *.prev.csv / *.diff       上一轮副本与两轮机械差异
 
@@ -13,6 +13,7 @@ Go 一致的合法 SKIP 集合记录在 tools/skip_baseline.txt(每行一个 key
 `compiler/<用例名>`,# 开头为注释);文件缺失或为空时所有 SKIP 均视为差异。
 SKIP 差异与 FAIL 同流程修复:纳入 subagent 修复循环,直至差集为空。
 """
+import math
 import os
 import re
 import shutil
@@ -44,7 +45,8 @@ def scan(log_path):
                 continue
             status, name, secs = m.groups()
             key = f"compiler/{name}"
-            (fails if status == "FAIL" else skips)[key] = secs
+            # 耗时向上取整为整数秒:亚秒抖动不再进 diff
+            (fails if status == "FAIL" else skips)[key] = str(math.ceil(float(secs)))
     return fails, skips
 
 
