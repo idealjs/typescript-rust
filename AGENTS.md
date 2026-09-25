@@ -28,6 +28,8 @@ flowchart TD
 
 SKIP 差异表：`python3 tools/corpus_csv_export.py` 每轮同时产出 `corpus_skips.csv`（超出 Go 合法 SKIP 基准的用例，基准记录在 `tools/skip_baseline.txt`，缺失时全部 SKIP 视为差异）。SKIP 差异与 FAIL 同流程修复：挑选 key 下发 subagent、循环消解，直至 `corpus_skips.csv` 为空。
 
+函数靠齐追踪表：`python3 tools/gen_func_alignment.py` 生成仓库根 `func_alignment.csv`（静态抓取 Go/Rust 两侧全部函数名，camelCase↔snake_case 由脚本归一为 `norm_name` 排序键，单表左右对照：已匹配的两侧同行展示，未匹配按 go_only/rust_only 标注且同名/近名行相邻；match_type 按 exact/suffix_variant/fuzzy/go_only/rust_only 分级）。每次修复中某个 Go 函数被靠齐后，主 agent 在收集裁决时执行 `--mark --go <函数名> --status yes|partial|no --round <轮次> --note <备注>` 标记该行；重新生成保留已有标记。该表与仓库根 CSV 同为 subagent 只读，用于快速掌握哪些 Go 函数已靠齐、哪些尚无对应。
+
 ## 代码规范
 
 ### 代码拒绝注释
