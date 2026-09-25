@@ -395,23 +395,32 @@ impl Checker {
 impl Checker {
     fn merge_augmentation_symbols(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) {
         let mut records = Vec::new();
-        merge_declarations_into_rec(target, source, &mut records);
+        let mut conflicts = Vec::new();
+        merge_declarations_into_rec(target, source, &mut records, &mut conflicts);
         for (t, s) in records {
             self.record_merged_symbol(&t, &s);
+        }
+        for (t, s) in conflicts {
+            self.report_merge_symbol_error(&t, &s);
         }
     }
 }
 
-fn merge_declarations_into(target: &Arc<Symbol>, source: &Arc<Symbol>) {
-    let mut records = Vec::new();
-    merge_declarations_into_rec(target, source, &mut records);
+fn merge_symbol_flags_conflict(target: &SymbolFlags, source: &SymbolFlags) -> bool {
+    (*target & get_excluded_symbol_flags(*source)) != SymbolFlags::empty()
+        && !(*source | *target).intersects(SymbolFlags::Assignment)
 }
 
 fn merge_declarations_into_rec(
     target: &Arc<Symbol>,
     source: &Arc<Symbol>,
     records: &mut Vec<(Arc<Symbol>, Arc<Symbol>)>,
-) {
+    conflicts: &mut Vec<(Arc<Symbol>, Arc<Symbol>)>,
+) -> Arc<Symbol> {
+    if merge_symbol_flags_conflict(&target.flags, &source.flags) {
+        conflicts.push((Arc::clone(target), Arc::clone(source)));
+        return Arc::clone(source);
+    }
     let t_mut = Arc::as_ptr(target) as *mut Symbol;
     let s_mut = Arc::as_ptr(source) as *mut Symbol;
     unsafe {
@@ -422,15 +431,17 @@ fn merge_declarations_into_rec(
         }
         (*t_mut).flags |= (*s_mut).flags;
         records.push((Arc::clone(target), Arc::clone(source)));
-        merge_symbol_tables_into(&mut (*t_mut).members, &(*s_mut).members, records);
-        merge_symbol_tables_into(&mut (*t_mut).exports, &(*s_mut).exports, records);
+        merge_symbol_tables_into(&mut (*t_mut).members, &(*s_mut).members, records, conflicts);
+        merge_symbol_tables_into(&mut (*t_mut).exports, &(*s_mut).exports, records, conflicts);
     }
+    Arc::clone(target)
 }
 
 fn merge_symbol_tables_into(
     target: &mut SymbolTable,
     source: &SymbolTable,
     records: &mut Vec<(Arc<Symbol>, Arc<Symbol>)>,
+    conflicts: &mut Vec<(Arc<Symbol>, Arc<Symbol>)>,
 ) {
     let entries: Vec<(String, Arc<Symbol>)> = source
         .entries
@@ -439,7 +450,10 @@ fn merge_symbol_tables_into(
         .collect();
     for (k, v) in entries {
         match target.entries.get(&k) {
-            Some(existing) => merge_declarations_into_rec(existing, &v, records),
+            Some(existing) => {
+                let merged = merge_declarations_into_rec(existing, &v, records, conflicts);
+                target.entries.insert(k, merged);
+            }
             None => {
                 target.entries.insert(k, v);
             }

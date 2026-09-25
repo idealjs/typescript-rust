@@ -163,29 +163,52 @@ result_mut.set_parent(&result);
             tsox_core::diagnostics::messages_generated::DUPLICATE_IDENTIFIER_0
         };
         let name = source.name.clone();
-        let mut locs: Vec<tsox_core::core::text::TextRange> = Vec::new();
-        for sym in [target, source] {
-            for d in &sym.declarations {
-                let name_node = tsox_frontend::ast::utilities::get_name_of_declaration(d)
-                    .unwrap_or_else(|| Arc::clone(d));
-                locs.push(name_node.loc);
+        for (err_sym, rel_sym) in [(source, target), (target, source)] {
+            for decl in &err_sym.declarations {
+                let error_node = tsox_frontend::ast::utilities::get_name_of_declaration(decl)
+                    .unwrap_or_else(|| Arc::clone(decl));
+                let file = self.get_source_file_of_node(&error_node);
+                let mut diag = tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    error_node.loc,
+                    message,
+                    vec![name.clone()],
+                );
+                for rel_decl in &rel_sym.declarations {
+                    let rel_node = tsox_frontend::ast::utilities::get_name_of_declaration(rel_decl)
+                        .unwrap_or_else(|| Arc::clone(rel_decl));
+                    if Arc::ptr_eq(&rel_node, &error_node) || diag.related_information.len() >= 5 {
+                        continue;
+                    }
+                    let rel_file = self.get_source_file_of_node(&rel_node);
+                    if diag.related_information.iter().any(|d| {
+                        d.loc == rel_node.loc
+                            && d.file.as_ref().map(|f| f.file_name.as_str())
+                                == rel_file.as_ref().map(|f| f.file_name.as_str())
+                    }) {
+                        continue;
+                    }
+                    let (rel_msg, args) = if diag.related_information.is_empty() {
+                        (
+                            tsox_core::diagnostics::messages_generated::X_0_WAS_ALSO_DECLARED_HERE,
+                            vec![name.clone()],
+                        )
+                    } else {
+                        (
+                            tsox_core::diagnostics::messages_generated::X_AND_HERE,
+                            Vec::new(),
+                        )
+                    };
+                    diag.related_information
+                        .push(tsox_frontend::ast::Diagnostic::new(
+                            rel_file,
+                            rel_node.loc,
+                            rel_msg,
+                            args,
+                        ));
+                }
+                self.diagnostics.add_or_append_related(diag);
             }
-        }
-        for loc in locs {
-            if self
-                .diagnostics
-                .get_all()
-                .iter()
-                .any(|d| d.loc == loc && d.code == message.code)
-            {
-                continue;
-            }
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                self.current_file.clone(),
-                loc,
-                message,
-                vec![name.clone()],
-            ));
         }
     }
 
