@@ -227,8 +227,9 @@ impl Checker {
             },
             SyntaxKind::BigIntLiteral => {
                 if operator == SyntaxKind::MinusToken {
-                    let pseudo = parse_pseudo_big_int(operand.text());
-                    let literal = self.get_big_int_literal_type(pseudo);
+                    let positive = parse_pseudo_big_int(&operand.text());
+                    let negative = tsox_core::jsnum::PseudoBigInt::new(&positive.to_string(), true);
+                    let literal = self.get_big_int_literal_type(negative);
                     return self.get_fresh_type_of_literal_type(&literal);
                 }
             }

@@ -1,6 +1,8 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker_impl_chunk_6::*;
+use crate::checker::mig::m1b::parse_pseudo_big_int;
+use tsox_core::diagnostics::messages_generated::OPERATOR_0_CANNOT_BE_APPLIED_TO_TYPE_1;
 
 impl Checker {
     pub fn get_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
@@ -59,7 +61,10 @@ impl Checker {
             SyntaxKind::FalseKeyword => self.get_fresh_type_of_literal_type(&self.false_type()),
             SyntaxKind::NullKeyword => self.nullish_widening_type(self.null_type()),
             SyntaxKind::UndefinedKeyword => self.nullish_widening_type(self.undefined_type()),
-            SyntaxKind::BigIntLiteral => self.get_fresh_type_of_literal_type(&self.bigint_type()),
+            SyntaxKind::BigIntLiteral => {
+                let literal = self.get_big_int_literal_type(parse_pseudo_big_int(&node.text()));
+                self.get_fresh_type_of_literal_type(&literal)
+            }
             SyntaxKind::ArrayLiteralExpression => {
                 return self.get_type_of_array_literal(node);
             }
@@ -93,6 +98,25 @@ impl Checker {
             SyntaxKind::BinaryExpression => self.get_type_of_binary_expression(node),
             SyntaxKind::PrefixUnaryExpression => {
                 if let tsox_frontend::ast::NodeData::PrefixUnaryExpression(data) = &node.data {
+                    if data.operator == SyntaxKind::MinusToken
+                        && data.operand.kind == SyntaxKind::BigIntLiteral
+                    {
+                        let positive = parse_pseudo_big_int(&data.operand.text());
+                        let negative =
+                            tsox_core::jsnum::PseudoBigInt::new(&positive.to_string(), true);
+                        let literal = self.get_big_int_literal_type(negative);
+                        return self.get_fresh_type_of_literal_type(&literal);
+                    }
+                    if data.operator == SyntaxKind::PlusToken
+                        && data.operand.kind == SyntaxKind::BigIntLiteral
+                    {
+                        self.error_message(
+                            &data.operand,
+                            OPERATOR_0_CANNOT_BE_APPLIED_TO_TYPE_1,
+                            &["+".to_string(), "bigint".to_string()],
+                        );
+                        return self.number_type();
+                    }
                     match data.operator {
                         SyntaxKind::ExclamationToken => return self.boolean_type(),
 

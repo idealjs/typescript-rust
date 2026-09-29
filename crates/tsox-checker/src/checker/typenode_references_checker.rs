@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::typenode_references::*;
+use crate::checker::mig::m1b::parse_pseudo_big_int;
 
 impl Checker {
     pub(crate) fn get_type_from_this_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
@@ -252,6 +253,19 @@ impl Checker {
                 self.bigint_literal_types
                     .insert(text.to_string(), Arc::clone(&t));
                 t
+            }
+            SyntaxKind::PrefixUnaryExpression => {
+                let NodeData::PrefixUnaryExpression(unary) = &literal.data else {
+                    return self.error_type();
+                };
+                if unary.operator == SyntaxKind::MinusToken
+                    && unary.operand.kind == SyntaxKind::BigIntLiteral
+                {
+                    let positive = parse_pseudo_big_int(&unary.operand.text());
+                    let negative = tsox_core::jsnum::PseudoBigInt::new(&positive.to_string(), true);
+                    return self.get_big_int_literal_type(negative);
+                }
+                self.error_type()
             }
             SyntaxKind::TrueKeyword => self.true_type(),
             SyntaxKind::FalseKeyword => self.false_type(),
