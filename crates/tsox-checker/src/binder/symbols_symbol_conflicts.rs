@@ -49,6 +49,9 @@ impl Binder {
 
     // Go DeclarationNameToString：名字按源文本展示（字符串字面量名带引号）
     fn declaration_name_display(b: &Binder, name_node: &Arc<Node>, fallback: &str) -> String {
+        if name_node.loc.end() == name_node.loc.pos() {
+            return "(Missing)".to_string();
+        }
         if let Some(sf) = b.current_source_file.as_ref()
             && name_node.loc.end() > name_node.loc.pos()
             && name_node.loc.end() <= sf.text.len()
@@ -68,8 +71,7 @@ impl Binder {
         let mut conflicted = false;
         let both_block_scoped_var = existing.flags.contains(SymbolFlags::BlockScopedVariable)
             && includes.contains(SymbolFlags::BlockScopedVariable);
-        if !name.is_empty() {
-            let report_all = |b: &mut Self, message: &'static tsox_core::diagnostics::Message| {
+        let report_all = |b: &mut Self, message: &'static tsox_core::diagnostics::Message| {
                 let push = |b: &mut Self, loc: tsox_core::core::text::TextRange, display: String| {
                     if b.symbol_map
                         .binder_diagnostics
@@ -157,7 +159,6 @@ impl Binder {
                     conflicted = true;
                 }
             }
-        }
         conflicted
     }
 }

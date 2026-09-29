@@ -45,8 +45,7 @@ impl Binder {
                     && existing
                         .flags
                         .contains(SymbolFlags::FunctionScopedVariable));
-            if !name.is_empty()
-                && !excludes.is_empty()
+            if !excludes.is_empty()
                 && existing.flags.intersects(excludes)
                 && !assignment_merge_exception
             {

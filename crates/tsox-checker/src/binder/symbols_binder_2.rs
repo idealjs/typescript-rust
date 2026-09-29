@@ -352,7 +352,6 @@ impl Binder {
             if !staticness_split
                 && !mixed_exportness_module_merge
                 && !excludes.is_empty()
-                && !name.is_empty()
                 && comparison_flags.intersects(excludes)
                 && !assignment_merge_exception
             {
