@@ -97,8 +97,12 @@ impl Parser {
     pub(crate) fn next_token_is_identifier_or_string_literal_on_same_line(&self) -> bool {
         let mut s = self.scanner.clone();
         s.scan();
-        !s.has_preceding_line_break()
-            && (is_identifier_or_keyword(s.token()) || s.token() == SyntaxKind::StringLiteral)
+        let token = s.token();
+        let identifier_like = token == SyntaxKind::Identifier
+            || (!(token == SyntaxKind::YieldKeyword && self.yield_context)
+                && !(token == SyntaxKind::AwaitKeyword && self.await_context)
+                && !is_reserved_word_kind(token));
+        !s.has_preceding_line_break() && (identifier_like || token == SyntaxKind::StringLiteral)
     }
 
     pub(crate) fn is_identifier(&self) -> bool {
