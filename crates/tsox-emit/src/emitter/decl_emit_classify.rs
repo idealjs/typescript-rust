@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use crate::emitter::decl_emit::*;
 use tsox_core::core::compiler_options::CompilerOptions;
-use tsox_core::tspath;
 use tsox_frontend::ast::Node;
 use tsox_frontend::ast::SyntaxKind;
 use tsox_frontend::ast::node_data_generated::NodeData;

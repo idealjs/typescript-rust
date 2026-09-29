@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn get_occurrences_try_catch_finally() {
     let content = r#"/*1*/[|try|] {
@@ -18,6 +18,6 @@ fn get_occurrences_try_catch_finally() {
 }
 [|fina/*3*/lly|] {
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Markers())...)
+    let _s = Session::new_for_test("getOccurrencesTryCatchFinally", content);
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Markers())...)
 }

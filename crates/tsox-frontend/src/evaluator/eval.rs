@@ -7,8 +7,17 @@ use tsox_core::jsnum::PseudoBigInt;
 pub fn evaluate_expression(
     expr: &Arc<Node>,
     location: Option<&Arc<Node>>,
-    evaluate_entity: EvaluateEntity,
+    evaluate_entity: EvaluateEntity<'_>,
 ) -> EvalResult {
+    // Go SkipOuterExpressions(OEKParentheses)：括号不阻断常量求值
+    let mut expr = Arc::clone(expr);
+    while expr.kind == SyntaxKind::ParenthesizedExpression {
+        match &expr.data {
+            NodeData::ParenthesizedExpression(d) => expr = Arc::clone(&d.expression),
+            _ => break,
+        }
+    }
+    let expr = &expr;
     match expr.kind {
         SyntaxKind::PrefixUnaryExpression => {
             if let NodeData::PrefixUnaryExpression(data) = &expr.data {
@@ -205,7 +214,7 @@ fn evaluate_template_expression(
     _expr: &Arc<Node>,
     data: &TemplateExpressionData,
     location: Option<&Arc<Node>>,
-    evaluate_entity: EvaluateEntity,
+    evaluate_entity: EvaluateEntity<'_>,
 ) -> EvalResult {
     let head_text = match &data.head.data {
         NodeData::TemplateHead(d) => d.text.clone(),

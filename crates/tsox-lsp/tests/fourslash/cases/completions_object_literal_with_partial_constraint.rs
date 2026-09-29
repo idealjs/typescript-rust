@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_object_literal_with_partial_constraint() {
     let content = r#"interface MyOptions {
@@ -56,11 +56,15 @@ f4({
     kind: "a",
     /*6*/
 })"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsObjectLiteralWithPartialConstraint", content);
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
+    // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, Some("3"), &["b", "g", "r"]);
+    fourslash::go_to_marker(&mut s, "4");
+    // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "5");
+    // TODO: f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, Some("6"), &["a"]);
 }

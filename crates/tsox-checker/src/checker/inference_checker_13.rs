@@ -14,9 +14,12 @@ impl Checker {
         false
     }
 
-    pub(crate) fn get_type_from_inference(&self, inference: &InferenceInfo) -> Option<Arc<Type>> {
+    pub(crate) fn get_type_from_inference(&mut self, inference: &InferenceInfo) -> Option<Arc<Type>> {
         if !inference.candidates.is_empty() {
-            Some(self.create_union_type(inference.candidates.clone()))
+            Some(self.get_union_type_ex(
+                inference.candidates.clone(),
+                crate::checker::exports_union_reduction::UnionReduction::Subtype,
+            ))
         } else if !inference.contra_candidates.is_empty() {
             Some(self.create_intersection_type(inference.contra_candidates.clone()))
         } else {
@@ -28,17 +31,33 @@ impl Checker {
         if types.len() == 1 {
             return types[0].clone();
         }
-        let primary_types: Vec<Arc<Type>> = types.to_vec();
-        if self.literal_types_with_same_base_type(&primary_types) {
-            return self.create_union_type(primary_types);
+        let mut primary_types: Vec<Arc<Type>> = types.to_vec();
+        if self.strict_null_checks {
+            primary_types = primary_types
+                .into_iter()
+                .map(|t| {
+                    self.filter_type(&t, &mut |u| {
+                        !u.flags.intersects(TypeFlags::Null | TypeFlags::Undefined)
+                    })
+                })
+                .collect();
         }
-        let supertype = self.get_single_common_supertype(&primary_types);
-        let nullable_flags = self.get_combined_type_flags(types) & TYPE_FLAGS_NULLABLE;
-        if nullable_flags != TypeFlags::None {
-            self.get_nullable_type(&supertype, nullable_flags)
+        let supertype = if self.literal_types_with_same_base_type(&primary_types) {
+            self.get_union_type(primary_types.clone())
         } else {
-            supertype
+            self.get_single_common_supertype(&primary_types)
+        };
+        let same = primary_types.len() == types.len()
+            && primary_types
+                .iter()
+                .zip(types.iter())
+                .all(|(a, b)| Arc::ptr_eq(a, b));
+        if same {
+            return supertype;
         }
+        let nullable_flags =
+            self.get_combined_type_flags(types) & (TypeFlags::Null | TypeFlags::Undefined);
+        self.get_nullable_type(&supertype, nullable_flags)
     }
 
     pub(crate) fn get_single_common_supertype(&mut self, types: &[Arc<Type>]) -> Arc<Type> {
@@ -70,8 +89,10 @@ impl Checker {
         for t in types {
             match &candidate {
                 None => candidate = Some(t.clone()),
-                Some(_c) => {
-                    candidate = Some(t.clone());
+                Some(c) => {
+                    if self.is_type_strict_subtype_of(c, t) {
+                        candidate = Some(t.clone());
+                    }
                 }
             }
         }
@@ -141,7 +162,18 @@ impl Checker {
     }
 
     pub(crate) fn maybe_type_of_kind(&self, t: &Type, flags: TypeFlags) -> bool {
-        t.flags.intersects(flags)
+        if t.flags.intersects(flags) {
+            return true;
+        }
+        if t
+            .flags
+            .intersects(TypeFlags::Union | TypeFlags::Intersection)
+        {
+            if let Some(ui) = t.as_union_or_intersection() {
+                return ui.types.iter().any(|c| self.maybe_type_of_kind(c, flags));
+            }
+        }
+        false
     }
 
     pub(crate) fn create_union_type(&self, types: Vec<Arc<Type>>) -> Arc<Type> {
@@ -187,6 +219,7 @@ impl Checker {
                 },
                 resolved_apparent_type: std::sync::OnceLock::new(),
                 unique_literal_filled_instantiation: std::sync::OnceLock::new(),
+                resolved_properties: std::sync::OnceLock::new(),
             }),
         ))
     }

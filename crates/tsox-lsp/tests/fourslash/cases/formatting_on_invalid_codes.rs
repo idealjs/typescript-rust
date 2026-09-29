@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn formatting_on_invalid_codes() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"/*1*/var a;var c          , b;var  $d
 /*2*/var $e
 /*3*/var f
@@ -98,8 +98,8 @@ fn formatting_on_invalid_codes() {
 /*83*/$( document ).ready(function(){
 /*84*/alert('hello');
 /*85*/    } ) ;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formattingOnInvalidCodes", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"var a; var c, b; var $d"#);
     fourslash::go_to_marker(&mut s, "2");
@@ -129,17 +129,11 @@ fn formatting_on_invalid_codes() {
     fourslash::go_to_marker(&mut s, "14");
     fourslash::verify_current_line_content(&mut s, r#"                break;"#);
     fourslash::go_to_marker(&mut s, "15");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"            case vari: v[--x] *= ++y * (m + n / k[z]);"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"            case vari: v[--x] *= ++y * (m + n / k[z]);"#);
     fourslash::go_to_marker(&mut s, "16");
     fourslash::verify_current_line_content(&mut s, r#"                for (a in b) {"#);
     fourslash::go_to_marker(&mut s, "17");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"                    for (a = 0; a < 10; ++a) {"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"                    for (a = 0; a < 10; ++a) {"#);
     fourslash::go_to_marker(&mut s, "18");
     fourslash::verify_current_line_content(&mut s, r#"                        a++; --a;"#);
     fourslash::go_to_marker(&mut s, "19");
@@ -155,15 +149,9 @@ fn formatting_on_invalid_codes() {
     fourslash::go_to_marker(&mut s, "24");
     fourslash::verify_current_line_content(&mut s, r#"                                ++a;"#);
     fourslash::go_to_marker(&mut s, "25");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"                                (--c) += d;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"                                (--c) += d;"#);
     fourslash::go_to_marker(&mut s, "26");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"                                $c = $a + --$b;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"                                $c = $a + --$b;"#);
     fourslash::go_to_marker(&mut s, "27");
     fourslash::verify_current_line_content(&mut s, r#"                            }"#);
     fourslash::go_to_marker(&mut s, "28");
@@ -171,34 +159,19 @@ fn formatting_on_invalid_codes() {
     fourslash::go_to_marker(&mut s, "29");
     fourslash::verify_current_line_content(&mut s, r#"                            if (a != b) {"#);
     fourslash::go_to_marker(&mut s, "30");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"                                if (a !== b)"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"                                if (a !== b)"#);
     fourslash::go_to_marker(&mut s, "31");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"                                    if (a === b)"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"                                    if (a === b)"#);
     fourslash::go_to_marker(&mut s, "32");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"                                        --a;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"                                        --a;"#);
     fourslash::go_to_marker(&mut s, "33");
     fourslash::verify_current_line_content(&mut s, r#"                                    else"#);
     fourslash::go_to_marker(&mut s, "34");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"                                        --a;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"                                        --a;"#);
     fourslash::go_to_marker(&mut s, "35");
     fourslash::verify_current_line_content(&mut s, r#"                                else {"#);
     fourslash::go_to_marker(&mut s, "36");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"                                    a--; ++b;"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"                                    a--; ++b;"#);
     fourslash::go_to_marker(&mut s, "37");
     fourslash::verify_current_line_content(&mut s, r#"                                    a++"#);
     fourslash::go_to_marker(&mut s, "38");
@@ -266,10 +239,7 @@ fn formatting_on_invalid_codes() {
     fourslash::go_to_marker(&mut s, "69");
     fourslash::verify_current_line_content(&mut s, r#"            'student':"#);
     fourslash::go_to_marker(&mut s, "70");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"                { 'id': '1', 'name': 'Linda Jones', 'legacySkill': 'Access, VB 5.0' }"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"                { 'id': '1', 'name': 'Linda Jones', 'legacySkill': 'Access, VB 5.0' }"#);
     fourslash::go_to_marker(&mut s, "71");
     fourslash::verify_current_line_content(&mut s, r#"        },"#);
     fourslash::go_to_marker(&mut s, "72");
@@ -277,10 +247,7 @@ fn formatting_on_invalid_codes() {
     fourslash::go_to_marker(&mut s, "73");
     fourslash::verify_current_line_content(&mut s, r#"            'student':"#);
     fourslash::go_to_marker(&mut s, "74");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"                { 'id': '2', 'name': 'Adam Davidson', 'legacySkill': 'Cobol,MainFrame' }"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"                { 'id': '2', 'name': 'Adam Davidson', 'legacySkill': 'Cobol,MainFrame' }"#);
     fourslash::go_to_marker(&mut s, "75");
     fourslash::verify_current_line_content(&mut s, r#"        },"#);
     fourslash::go_to_marker(&mut s, "76");
@@ -288,19 +255,13 @@ fn formatting_on_invalid_codes() {
     fourslash::go_to_marker(&mut s, "77");
     fourslash::verify_current_line_content(&mut s, r#"            'student':"#);
     fourslash::go_to_marker(&mut s, "78");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"                { 'id': '3', 'name': 'Charles Boyer', 'legacySkill': 'HTML, XML' }"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"                { 'id': '3', 'name': 'Charles Boyer', 'legacySkill': 'HTML, XML' }"#);
     fourslash::go_to_marker(&mut s, "79");
     fourslash::verify_current_line_content(&mut s, r#"        }"#);
     fourslash::go_to_marker(&mut s, "80");
     fourslash::verify_current_line_content(&mut s, r#"    ];"#);
     fourslash::go_to_marker(&mut s, "81");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"    $create(Sys.UI.DataView, { data: webclass }, null, null, $get('SList'));"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"    $create(Sys.UI.DataView, { data: webclass }, null, null, $get('SList'));"#);
     fourslash::go_to_marker(&mut s, "82");
     fourslash::verify_current_line_content(&mut s, r#"}"#);
     fourslash::go_to_marker(&mut s, "83");

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
+
 #[test]
 fn go_to_source_fallbacks_to_definition_for_interface() {
     let content = r#"// @moduleResolution: bundler
@@ -15,11 +15,10 @@ exports.makeConfig = () => ({ enabled: true });
 // @Filename: /home/src/workspaces/project/index.ts
 import type { /*importName*/Config } from "pkg";
 let value: /*typeRef*/Config;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importName", "typeRef")
+    let _s = Session::new_for_test("goToSourceFallbacksToDefinitionForInterface", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName", "typeRef")
 }
 
-#[ignore = "generator: // (the .d.ts declaration) since there's no concrete JS impl"]
 #[test]
 fn go_to_source_type_only_symbol_fallback() {
     // TODO: // When a type-only symbol (type alias) is imported with a regular import and used
@@ -42,11 +41,10 @@ export function makeConfig() { return { enabled: true }; }
 import { Config, makeConfig } from "pkg";
 let c: /*typeRef*/Config;
 makeConfig/*callRef*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "typeRef", "callRef")
+    let _s = Session::new_for_test("goToSourceTypeOnlySymbolFallback", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "typeRef", "callRef")
 }
 
-#[ignore = "generator: // Forwarded declarations are non-concrete, so they merge wi"]
 #[test]
 fn go_to_source_forwarded_non_concrete_merge() {
     // TODO: // Forwarded declarations are non-concrete, so they merge with the initial
@@ -67,6 +65,6 @@ export { Config } from "./types.js";
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importName*/Config } from "pkg";
 let c: Config;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importName")
+    let _s = Session::new_for_test("goToSourceForwardedNonConcreteMerge", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName")
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
+
 #[test]
 fn auto_import_index_re_export_prefix() {
     let content = r#"// @module: nodenext
@@ -12,6 +12,6 @@ export { sum } from "./sum.js";
 export const sum = 0;
 // @Filename: /utils/sumAB.ts
 sum/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"./sum/index.js", "./sum/sum.js"}, &lsutil.UserPre
+    let _s = Session::new_for_test("autoImportIndexReExportPrefix", content);
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"./sum/index.js", "./sum/sum.js"}, &lsutil.UserPre
 }

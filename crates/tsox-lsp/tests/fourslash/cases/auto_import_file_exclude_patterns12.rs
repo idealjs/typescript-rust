@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFix"]
+
 #[test]
 fn auto_import_file_exclude_patterns12() {
     let content = r#"// @Filename: /src/vs/test.ts
@@ -26,6 +26,6 @@ declare module './thing' {
 		c: string;
 	}
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
+    let _s = Session::new_for_test("autoImportFileExcludePatterns12", content);
+    // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

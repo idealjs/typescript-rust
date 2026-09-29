@@ -121,6 +121,11 @@ impl GeneratedName {
 #[derive(Default)]
 pub struct EmitContext {
     pub(crate) next_id: AtomicU32,
+    pub emit_nodes:
+        std::cell::RefCell<HashMap<*const Node, crate::printer::mig::m4m_2::EmitNode>>,
+    pub auto_generate: HashMap<*const Node, AutoGenerateInfo>,
+    pub var_scope_stack: Vec<crate::printer::mig::m4m_3::VarScope>,
+    pub let_scope_stack: Vec<crate::printer::mig::m4m_3::VarScope>,
 }
 
 impl EmitContext {

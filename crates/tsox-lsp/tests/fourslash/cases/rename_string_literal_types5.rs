@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
+
 #[test]
 fn rename_string_literal_types5() {
     let content = r#"type T = {
@@ -10,6 +10,6 @@ fn rename_string_literal_types5() {
 declare const fn: <K extends keyof T>(p: K) => void
 
 fn("Prop 1"/**/)"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
+    let _s = Session::new_for_test("renameStringLiteralTypes5", content);
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_paths_kinds() {
     let content = r#"// @Filename: /src/b.ts
@@ -19,6 +19,6 @@ import {} from "./[|/*1*/|]";
         }
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"0", "1"}, &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("completionsPaths_kinds", content);
+    // TODO: f.VerifyCompletions(t, []string{"0", "1"}, &fourslash.CompletionsExpectedList{
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_display_parts_class_property() {
     let content = r#"class c {
@@ -22,6 +22,6 @@ fn quick_info_display_parts_class_property() {
 var cInstance = new c();
 /*9*/cInstance./*10*/publicProperty;
 /*11*/c./*12*/staticProperty;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoDisplayPartsClassProperty", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

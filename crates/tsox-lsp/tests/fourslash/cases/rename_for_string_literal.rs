@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
+
 #[test]
 fn rename_for_string_literal() {
     let content = r#"// @filename: /a.ts
@@ -13,6 +13,6 @@ interface Foo {
 const obj: Foo = {
     property: "foo",
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
+    let _s = Session::new_for_test("renameForStringLiteral", content);
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

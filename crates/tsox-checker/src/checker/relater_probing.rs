@@ -11,7 +11,7 @@ pub use crate::checker::relater_probing_checker_3::*;
 #[allow(unused_imports)]
 pub use crate::checker::relater_probing_checker_4::*;
 #[allow(unused_imports)]
-pub use crate::checker::relater_probing_substitute_infer_object::*;
+pub use crate::checker::relater_probing_mapped_apply::*;
 #[allow(unused_imports)]
 pub use crate::checker::relater_probing_substitute_infer_variants::*;
 pub(crate) use std::collections::HashMap;

@@ -57,6 +57,20 @@ pub fn is_unit_type(t: &Type) -> bool {
     t.flags.intersects(TYPE_FLAGS_UNIT)
 }
 
+pub fn is_literal_or_all_literal_union(t: &Type) -> bool {
+    if t.flags.contains(TypeFlags::Boolean) {
+        return true;
+    }
+    if t.flags.contains(TypeFlags::Union) {
+        if t.flags.contains(TypeFlags::EnumLiteral) {
+            return true;
+        }
+        return t.types()
+            .is_some_and(|members| members.iter().all(|m| is_unit_type(m)));
+    }
+    is_unit_type(t)
+}
+
 pub fn is_string_like_type(t: &Type) -> bool {
     t.flags.intersects(TYPE_FLAGS_STRING_LIKE)
 }
@@ -173,13 +187,28 @@ pub fn is_fresh_object_literal_type(t: &Type) -> bool {
     t.flags.contains(TypeFlags::Object) && t.object_flags.contains(ObjectFlags::FreshLiteral)
 }
 
+/// Go symbolToString：well-known symbol 内部名 `__@x` 的显示形式 `[Symbol.x]`
+pub fn property_name_for_display(name: &str) -> String {
+    match name.strip_prefix("__@") {
+        Some(stripped) => format!("[Symbol.{stripped}]"),
+        None => name.to_string(),
+    }
+}
+
+pub fn property_names_for_display(names: &[String]) -> String {
+    names
+        .iter()
+        .map(|n| property_name_for_display(n))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
 pub fn is_object_literal_type(t: &Type) -> bool {
     t.flags.contains(TypeFlags::Object) && t.object_flags.contains(ObjectFlags::ObjectLiteral)
 }
 
 pub fn is_type_usable_as_property_name(t: &Type) -> bool {
-    t.flags
-        .intersects(TYPE_FLAGS_STRING_OR_NUMBER_LITERAL_OR_UNIQUE | TypeFlags::ESSymbol)
+    t.flags.intersects(TYPE_FLAGS_STRING_OR_NUMBER_LITERAL_OR_UNIQUE)
 }
 
 pub fn get_property_name_from_type(t: &Type) -> String {

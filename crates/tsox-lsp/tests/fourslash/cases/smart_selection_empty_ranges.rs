@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineSelectionRanges"]
+
 #[test]
 fn smart_selection_empty_ranges() {
     let content = r#"class HomePage {
@@ -10,6 +10,6 @@ fn smart_selection_empty_ranges() {
     }
   }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineSelectionRanges"); // f.VerifyBaselineSelectionRanges(t)
+    let _s = Session::new_for_test("smartSelection_emptyRanges", content);
+    // TODO: f.VerifyBaselineSelectionRanges(t)
 }

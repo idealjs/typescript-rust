@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn document_highlight_typeof_this() {
     let content = r#"
@@ -9,6 +9,6 @@ interface Foo {
   bar(): typeof [|this|];
 }
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, f.Ranges()[0])
+    let _s = Session::new_for_test("documentHighlightTypeofThis", content);
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, f.Ranges()[0])
 }

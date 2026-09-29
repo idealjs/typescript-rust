@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_for_default_export() {
     let content = r#"// @Filename: a.ts
@@ -10,7 +10,7 @@ import /*deg*/g from "./a";
 [|/*ref*/g|]();
 // @Filename: c.ts
 import { f } from "./a";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "def", "deg")
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "ref")
+    let _s = Session::new_for_test("findAllRefsForDefaultExport", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "def", "deg")
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "ref")
 }

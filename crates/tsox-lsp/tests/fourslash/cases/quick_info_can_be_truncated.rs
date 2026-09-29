@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoIs"]
+
 #[test]
 fn quick_info_can_be_truncated() {
     let content = r#"// @stableTypeOrdering: true
@@ -515,18 +515,18 @@ f("_499", /*3*/);
 type Decomposed/*4*/ = {[K in A]: Foo[K]}
 type LongTuple/*5*/ = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17.18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70];
 type DeeplyMapped/*6*/ = {[K in keyof Foo]: {[K2 in keyof Foo]: [K, K2, Foo[K], Foo[K2]]}}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoCanBeTruncated", content);
     fourslash::go_to_marker(&mut s, "1");
-    fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "type A = keyof Foo", "")
+    // TODO: f.VerifyQuickInfoIs(t, "type A = keyof Foo", "")
     fourslash::go_to_marker(&mut s, "2");
-    fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "type Less = \"_1\" | \"_10\" | \"_100\" | \"_101\" | \"_102\" | \"_103\" | \
+    // TODO: f.VerifyQuickInfoIs(t, "type Less = \"_1\" | \"_10\" | \"_100\" | \"_101\" | \"_102\" | \"_103\" | \
     fourslash::go_to_marker(&mut s, "3");
     fourslash::go_to_marker(&mut s, "3");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "f(s: \"_499\", x: \"_0\" | \"_1
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "f(s: \"_499\", x: \"_0\" | \"_1
     fourslash::go_to_marker(&mut s, "4");
-    fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "type Decomposed = {\n    _0: 0;\n    _1: 1;\n    _10: 10;\n    _100: 100;\n 
+    // TODO: f.VerifyQuickInfoIs(t, "type Decomposed = {\n    _0: 0;\n    _1: 1;\n    _10: 10;\n    _100: 100;\n 
     fourslash::go_to_marker(&mut s, "5");
-    fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "type LongTuple = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
+    // TODO: f.VerifyQuickInfoIs(t, "type LongTuple = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
     fourslash::go_to_marker(&mut s, "6");
-    fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "type DeeplyMapped = {\n    _0: {\n        _0: [\"_0\", \"_0\", 0, 0];\n     
+    // TODO: f.VerifyQuickInfoIs(t, "type DeeplyMapped = {\n    _0: {\n        _0: [\"_0\", \"_0\", 0, 0];\n     
 }

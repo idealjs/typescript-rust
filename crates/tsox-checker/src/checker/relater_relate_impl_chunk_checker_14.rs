@@ -54,7 +54,10 @@ impl Checker {
             );
         }
         if let Some(generic_rest) = generic_rest {
-            let s = self.get_type_at_position(contextual, param_count);
+            // Go applyToParameterTypes：目标带 rest 时，源在 rest 起点按
+            // getRestTypeAtPosition 展开为元组再对位（(...a: A) 的 A ←
+            // [string, number] 这类实参元组），不能只取单个参数位类型
+            let s = self.source_rest_type_at(contextual, param_count);
             self.infer_types(
                 &mut context.inferences,
                 Some(s),
@@ -65,7 +68,7 @@ impl Checker {
         }
 
         if let Some(source_return) = self.get_return_type_of_signature(source) {
-            if type_contains_type_parameter(&source_return) {
+            if self.could_contain_type_variables(&source_return) {
                 if let Some(contextual_return) = self.get_return_type_of_signature(contextual) {
                     self.infer_types(
                         &mut context.inferences,
@@ -213,9 +216,13 @@ impl Checker {
         if t.flags.contains(TypeFlags::TypeParameter) {
             return true;
         }
-        t.types()
-            .map(|ts| ts.iter().any(type_contains_type_parameter))
-            .is_some()
+        if t.flags.intersects(crate::checker::types::TYPE_FLAGS_UNION_OR_INTERSECTION)
+            && !t.flags.intersects(crate::checker::types::TYPE_FLAGS_PRIMITIVE)
+            && let Some(ts) = t.types()
+        {
+            return ts.iter().all(|m| m.flags.contains(TypeFlags::TypeParameter));
+        }
+        false
     }
 
     pub fn try_get_indexed_access_type(
@@ -237,7 +244,29 @@ impl Checker {
             for c in &constituents {
                 resolved.push(self.try_get_indexed_access_type(object_type, c, access_flags)?);
             }
+            if access_flags.contains(AccessFlags::Writing) {
+                if resolved.len() == 1 {
+                    return resolved.pop();
+                }
+                return Some(self.get_intersection_type(resolved));
+            }
             return Some(self.get_union_type(resolved));
+        }
+
+        if object_type.flags.contains(TypeFlags::Intersection)
+            && let Some(constituents) = object_type.types()
+        {
+            let mut resolved: Vec<Arc<Type>> = Vec::new();
+            for c in constituents {
+                if let Some(t) = self.try_get_indexed_access_type(c, index_type, access_flags) {
+                    resolved.push(t);
+                }
+            }
+            return match resolved.len() {
+                0 => None,
+                1 => Some(resolved.pop().expect("exactly one")),
+                _ => Some(self.get_intersection_type(resolved)),
+            };
         }
 
         if object_type.flags.contains(TypeFlags::TypeParameter) {

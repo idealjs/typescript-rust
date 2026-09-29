@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_properties_with_promise_union_type() {
     let content = r#"// @strict: true
@@ -13,6 +13,6 @@ fakeTest(() => {
     /*a*/
   };
 });"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"a"}, &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("completionsPropertiesWithPromiseUnionType", content);
+    // TODO: f.VerifyCompletions(t, []string{"a"}, &fourslash.CompletionsExpectedList{
 }

@@ -115,10 +115,21 @@ pub struct RelationCacheKey {
     pub source_id: u32,
     pub target_id: u32,
     pub relation: RelationKind,
+    pub intersection_target: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct RelaterChainEntry {
+    pub message: tsox_core::diagnostics::Message,
+    pub args: Vec<String>,
+    /// Go 缺属性行的 related info（X_0_IS_DECLARED_HERE 挂声明节点）
+    pub related: Option<crate::checker::relater_relation::ChainRelated>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ChainRelated {
+    pub file: Option<std::sync::Arc<tsox_frontend::ast::SourceFile>>,
+    pub loc: tsox_core::core::text::TextRange,
     pub message: tsox_core::diagnostics::Message,
     pub args: Vec<String>,
 }
@@ -151,5 +162,30 @@ impl Relation {
 
     pub fn clear(&mut self) {
         self.results.clear();
+    }
+}
+
+pub(crate) fn error_range_for_node(
+    node: &std::sync::Arc<tsox_frontend::ast::Node>,
+) -> tsox_core::core::text::TextRange {
+    use tsox_frontend::ast::SyntaxKind;
+    match node.kind {
+        SyntaxKind::VariableDeclaration
+        | SyntaxKind::BindingElement
+        | SyntaxKind::ClassDeclaration
+        | SyntaxKind::InterfaceDeclaration
+        | SyntaxKind::ModuleDeclaration
+        | SyntaxKind::EnumDeclaration
+        | SyntaxKind::EnumMember
+        | SyntaxKind::FunctionExpression
+        | SyntaxKind::GetAccessor
+        | SyntaxKind::SetAccessor
+        | SyntaxKind::TypeAliasDeclaration
+        | SyntaxKind::PropertyDeclaration
+        | SyntaxKind::PropertySignature
+        | SyntaxKind::NamespaceImport
+        | SyntaxKind::MethodDeclaration
+        | SyntaxKind::FunctionDeclaration => node.name().map(|n| n.loc).unwrap_or(node.loc),
+        _ => node.loc,
     }
 }

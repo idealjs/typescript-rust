@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.VerifyOrganizeImports("]
+
 #[test]
 fn organize_imports_dts_unused_import_with_augmentation() {
     let content = r#"// @Filename: /styled-patch.d.ts
@@ -14,6 +14,6 @@ declare module 'styled-components' {
 // @Filename: /node_modules/styled-components/index.d.ts
 export interface Keyframes {}
 export interface ThemedStyledComponentsModule {}"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("organizeImports_dtsUnusedImportWithAugmentation", content);
     // TODO: f.VerifyOrganizeImports(
 }

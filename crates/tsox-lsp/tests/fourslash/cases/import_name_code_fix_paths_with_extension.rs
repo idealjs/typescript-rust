@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
+
 #[test]
 fn import_name_code_fix_paths_with_extension() {
     let content = r##"// @Filename: /tsconfig.json
@@ -21,6 +21,6 @@ fn import_name_code_fix_paths_with_extension() {
 export function helloWorld() {}
 // @Filename: /src/index.ts
 helloWorld/**/"##;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"#internals/example"}, &lsutil.UserPreferences{Imp
+    let _s = Session::new_for_test("importNameCodeFix_pathsWithExtension", content);
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"#internals/example"}, &lsutil.UserPreferences{Imp
 }

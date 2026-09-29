@@ -42,3 +42,6 @@ pub fn is_symlink_or_reparse_point(path: &str) -> bool {
 
 #[cfg(test)]
 pub(crate) mod tests;
+
+// r 轮接线:迁移批次模块
+pub mod mig;

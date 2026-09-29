@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker_assignment2::*;
+use tsox_core::diagnostics::messages_generated::OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1;
 
 impl Checker {
     pub(crate) fn check_assignment_compat(
@@ -76,6 +77,11 @@ impl Checker {
         if target.kind == Identifier {
             if let Some(sym) = self.resolve_identifier(target) {
                 let base = self.resolve_alias_base(sym);
+                if base.flags.contains(SymbolFlags::NamespaceModule)
+                    && !base.flags.contains(SymbolFlags::ValueModule)
+                {
+                    return;
+                }
                 if base
                     .flags
                     .intersects(SymbolFlags::Class | SymbolFlags::ENUM | SymbolFlags::ValueModule)
@@ -127,20 +133,91 @@ impl Checker {
             }
         };
 
-        let _ = self.check_type_assignable_to_and_optionally_elaborate(
-            &right_type,
-            &left_type,
-            Some(target),
-            Some(&data.right),
-            None,
-            None,
-        );
+        if data.operator_token.kind == EqualsToken
+            && data.right.kind == SyntaxKind::ObjectLiteralExpression
+        {
+            if let Some(excess_name) = self.get_excess_property_name(&right_type, &left_type) {
+                let loc = self
+                    .find_object_literal_property_name_node(&data.right, &excess_name)
+                    .unwrap_or(data.right.loc);
+                let filtered_left = self.excess_check_error_target(&left_type);
+                let annot_str = self.type_to_string(&filtered_left);
+                // Go reportUnmatchedPropertyForExcessProperty：字面量自身元素命中
+                // 拼写建议时换 TS2561 文案
+                if let Some(sugg) = self.suggestion_for_nonexistent_property(&excess_name, &filtered_left) {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        loc,
+                        tsox_core::diagnostics::messages_generated::
+                            OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_BUT_0_DOES_NOT_EXIST_IN_TYPE_1_DID_YOU_MEAN_TO_WRITE_2,
+                        vec![
+                            crate::checker::property_name_for_display(&excess_name),
+                            annot_str,
+                            sugg,
+                        ],
+                    ));
+                } else {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        loc,
+                        OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
+                        vec![
+                            crate::checker::property_name_for_display(&excess_name),
+                            annot_str,
+                        ],
+                    ));
+                }
+                return;
+            }
+        }
+
+        if !self.is_type_assignable_to(&right_type, &left_type) {
+            let report_type = self.assignment_report_type(target, &left_type);
+            let head_message = self.exact_optional_mismatch_head_message(target, &right_type);
+            let _ = self.check_type_assignable_to_and_optionally_elaborate(
+                &right_type,
+                &report_type,
+                Some(target),
+                Some(&data.right),
+                head_message.as_ref(),
+                None,
+            );
+        }
+    }
+
+    // Go checkAssignmentOperator：EOPT 下写 undefined 到属性访问目标且
+    // 目标属性类型含 missing（Rust 以符号 Optional 位近似）时换 TS2412 文案
+    fn exact_optional_mismatch_head_message(
+        &mut self,
+        target: &Arc<Node>,
+        right_type: &Arc<Type>,
+    ) -> Option<tsox_core::diagnostics::Message> {
+        if !self.exact_optional_property_types {
+            return None;
+        }
+        let tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) = &target.data else {
+            return None;
+        };
+        if !self.maybe_type_of_kind(right_type, TypeFlags::Undefined) {
+            return None;
+        }
+        let obj_type = self.get_type_of_node(&pa.expression);
+        let prop = self.get_property_of_type(&obj_type, &pa.name.text())?;
+        if !prop.flags.contains(SymbolFlags::Optional) {
+            return None;
+        }
+        Some(
+            tsox_core::diagnostics::messages_generated::
+                TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_WITH_EXACTOPTIONALPROPERTYTYPES_COLON_TRUE_CONSIDER_ADDING_UNDEFINED_TO_THE_TYPE_OF_THE_TARGET,
+        )
     }
 
     pub(crate) fn write_type_of_property_symbol(
         &mut self,
+        owner: Option<&Arc<Type>>,
         prop: &Arc<tsox_frontend::ast::Symbol>,
     ) -> Arc<Type> {
+        let mut t = None;
         if prop.flags.contains(SymbolFlags::SetAccessor)
             && let Some(setter) = prop
                 .declarations
@@ -151,9 +228,69 @@ impl Checker {
             && let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &param.data
             && let Some(tn) = &pd.type_node
         {
-            return self.get_type_from_type_node(tn);
+            let raw = self.get_type_from_type_node(tn);
+            let mapped = self
+                .value_symbol_links
+                .get(prop)
+                .and_then(|l| l.mapper.clone())
+                .map(|m| m.map(&raw))
+                .unwrap_or(raw);
+            t = Some(mapped);
         }
-        self.get_type_of_symbol(prop)
+        let base = t.unwrap_or_else(|| self.get_type_of_symbol(prop));
+        let Some(owner) = owner else {
+            return base;
+        };
+        let Some(obj) = owner.as_object() else {
+            return base;
+        };
+        if obj.type_arguments.is_empty() {
+            return base;
+        }
+        let Some(owner_sym) = owner.symbol.clone() else {
+            return base;
+        };
+        let decl_tps = self.declared_type_parameter_types(&owner_sym);
+        if decl_tps.is_empty() || decl_tps.len() != obj.type_arguments.len() {
+            return base;
+        }
+        self.substitute_infer_type_parameters(&base, &decl_tps, &obj.type_arguments)
+    }
+
+    // setter 目标的赋值报错文案：联合写类型去掉 undefined 成员
+    // （Go getFlowTypeOfAccessExpression 对确定性写路径的 removeMissingType）
+    fn assignment_report_type(&mut self, target: &Arc<Node>, write_type: &Arc<Type>) -> Arc<Type> {
+        let has_setter = match &target.data {
+            tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) => {
+                let obj_type = self.get_type_of_node(&pa.expression);
+                self.get_property_of_type(&obj_type, &pa.name.text())
+                    .is_some_and(|s| s.flags.contains(SymbolFlags::SetAccessor))
+            }
+            tsox_frontend::ast::NodeData::ElementAccessExpression(ea)
+                if Self::element_access_property_key(&ea.argument_expression).is_some() =>
+            {
+                let obj_type = self.get_type_of_node(&ea.expression);
+                let name = Self::element_access_property_key(&ea.argument_expression).unwrap();
+                self.get_property_of_type(&obj_type, &name)
+                    .is_some_and(|s| s.flags.contains(SymbolFlags::SetAccessor))
+            }
+            _ => false,
+        };
+        if !has_setter {
+            return Arc::clone(write_type);
+        }
+        if let crate::checker::types::TypeData::Union(u) = &write_type.data {
+            let kept: Vec<&Arc<Type>> = u
+                .union_or_intersection
+                .types
+                .iter()
+                .filter(|t| !t.flags.contains(TypeFlags::Undefined))
+                .collect();
+            if kept.len() == 1 && kept.len() < u.union_or_intersection.types.len() {
+                return Arc::clone(kept[0]);
+            }
+        }
+        Arc::clone(write_type)
     }
 
     pub(crate) fn assignment_target_type(&mut self, target: &Arc<Node>) -> Option<Arc<Type>> {
@@ -175,14 +312,13 @@ impl Checker {
                 let obj_type = self.get_type_of_node(&pa.expression);
 
                 self.get_property_of_type(&obj_type, &pa.name.text())
-                    .map(|sym| self.write_type_of_property_symbol(&sym))
+                    .map(|sym| self.write_type_of_property_symbol(Some(&obj_type), &sym))
             }
             tsox_frontend::ast::NodeData::ElementAccessExpression(ea) => {
-                if ea.argument_expression.kind == SyntaxKind::StringLiteral {
+                if let Some(name) = Self::element_access_property_key(&ea.argument_expression) {
                     let obj_type = self.get_type_of_node(&ea.expression);
-                    let name = ea.argument_expression.text();
-                    if let Some(prop) = self.get_property_of_type(&obj_type, name) {
-                        return Some(self.write_type_of_property_symbol(&prop));
+                    if let Some(prop) = self.get_property_of_type(&obj_type, &name) {
+                        return Some(self.write_type_of_property_symbol(Some(&obj_type), &prop));
                     }
                 }
                 let obj_type = self.get_type_of_node(&ea.expression);
@@ -219,6 +355,16 @@ impl Checker {
                     .is_some()
             }
             _ => false,
+        }
+    }
+
+    /// 元素访问的属性键：字符串/数字字面量按文本，`Symbol.<well-known>` 按内部名
+    fn element_access_property_key(arg: &Arc<Node>) -> Option<String> {
+        match arg.kind {
+            SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral => {
+                Some(arg.text().to_string())
+            }
+            _ => crate::binder::symbols_binder_4::well_known_symbol_member_name(arg),
         }
     }
 

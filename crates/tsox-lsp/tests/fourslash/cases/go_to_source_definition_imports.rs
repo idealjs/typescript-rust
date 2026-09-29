@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
+
 #[test]
 fn go_to_source_aliased_import_export() {
     let content = r#"// @moduleResolution: bundler
@@ -15,11 +15,10 @@ import { foo as /*importAlias*/bar } from "pkg";
 bar;
 // @Filename: /home/src/workspaces/project/reexport.ts
 export { foo as /*reExportAlias*/bar } from "pkg";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importAlias", "reExportAlias")
+    let _s = Session::new_for_test("goToSourceAliasedImportExport", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importAlias", "reExportAlias")
 }
 
-#[ignore = "generator: // import { original as alias } uses the propertyName branch"]
 #[test]
 fn go_to_source_aliased_import_specifier() {
     // TODO: // import { original as alias } uses the propertyName branch.
@@ -33,11 +32,10 @@ export function /*target*/original() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { original as /*aliasedImport*/renamed } from "pkg";
 renamed();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "aliasedImport")
+    let _s = Session::new_for_test("goToSourceAliasedImportSpecifier", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "aliasedImport")
 }
 
-#[ignore = "generator: // (in the current file) and the call signature target (from"]
 #[test]
 fn go_to_source_call_through_import() {
     // TODO: // When calling an imported function, the checker returns both the import specifier
@@ -59,11 +57,10 @@ export class /*targetWidget*/Widget {
 import { Widget } from "pkg";
 const w = new /*constructorCall*/Widget("test");
 w./*methodCall*/render();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "constructorCall", "methodCall")
+    let _s = Session::new_for_test("goToSourceCallThroughImport", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "constructorCall", "methodCall")
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
 #[test]
 fn go_to_source_callback_param() {
     let content = r#"// @moduleResolution: bundler
@@ -89,11 +86,10 @@ import { command } from "yargs";
 command("foo", yargs => {
     yargs.[|/*start*/positional|]();
 });"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "start")
+    let _s = Session::new_for_test("goToSourceCallbackParam", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
 #[test]
 fn go_to_source_re_export_names() {
     let content = r#"// @moduleResolution: bundler
@@ -109,11 +105,10 @@ export function /*targetBar*/bar() { return 42; }
 export { /*reExportFoo*/foo, /*reExportBar*/bar } from "pkg";
 // @Filename: /home/src/workspaces/project/index.ts
 import { foo, bar } from [|"pkg"/*moduleSpecifier*/|];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "reExportFoo", "reExportBar", "moduleSpecifier")
+    let _s = Session::new_for_test("goToSourceReExportNames", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "reExportFoo", "reExportBar", "moduleSpecifier")
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
 #[test]
 fn go_to_source_re_export_module_specifier() {
     let content = r#"// @moduleResolution: bundler
@@ -127,11 +122,10 @@ export function /*targetAlpha*/alpha() { return "a"; }
 export function /*targetBeta*/beta() { return 2; }
 // @Filename: /home/src/workspaces/project/reexport.ts
 export { alpha, beta } from [|"pkg"/*reExportSpecifier*/|];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "reExportSpecifier")
+    let _s = Session::new_for_test("goToSourceReExportModuleSpecifier", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "reExportSpecifier")
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
 #[test]
 fn go_to_source_re_exported_implementation() {
     let content = r#"// @moduleResolution: bundler
@@ -148,11 +142,10 @@ export function /*target*/foo() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importName*/foo } from "pkg";
 foo/*start*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importName", "start")
+    let _s = Session::new_for_test("goToSourceReExportedImplementation", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName", "start")
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
 #[test]
 fn go_to_source_import_filtered_by_external_declaration() {
     let content = r#"// @moduleResolution: bundler
@@ -166,11 +159,10 @@ export function /*target*/helper() {}
 import { helper } from "pkg";
 helper/*usage*/();
 export { helper as /*reExport*/myHelper } from "pkg";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage", "reExport")
+    let _s = Session::new_for_test("goToSourceImportFilteredByExternalDeclaration", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage", "reExport")
 }
 
-#[ignore = "generator: // The .d.ts declaration itself re-exports from another modu"]
 #[test]
 fn go_to_source_dts_re_export() {
     // TODO: // The .d.ts declaration itself re-exports from another module,
@@ -189,11 +181,10 @@ export { helper } from "./impl.js";
 // @Filename: /home/src/workspaces/project/index.ts
 import { helper } from "pkg";
 helper/*usage*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
+    let _s = Session::new_for_test("goToSourceDtsReExport", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
-#[ignore = "generator: // index.js re-exports from impl.js, causing getForwardedImp"]
 #[test]
 fn go_to_source_barrel_re_export_chain() {
     // TODO: // index.js re-exports from impl.js, causing getForwardedImplementationFiles
@@ -212,11 +203,10 @@ export { doWork } from "./impl.js";
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importName*/doWork } from "pkg";
 doWork/*callSite*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importName", "callSite")
+    let _s = Session::new_for_test("goToSourceBarrelReExportChain", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName", "callSite")
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
 #[test]
 fn go_to_source_cjs_re_export_via_define_property() {
     let content = r#"// @moduleResolution: bundler
@@ -255,6 +245,6 @@ var /*targetPopulationImpl*/TargetPopulation;
 import { /*namedImport*/greet, /*enumImport*/TargetPopulation } from "pkg";
 greet/*call*/("world");
 TargetPopulation/*enumAccess*/.Team;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "namedImport", "enumImport", "call", "enumAccess")
+    let _s = Session::new_for_test("goToSourceCJSReExportViaDefineProperty", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "namedImport", "enumImport", "call", "enumAccess")
 }

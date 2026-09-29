@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 pub struct CachedFS {
-    fs: Arc<dyn FS>,
+    pub(crate) fs: Arc<dyn FS>,
     enabled: Mutex<bool>,
     directory_exists_cache: Mutex<HashMap<String, bool>>,
     file_exists_cache: Mutex<HashMap<String, bool>>,

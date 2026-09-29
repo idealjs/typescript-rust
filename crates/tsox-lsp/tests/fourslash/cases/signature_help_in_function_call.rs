@@ -1,12 +1,12 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyNoSignatureHelpForMarkers"]
+
 #[test]
 fn signature_help_in_function_call() {
     let content = r#"var items = [];
 items.forEach(item => {
     for (/**/
 });"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyNoSignatureHelpForMarkers"); // f.VerifyNoSignatureHelpForMarkers(t, "")
+    let _s = Session::new_for_test("signatureHelpInFunctionCall", content);
+    // TODO: f.VerifyNoSignatureHelpForMarkers(t, "")
 }

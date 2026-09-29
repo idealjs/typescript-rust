@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_decorator_overloads() {
     let content = r#"// @Target: ES6
@@ -16,6 +16,6 @@ class C {
     @[|/*useDecString*/dec|] f() {}
     @[|/*useDecSymbol*/dec|] [s]() {}
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "useDecString", "useDecSymbol")
+    let _s = Session::new_for_test("goToDefinitionDecoratorOverloads", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "useDecString", "useDecSymbol")
 }

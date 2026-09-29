@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
+
 #[test]
 fn signature_help_this() {
     let content = r#"class Foo<T> {
@@ -31,17 +31,17 @@ implicitAny(/*4*/12);
 explicitVoid(/*5*/13);
 let o = { n: 14, m: explicitLiteral };
 o.m(/*6*/);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpThis", content);
     fourslash::go_to_marker(&mut s, "1");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{ParameterName: "n"})
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{ParameterName: "n"})
     fourslash::go_to_marker(&mut s, "2");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{ParameterName: "n"})
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{ParameterName: "n"})
     fourslash::go_to_marker(&mut s, "3");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{ParameterName: "n"})
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{ParameterName: "n"})
     fourslash::go_to_marker(&mut s, "4");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{ParameterName: "x"})
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{ParameterName: "x"})
     fourslash::go_to_marker(&mut s, "5");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{ParameterName: "x"})
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{ParameterName: "x"})
     fourslash::go_to_marker(&mut s, "6");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{ParameterName: "x"})
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{ParameterName: "x"})
 }

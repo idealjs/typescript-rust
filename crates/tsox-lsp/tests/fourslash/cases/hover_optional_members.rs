@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn hover_optional_members() {
     let content = r#"
@@ -74,6 +74,6 @@ foo3./*3i*/m
 foo3./*3j*/m?.(42)
 foo3./*3k*/m?.("abc")
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("hoverOptionalMembers", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

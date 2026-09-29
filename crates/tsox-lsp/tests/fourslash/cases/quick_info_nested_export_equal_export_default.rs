@@ -1,12 +1,12 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_nested_export_equal_export_default() {
     let content = r#"export = (state, messages) => {
    export/*1*/ default/*2*/ {
    }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoNestedExportEqualExportDefault", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

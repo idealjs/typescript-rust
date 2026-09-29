@@ -20,6 +20,7 @@ pub(crate) fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
         "noimplicitany" => options.no_implicit_any = t,
         "noimplicitthis" => options.no_implicit_this = t,
         "noimplicitoverride" => options.no_implicit_override = t,
+        "noimplicitreturns" => options.no_implicit_returns = t,
         "nounusedlocals" => options.no_unused_locals = t,
         "nounusedparameters" => options.no_unused_parameters = t,
         "nofallthroughcasesinswitch" => options.no_fallthrough_cases_in_switch = t,
@@ -30,6 +31,7 @@ pub(crate) fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
         "noresolve" => options.no_resolve = t,
         "useunknownincatchvariables" => options.use_unknown_in_catch_variables = t,
         "exactoptionalpropertytypes" => options.exact_optional_property_types = t,
+        "usedefineforclassfields" => options.use_define_for_class_fields = t,
         "esmoduleinterop" => options.es_module_interop = t,
         "allowsyntheticdefaultimports" => options.allow_synthetic_default_imports = t,
         "allowjs" => options.allow_js = t,
@@ -48,6 +50,18 @@ pub(crate) fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
         "verbatimmodulesyntax" => options.verbatim_module_syntax = t,
         "preserveconstenums" => options.preserve_const_enums = t,
         "importhelpers" => options.import_helpers = t,
+        "noemithelpers" => options.no_emit_helpers = t,
+        "runexternalcode" => options.run_external_code = t,
+        "downleveliteration" => options.downlevel_iteration = t,
+        "emitbom" => options.emit_bom = t,
+        "stripinternal" => options.strip_internal = t,
+        "rewriterelativeimportextensions" => options.rewrite_relative_import_extensions = t,
+        "preservesymlinks" => options.preserve_symlinks = t,
+        "deduplicatepackages" => options.deduplicate_packages = t,
+        "stabletypeordering" => options.stable_type_ordering = t,
+        "allowarbitraryextensions" => options.allow_arbitrary_extensions = t,
+        "allowimportingtsextensions" => options.allow_importing_ts_extensions = t,
+        "resolvepackagejsonexports" => options.resolve_package_json_exports = t,
         "experimentaldecorators" => options.experimental_decorators = t,
         "emitdecoratormetadata" => options.emit_decorator_metadata = t,
         "forceconsistentcasinginfilenames" => options.force_consistent_casing_in_file_names = t,
@@ -69,6 +83,11 @@ pub(crate) fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
         "build" => options.build = t,
         "singlethreaded" => options.single_threaded = t,
         "quiet" => options.quiet = t,
+        "allowunreachablecode" => options.allow_unreachable_code = t,
+        "allowunusedlabels" => options.allow_unused_labels = t,
+        "erasablesyntaxonly" => options.erasable_syntax_only = t,
+        "nouncheckedsideeffectimports" => options.no_unchecked_side_effect_imports = t,
+        "libreplacement" => options.lib_replacement = t,
         "strict" => {
             options.strict = t;
 
@@ -108,8 +127,9 @@ pub fn apply_test_settings_with_base(
         "noimplicitany",
         "noimplicitthis",
         "noimplicitoverride",
-        "nounsusedlocals",
-        "nounsusedparameters",
+        "noimplicitreturns",
+        "nounusedlocals",
+        "nounusedparameters",
         "nofallthroughcasesinswitch",
         "nouncheckedindexedaccess",
         "nopropertyaccessfromindexsignature",
@@ -118,6 +138,7 @@ pub fn apply_test_settings_with_base(
         "noresolve",
         "useunknownincatchvariables",
         "exactoptionalpropertytypes",
+        "usedefineforclassfields",
         "esmoduleinterop",
         "allowsyntheticdefaultimports",
         "allowjs",
@@ -135,6 +156,18 @@ pub fn apply_test_settings_with_base(
         "verbatimmodulesyntax",
         "preserveconstenums",
         "importhelpers",
+        "noemithelpers",
+        "runexternalcode",
+        "downleveliteration",
+        "emitbom",
+        "stripinternal",
+        "rewriterelativeimportextensions",
+        "preservesymlinks",
+        "deduplicatepackages",
+        "stabletypeordering",
+        "allowarbitraryextensions",
+        "allowimportingtsextensions",
+        "resolvepackagejsonexports",
         "experimentaldecorators",
         "emitdecoratormetadata",
         "forceconsistencingcasingfilenames",
@@ -158,6 +191,11 @@ pub fn apply_test_settings_with_base(
         "quiet",
         "strict",
         "alwaysstrict",
+        "allowunreachablecode",
+        "allowunusedlabels",
+        "erasablesyntaxonly",
+        "nouncheckedsideeffectimports",
+        "libreplacement",
     ];
     const KNOWN_STR_OPTIONS: &[&str] = &[
         "target",
@@ -182,11 +220,17 @@ pub fn apply_test_settings_with_base(
         "modulosuffixes",
         "customconditions",
         "jsxmode",
+        "maxnodemodulejsdepth",
+        "ignoredeprecations",
     ];
     const KNOWN_LIST_OPTIONS: &[&str] = &["lib", "types", "typeroots", "rootdirs"];
 
     let mut options = base;
     let mut unrecognized: Vec<String> = Vec::new();
+
+    if options.skip_default_lib_check.is_unknown() {
+        options.skip_default_lib_check = tsox_core::core::tristate::Tristate::True;
+    }
 
     let has_strict_directive = settings.keys().any(|k| k.eq_ignore_ascii_case("strict"));
     let has_nia_directive = settings
@@ -196,7 +240,12 @@ pub fn apply_test_settings_with_base(
         options.no_implicit_any = tsox_core::core::tristate::Tristate::True;
     }
 
-    for (name, raw_value) in settings {
+    let mut ordered_names: Vec<&String> = settings.keys().collect();
+    ordered_names.sort();
+    ordered_names.sort_by_key(|n| !n.eq_ignore_ascii_case("strict"));
+
+    for name in ordered_names {
+        let raw_value = &settings[name];
         let lower = name.to_lowercase();
         let trimmed = raw_value.trim().trim_end_matches(';').to_string();
 
@@ -214,6 +263,11 @@ pub fn apply_test_settings_with_base(
 
         let canonical = find_option(&lower)
             .map(|o| o.name.to_string())
+            .or_else(|| match lower.as_str() {
+                "maxnodemodulejsdepth" => Some("maxNodeModuleJsDepth".to_string()),
+                "ignoredeprecations" => Some("ignoreDeprecations".to_string()),
+                _ => None,
+            })
             .unwrap_or_else(|| lower.clone());
         if is_bool_val {
             set_bool(&mut options, &lower, trimmed.eq_ignore_ascii_case("true"));
@@ -233,5 +287,6 @@ pub fn apply_test_settings_with_base(
         }
     }
 
+    unrecognized.sort();
     (options, unrecognized)
 }

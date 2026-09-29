@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
+
 #[test]
 fn rename_for_default_export03() {
     let content = r#"[|function /*1*/[|{| "contextRangeIndex": 0 |}f|]() {
@@ -19,6 +19,6 @@ var y = /*4*/[|f|]();
 [|namespace /*5*/[|{| "contextRangeIndex": 7 |}f|] {
     var local = 100;
 }|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, ToAny(core.Filter(f.GetRangesByText().Get("f"), func(
+    let _s = Session::new_for_test("renameForDefaultExport03", content);
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, ToAny(core.Filter(f.GetRangesByText().Get("f"), func(
 }

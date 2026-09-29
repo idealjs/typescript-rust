@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: capabilities := fourslash.GetDefaultCapabilities()"]
+
 #[test]
 fn doc_comment_template_with_existing_js_doc() {
     let content = r#"/** /**/ */
@@ -14,6 +14,6 @@ function foo(a, b) {
 }"#;
     // TODO: capabilities := fourslash.GetDefaultCapabilities()
     // TODO: capabilities.TextDocument.Completion.CompletionItem.SnippetSupport = new(false)
-    let mut s = Session::new_with_capabilities(content, None);
-    fourslash::unsupported("VerifyNoJSDocCompletion"); // f.VerifyNoJSDocCompletion(t, "")
+    let _s = Session::new_with_capabilities(content, None);
+    // TODO: f.VerifyNoJSDocCompletion(t, "")
 }

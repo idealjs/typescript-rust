@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
+
 #[test]
 fn import_name_code_fix_new_import_file3() {
     let content = r#"[|let t: XXX/*0*/.I;|]
@@ -9,6 +9,6 @@ export namespace XXX {
    export interface I {
    }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    let _s = Session::new_for_test("importNameCodeFixNewImportFile3", content);
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

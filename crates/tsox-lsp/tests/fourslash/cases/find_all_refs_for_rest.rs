@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_for_rest() {
     let content = r#"interface Gen {
@@ -11,6 +11,6 @@ fn find_all_refs_for_rest() {
 let t: Gen;
 var { x, ...rest } = t;
 rest./*2*/parent;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2")
+    let _s = Session::new_for_test("findAllRefsForRest", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

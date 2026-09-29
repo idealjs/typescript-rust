@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: }"]
+
 #[test]
 fn signature_help_comments_comment_parsing() {
     let content = r#"/// This is simple /// comments
@@ -204,7 +204,7 @@ jsDocCommentAlignmentTest3(/*47*/"hello",/*48*/1, /*49*/2);
 /**/
 class NoQuickInfoClass {
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
+    let _s = Session::new_for_test("signatureHelpCommentsCommentParsing", content);
+    // TODO: f.VerifyBaselineSignatureHelp(t)
     // TODO: }
 }

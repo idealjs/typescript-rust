@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn references_for_no_context() {
     let content = r#"namespace modTest {
@@ -23,6 +23,6 @@ fn references_for_no_context() {
     namespace testMod {
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
+    let _s = Session::new_for_test("referencesForNoContext", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

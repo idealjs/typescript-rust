@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn formatting_array_literal() {
     let content = r#"/*1*/x= [];
@@ -13,8 +13,8 @@ z = [[
 /*5*/  1,
 /*6*/             2
 /*7*/      ]  ];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formattingArrayLiteral", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"x = [];"#);
     fourslash::go_to_marker(&mut s, "2");

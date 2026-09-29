@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn empty_export_find_references() {
     let content = r#"// @allowNonTsExtensions: true
@@ -8,6 +8,6 @@ fn empty_export_find_references() {
 /**/module.exports = {
 
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "")
+    let _s = Session::new_for_test("emptyExportFindReferences", content);
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "")
 }

@@ -10,6 +10,7 @@ pub mod referenceresolver;
 pub(crate) use container_flags::*;
 pub(crate) use flow_label::{ActiveLabel, FlowLabel};
 pub(crate) use helpers::*;
+pub(crate) use bind_js_assignment_declarations::get_assignment_declaration_kind;
 
 pub(crate) use std::sync::Arc;
 pub(crate) use tsox_core::diagnostics::messages_generated::A_PARAMETER_INITIALIZER_IS_ONLY_ALLOWED_IN_A_FUNCTION_OR_CONSTRUCTOR_IMPLEMENTATION;
@@ -21,6 +22,7 @@ pub(crate) use tsox_core::diagnostics::messages_generated::IDENTIFIER_EXPECTED_0
 pub(crate) use tsox_core::diagnostics::messages_generated::IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_IN_STRICT_MODE_MODULES_ARE_AUTOMATICALLY_IN_STRICT_MODE;
 pub(crate) use tsox_core::diagnostics::messages_generated::IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_THAT_CANNOT_BE_USED_HERE;
 pub(crate) use tsox_frontend::ast::*;
+pub(crate) mod bind_js_assignment_declarations;
 pub(crate) mod bind_walk;
 pub(crate) mod bind_walk_bind_module_declaration;
 pub(crate) mod bind_walk_bind_statement_kinds;
@@ -53,3 +55,6 @@ pub(crate) mod symbols_symbol_conflicts;
 pub(crate) mod symbols_symbol_insertion;
 #[cfg(test)]
 pub(crate) mod tests;
+
+// r 轮接线:迁移批次模块
+pub mod mig;

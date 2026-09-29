@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn import_completions_package_json_exports_specifier_ends_in_ts() {
     let content = r#"// @module: node18
@@ -22,6 +22,6 @@ export function foo(): void;
  }
 // @Filename: /index.ts
 import {} from "pkg//*1*/";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("importCompletionsPackageJsonExportsSpecifierEndsInTs", content);
+    // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
 }

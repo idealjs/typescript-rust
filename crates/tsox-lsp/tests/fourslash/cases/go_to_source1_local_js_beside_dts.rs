@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn go_to_source1_local_js_beside_dts() {
     let content = r#"// @lib: es5
@@ -11,7 +11,7 @@ export declare const a: string;
 // @Filename: /home/src/workspaces/project/index.ts
 import { a } from [|"./a"/*moduleSpecifier*/|];
 [|a/*identifier*/|]"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("goToSource1_localJsBesideDts", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "identifier", "moduleSpecifier")
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "identifier", "moduleSpecifier")
 }

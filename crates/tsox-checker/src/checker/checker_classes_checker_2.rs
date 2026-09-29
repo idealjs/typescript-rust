@@ -20,10 +20,126 @@ impl Checker {
         self.extends_base_of(&class_node)
     }
 
+    /// 泛型类引用/继承的实例化：类实例缓存按节点驻留的是裸声明形态，
+    /// 带实参构建须绕开缓存——取出裸缓存、类型实参映射压栈下重建成员，
+    /// 再还原裸缓存（Go 声明类型与 instantiation 分离的等价实现）
+    pub(crate) fn instantiate_class_instance_type(
+        &mut self,
+        class_node: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+        class_tps: &[Arc<tsox_frontend::ast::Symbol>],
+        arg_types: &[Arc<Type>],
+    ) -> Arc<Type> {
+        let node_id = class_node.id();
+        let saved = self.class_instance_type_cache.remove(&node_id);
+        self.this_type_cache.remove(&node_id);
+
+        let mut mapping = HashMap::new();
+        let mut name_frame: Vec<(Arc<tsox_frontend::ast::Symbol>, Arc<Type>)> = Vec::new();
+        for (i, tp_sym) in class_tps.iter().enumerate() {
+            if let Some(arg) = arg_types.get(i) {
+                mapping.insert(
+                    Arc::as_ptr(tp_sym) as *const tsox_frontend::ast::Symbol,
+                    Arc::clone(arg),
+                );
+                name_frame.push((Arc::clone(tp_sym), Arc::clone(arg)));
+            }
+        }
+        self.type_argument_stack.push(mapping);
+        self.type_argument_name_frames.push(name_frame);
+        self.push_scope(class_node);
+        let instance = self.build_class_instance_type_with_base(class_node);
+        self.pop_scope();
+        self.type_argument_stack.pop();
+        self.type_argument_name_frames.pop();
+
+        self.class_instance_type_cache.remove(&node_id);
+        self.this_type_cache.remove(&node_id);
+        match saved {
+            Some(raw) => {
+                self.class_instance_type_cache.insert(node_id, raw);
+            }
+            None => {
+                let _ = self.build_class_instance_type_with_base(class_node);
+            }
+        }
+
+        let tp_types: Vec<Arc<Type>> = class_tps
+            .iter()
+            .map(|s| self.get_type_parameter_from_symbol(s))
+            .collect();
+        if !arg_types.is_empty() {
+            let instance_mut = Arc::as_ptr(&instance) as *mut crate::checker::types::Type;
+            unsafe {
+                if let crate::checker::types::TypeData::Object(o) = &mut (*instance_mut).data {
+                    o.type_arguments = arg_types.to_vec();
+                }
+            }
+        }
+        self.mark_structured_members_instantiated(&instance, symbol, class_tps, &tp_types, arg_types);
+        // 实例化类实例型记录显式实参（Go 类实例引用携带 target+args，
+        // 消息显示按带参形态）
+        {
+            let ptr = Arc::as_ptr(&instance) as *mut crate::checker::types::Type;
+            unsafe {
+                if let crate::checker::types::TypeData::Object(obj) = &mut (*ptr).data
+                    && obj.type_arguments.is_empty()
+                {
+                    obj.type_arguments = arg_types.to_vec();
+                }
+            }
+        }
+        instance
+    }
+
+    pub(crate) fn resolve_entity_name_class_symbol(&mut self, expr: &Arc<Node>) -> Option<Arc<Symbol>> {
+        match expr.kind {
+            SyntaxKind::Identifier => self.resolve_identifier(expr),
+            SyntaxKind::PropertyAccessExpression => {
+                let tsox_frontend::ast::NodeData::PropertyAccessExpression(d) = &expr.data else {
+                    return None;
+                };
+                let base = self.resolve_entity_name_class_symbol(&d.expression)?;
+                let name = d.name.text();
+                base.members
+                    .get(name)
+                    .cloned()
+                    .or_else(|| base.exports.get(name).cloned())
+            }
+            _ => None,
+        }
+    }
+
+    pub(crate) fn emit_ts2506(&mut self, class_node: &Arc<Node>, symbol: &Arc<Symbol>) {
+        let class_name_loc = match &class_node.data {
+            tsox_frontend::ast::NodeData::ClassDeclaration(cd) => cd
+                .name
+                .as_ref()
+                .map(|n| n.loc)
+                .unwrap_or(class_node.loc),
+            _ => class_node.loc,
+        };
+        let file = self.get_source_file_of_node(class_node);
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            file,
+            class_name_loc,
+            tsox_core::diagnostics::messages_generated::
+                X_0_IS_REFERENCED_DIRECTLY_OR_INDIRECTLY_IN_ITS_OWN_BASE_EXPRESSION,
+            vec![symbol.name.clone()],
+        ));
+    }
+
     pub(crate) fn resolve_base_class_instance_type(&mut self, type_ref: &Arc<Node>) -> Arc<Type> {
         if let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(data) = &type_ref.data {
-            if data.expression.kind == SyntaxKind::Identifier {
-                if let Some(symbol) = self.resolve_identifier(&data.expression) {
+            let entity_symbol = match data.expression.kind {
+                SyntaxKind::Identifier => self.resolve_identifier(&data.expression),
+                SyntaxKind::PropertyAccessExpression => {
+                    self.resolve_entity_name_class_symbol(&data.expression)
+                }
+                _ => None,
+            };
+            if let Some(symbol) = entity_symbol {
+                {
                     if symbol.flags.contains(SymbolFlags::Class) {
                         if self.type_resolution_stack.len() >= 200 {
                             return self.get_any_type();
@@ -36,10 +152,11 @@ impl Checker {
                             .cloned()
                         {
                             let key = Arc::as_ptr(&symbol) as *const tsox_frontend::ast::Symbol;
-                            if !self.push_type_resolution(
-                                key,
-                                TypeResolutionProperty::ResolvedBaseTypes,
-                            ) {
+                            if self.is_resolving(key, TypeResolutionProperty::ResolvedBaseTypes) {
+                                self.mark_type_resolution_cycle(
+                                    key,
+                                    TypeResolutionProperty::ResolvedBaseTypes,
+                                );
                                 return self.get_any_type();
                             }
 
@@ -62,43 +179,36 @@ impl Checker {
                                     }
                                     _ => Vec::new(),
                                 };
-                            let pushed = if let Some(args) = &heritage_args
+                            let mut pushed_args: Option<Vec<Arc<Type>>> = None;
+                            let _pushed = if let Some(args) = &heritage_args
                                 && !base_tps.is_empty()
                             {
                                 let arg_types: Vec<Arc<Type>> = args
                                     .iter()
                                     .map(|a| self.get_type_from_type_node(a))
                                     .collect();
-                                let mut mapping = HashMap::new();
-                                let mut name_frame: Vec<(Arc<Symbol>, Arc<Type>)> = Vec::new();
-                                for (i, tp_sym) in base_tps.iter().enumerate() {
-                                    if i < arg_types.len() {
-                                        mapping.insert(
-                                            Arc::as_ptr(tp_sym)
-                                                as *const tsox_frontend::ast::Symbol,
-                                            Arc::clone(&arg_types[i]),
-                                        );
-                                        name_frame
-                                            .push((Arc::clone(tp_sym), Arc::clone(&arg_types[i])));
-                                    }
+                                if arg_types.len() == base_tps.len() {
+                                    pushed_args = Some(arg_types);
+                                    true
+                                } else {
+                                    false
                                 }
-                                self.type_argument_stack.push(mapping);
-                                self.type_argument_name_frames.push(name_frame);
-                                true
                             } else {
                                 false
                             };
-                            let instance = {
+                            let instance = if let Some(arg_types) = pushed_args {
+                                self.instantiate_class_instance_type(
+                                    &class_node,
+                                    &symbol,
+                                    &base_tps,
+                                    &arg_types,
+                                )
+                            } else {
                                 self.push_scope(&class_node);
                                 let i = self.build_class_instance_type_with_base(&class_node);
                                 self.pop_scope();
                                 i
                             };
-                            if pushed {
-                                self.type_argument_stack.pop();
-                                self.type_argument_name_frames.pop();
-                            }
-                            self.pop_type_resolution();
                             return instance;
                         }
                     }
@@ -166,7 +276,7 @@ impl Checker {
 
             symbol: derived.symbol.clone(),
             alias: None,
-            data: TypeData::Object(ObjectTypeData {
+            data: TypeData::Object(ObjectTypeData { node: None,
                 structured: StructuredTypeData {
                     members: symbol_table,
                     properties: props,
@@ -203,6 +313,7 @@ impl Checker {
         }
         let members = match &class_node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(d) => &d.members,
+            tsox_frontend::ast::NodeData::ClassExpression(d) => &d.members,
             _ => return,
         };
 
@@ -238,10 +349,19 @@ impl Checker {
                 continue;
             }
 
-            let Some(type_node) = &pd.type_node else {
-                continue;
+            let prop_type = if let Some(sym) = self
+                .program
+                .symbol_map()
+                .symbol_of(member)
+                .cloned()
+            {
+                self.get_type_of_symbol(&sym)
+            } else {
+                match &pd.type_node {
+                    Some(type_node) => self.get_type_from_type_node(type_node),
+                    None => continue,
+                }
             };
-            let prop_type = self.get_type_from_type_node(type_node);
             if prop_type
                 .flags
                 .intersects(TYPE_FLAGS_ANY_OR_UNKNOWN | TypeFlags::Undefined)
@@ -251,7 +371,7 @@ impl Checker {
             }
 
             if let Some(ctor) = constructor {
-                if self.is_property_assigned_in_constructor(name_node, ctor) {
+                if self.is_property_assigned_in_constructor(name_node, &prop_type, ctor) {
                     continue;
                 }
             }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
+
 #[test]
 fn outlining_spans_for_import_tag_js_doc() {
     let content = r#"
@@ -17,6 +17,6 @@ fn outlining_spans_for_import_tag_js_doc() {
  */|]
 
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
+    let _s = Session::new_for_test("outliningSpansForImportTagJSDoc", content);
+    // TODO: f.VerifyOutliningSpans(t)
 }

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_suggestions_cache_invalid_package_json() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @lib: es5
 // @Filename: /home/src/workspaces/project/jsconfig.json
 {
@@ -25,8 +25,8 @@ declare module 'util' {
 // @Filename: /home/src/workspaces/project/a.js
 
 readF/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importSuggestionsCache_invalidPackageJson", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
 }

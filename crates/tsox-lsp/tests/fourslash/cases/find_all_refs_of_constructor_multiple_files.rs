@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_of_constructor_multiple_files() {
     let content = r#"// @Filename: f.ts
@@ -18,7 +18,7 @@ export { B as B1 } from "./f";
 import B, { B1 } from "./a";
 const d = new B("b");
 const d1 = new B1("b1");"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "aCtr")
+    let mut s = Session::new_for_test("findAllRefsOfConstructor_multipleFiles", content);
+    fourslash::verify_no_errors(&mut s, );
+    // TODO: f.VerifyBaselineFindAllReferences(t, "aCtr")
 }

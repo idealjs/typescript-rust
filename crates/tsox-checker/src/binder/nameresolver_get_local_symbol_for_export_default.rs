@@ -3,7 +3,6 @@
 use std::sync::Arc;
 use tsox_frontend::ast::*;
 
-use crate::binder::nameresolver::*;
 
 pub fn get_local_symbol_for_export_default(symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
     if !is_export_default_symbol(symbol) || symbol.declarations.is_empty() {
@@ -47,8 +46,8 @@ pub fn is_type_parameter_symbol_declared_in_container(
 ) -> bool {
     for decl in &symbol.declarations {
         if decl.kind == SyntaxKind::TypeParameter {
-            if let Some(parent) = &decl.parent {
-                if Arc::ptr_eq(parent, container) {
+            if let Some(parent) = decl.parent() {
+                if Arc::ptr_eq(&parent, container) {
                     return true;
                 }
             }

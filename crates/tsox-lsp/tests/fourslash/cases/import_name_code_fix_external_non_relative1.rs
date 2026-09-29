@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_external_non_relative1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /home/src/workspaces/project/tsconfig.base.json
 {
   "compilerOptions": {
@@ -40,13 +40,13 @@ export const Pkg2 = {};
 // @Filename: /home/src/workspaces/project/packages/pkg-2/src/blah/foo/data.ts
 Pkg2/*internal*/
 // @link: /home/src/workspaces/project/packages/pkg-2 -> /home/src/workspaces/project/packages/pkg-1/node_modules/pkg-2"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_externalNonRelative1", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: opts1534 := f.GetOptions()
     // TODO: opts1534.FormatCodeSettings.NewLineCharacter = "\n"
-    fourslash::unsupported("Configure"); // f.Configure(t, opts1534)
+    // TODO: f.Configure(t, opts1534)
     fourslash::go_to_marker(&mut s, "external");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_marker(&mut s, "internal");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

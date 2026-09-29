@@ -3,6 +3,32 @@
 use crate::parser::expressions::*;
 
 impl Parser {
+    pub(crate) fn parse_super_expression(&mut self) -> Arc<Node> {
+        let pos = self.node_pos();
+        let expression = self.parse_keyword_expression(SyntaxKind::SuperKeyword);
+        if matches!(
+            self.token,
+            SyntaxKind::OpenParenToken | SyntaxKind::DotToken | SyntaxKind::OpenBracketToken
+        ) {
+            return expression;
+        }
+        self.parse_error_at_current_token(
+            tsox_core::diagnostics::X_SUPER_MUST_BE_FOLLOWED_BY_AN_ARGUMENT_LIST_OR_MEMBER_ACCESS,
+            &[],
+        );
+        let name = self.parse_right_side_of_dot();
+        let end = name.end();
+        Arc::new(Node::with_loc(
+            SyntaxKind::PropertyAccessExpression,
+            NodeData::PropertyAccessExpression(PropertyAccessExpressionData {
+                expression,
+                question_dot_token: None,
+                name,
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
     pub(crate) fn parse_unary_expression(&mut self) -> Arc<Node> {
         match self.token {
             SyntaxKind::PlusToken
@@ -14,7 +40,16 @@ impl Parser {
                 let operator = self.token;
                 let op_pos = self.token_pos();
                 self.next_token();
-                let operand = self.parse_unary_expression();
+                // Go parseUpdateExpression：前缀 ++/-- 的操作数是 LHS，
+                // 不含后缀 ++（`++a++` 应在语句层报 1005/1109）
+                let operand = if matches!(
+                    operator,
+                    SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
+                ) {
+                    self.parse_left_hand_side_expression()
+                } else {
+                    self.parse_unary_expression()
+                };
                 let loc = TextRange::new(op_pos, operand.end());
                 Arc::new(Node::with_loc(
                     SyntaxKind::PrefixUnaryExpression,
@@ -61,10 +96,12 @@ impl Parser {
                 self.next_token();
                 let expression = self.parse_unary_expression();
                 let end = expression.end();
-                Arc::new(Node::with_loc(
+                let flags = self.context_flags_now();
+                Arc::new(Node::with_loc_flags(
                     SyntaxKind::AwaitExpression,
                     NodeData::AwaitExpression(AwaitExpressionData { expression }),
                     TextRange::new(pos, end),
+                    flags,
                 ))
             }
             SyntaxKind::LessThanToken if self.language_variant != LanguageVariant::Jsx => {

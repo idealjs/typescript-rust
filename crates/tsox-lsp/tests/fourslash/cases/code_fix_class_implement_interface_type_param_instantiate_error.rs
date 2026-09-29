@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFixAvailable"]
+
 #[test]
 fn code_fix_class_implement_interface_type_param_instantiate_error() {
     let content = r#"interface I<T extends string> {
@@ -8,6 +8,6 @@ fn code_fix_class_implement_interface_type_param_instantiate_error() {
 }
 
 class C implements I<number> { }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFixAvailable"); // f.VerifyCodeFixAvailable(t, []string{"Implement interface 'I<number>'"})
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceTypeParamInstantiateError", content);
+    // TODO: f.VerifyCodeFixAvailable(t, []string{"Implement interface 'I<number>'"})
 }

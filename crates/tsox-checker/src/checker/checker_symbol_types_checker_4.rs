@@ -12,30 +12,41 @@ impl Checker {
 
         let instance_type = self.build_class_instance_type_with_base(node);
         let mut construct_sigs: Vec<Arc<Signature>> = Vec::new();
+        let mut prev_member_ctor = false;
         for member in members.iter() {
             if member.kind != SyntaxKind::Constructor {
+                prev_member_ctor = false;
                 continue;
             }
-            let params = match &member.data {
-                tsox_frontend::ast::NodeData::ConstructorDeclaration(data) => &data.parameters,
-                _ => continue,
-            };
-            let sig = self.build_signature_from_function_like_type_node(
-                params,
-                Arc::clone(&instance_type),
-                true,
-                None,
-                Some(Arc::clone(member)),
+            let has_body = matches!(
+                &member.data,
+                tsox_frontend::ast::NodeData::ConstructorDeclaration(data) if data.body.is_some()
             );
-            construct_sigs.push(sig);
+            if !(has_body && prev_member_ctor) {
+                let params = match &member.data {
+                    tsox_frontend::ast::NodeData::ConstructorDeclaration(data) => &data.parameters,
+                    _ => continue,
+                };
+                let sig = self.build_signature_from_function_like_type_node(
+                    params,
+                    Arc::clone(&instance_type),
+                    true,
+                    None,
+                    Some(Arc::clone(member)),
+                );
+                construct_sigs.push(sig);
+            }
+            prev_member_ctor = true;
         }
         self.pop_scope();
         if construct_sigs.is_empty() {
-            let mut inherited: Option<(Arc<Node>, Arc<Node>)> = None;
+            let mut inherited: Option<(Arc<Node>, Arc<Node>, Arc<Node>)> = None;
+            let mut inherited_via_ast = false;
             let mut cursor = Arc::clone(node);
 
             for _ in 0..1000 {
-                let Some((base_node, _)) = self.extends_base_of(&cursor) else {
+                let Some((base_node, _, heritage_expr)) = self.extends_base_class_node(&cursor)
+                else {
                     break;
                 };
                 if Arc::ptr_eq(&base_node, &cursor) {
@@ -48,25 +59,81 @@ impl Checker {
                             tsox_frontend::ast::NodeData::ConstructorDeclaration(_)
                         )
                     }) {
-                        inherited = Some((Arc::clone(ctor), Arc::clone(&base_node)));
+                        inherited = Some((Arc::clone(ctor), Arc::clone(&base_node), heritage_expr));
                         break;
                     }
                 }
                 cursor = base_node;
             }
-            if let Some((ctor_decl, _)) = inherited {
+            if let Some((ctor_decl, base_node, heritage_expr)) = inherited {
+                inherited_via_ast = true;
                 if let tsox_frontend::ast::NodeData::ConstructorDeclaration(data) = &ctor_decl.data
                 {
                     let params = Arc::clone(&data.parameters);
+                    // 继承构造签名按 heritage 实参实例化（基类 ctor 参数里的
+                    // 类型参数映射为派生类继承实参），映射压栈下构建
+                    let base_tps: Vec<Arc<Symbol>> = match &base_node.data {
+                        tsox_frontend::ast::NodeData::ClassDeclaration(cd) => {
+                            match &cd.type_parameters {
+                                Some(tps) => tps
+                                    .iter()
+                                    .filter_map(|tp| {
+                                        self.program
+                                            .symbol_map()
+                                            .symbol_of(tp)
+                                            .map(Arc::clone)
+                                    })
+                                    .collect(),
+                                None => Vec::new(),
+                            }
+                        }
+                        _ => Vec::new(),
+                    };
+                    let heritage_args: Option<Vec<Arc<Node>>> = match &heritage_expr.data {
+                        tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(ewa) => {
+                            ewa.type_arguments.as_ref().map(|n| n.iter().cloned().collect())
+                        }
+                        _ => None,
+                    };
+                    let mut arg_types: Option<Vec<Arc<Type>>> = None;
+                    if !base_tps.is_empty() {
+                        let provided: Vec<Arc<Node>> =
+                            heritage_args.clone().unwrap_or_default();
+                        let at = self.instantiate_heritage_type_arguments(
+                            &base_tps,
+                            &provided,
+                        );
+                        if let Some(at) = at {
+                            let mut mapping = HashMap::new();
+                            let mut name_frame: Vec<(Arc<Symbol>, Arc<Type>)> = Vec::new();
+                            for (i, tp_sym) in base_tps.iter().enumerate() {
+                                mapping.insert(
+                                    Arc::as_ptr(tp_sym) as *const Symbol,
+                                    Arc::clone(&at[i]),
+                                );
+                                name_frame.push((Arc::clone(tp_sym), Arc::clone(&at[i])));
+                            }
+                            self.type_argument_stack.push(mapping);
+                            self.type_argument_name_frames.push(name_frame);
+                            arg_types = Some(at);
+                        }
+                    }
                     let sig = self.build_signature_from_function_like_type_node(
                         &params,
                         Arc::clone(&instance_type),
                         true,
                         None,
-                        Some(ctor_decl),
+                        Some(Arc::clone(&ctor_decl)),
                     );
+                    if arg_types.is_some() {
+                        self.type_argument_stack.pop();
+                        self.type_argument_name_frames.pop();
+                    }
                     construct_sigs.push(sig);
                 }
+            }
+            if !inherited_via_ast {
+                self.inherit_base_constructor_signatures(node, &instance_type, &mut construct_sigs);
             }
         }
         if construct_sigs.is_empty() {
@@ -78,6 +145,19 @@ impl Checker {
                 None,
             );
             construct_sigs.push(sig);
+        }
+
+        // Go getSignatureFromDeclaration：构造签名类型参数取自类声明（构造器自身不可带）
+        let class_tp_types: Vec<Arc<Type>> = self.class_type_parameter_types_of(node);
+        if !class_tp_types.is_empty() {
+            for sig in &construct_sigs {
+                let sig_mut = Arc::as_ptr(sig) as *mut crate::checker::types::Signature;
+                unsafe {
+                    if (*sig_mut).type_parameters.is_empty() {
+                        (*sig_mut).type_parameters = class_tp_types.clone();
+                    }
+                }
+            }
         }
 
         if node.has_syntactic_modifier(ModifierFlags::Abstract) {
@@ -123,118 +203,52 @@ impl Checker {
         ctor_type
     }
 
-    pub(crate) fn attach_class_statics(&mut self, ctor_type: &Arc<Type>, node: &Arc<Node>) {
-        let node_id = node.id();
-        if self.class_statics_resolution_stack.contains(&node_id)
-            || self.class_statics_resolution_stack.len() >= 200
-        {
-            return;
-        }
-        self.class_statics_resolution_stack.push(node_id);
-        let mut members = SymbolTable::new();
-        let mut properties: Vec<Arc<Symbol>> = Vec::new();
 
-        if let Some(class_sym) = self.program.symbol_map().symbol_of(node) {
-            let mut statics: Vec<(String, Arc<Symbol>)> = Vec::new();
-            for sym in class_sym.members.entries.values() {
-                if sym
-                    .declarations
-                    .iter()
-                    .any(|d| d.has_syntactic_modifier(ModifierFlags::Static))
-                {
-                    statics.push((sym.name.clone(), Arc::clone(sym)));
-                }
-            }
-            for sym in class_sym.exports.entries.values() {
-                if (sym
-                    .declarations
-                    .iter()
-                    .any(|d| d.has_syntactic_modifier(ModifierFlags::Static))
-                    || sym.flags.contains(SymbolFlags::Prototype))
-                    && !statics.iter().any(|(n, _)| *n == sym.name)
-                {
-                    statics.push((sym.name.clone(), Arc::clone(sym)));
-                }
-            }
-            for (name, sym) in statics {
-                properties.push(Arc::clone(&sym));
-                members.insert(name, sym);
-            }
-        }
-
-        let class_members: Option<Arc<NodeList>> = match &node.data {
-            tsox_frontend::ast::NodeData::ClassDeclaration(d) => Some(Arc::clone(&d.members)),
-            tsox_frontend::ast::NodeData::ClassExpression(d) => Some(Arc::clone(&d.members)),
-            _ => None,
+    /// extends_base_of 的限定名版：`class D extends React.Component<...>` 的
+    /// 基类名是属性访问表达式，标识符-only 的 extends_base_of 解析不到；
+    /// 同时返回 heritage 表达式（含类型实参，供继承构造签名实例化）
+    pub(crate) fn extends_base_class_node(
+        &mut self,
+        class_node: &Arc<Node>,
+    ) -> Option<(Arc<Node>, Arc<Symbol>, Arc<Node>)> {
+        let heritage = match &class_node.data {
+            tsox_frontend::ast::NodeData::ClassDeclaration(data) => data.heritage_clauses.clone(),
+            tsox_frontend::ast::NodeData::ClassExpression(data) => data.heritage_clauses.clone(),
+            _ => return None,
         };
-        if let Some(member_list) = class_members {
-            for member in member_list.iter() {
-                if !member.has_syntactic_modifier(ModifierFlags::Static) {
-                    continue;
-                }
-                let Some(name_node) = member.name() else {
-                    continue;
-                };
-                let name = name_node.text().to_string();
-                if name.is_empty() || members.get(&name).is_some() {
-                    continue;
-                }
-                let flags = match member.kind {
-                    SyntaxKind::MethodDeclaration => SymbolFlags::Method,
-                    SyntaxKind::GetAccessor => SymbolFlags::GetAccessor,
-                    SyntaxKind::SetAccessor => SymbolFlags::SetAccessor,
-                    _ => SymbolFlags::Property,
-                };
-                let mut sym = Symbol::new(flags, name.clone());
-                sym.declarations.push(Arc::clone(member));
-                let sym = Arc::new(sym);
-
-                if let tsox_frontend::ast::NodeData::PropertyDeclaration(pd) = &member.data
-                    && let Some(tn) = &pd.type_node
-                {
-                    let t = self.get_type_from_type_node(tn);
-                    self.value_symbol_links.insert(
-                        &sym,
-                        crate::checker::types::ValueSymbolLinks {
-                            resolved_type: Some(t),
-                            ..Default::default()
-                        },
-                    );
-                }
-                properties.push(Arc::clone(&sym));
-                members.insert(name, sym);
-            }
-        }
-
-        if let Some((base_node, _)) = self.extends_base_of(node) {
-            let base_ctor = self.get_type_of_class_declaration(&base_node);
-            if let Some(base_structured) = base_ctor.as_structured() {
-                for (name, sym) in base_structured.members.iter() {
-                    if members.get(name).is_none() {
-                        members.insert(name.clone(), Arc::clone(sym));
-                    }
-                }
-                for prop in &base_structured.properties {
-                    let name = prop.name.clone();
-                    if members.get(&name).is_some()
-                        && !properties.iter().any(|p| Arc::ptr_eq(p, prop))
-                    {
-                        properties.push(Arc::clone(prop));
-                    }
+        let extends_expr = heritage?.iter().find_map(|clause| {
+            if let tsox_frontend::ast::NodeData::HeritageClause(hc) = &clause.data {
+                if hc.token == SyntaxKind::ExtendsKeyword {
+                    return hc.types.iter().next().cloned();
                 }
             }
-        }
-        self.class_statics_resolution_stack.pop();
-        if members.is_empty() {
-            return;
-        }
-        let t_mut = Arc::as_ptr(ctor_type) as *mut crate::checker::types::Type;
-        unsafe {
-            if let TypeData::Object(obj) = &mut (*t_mut).data {
-                obj.structured.members = members;
-                obj.structured.properties = properties;
+            None
+        })?;
+        let base_expr = match &extends_expr.data {
+            tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(data) => {
+                Arc::clone(&data.expression)
             }
+            _ => return None,
+        };
+        let symbol = match base_expr.kind {
+            SyntaxKind::Identifier => self.resolve_identifier(&base_expr)?,
+            SyntaxKind::QualifiedName | SyntaxKind::PropertyAccessExpression => {
+                match self.resolve_qualified_symbol_traced(&base_expr) {
+                    Ok(s) => s,
+                    Err(_) => return None,
+                }
+            }
+            _ => return None,
+        };
+        if !symbol.flags.contains(SymbolFlags::Class) {
+            return None;
         }
+        let base_node = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::ClassDeclaration)
+            .cloned()?;
+        Some((base_node, symbol, extends_expr))
     }
 
     pub(crate) fn extends_base_of(

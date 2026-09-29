@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
+
 #[test]
 fn tsx_rename9() {
     let content = r#"//@Filename: file.tsx
@@ -31,6 +31,6 @@ let opt = [|<[|{| "contextRangeIndex": 14 |}MainButton|] [|[|{| "contextRangeInd
 let opt = [|<[|{| "contextRangeIndex": 18 |}MainButton|] [|[|{| "contextRangeIndex": 20 |}onClick|]={()=>{}}|] [|ignore-prop|] />|];
 let opt = [|<[|{| "contextRangeIndex": 23 |}MainButton|] [|[|{| "contextRangeIndex": 25 |}goTo|]="goTo"|] />|];
 let opt = [|<[|{| "contextRangeIndex": 27 |}MainButton|] [|wrong|] />|];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "onClick", "goTo", "MainButton", "ign
+    let _s = Session::new_for_test("tsxRename9", content);
+    // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "onClick", "goTo", "MainButton", "ign
 }

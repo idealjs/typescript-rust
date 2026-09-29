@@ -52,14 +52,17 @@ impl Parser {
         self.parse_error_at_range(self.token_range(), message, args);
     }
 
-    pub(crate) fn expect(&mut self, expected: SyntaxKind) {
+    /// Go parseExpected：匹配则消费返回 true；不匹配报错返回 false，不消费
+    pub(crate) fn expect(&mut self, expected: SyntaxKind) -> bool {
         if self.token == expected {
             self.next_token();
+            true
         } else {
             self.parse_error_at_current_token(
                 tsox_core::diagnostics::X_0_EXPECTED,
                 &[token_to_string(expected)],
             );
+            false
         }
     }
 
@@ -119,21 +122,22 @@ impl Parser {
             }
             _ => raw.to_string(),
         };
+        let template_flags = self.scanner.token_flags();
         let data = match self.token {
             SyntaxKind::TemplateHead => NodeData::TemplateHead(TemplateHeadData {
                 text: cooked.clone(),
                 raw_text: raw.to_string(),
-                template_flags: 0,
+                template_flags,
             }),
             SyntaxKind::TemplateMiddle => NodeData::TemplateMiddle(TemplateMiddleData {
                 text: cooked.clone(),
                 raw_text: raw.to_string(),
-                template_flags: 0,
+                template_flags,
             }),
             SyntaxKind::TemplateTail => NodeData::TemplateTail(TemplateTailData {
                 text: cooked.clone(),
                 raw_text: raw.to_string(),
-                template_flags: 0,
+                template_flags,
             }),
             _ => NodeData::Token,
         };
@@ -172,6 +176,57 @@ impl Parser {
     pub(crate) fn parse_semicolon(&mut self) -> bool {
         self.try_parse_semicolon() || {
             self.expect(SyntaxKind::SemicolonToken);
+            false
+        }
+    }
+}
+
+impl Parser {
+    /// Go parseExpectedToken：匹配时消费并给 token 节点；失败时报错并给
+    /// 零宽缺失 token（不消费当前 token）
+    pub(crate) fn parse_expected_token_colon(&mut self) -> Arc<Node> {
+        if self.token == SyntaxKind::ColonToken {
+            let node = self.create_token_node();
+            self.next_token();
+            node
+        } else {
+            self.parse_error_at_current_token(
+                tsox_core::diagnostics::X_0_EXPECTED,
+                &[token_to_string(SyntaxKind::ColonToken)],
+            );
+            let pos = self.token_pos();
+            Arc::new(Node::with_loc(
+                SyntaxKind::ColonToken,
+                NodeData::Token,
+                TextRange::new(pos, pos),
+            ))
+        }
+    }
+
+    /// Go createMissingIdentifier：零宽空名标识符
+    pub(crate) fn missing_identifier_expression(&self) -> Arc<Node> {
+        let pos = self.token_pos();
+        Arc::new(Node::with_loc(
+            SyntaxKind::Identifier,
+            NodeData::Identifier(IdentifierData {
+                text: String::new(),
+            }),
+            TextRange::new(pos, pos),
+        ))
+    }
+}
+
+impl Parser {
+    /// Go parseExpected：匹配时消费；失败时报错返回 false（不消费）
+    pub(crate) fn expect_report(&mut self, expected: SyntaxKind) -> bool {
+        if self.token == expected {
+            self.next_token();
+            true
+        } else {
+            self.parse_error_at_current_token(
+                tsox_core::diagnostics::X_0_EXPECTED,
+                &[token_to_string(expected)],
+            );
             false
         }
     }

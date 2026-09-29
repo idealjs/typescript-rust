@@ -3,6 +3,28 @@
 use crate::binder::symbols::*;
 
 impl Binder {
+    // Go 模块容器本地/导出分表的合并面：同名不同导出性的声明并入同一
+    // 符号（checker 的 TS2395 依赖合并声明集），不做 binder 冲突报告
+    pub(crate) fn append_declaration_to_existing_symbol(
+        &mut self,
+        node: &Arc<Node>,
+        existing: &Arc<Symbol>,
+        includes: SymbolFlags,
+    ) -> Option<Arc<Symbol>> {
+        let existing_mut = Arc::as_ptr(existing) as *mut Symbol;
+        unsafe {
+            (*existing_mut).declarations.push(Arc::clone(node));
+            (*existing_mut).flags |= includes;
+            if (*existing_mut).value_declaration.is_none()
+                && includes.intersects(SymbolFlags::VALUE)
+            {
+                (*existing_mut).value_declaration = Some(Arc::clone(node));
+            }
+        }
+        self.symbol_map.set_symbol(node, Arc::clone(existing));
+        Some(Arc::clone(existing))
+    }
+
     pub(crate) fn merge_into_existing_symbol(
         &mut self,
         node: &Arc<Node>,
@@ -16,17 +38,23 @@ impl Binder {
                 .iter()
                 .all(|d| Self::declaration_is_var(d));
 
+        // Go declareSymbol：var 与非实例化 namespace 互相合并（var excludes 不含
+        // NamespaceModule；非实例化 namespace excludes=None）
         let ns_var_merge = Self::declaration_is_var(node)
-            && existing.flags.contains(SymbolFlags::ValueModule)
-            && existing
-                .declarations
-                .iter()
-                .filter(|d| d.kind == SyntaxKind::ModuleDeclaration)
-                .all(|ns| !Self::ns_is_instantiated_static(ns));
+            && existing.flags.contains(SymbolFlags::NamespaceModule)
+            && !existing.flags.contains(SymbolFlags::ValueModule);
 
         let var_ns_merge = node.kind == SyntaxKind::ModuleDeclaration
-            && !Self::ns_is_instantiated_static(node)
+            && get_module_instance_state(node) == ModuleInstanceState::NonInstantiated
             && existing.flags == SymbolFlags::BlockScopedVariable;
+
+        // Go declareSymbol：类成员只要未触发 excludes 冲突即并入既有符号
+        // （get/set 对、static/实例分表合并等），跨 staticness 子集恒并入
+        let same_static_flags = self.class_member_same_static_flags(node, existing);
+        let staticness_split = same_static_flags
+            .map(|(same, _)| same == SymbolFlags::empty())
+            .unwrap_or(false);
+        let class_member_merge = same_static_flags.is_some();
 
         let import_export_alias_merge = includes.contains(SymbolFlags::Alias)
             && existing.flags.contains(SymbolFlags::Alias)
@@ -38,7 +66,13 @@ impl Binder {
                     .all(|d| d.kind == SyntaxKind::ExportSpecifier);
                 node_is_spec != existing_all_spec
             };
-        if self.can_merge_symbols(existing.flags, includes)
+        let comparison_flags = match same_static_flags {
+            Some((same, _)) => same,
+            None => existing.flags,
+        };
+        if staticness_split
+            || class_member_merge
+            || self.can_merge_symbols(comparison_flags, includes)
             || var_var_merge
             || ns_var_merge
             || var_ns_merge

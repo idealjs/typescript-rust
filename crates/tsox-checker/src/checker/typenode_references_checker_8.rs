@@ -4,19 +4,64 @@ use crate::checker::typenode_references::*;
 
 impl Checker {
     pub(crate) fn resolve_namespace_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
-        if let Some(cached) = self
+        // namespace+interface 合并符号：接口声明类型（type_alias_links）与
+        // 模块实例类型（值侧）分离缓存，避免互相污染
+        let merged_with_type_meaning = symbol.flags.contains(SymbolFlags::Interface);
+        if merged_with_type_meaning {
+            if let Some(cached) = self.merged_ns_instance_type_cache.get(&symbol.id()) {
+                return Arc::clone(cached);
+            }
+        } else if let Some(cached) = self
             .type_alias_links
             .get(symbol)
             .and_then(|l| l.declared_type.clone())
         {
             return cached;
         }
+        self.resolve_namespace_type_uncached(symbol)
+    }
 
+    fn resolve_namespace_type_uncached(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
         let mut members: Vec<(String, Arc<Symbol>)> = symbol
             .exports
             .iter()
+            .filter(|(_, v)| {
+                // type-only 导出别名不属于模块实例的值成员
+                !(v.flags.contains(SymbolFlags::Alias)
+                    && !v.flags.intersects(SymbolFlags::VALUE.union(SymbolFlags::Class))
+                    && self.is_type_only_alias_declaration(v))
+            })
             .map(|(k, v)| (k.clone(), Arc::clone(v)))
             .collect();
+
+        let is_global_this = self
+            .global_this_symbol
+            .as_ref()
+            .is_some_and(|g| Arc::ptr_eq(g, symbol));
+        if is_global_this {
+            for (name, sym) in self.globals.iter() {
+                if !members.iter().any(|(n, _)| n == name) {
+                    members.push((name.clone(), Arc::clone(sym)));
+                }
+            }
+        }
+
+        // Go binder 静态成员入 exports；本仓静态在 members：clodule 合并类型
+        // 须并入类静态成员（typeof A 含 bar/x/baz 的成员来源）
+        if symbol.flags.contains(SymbolFlags::Class) {
+            for sym in symbol.members.entries.values() {
+                if sym
+                    .declarations
+                    .iter()
+                    .any(|d| {
+                        d.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Static)
+                    })
+                    && !members.iter().any(|(n, _)| *n == sym.name)
+                {
+                    members.push((sym.name.clone(), Arc::clone(sym)));
+                }
+            }
+        }
 
         if self.ambient_namespace_locals_visible(symbol) {
             let local_members: Vec<(String, Arc<Symbol>)> = symbol
@@ -59,7 +104,10 @@ impl Checker {
                             && let NodeData::NamedExports(ne) = &clause.data
                         {
                             for el in ne.elements.iter() {
-                                if let NodeData::ExportSpecifier(spec) = &el.data {
+                                if let NodeData::ExportSpecifier(spec) = &el.data
+                                    // type-only 导出不属于模块实例的值成员
+                                    && !(d.is_type_only || spec.is_type_only)
+                                {
                                     let exported =
                                         spec.name.text().trim_matches(['"', '\'', '`']).to_string();
                                     let local = spec
@@ -139,7 +187,9 @@ impl Checker {
                     && let Some(module_spec) = &d.module_specifier
                 {
                     for el in ne.elements.iter() {
-                        if let NodeData::ExportSpecifier(spec) = &el.data {
+                        if let NodeData::ExportSpecifier(spec) = &el.data
+                            && !(d.is_type_only || spec.is_type_only)
+                        {
                             let exported =
                                 spec.name.text().trim_matches(['"', '\'', '`']).to_string();
                             let imported = spec
@@ -187,18 +237,33 @@ impl Checker {
             {
                 continue;
             }
-            let member_type = self.get_type_of_symbol(member_sym);
 
-            let prop_sym = Arc::new(Symbol::new(SymbolFlags::Property, name.clone()));
-            self.value_symbol_links.insert(
-                &prop_sym,
-                ValueSymbolLinks {
-                    resolved_type: Some(member_type),
-                    ..Default::default()
-                },
-            );
+            // 保留成员原始身份（flags/声明/父链），显示 var A.Y 等限定前缀用
+            let prop_sym = if is_global_this {
+                Arc::clone(member_sym)
+            } else {
+                let s = Arc::as_ptr(member_sym) as *mut Symbol;
+                unsafe {
+                    if (*s).parent().is_none() {
+                        (*s).set_parent(symbol);
+                    }
+                }
+                Arc::clone(member_sym)
+            };
             symbol_table.insert(name.clone(), Arc::clone(&prop_sym));
-            props.push(prop_sym);
+            // Go setStructuredTypeMembers→getNamedMembers→symbolIsValue：
+            // properties 列表只收值成员；别名揭示落点无值义（Go 侧回落
+            // unknownSymbol，Property|Variable 属 Value）时按值成员计
+            let is_value = member_sym.flags.intersects(SymbolFlags::VALUE)
+                || (member_sym.flags.contains(SymbolFlags::Alias) && {
+                    let base = self.resolve_alias_base(Arc::clone(member_sym));
+                    base.flags.intersects(SymbolFlags::VALUE)
+                        || base.flags == SymbolFlags::Alias
+                        || base.flags == SymbolFlags::Alias.union(SymbolFlags::Assignment)
+                });
+            if is_value {
+                props.push(prop_sym);
+            }
         }
         let result = Arc::new(Type {
             flags: TypeFlags::Object,
@@ -206,7 +271,7 @@ impl Checker {
             id: crate::checker::types::next_type_id(),
             symbol: Some(Arc::clone(symbol)),
             alias: None,
-            data: TypeData::Object(ObjectTypeData {
+            data: TypeData::Object(ObjectTypeData { node: None,
                 structured: StructuredTypeData {
                     members: symbol_table,
                     properties: props,
@@ -215,7 +280,13 @@ impl Checker {
                 ..Default::default()
             }),
         });
-        self.type_alias_links.get_or_default(symbol).declared_type = Some(Arc::clone(&result));
+        let merged_with_type_meaning = symbol.flags.contains(SymbolFlags::Interface);
+        if merged_with_type_meaning {
+            self.merged_ns_instance_type_cache
+                .insert(symbol.id(), Arc::clone(&result));
+        } else {
+            self.type_alias_links.get_or_default(symbol).declared_type = Some(Arc::clone(&result));
+        }
         result
     }
 }

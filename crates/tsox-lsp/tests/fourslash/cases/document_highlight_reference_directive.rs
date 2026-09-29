@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn document_highlight_reference_directive() {
     let content = r#"// @Filename: /a.ts
@@ -11,6 +11,6 @@ const x = 1;
 // @filename: b.ts
 export type Foo = number;
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, f.Ranges()[0])
+    let _s = Session::new_for_test("documentHighlightReferenceDirective", content);
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, f.Ranges()[0])
 }

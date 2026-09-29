@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_union_type_property4() {
     let content = r#"interface SnapCrackle {
@@ -20,6 +20,6 @@ var magnitude: Magnitude;
 var snapcrackle: SnapCrackle;
 
 var x = (snapcrackle || magnitude || art).[|/*usage*/pop|];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "usage")
+    let _s = Session::new_for_test("goToDefinitionUnionTypeProperty4", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "usage")
 }

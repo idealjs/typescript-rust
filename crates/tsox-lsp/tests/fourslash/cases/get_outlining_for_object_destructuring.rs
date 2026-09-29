@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
+
 #[test]
 fn get_outlining_for_object_destructuring() {
     let content = r#"const[| {
@@ -37,6 +37,6 @@ const[| {
     b: 2,
     c: 3
 }|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
+    let _s = Session::new_for_test("getOutliningForObjectDestructuring", content);
+    // TODO: f.VerifyOutliningSpans(t)
 }

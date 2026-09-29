@@ -22,9 +22,19 @@ pub(super) fn build_program(path: &str, content: &str) -> Arc<tsox_compile::comp
     config.file_names = vec![path.to_string()];
     config.compiler_options.no_lib = tsox_core::core::tristate::Tristate::True;
 
-    Arc::new(tsox_compile::compiler::Program::new(
-        tsox_compile::compiler::ProgramOptions { config, host },
-    ))
+    tsox_compile::compiler::Program::new(
+        tsox_compile::compiler::ProgramOptions {
+                config,
+                host,
+                use_source_of_project_reference: false,
+                single_threaded: tsox_core::core::tristate::Tristate::Unknown,
+                create_checker_pool: None,
+                typings_location: String::new(),
+                project_name: String::new(),
+                tracing: None,
+                skip_module_resolution: false,
+            },
+    )
 }
 
 pub(super) fn display_parts_to_string(
@@ -97,9 +107,19 @@ pub(super) fn build_program_from_documents(
     config.file_names = file_names;
     config.compiler_options.no_lib = tsox_core::core::tristate::Tristate::True;
 
-    Some(Arc::new(tsox_compile::compiler::Program::new(
-        tsox_compile::compiler::ProgramOptions { config, host },
-    )))
+    Some(tsox_compile::compiler::Program::new(
+        tsox_compile::compiler::ProgramOptions {
+                config,
+                host,
+                use_source_of_project_reference: false,
+                single_threaded: tsox_core::core::tristate::Tristate::Unknown,
+                create_checker_pool: None,
+                typings_location: String::new(),
+                project_name: String::new(),
+                tracing: None,
+                skip_module_resolution: false,
+            },
+    ))
 }
 
 pub(super) fn path_to_uri(path: &str) -> String {

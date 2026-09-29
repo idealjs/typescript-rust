@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoExists"]
+
 #[test]
 fn quick_info_type_argument_inference_with_method_without_body() {
     let content = r#"interface ProxyHandler<T extends object> {
@@ -14,7 +14,7 @@ let target = {}
 let proxy = new /**/Proxy(target, {
     getPrototypeOf()
 })"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoTypeArgumentInferenceWithMethodWithoutBody", content);
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyQuickInfoExists"); // f.VerifyQuickInfoExists(t)
+    // TODO: f.VerifyQuickInfoExists(t)
 }

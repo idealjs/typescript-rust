@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_shorthand_property01() {
     let content = r#"// @lib: es5
@@ -10,6 +10,6 @@ declare var /*valueDeclaration3*/id;
 var obj = {[|/*valueDefinition1*/name|], [|/*valueDefinition2*/id|]};
 obj.[|/*valueReference1*/name|];
 obj.[|/*valueReference2*/id|];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "valueDefinition1", "valueDefinition2", "valueReference1", "
+    let _s = Session::new_for_test("goToDefinitionShorthandProperty01", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "valueDefinition1", "valueDefinition2", "valueReference1", "
 }

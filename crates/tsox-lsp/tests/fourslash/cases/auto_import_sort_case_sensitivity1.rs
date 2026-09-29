@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_sort_case_sensitivity1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /exports1.ts
 export const a = 0;
 export const A = 1;
@@ -23,11 +23,11 @@ a/*0*/
 import { A, a, B, b } from "./exports1";
 import { E } from "./exports2";
 d/*1*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportSortCaseSensitivity1", content);
     fourslash::go_to_marker(&mut s, "0");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_marker(&mut s, "1");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

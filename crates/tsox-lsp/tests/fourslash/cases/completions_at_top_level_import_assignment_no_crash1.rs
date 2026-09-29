@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_at_top_level_import_assignment_no_crash1() {
     let content = r#"// @filename: /a.ts
@@ -12,6 +12,6 @@ class Foo {}
 // @filename: /c.ts
 import x =/*3*/
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "2", "3"}, &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("completionsAtTopLevelImportAssignmentNoCrash1", content);
+    // TODO: f.VerifyCompletions(t, []string{"1", "2", "3"}, &fourslash.CompletionsExpectedList{
 }

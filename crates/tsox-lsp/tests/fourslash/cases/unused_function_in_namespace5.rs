@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn unused_function_in_namespace5() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @noUnusedLocals: true
 // @noUnusedParameters:true
 namespace Validation {
@@ -24,6 +24,6 @@ namespace Validation {
 
     export let a = function3; |]
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `function function3() {
+    let _s = Session::new_for_test("unusedFunctionInNamespace5", content);
+    // TODO: f.VerifyRangeAfterCodeFix(t, `function function3() {
 }

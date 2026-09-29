@@ -1,5 +1,11 @@
 use super::*;
 
+pub(crate) struct ExpandoAssignmentInfo {
+    pub(crate) node: Arc<Node>,
+    pub(crate) block_scope_container: Option<Arc<Node>>,
+    pub(crate) container: Option<Arc<Node>>,
+}
+
 pub struct Binder {
     pub symbol_map: NodeSymbolMap,
 
@@ -17,7 +23,7 @@ pub struct Binder {
 
     pub(crate) symbol_count: usize,
 
-    pub(crate) expando_assignments: Vec<(Arc<Node>, Option<Arc<Node>>)>,
+    pub(crate) expando_assignments: Vec<ExpandoAssignmentInfo>,
 
     pub(crate) unreachable_flow: Option<Arc<FlowNode>>,
 
@@ -34,6 +40,10 @@ pub struct Binder {
     pub(crate) has_explicit_return: bool,
 
     pub(crate) has_flow_effects: bool,
+
+    pub(crate) not_const_enum_only_modules: std::collections::HashSet<u64>,
+
+    pub(crate) global_exports: Option<SymbolTable>,
 }
 
 impl Default for Binder {
@@ -46,6 +56,8 @@ pub(crate) enum DeclareTarget {
     Exports(Arc<Symbol>),
 
     Locals(Arc<Node>),
+
+    Members(Arc<Symbol>),
 }
 
 impl Binder {
@@ -68,6 +80,8 @@ impl Binder {
             active_label_list: None,
             has_explicit_return: false,
             has_flow_effects: false,
+            not_const_enum_only_modules: std::collections::HashSet::new(),
+            global_exports: None,
         }
     }
 
@@ -108,13 +122,82 @@ impl Binder {
 
         self.bind_children(&file.node);
 
+        // Go binder：JS 文件存在 CommonJS 指示时声明 module/exports 文件
+        // 局部符号（FunctionScopedVariable|ModuleExports；module 带 exports
+        // 成员属性）
+        if file.common_js_module_indicator.is_some()
+            && matches!(
+                file.script_kind,
+                tsox_frontend::ast::ScriptKind::Js | tsox_frontend::ast::ScriptKind::Jsx
+            )
+        {
+            self.declare_common_js_variable(&file.node, "module");
+            self.declare_common_js_variable(&file.node, "exports");
+        }
+
         self.process_expando_assignments();
+
+        if let Some(table) = self.global_exports.take() {
+            let file_node_mut = Arc::as_ptr(&file.node) as *mut Node;
+            unsafe {
+                if let NodeData::SourceFile(data) = &mut (*file_node_mut).data {
+                    data.global_exports = Some(table);
+                }
+            }
+        }
 
         self.container = prev_container;
         self.block_scope_container = prev_block;
         self.parent_symbol = prev_parent;
 
         &self.symbol_map
+    }
+
+    fn declare_common_js_variable(&mut self, file_node: &Arc<Node>, name: &str) {
+        if self
+            .symbol_map
+            .locals
+            .get(&file_node.id())
+            .is_some_and(|l| l.get(name).is_some())
+        {
+            return;
+        }
+        let symbol = Arc::new(Symbol::new(
+            SymbolFlags::FunctionScopedVariable.union(SymbolFlags::ModuleExports),
+            name.to_string(),
+        ));
+        {
+            let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+            unsafe {
+                (*symbol_mut).declarations.push(Arc::clone(file_node));
+                (*symbol_mut).value_declaration = Some(Arc::clone(file_node));
+            }
+        }
+        if name == "module" {
+            let exports_property = Arc::new(Symbol::new(
+                SymbolFlags::ModuleExports.union(SymbolFlags::Property),
+                "exports",
+            ));
+            {
+                let prop_mut = Arc::as_ptr(&exports_property) as *mut Symbol;
+                unsafe {
+                    (*prop_mut).declarations.push(Arc::clone(file_node));
+                    (*prop_mut).value_declaration = Some(Arc::clone(file_node));
+                    (*prop_mut).set_parent(&symbol);
+                }
+            }
+            let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+            unsafe {
+                (*symbol_mut)
+                    .members
+                    .insert("exports", exports_property);
+            }
+        }
+        self.symbol_map
+            .locals
+            .entry(file_node.id())
+            .or_default()
+            .insert(name.to_string(), symbol);
     }
 
     pub(crate) fn set_parent_pointers(&mut self, node: &Arc<Node>) {
@@ -128,7 +211,7 @@ impl Binder {
         for child in &children {
             let child_mut = Arc::as_ptr(child) as *mut Node;
             unsafe {
-                (*child_mut).parent = Some(Arc::clone(&parent_clone));
+                (*child_mut).set_parent(&parent_clone);
             }
             self.set_parent_pointers(child);
         }
@@ -139,4 +222,11 @@ pub fn bind_source_file(file: &Arc<SourceFile>) -> NodeSymbolMap {
     let mut binder = Binder::new();
     binder.bind_source_file(file);
     std::mem::take(&mut binder.symbol_map)
+}
+
+/// parse 后立即回填 parent 指针：program 的 import 收集处理期即需父链
+/// （ImportType 来源判定等），binder 后续调用幂等
+pub fn wire_parent_pointers(file: &Arc<SourceFile>) {
+    let mut binder = Binder::new();
+    binder.set_parent_pointers(&file.node);
 }

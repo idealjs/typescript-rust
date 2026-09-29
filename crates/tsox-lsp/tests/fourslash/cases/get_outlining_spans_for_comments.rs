@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn get_outlining_spans_for_comments() {
     let content = r#"// @lib: es5
@@ -18,7 +18,7 @@ declare module "m";
 // line 3
 // line 4|]
 declare module "n";"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("getOutliningSpansForComments", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t, lsproto.FoldingRangeKindComment)
+    // TODO: f.VerifyOutliningSpans(t, lsproto.FoldingRangeKindComment)
 }

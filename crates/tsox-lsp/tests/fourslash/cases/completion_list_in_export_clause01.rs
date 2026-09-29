@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: }"]
+
 #[test]
 fn completion_list_in_export_clause01() {
     let content = r#"// @Filename: m1.ts
@@ -13,11 +13,13 @@ export {/*3*/} from "./m1"
 export {foo,/*4*/ from "./m1"
 export {bar as /*5*/, /*6*/ from "./m1"
 export {foo, bar, baz as b,/*7*/} from "./m1""#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "2", "3"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", nil)
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "7", nil)
+    let mut s = Session::new_for_test("completionListInExportClause01", content);
+    // TODO: f.VerifyCompletions(t, []string{"1", "2", "3"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "4");
+    // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_empty_at(&mut s, Some("5"));
+    fourslash::go_to_marker(&mut s, "6");
+    // TODO: f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_empty_at(&mut s, Some("7"));
     // TODO: }
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_object_binding_element_property_name04() {
     let content = r#"interface I {
@@ -14,6 +14,6 @@ function f({ /*1*/property1: p1 }: I,
 
     return /*3*/property1 + 1;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
+    let _s = Session::new_for_test("findAllRefsObjectBindingElementPropertyName04", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
 }

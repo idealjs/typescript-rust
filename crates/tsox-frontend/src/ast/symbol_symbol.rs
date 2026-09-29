@@ -1,8 +1,8 @@
 use crate::ast::node::Node;
 use crate::ast::symbol_flags::CheckFlags;
 use crate::ast::symbol_flags::SymbolFlags;
-use std::collections::HashMap;
-use std::sync::Arc;
+use std::collections::BTreeMap;
+use std::sync::{Arc, OnceLock, Weak};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 #[derive(Debug)]
@@ -14,7 +14,9 @@ pub struct Symbol {
     pub value_declaration: Option<Arc<Node>>,
     pub members: SymbolTable,
     pub exports: SymbolTable,
-    pub parent: Option<Arc<Symbol>>,
+    /// Go Symbol.parent 是非持有回指针；强引用会与 members/exports 的
+    /// 父到子持有构成环，令每轮 bind 的符号图整体泄漏
+    pub(crate) parent: OnceLock<Weak<Symbol>>,
     pub export_symbol: Option<Arc<Symbol>>,
     id: AtomicU64,
 }
@@ -29,10 +31,18 @@ impl Symbol {
             value_declaration: None,
             members: SymbolTable::default(),
             exports: SymbolTable::default(),
-            parent: None,
+            parent: OnceLock::new(),
             export_symbol: None,
             id: AtomicU64::new(0),
         }
+    }
+
+    pub fn parent(&self) -> Option<Arc<Symbol>> {
+        self.parent.get().and_then(|w| w.upgrade())
+    }
+
+    pub fn set_parent(&self, parent: &Arc<Symbol>) {
+        let _ = self.parent.set(Arc::downgrade(parent));
     }
 
     pub fn id(&self) -> u64 {
@@ -65,7 +75,7 @@ static NEXT_SYMBOL_ID: AtomicU64 = AtomicU64::new(1);
 
 #[derive(Debug, Default, Clone)]
 pub struct SymbolTable {
-    pub entries: HashMap<String, Arc<Symbol>>,
+    pub entries: BTreeMap<String, Arc<Symbol>>,
 }
 
 impl SymbolTable {
@@ -89,7 +99,7 @@ impl SymbolTable {
         self.entries.is_empty()
     }
 
-    pub fn iter(&self) -> std::collections::hash_map::Iter<'_, String, Arc<Symbol>> {
+    pub fn iter(&self) -> std::collections::btree_map::Iter<'_, String, Arc<Symbol>> {
         self.entries.iter()
     }
 }

@@ -51,7 +51,8 @@ fn parse_private_identifier_member_access() {
 
 #[test]
 fn parse_less_than_is_comparison_not_type_args() {
-    let mut p = Parser::new("if (x < 10) { }");
+    // Go parsePrimaryExpression：保留字不作表达式标识符，输入须为合法表达式
+    let mut p = Parser::new("x < 10");
     let _ = p.parse_expression();
     assert!(
         p.diagnostics().iter().all(|d| {

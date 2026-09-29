@@ -15,12 +15,14 @@ impl crate::parser::Parser {
         } else {
             margin
         };
-        let initial_margin = if margin < indent_text.len() {
-            Some(&indent_text[margin..])
+        // Go var initialMargin string 取地址恒非 nil：即使空串也将注释扫描
+        // 置为 SawAsterisk（标签行中间的 * 记录为注释而非行首装饰）
+        let initial_margin_owned: String = if margin < indent_text.len() {
+            indent_text[margin..].to_string()
         } else {
-            None
+            String::new()
         };
-        self.parse_tag_comments(margin, initial_margin)
+        self.parse_tag_comments(margin, Some(&initial_margin_owned))
     }
 
     pub(crate) fn parse_tag_comments(
@@ -39,8 +41,8 @@ impl crate::parser::Parser {
         if let Some(m) = initial_margin {
             if !m.is_empty() {
                 push_comment(&mut comments, &mut indent, &mut margin, m);
-                state = JSDocState::SawAsterisk;
             }
+            state = JSDocState::SawAsterisk;
         }
 
         loop {
@@ -178,7 +180,9 @@ impl crate::parser::Parser {
         indent: usize,
         name: Option<Arc<Node>>,
     ) -> Option<Arc<Node>> {
-        let mut can_parse_tag = false;
+        // Go canParseTag 初始 true：进入时（rewind/set_range 后）遇到的第一个
+        // 可跟标签的 @ 即子标签候选
+        let mut can_parse_tag = true;
         let mut seen_asterisk = false;
 
         loop {

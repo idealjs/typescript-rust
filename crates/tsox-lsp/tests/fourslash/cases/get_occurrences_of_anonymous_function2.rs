@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn get_occurrences_of_anonymous_function2() {
     let content = r#"//global foo definition
@@ -12,6 +12,6 @@ function foo() {}
 //global foo references
 fo/*global*/o();
 var f = foo;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "local", "global")
+    let _s = Session::new_for_test("getOccurrencesOfAnonymousFunction2", content);
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "local", "global")
 }

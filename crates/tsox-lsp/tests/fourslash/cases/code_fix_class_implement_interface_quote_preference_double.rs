@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFix"]
+
 #[test]
 fn code_fix_class_implement_interface_quote_preference_double() {
     let content = r#"interface I {
@@ -11,6 +11,6 @@ fn code_fix_class_implement_interface_quote_preference_double() {
     d: { e: "e"; };
 }
 class Foo implements I {}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
+    let _s = Session::new_for_test("codeFixClassImplementInterface_quotePreferenceDouble", content);
+    // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

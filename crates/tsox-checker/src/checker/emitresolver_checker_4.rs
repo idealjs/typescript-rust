@@ -139,7 +139,7 @@ impl Checker {
                     }
                 }
             }
-            current = n.parent.clone();
+            current = n.parent();
         }
 
         if let Some(file_sym) = symbol_map.symbols.get(&self.current_file_id) {
@@ -153,7 +153,7 @@ impl Checker {
     }
 
     pub(crate) fn meaning_of_entity_name_reference(entity_name: &Arc<Node>) -> SymbolFlags {
-        let parent = match &entity_name.parent {
+        let parent = match entity_name.parent() {
             Some(p) => p,
             None => return SymbolFlags::TYPE,
         };
@@ -202,7 +202,7 @@ impl Checker {
                 let is_exported =
                     any_import.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Export);
                 if !is_exported {
-                    if let Some(parent) = any_import.parent.clone() {
+                    if let Some(parent) = any_import.parent() {
                         if self.is_declaration_visible(&parent) {
                             self.declaration_links
                                 .get_or_default(declaration)
@@ -214,13 +214,13 @@ impl Checker {
             }
 
             if declaration.kind == SyntaxKind::VariableDeclaration {
-                let var_list = declaration.parent.clone();
-                let var_stmt = var_list.as_ref().and_then(|p| p.parent.clone());
+                let var_list = declaration.parent();
+                let var_stmt = var_list.as_ref().and_then(|p| p.parent());
                 if let Some(vs) = &var_stmt {
                     if vs.kind == SyntaxKind::VariableStatement
                         && !vs.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Export)
                     {
-                        if let Some(container) = vs.parent.clone() {
+                        if let Some(container) = vs.parent() {
                             if self.is_declaration_visible(&container) {
                                 self.declaration_links
                                     .get_or_default(declaration)
@@ -235,7 +235,7 @@ impl Checker {
             if Checker::is_late_visibility_painted_statement(declaration)
                 && !declaration.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Export)
             {
-                if let Some(parent) = declaration.parent.clone() {
+                if let Some(parent) = declaration.parent() {
                     if self.is_declaration_visible(&parent) {
                         self.declaration_links
                             .get_or_default(declaration)

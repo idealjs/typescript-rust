@@ -52,7 +52,7 @@ pub fn get_set_accessor_value_parameter(accessor: &Node) -> Option<Arc<Node>> {
 }
 
 pub fn get_super_container(node: &Node, _stop_on_functions: bool) -> Option<Arc<Node>> {
-    node.parent.clone()
+    node.parent()
 }
 
 pub fn get_alias_declaration_from_name(node: &Node) -> Option<Arc<Node>> {
@@ -81,7 +81,7 @@ pub fn is_in_right_side_of_import_or_export_assignment(node: &Node) -> bool {
 }
 
 pub fn is_class_instance_property(node: &Node) -> bool {
-    node.parent
+    node.parent()
         .as_ref()
         .map(|p| {
             tsox_frontend::ast::is_class_like(p)

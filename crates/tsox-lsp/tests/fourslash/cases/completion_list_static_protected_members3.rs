@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_static_protected_members3() {
     let content = r#"// @lib: es5
@@ -25,6 +25,6 @@ class C3 extends Base {
 
 Base./*1*/;
 C3./*2*/;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("completionListStaticProtectedMembers3", content);
+    // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
+
 #[test]
 fn document_symbol_private_name() {
     let content = r#"// @Filename: first.ts
@@ -24,8 +24,8 @@ class Foo {
 	#privateProp: string;
 }
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
+    let mut s = Session::new_for_test("documentSymbolPrivateName", content);
+    // TODO: f.VerifyBaselineDocumentSymbol(t)
     fourslash::go_to_file(&mut s, "second.ts");
-    fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
+    // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_object_members_in_type_location_with_typeof() {
     let content = r#"// @strict: true
@@ -9,7 +9,9 @@ type A = Parameters<typeof languageService./*1*/>
 
 declare const obj: { dance: () => {} } | undefined
 type B = Parameters<typeof obj./*2*/>"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListObjectMembersInTypeLocationWithTypeof", content);
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
+    // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

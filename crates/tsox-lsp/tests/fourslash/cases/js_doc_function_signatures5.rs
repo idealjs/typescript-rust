@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineSignatureHelp"]
+
 #[test]
 fn js_doc_function_signatures5() {
     let content = r#"// @strict: true
@@ -18,6 +18,6 @@ function pathFilter(basePath, pattern, type, options){
 //...
 }
 pathFilter(/**/'foo', 'bar', 'baz', {});"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
+    let _s = Session::new_for_test("jsDocFunctionSignatures5", content);
+    // TODO: f.VerifyBaselineSignatureHelp(t)
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn ng_proxy3() {
     let content = r#"// @Filename: tsconfig.json
@@ -17,8 +17,8 @@ fn ng_proxy3() {
 let x = [1, 2];
 x/**/
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("ngProxy3", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "let x: number[]", "")
+    // TODO: f.VerifyQuickInfoIs(t, "let x: number[]", "")
 }

@@ -2,7 +2,9 @@
 
 use crate::checker::checker::*;
 
-pub const HERITAGE_RETRY_LIMIT: u32 = 2;
+pub const HERITAGE_RETRY_LIMIT: u32 = 100;
+
+pub const ALIAS_SELF_INSTANTIATION_DEPTH: usize = 8;
 
 pub const EXTERNAL_EMIT_HELPER_IMPORT_DEFAULT: u32 = 1 << 0;
 pub const EXTERNAL_EMIT_HELPER_IMPORT_STAR: u32 = 1 << 1;
@@ -23,6 +25,10 @@ pub enum TypeResolutionProperty {
     ResolvedTypeArguments,
 
     ResolvedBaseConstraint,
+
+    WriteType,
+
+    InitializerIsUndefined,
 }
 
 #[derive(Clone, Copy)]
@@ -57,8 +63,19 @@ pub trait Program: Send + Sync {
         None
     }
 
+    fn get_resolved_modules(
+        &self,
+    ) -> std::collections::HashMap<String, Vec<(String, Option<tsox_tsoptions::module::ResolvedModule>)>>
+    {
+        std::collections::HashMap::new()
+    }
+
     fn read_file(&self, _file_name: &str) -> Option<String> {
         None
+    }
+
+    fn canonicalize_path(&self, path: &str) -> String {
+        path.to_string()
     }
 
     fn get_source_file_for_resolved_module(&self, _resolved_path: &str) -> Option<Arc<SourceFile>> {
@@ -120,6 +137,8 @@ where
         self.data.insert(key.id(), value);
     }
 }
+
+
 
 pub trait HasId {
     fn id(&self) -> u64;

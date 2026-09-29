@@ -1068,6 +1068,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "tinyvec"
+version = "1.13.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fd3ca314f692efd6c868f8408f53fe444634a845f96c028b97d35f6a1f79f0ee"
+
+[[package]]
 name = "tokio"
 version = "1.53.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1195,7 +1201,14 @@ dependencies = [
 name = "tsox-api"
 version = "0.1.0"
 dependencies = [
+ "serde",
  "serde_json",
+ "tsox-checker",
+ "tsox-compile",
+ "tsox-core",
+ "tsox-frontend",
+ "tsox-lsp",
+ "tsox-tsoptions",
 ]
 
 [[package]]
@@ -1221,6 +1234,7 @@ dependencies = [
  "tsox-emit",
  "tsox-frontend",
  "tsox-tsoptions",
+ "xxhash-rust",
 ]
 
 [[package]]
@@ -1254,10 +1268,12 @@ name = "tsox-execute"
 version = "0.1.0"
 dependencies = [
  "notify",
+ "serde",
  "serde_json",
  "tsox-checker",
  "tsox-compile",
  "tsox-core",
+ "tsox-emit",
  "tsox-frontend",
  "tsox-tsoptions",
 ]
@@ -1282,9 +1298,12 @@ dependencies = [
  "tsox-checker",
  "tsox-compile",
  "tsox-core",
+ "tsox-emit",
  "tsox-frontend",
  "tsox-tsoptions",
+ "unicode-general-category",
  "unicode-ident",
+ "unicode-normalization",
  "xxhash-rust",
 ]
 
@@ -1297,6 +1316,7 @@ name = "tsox-tsoptions"
 version = "0.1.0"
 dependencies = [
  "bitflags 2.13.1",
+ "regex",
  "serde",
  "serde_json",
  "tsox-core",
@@ -1310,10 +1330,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eaea85b334db583fe3274d12b4cd1880032beab409c0d774be044d4480ab9a94"
 
 [[package]]
+name = "unicode-general-category"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2281c8c1d221438e373249e065ca4989c4c36952c211ff21a0ee91c44a3869e7"
+
+[[package]]
 name = "unicode-ident"
 version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
+
+[[package]]
+name = "unicode-normalization"
+version = "0.1.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5fd4f6878c9cb28d874b009da9e8d183b5abc80117c40bbd187a1fde336be6e8"
+dependencies = [
+ "tinyvec",
+]
 
 [[package]]
 name = "unicode-width"

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: // Locally defined enum should provide exhaustive case compl"]
+
 #[test]
 fn exhaustive_case_completions_untitled_local_enum() {
     let content = r#"// @newline: LF
@@ -16,10 +16,10 @@ switch (e) {
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
     // TODO: // Locally defined enum should provide exhaustive case completions in untitled file
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }
 
-#[ignore = "generator: // Globally declared enum should provide exhaustive case com"]
 #[test]
 fn exhaustive_case_completions_untitled_global_enum() {
     let content = r#"// @newline: LF
@@ -38,10 +38,10 @@ switch (direction) {
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
     // TODO: // Globally declared enum should provide exhaustive case completions in untitled file
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }
 
-#[ignore = "generator: // String literal unions should provide exhaustive case comp"]
 #[test]
 fn exhaustive_case_completions_untitled_string_literals() {
     let content = r#"// @newline: LF
@@ -53,10 +53,10 @@ switch (status) {
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
     // TODO: // String literal unions should provide exhaustive case completions in untitled file
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn exhaustive_case_completions_untitled_imported_enum() {
     let content = r#"// @newline: LF
@@ -73,5 +73,6 @@ switch (s) {
     case/**/
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

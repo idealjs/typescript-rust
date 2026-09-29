@@ -1,3 +1,4 @@
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::Value;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -32,6 +33,23 @@ impl QuotePreference {
     }
 }
 
+impl Serialize for QuotePreference {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(self.as_str())
+    }
+}
+
+impl<'de> Deserialize<'de> for QuotePreference {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Ok(match String::deserialize(deserializer)?.to_ascii_lowercase().as_str() {
+            "auto" => Self::Auto,
+            "double" => Self::Double,
+            "single" => Self::Single,
+            _ => Self::Unknown,
+        })
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum JsxAttributeCompletionStyle {
     #[default]
@@ -42,6 +60,15 @@ pub enum JsxAttributeCompletionStyle {
 }
 
 impl JsxAttributeCompletionStyle {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            JsxAttributeCompletionStyle::Unknown => "",
+            JsxAttributeCompletionStyle::Auto => "auto",
+            JsxAttributeCompletionStyle::Braces => "braces",
+            JsxAttributeCompletionStyle::None => "none",
+        }
+    }
+
     pub fn parse(value: &Value) -> JsxAttributeCompletionStyle {
         if let Value::String(s) = value {
             return match s.to_ascii_lowercase().as_str() {
@@ -54,6 +81,23 @@ impl JsxAttributeCompletionStyle {
     }
 }
 
+impl Serialize for JsxAttributeCompletionStyle {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(self.as_str())
+    }
+}
+
+impl<'de> Deserialize<'de> for JsxAttributeCompletionStyle {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Ok(match String::deserialize(deserializer)?.as_str() {
+            "braces" => Self::Braces,
+            "none" => Self::None,
+            "" => Self::Unknown,
+            _ => Self::Auto,
+        })
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum IncludeInlayParameterNameHints {
     #[default]
@@ -63,6 +107,14 @@ pub enum IncludeInlayParameterNameHints {
 }
 
 impl IncludeInlayParameterNameHints {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            IncludeInlayParameterNameHints::None => "",
+            IncludeInlayParameterNameHints::All => "all",
+            IncludeInlayParameterNameHints::Literals => "literals",
+        }
+    }
+
     pub fn parse(value: &Value) -> IncludeInlayParameterNameHints {
         if let Value::String(s) = value {
             return match s.as_str() {
@@ -72,6 +124,22 @@ impl IncludeInlayParameterNameHints {
             };
         }
         IncludeInlayParameterNameHints::None
+    }
+}
+
+impl Serialize for IncludeInlayParameterNameHints {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(self.as_str())
+    }
+}
+
+impl<'de> Deserialize<'de> for IncludeInlayParameterNameHints {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Ok(match String::deserialize(deserializer)?.as_str() {
+            "all" => Self::All,
+            "literals" => Self::Literals,
+            _ => Self::None,
+        })
     }
 }
 
@@ -162,5 +230,72 @@ impl OrganizeImportsTypeOrder {
             };
         }
         OrganizeImportsTypeOrder::Auto
+    }
+}
+
+impl Serialize for OrganizeImportsSort {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_i32(*self as i32)
+    }
+}
+
+impl<'de> Deserialize<'de> for OrganizeImportsSort {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Ok(match i32::deserialize(deserializer)? {
+            1 => Self::Ordinal,
+            2 => Self::OrdinalIgnoreCase,
+            3 => Self::Natural,
+            4 => Self::NaturalIgnoreCase,
+            _ => Self::Auto,
+        })
+    }
+}
+
+impl Serialize for OrganizeImportsCollation {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_bool(*self == Self::Unicode)
+    }
+}
+
+impl<'de> Deserialize<'de> for OrganizeImportsCollation {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Ok(if bool::deserialize(deserializer)? {
+            Self::Unicode
+        } else {
+            Self::Ordinal
+        })
+    }
+}
+
+impl Serialize for OrganizeImportsCaseFirst {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_i32(*self as i32)
+    }
+}
+
+impl<'de> Deserialize<'de> for OrganizeImportsCaseFirst {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Ok(match i32::deserialize(deserializer)? {
+            1 => Self::Lower,
+            2 => Self::Upper,
+            _ => Self::False,
+        })
+    }
+}
+
+impl Serialize for OrganizeImportsTypeOrder {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_i32(*self as i32)
+    }
+}
+
+impl<'de> Deserialize<'de> for OrganizeImportsTypeOrder {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Ok(match i32::deserialize(deserializer)? {
+            1 => Self::Last,
+            2 => Self::Inline,
+            3 => Self::First,
+            _ => Self::Auto,
+        })
     }
 }

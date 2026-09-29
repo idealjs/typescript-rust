@@ -10,9 +10,18 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         use crate::checker::types::TypeData;
 
+
         if t.flags.contains(TypeFlags::TypeParameter) {
             let constraint = self.get_constraint_of_type_parameter(t)?;
             return self.get_type_of_property_of_contextual_type(&constraint, name);
+        }
+
+        if let TypeData::IndexedAccess(ia) = &t.data
+            && let (Some(obj), Some(idx)) = (&ia.object_type, &ia.index_type)
+            && let Some(resolved) =
+                self.try_get_indexed_access_type(obj, idx, AccessFlags::None)
+        {
+            return self.get_type_of_property_of_contextual_type(&resolved, name);
         }
 
         if t.flags.contains(TypeFlags::Union)
@@ -28,7 +37,15 @@ impl Checker {
                 0 => None,
                 1 => Some(found.into_iter().next().unwrap()),
                 _ => {
-                    let types = found;
+                    // Go mapTypeEx(noReductions) 保留成分并集;any 成分(函数型经
+                    // CallableFunction 增补解析出的成员型)在上下文签名提取处
+                    // 因无签名被丢弃,等价剔除 any,防其吸收整个并集
+                    let non_any: Vec<Arc<Type>> = found
+                        .iter()
+                        .filter(|x| !x.flags.contains(TypeFlags::Any))
+                        .cloned()
+                        .collect();
+                    let types = if non_any.is_empty() { found } else { non_any };
                     if types.iter().all(|x| Arc::ptr_eq(x, &types[0])) {
                         Some(Arc::clone(&types[0]))
                     } else {
@@ -41,7 +58,6 @@ impl Checker {
         if matches!(&t.data, TypeData::Mapped(_))
             && let TypeData::Mapped(m) = &t.data
             && m.type_parameter.is_some()
-            && m.template_type.is_some()
             && m.name_type.is_none()
         {
             let constraint = m.constraint_type.clone()?;
@@ -68,7 +84,7 @@ impl Checker {
                 return None;
             }
             let tp = m.type_parameter.clone().unwrap();
-            let template = m.template_type.clone().unwrap();
+            let template = self.get_template_type_from_mapped_type(&Arc::clone(t))?;
             let substituted =
                 self.substitute_infer_type_parameters(&template, &[tp], &[name_literal]);
 
@@ -114,16 +130,85 @@ impl Checker {
         if t.flags.contains(TypeFlags::Intersection)
             && let TypeData::Intersection(i) = &t.data
         {
+            // Go getTypeOfPropertyOfContextualTypeEx：交集逐成分收集属性型后
+            // 求交（any 换 unknown 防抹掉其它成分的上下文信息）
+            let mut found: Vec<Arc<Type>> = Vec::new();
             for c in &i.union_or_intersection.types {
-                if let Some(found) = self.get_type_of_property_of_contextual_type(c, name) {
-                    return Some(found);
+                if let Some(t) = self.get_type_of_property_of_contextual_type(c, name) {
+                    let t = if t.flags.contains(TypeFlags::Any) {
+                        self.unknown_type()
+                    } else {
+                        t
+                    };
+                    found.push(t);
                 }
             }
-            return None;
+            return match found.len() {
+                0 => None,
+                1 => Some(found.pop().unwrap()),
+                _ => Some(self.get_intersection_type(found)),
+            };
         }
 
         if let Some(prop) = self.get_property_of_type(t, name) {
-            return Some(self.get_type_of_symbol(&prop));
+            let prop_type = self.get_type_of_symbol(&prop);
+            // 接口实例的成员类型在退化窗口期可能按裸类型参数驻留（成员符号
+            // 链接先建先用）；仍含实例类型参数时按 [tp→实参] 按需重代入
+            //（Go 实例成员经引用 mapper 实例化，成员类型不携带裸类型参数）
+            if t.symbol.as_ref().is_some_and(|s| s.flags.contains(SymbolFlags::Interface))
+                && let Some(obj) = t.as_object()
+                && !obj.type_arguments.is_empty()
+                && crate::checker::type_contains_type_parameter(&prop_type)
+            {
+                let iface_sym = t.symbol.clone().unwrap();
+                let mut tp_nodes: Vec<Arc<tsox_frontend::ast::Node>> = Vec::new();
+                for d in &iface_sym.declarations {
+                    if let tsox_frontend::ast::NodeData::InterfaceDeclaration(idata) = &d.data
+                        && let Some(tps) = &idata.type_parameters
+                    {
+                        tp_nodes.extend(tps.iter().cloned());
+                    }
+                }
+                let mut tp_syms: Vec<Arc<tsox_frontend::ast::Symbol>> = Vec::new();
+                for tp in &tp_nodes {
+                    if let Some(sym) = self.program.symbol_map().symbol_of(tp) {
+                        tp_syms.push(Arc::clone(sym));
+                    }
+                }
+                let tp_types: Vec<Arc<Type>> = tp_syms
+                    .iter()
+                    .map(|sym| self.get_type_parameter_from_symbol(sym))
+                    .collect();
+                if tp_types.len() == obj.type_arguments.len() && !tp_types.is_empty() {
+                    // 符号实例漂移容错：params 取 prop_type 内实际引用的 tp 实例
+                    //（ptr 必中），按名字对位接口声明序取实参
+                    let mut params: Vec<Arc<Type>> = Vec::new();
+                    let mut subs: Vec<Arc<Type>> = Vec::new();
+                    for (idx, tp_t) in tp_types.iter().enumerate() {
+                        let tp_name = tp_t
+                            .symbol
+                            .as_ref()
+                            .map(|s| s.name.clone())
+                            .unwrap_or_default();
+                        if let (Some(arg), Some(instance)) = (
+                            obj.type_arguments.get(idx),
+                            Self::find_tp_instance_by_name(&prop_type, &tp_name),
+                        ) {
+                            params.push(instance);
+                            subs.push(Arc::clone(arg));
+                        }
+                    }
+                    if !params.is_empty() {
+                        let reinstance =
+                            self.substitute_infer_type_parameters(&prop_type, &params, &subs);
+                        // mapped 结果自身含其类型参数 K 属正常，只要求解发生替换
+                        if !Arc::ptr_eq(&reinstance, &prop_type) {
+                            return Some(reinstance);
+                        }
+                    }
+                }
+            }
+            return Some(prop_type);
         }
 
         let name_literal = self.get_string_literal_type(name);
@@ -154,8 +239,13 @@ impl Checker {
         node: &Arc<tsox_frontend::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
-        let parent = match &node.parent {
-            Some(p) => Arc::clone(p),
+        if let Some((id, t)) = self.active_inferential_contextual.as_ref() {
+            if *id == node.id() {
+                return Some(Arc::clone(t));
+            }
+        }
+        let parent = match node.parent() {
+            Some(p) => Arc::clone(&p),
             None => return None,
         };
 
@@ -171,23 +261,30 @@ impl Checker {
                 self.get_contextual_type_for_return_expression(node, _context_flags)
             }
             SyntaxKind::CallExpression | SyntaxKind::NewExpression => {
-                self.get_contextual_type_for_argument(&parent, node)
+                self.get_contextual_type_for_argument_ex(&parent, node, _context_flags)
             }
 
-            SyntaxKind::TypeAssertionExpression => {
-                if let tsox_frontend::ast::NodeData::TypeAssertion(d) = &parent.data {
-                    Some(self.get_type_from_type_node(&d.type_node))
-                } else {
-                    None
+            // Go getContextualType：断言/as 表达式的内表达式以断言目标类型为
+            // 上下文（const 断言除外，透传外层）
+            SyntaxKind::TypeAssertionExpression | SyntaxKind::AsExpression => {
+                let type_node = match &parent.data {
+                    tsox_frontend::ast::NodeData::TypeAssertion(d) => Some(&d.type_node),
+                    tsox_frontend::ast::NodeData::AsExpression(d) => Some(&d.type_node),
+                    _ => None,
+                }?;
+                if parent.kind == SyntaxKind::AsExpression
+                    && matches!(
+                        &type_node.data,
+                        tsox_frontend::ast::NodeData::TypeReferenceNode(r)
+                            if r.type_arguments.is_none()
+                                && matches!(&r.type_name.data, tsox_frontend::ast::NodeData::Identifier(id) if id.text == "const")
+                    )
+                {
+                    return self.get_contextual_type(&parent, _context_flags);
                 }
+                Some(self.get_type_from_type_node(type_node))
             }
-            SyntaxKind::AsExpression => {
-                if let tsox_frontend::ast::NodeData::AsExpression(d) = &parent.data {
-                    Some(self.get_type_from_type_node(&d.type_node))
-                } else {
-                    None
-                }
-            }
+
             SyntaxKind::SatisfiesExpression => {
                 if let tsox_frontend::ast::NodeData::SatisfiesExpression(d) = &parent.data {
                     Some(self.get_type_from_type_node(&d.type_node))
@@ -195,14 +292,46 @@ impl Checker {
                     None
                 }
             }
+            SyntaxKind::YieldExpression => self.get_contextual_type_for_yield_operand(&parent),
             SyntaxKind::BinaryExpression => {
                 self.get_contextual_type_for_binary_operand(node, _context_flags)
             }
             SyntaxKind::PropertyAssignment | SyntaxKind::ShorthandPropertyAssignment => {
                 self.get_contextual_type_for_object_literal_element(&parent, _context_flags)
             }
+            // Go getContextualType：对象字面量展开操作数继承外层字面量的
+            // 上下文型（属性字面量在展开内得以保字面量）；本前端解析器对
+            // 对象展开统一产 SpreadElement（无 SpreadAssignment 形态）
+            SyntaxKind::SpreadAssignment | SyntaxKind::SpreadElement
+                if matches!(
+                    parent.parent().as_ref().map(|p| p.kind),
+                    Some(SyntaxKind::ObjectLiteralExpression)
+                ) =>
+            {
+                self.get_contextual_type(&parent.parent()?, _context_flags)
+            }
+            // 对象字面量方法成员：方法节点自身的上下文型（参数定型经此）
+            SyntaxKind::ObjectLiteralExpression
+                if node.kind == SyntaxKind::MethodDeclaration =>
+            {
+                self.get_contextual_type_for_object_literal_element(node, _context_flags)
+            }
+            SyntaxKind::JsxExpression => self.get_contextual_type_for_jsx_expression(node, _context_flags),
             SyntaxKind::ArrayLiteralExpression => {
                 self.get_contextual_type_for_array_literal_element(node, &parent, _context_flags)
+            }
+            // Go getContextualTypeForConditionalOperand：条件表达式两分支
+            // 继承条件表达式自身的上下文型，条件不透传
+            SyntaxKind::ConditionalExpression => {
+                if let tsox_frontend::ast::NodeData::ConditionalExpression(d) = &parent.data {
+                    if Arc::ptr_eq(&d.when_true, node) || Arc::ptr_eq(&d.when_false, node) {
+                        self.get_contextual_type(&parent, _context_flags)
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
             }
 
             SyntaxKind::ParenthesizedExpression | SyntaxKind::NonNullExpression => {
@@ -243,9 +372,14 @@ impl Checker {
         node: &Arc<tsox_frontend::ast::Node>,
     ) -> Option<Arc<Signature>> {
         let signatures = self.get_signatures_of_type(t, SignatureKind::Call);
-        signatures
+        let applicable: Vec<Arc<Signature>> = signatures
             .into_iter()
-            .find(|s| !self.is_arity_smaller(s, node))
+            .filter(|s| !self.is_arity_smaller(s, node))
+            .collect();
+        if applicable.len() == 1 {
+            return applicable.into_iter().next();
+        }
+        self.get_intersected_signatures(&applicable)
     }
 
     pub(crate) fn is_arity_smaller(
@@ -278,5 +412,60 @@ impl Checker {
         let parameter_count =
             signature.parameters.len() as i32 - if has_effective_rest { 1 } else { 0 };
         !has_effective_rest && parameter_count < target_parameter_count
+    }
+
+    /// 在类型中找指定名字的类型参数实例（多副本符号按名容错）
+    pub(crate) fn find_tp_instance_by_name(t: &Arc<Type>, name: &str) -> Option<Arc<Type>> {
+        if let TypeData::TypeParameter(_) = &t.data
+            && t.symbol.as_ref().is_some_and(|s| s.name == name)
+        {
+            return Some(Arc::clone(t));
+        }
+        match &t.data {
+            TypeData::Union(_) | TypeData::Intersection(_) => t.types().and_then(|ms| {
+                ms.iter().find_map(|m| Self::find_tp_instance_by_name(m, name))
+            }),
+            TypeData::Tuple(tup) => tup
+                .element_infos
+                .iter()
+                .filter_map(|e| e.type_.as_ref())
+                .find_map(|e| Self::find_tp_instance_by_name(e, name)),
+            TypeData::IndexedAccess(ia) => ia
+                .object_type
+                .as_ref()
+                .and_then(|o| Self::find_tp_instance_by_name(o, name))
+                .or_else(|| {
+                    ia.index_type
+                        .as_ref()
+                        .and_then(|i| Self::find_tp_instance_by_name(i, name))
+                }),
+            TypeData::Conditional(c) => c
+                .check_type
+                .as_ref()
+                .and_then(|c| Self::find_tp_instance_by_name(c, name))
+                .or_else(|| {
+                    c.extends_type
+                        .as_ref()
+                        .and_then(|e| Self::find_tp_instance_by_name(e, name))
+                }),
+            TypeData::Mapped(m) => m
+                .constraint_type
+                .as_ref()
+                .and_then(|c| Self::find_tp_instance_by_name(c, name))
+                .or_else(|| {
+                    m.template_type
+                        .as_ref()
+                        .and_then(|t| Self::find_tp_instance_by_name(t, name))
+                }),
+            TypeData::Object(o) => o
+                .type_arguments
+                .iter()
+                .find_map(|a| Self::find_tp_instance_by_name(a, name)),
+            TypeData::Substitution(sub) => sub
+                .base_type
+                .as_ref()
+                .and_then(|b| Self::find_tp_instance_by_name(b, name)),
+            _ => None,
+        }
     }
 }

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_require() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @allowJs: true
 // @checkJs: true
 // @Filename: foo.js
@@ -19,7 +19,7 @@ foo();
 util1();
 util2();
 new Blah;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_require", content);
     fourslash::go_to_file(&mut s, "index.js");
-    fourslash::unsupported("VerifyCodeFixAll"); // f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
+    // TODO: f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

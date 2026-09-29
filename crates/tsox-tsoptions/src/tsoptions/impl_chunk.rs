@@ -69,6 +69,7 @@ pub struct ParsedBuildCommandLine {
 
     pub watch_options: WatchOptions,
     pub(crate) current_dir: String,
+    pub(crate) locale_once: std::sync::OnceLock<()>,
 }
 
 impl ParsedBuildCommandLine {
@@ -121,6 +122,22 @@ pub fn parse_command_line(
         compile_on_save: None,
         watch,
         watch_options,
+        config_file: None,
+        type_acquisition: None,
+        content_mappers: Vec::new(),
+        literal_file_names_len: 0,
+        compare_paths_options: Default::default(),
+        source_to_project_reference: Default::default(),
+        output_dts_to_project_reference: Default::default(),
+        source_and_output_maps_once: std::sync::OnceLock::new(),
+        common_source_directory: String::new(),
+        common_source_directory_once: std::sync::OnceLock::new(),
+        resolved_project_reference_paths: Vec::new(),
+        resolved_project_reference_paths_once: std::sync::OnceLock::new(),
+        file_names_by_path: Default::default(),
+        file_names_by_path_once: std::sync::OnceLock::new(),
+        locale: Default::default(),
+        locale_once: std::sync::OnceLock::new(),
     }
 }
 
@@ -185,5 +202,6 @@ pub fn parse_build_command_line(
         errors,
         watch_options,
         current_dir: current_dir.to_string(),
+        locale_once: std::sync::OnceLock::new(),
     }
 }

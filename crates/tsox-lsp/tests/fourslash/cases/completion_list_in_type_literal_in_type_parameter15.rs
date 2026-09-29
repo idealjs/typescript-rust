@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_in_type_literal_in_type_parameter15() {
     let content = r#"interface Foo {
@@ -14,6 +14,6 @@ class {
    @decorator<{/*0*/}>
    method() {}
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListInTypeLiteralInTypeParameter15", content);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("0"), &["one", "two"]);
 }

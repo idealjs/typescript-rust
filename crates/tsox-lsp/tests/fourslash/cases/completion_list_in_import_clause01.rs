@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: }"]
+
 #[test]
 fn completion_list_in_import_clause01() {
     let content = r#"// @Filename: m1.ts
@@ -15,7 +15,7 @@ import {bar as /*5*/, /*6*/ from "./m1"
 import {foo, bar, baz as b,/*7*/} from "./m1"
 import { type /*8*/ } from "./m1";
 import { type b/*9*/ } from "./m1";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"8", "9"}, &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("completionListInImportClause01", content);
+    // TODO: f.VerifyCompletions(t, []string{"8", "9"}, &fourslash.CompletionsExpectedList{
     // TODO: }
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn quick_info_for_contextually_typed_parameters() {
     let content = r#"declare function foo1<T>(obj: T, settings: (row: T) => { value: string, func?: Function }): void;
@@ -27,19 +28,9 @@ function q<T extends { name: string }>(x: T): T["name"] {
 }
 
 foof/*4*/(o => ({ value: o.name, func: x => 'foo' }), new Error(), "name");"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoForContextuallyTypedParameters", content);
     fourslash::verify_quick_info_at(&mut s, "1", "(parameter) o: Error", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(parameter) o: Error", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "3",
-        "function foof<T, \"name\">(settings: (row: T) => {\n    value: T[\"name\"];\n    func?: Function;\n}, obj: T, key: \"name\"): \"name\"",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "4",
-        "function foof<Error, \"name\">(settings: (row: Error) => {\n    value: string;\n    func?: Function;\n}, obj: Error, key: \"name\"): \"name\"",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "3", "function foof<T, \"name\">(settings: (row: T) => {\n    value: T[\"name\"];\n    func?: Function;\n}, obj: T, key: \"name\"): \"name\"", "");
+    fourslash::verify_quick_info_at(&mut s, "4", "function foof<Error, \"name\">(settings: (row: Error) => {\n    value: string;\n    func?: Function;\n}, obj: Error, key: \"name\"): \"name\"", "");
 }

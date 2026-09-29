@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn class_members_after_const_assertion_initializer() {
     let content = r#"
@@ -14,6 +14,7 @@ class B implements A {
 	/**/
 }
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("classMembersAfterConstAssertionInitializer", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

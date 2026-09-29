@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn node_next_module_kind_caching1() {
     let content = r#"// @Filename: tsconfig.json
@@ -23,7 +23,7 @@ fn node_next_module_kind_caching1() {
 // @Filename: src/index.ts
 // The line below should show a "Relative import paths need explicit file
 // extensions..." error in VS Code, but it doesn't. The error is only picked up
-// by ` + "`" + `tsc` + "`" + ` which seems to properly infer the module type.
+// by `tsc` which seems to properly infer the module type.
 import { helloWorld } from './example'
 /**/
 helloWorld()
@@ -31,7 +31,7 @@ helloWorld()
 export function helloWorld() {
     console.log('Hello, world!')
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("nodeNextModuleKindCaching1", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 1);

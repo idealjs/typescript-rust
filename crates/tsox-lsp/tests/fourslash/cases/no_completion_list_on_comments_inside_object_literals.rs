@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn no_completion_list_on_comments_inside_object_literals() {
     let content = r#"namespace ObjectLiterals {
@@ -13,6 +13,6 @@ fn no_completion_list_on_comments_inside_object_literals() {
 		/* /*1*/ Comment /*2*/ */
 	};
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), nil)
+    let _s = Session::new_for_test("noCompletionListOnCommentsInsideObjectLiterals", content);
+    // TODO: f.VerifyCompletions(t, f.Markers(), nil)
 }

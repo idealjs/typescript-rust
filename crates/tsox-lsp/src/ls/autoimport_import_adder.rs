@@ -121,7 +121,7 @@ pub fn get_name_for_exported_symbol(_symbol: &Symbol, _prefer_capitalized: bool)
 
 pub fn type_to_auto_importable_type_node(
     _c: &Checker,
-    _import_adder: &mut dyn ImportAdderTrait,
+    _import_adder: Option<&mut dyn ImportAdderTrait>,
     _t: &tsox_checker::checker::Type,
     _context_node: &Node,
 ) -> Option<Arc<Node>> {

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.GoToEOF"]
+
 #[test]
 fn type_check_after_resolve() {
     let content = r#"/*start*/class Point implements /*IPointRef*/IPoint {
@@ -8,12 +8,12 @@ fn type_check_after_resolve() {
         ssss;
     }
 }/*end*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("GoToEOF"); // f.GoToEOF(t)
-    fourslash::unsupported("InsertLine"); // f.InsertLine(t, "")
+    let mut s = Session::new_for_test("typeCheckAfterResolve", content);
+    fourslash::go_to_eof(&mut s, );
+    fourslash::insert_line(&mut s, "");
     fourslash::verify_quick_info_at(&mut s, "IPointRef", "any", "");
-    fourslash::unsupported("VerifyErrorExistsAfterMarker"); // f.VerifyErrorExistsAfterMarker(t, "IPointRef")
-    fourslash::unsupported("GoToEOF"); // f.GoToEOF(t)
-    fourslash::unsupported("InsertLine"); // f.InsertLine(t, "")
-    fourslash::unsupported("VerifyErrorExistsAfterMarker"); // f.VerifyErrorExistsAfterMarker(t, "IPointRef")
+    // TODO: f.VerifyErrorExistsAfterMarker(t, "IPointRef")
+    fourslash::go_to_eof(&mut s, );
+    fourslash::insert_line(&mut s, "");
+    // TODO: f.VerifyErrorExistsAfterMarker(t, "IPointRef")
 }

@@ -10,7 +10,23 @@ impl Checker {
         is_new: bool,
     ) -> Option<Vec<Arc<Signature>>> {
         let mut union_signatures: Vec<Arc<Signature>> = Vec::new();
-        let signatures: &[Arc<Signature>] = if callee_type.as_union_or_intersection().is_some() {
+        let sig_kind = if is_new {
+            SignatureKind::Construct
+        } else {
+            SignatureKind::Call
+        };
+        let signatures: &[Arc<Signature>] = if callee_type.is_intersection() {
+            // Go getSignaturesOfStructuredType：交集签名 = 各成分签名拼接，
+            // 不可调用的成分（原始类型等）不贡献签名也不阻断
+            for m in callee_type.types().into_iter().flatten() {
+                union_signatures.extend(self.get_signatures_of_type(m, sig_kind));
+            }
+            if union_signatures.is_empty() {
+                self.report_invocation_error(callee_expr, callee_type, is_new);
+                return None;
+            }
+            &union_signatures
+        } else if callee_type.as_union_or_intersection().is_some() {
             let mut leaves: Vec<&Arc<Type>> = Vec::new();
             flatten_union_leaves(callee_type, &mut leaves);
             if is_new {
@@ -59,37 +75,128 @@ impl Checker {
                     }
                     expanded_leaves.push(Arc::clone(m));
                 }
+                // Go resolveUnionTypeMembers：Function 接口成分贡献 unknown 签名
                 let all_callable = !expanded_leaves.is_empty()
                     && expanded_leaves.iter().all(|m| {
                         m.as_structured()
                             .is_some_and(|s| !s.call_signatures().is_empty())
+                            || self.is_global_function_type(m)
                     });
                 if all_callable {
+                    // Go getUnionSignatures 产出的组合签名携带 composite(原始
+                    // 签名表),推断与上下文定型会分布回原始签名(上下文敏感
+                    // 实参参数取并集)。本地组合无 composite 分布,真交集参数
+                    // 会误伤混合类型参数等场景,故调用路径维持逐成员拼接
                     for m in &expanded_leaves {
+                        if self.is_global_function_type(m) {
+                            union_signatures.push(self.untyped_call_signature());
+                            continue;
+                        }
                         if let Some(s) = m.as_structured() {
                             union_signatures.extend(s.call_signatures().iter().cloned());
                         }
+                    }
+                    if let Some(combined) = self.try_combine_union_call_signatures(&union_signatures)
+                    {
+                        union_signatures = vec![combined];
+                    }
+                    if union_signatures.is_empty() {
+                        self.report_invocation_error(callee_expr, callee_type, is_new);
+                        return None;
                     }
                     &union_signatures
                 } else {
                     self.report_invocation_error(callee_expr, callee_type, is_new);
                     return None;
                 }
+            }        } else {
+            // Go isUntypedFunctionCall：无任何签名且为全局 Function 型时按
+            // untyped 调用，不报不可调用
+            if !is_new
+                && callee_type.as_structured().is_some_and(|s| {
+                    s.call_signatures().is_empty() && s.construct_signatures().is_empty()
+                })
+                && self.is_global_function_type(callee_type)
+            {
+                union_signatures.push(self.untyped_call_signature());
+                return Some(union_signatures);
             }
-        } else if let Some(structured) = callee_type.as_structured() {
-            if is_new {
-                structured.construct_signatures()
-            } else {
-                structured.call_signatures()
-            }
-        } else {
-            if !is_new && self.report_get_accessor_call(callee_expr) {
+            let resolved = self.get_signatures_of_type(callee_type, sig_kind);
+            if resolved.is_empty() {
+                let other_kind = if is_new {
+                    SignatureKind::Call
+                } else {
+                    SignatureKind::Construct
+                };
+                let other = self.get_signatures_of_type(callee_type, other_kind);
+                if !is_new && !other.is_empty() {
+                    let type_str = self.type_to_string(callee_type);
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        callee_expr.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            VALUE_OF_TYPE_0_IS_NOT_CALLABLE_DID_YOU_MEAN_TO_INCLUDE_NEW,
+                        vec![type_str],
+                    ));
+                    return None;
+                }
+                if is_new && !other.is_empty() {
+                    self.new_call_fallback_signature = true;
+                    return Some(other);
+                }
+                if !is_new && self.report_get_accessor_call(callee_expr) {
+                    return None;
+                }
+                self.report_invocation_error(callee_expr, callee_type, is_new);
                 return None;
             }
-            self.report_invocation_error(callee_expr, callee_type, is_new);
-            return None;
+            union_signatures = resolved;
+            &union_signatures
         };
-        Some(signatures.to_vec())
+        Some(self.reorder_candidates(signatures))
+    }
+
+    pub(crate) fn reorder_candidates(&self, signatures: &[Arc<Signature>]) -> Vec<Arc<Signature>> {
+        let mut last_parent: Option<Arc<Node>> = None;
+        let mut last_symbol: Option<Arc<Symbol>> = None;
+        let mut index: usize = 0;
+        let mut cutoff_index: usize = 0;
+        let mut splice_index: usize;
+        let mut specialized_index: isize = -1;
+        let mut result: Vec<Arc<Signature>> = Vec::with_capacity(signatures.len());
+        for signature in signatures {
+            let mut symbol: Option<Arc<Symbol>> = None;
+            let mut parent: Option<Arc<Node>> = None;
+            if let Some(declaration) = signature.declaration.as_ref() {
+                symbol = self.get_symbol_of_declaration(declaration);
+                if let Some(sym) = symbol.as_ref() {
+                    symbol = Some(self.get_merged_symbol(sym));
+                }
+                parent = declaration.parent();
+            }
+            if last_symbol.is_none() || ptr_eq_opt(&symbol, &last_symbol) {
+                if last_parent.is_some() && ptr_eq_opt(&parent, &last_parent) {
+                    index += 1;
+                } else {
+                    last_parent = parent;
+                    index = cutoff_index;
+                }
+            } else {
+                index = result.len();
+                cutoff_index = result.len();
+                last_parent = parent;
+            }
+            last_symbol = symbol;
+            if signature.flags.contains(SignatureFlags::HasLiteralTypes) {
+                specialized_index += 1;
+                splice_index = specialized_index as usize;
+                cutoff_index += 1;
+            } else {
+                splice_index = index;
+            }
+            result.insert(splice_index, Arc::clone(signature));
+        }
+        result
     }
 
     pub(crate) fn check_uncallable_callee(
@@ -154,5 +261,36 @@ impl Checker {
         }
         self.report_invocation_error(callee_expr, callee_type, is_new);
         return;
+    }
+}
+
+impl Checker {
+    // Go unknownSignature：无参任意返回的合成调用签名
+    fn untyped_call_signature(&mut self) -> Arc<Signature> {
+        self.build_signature_from_function_like_type_node(
+            &Arc::new(NodeList::default()),
+            self.get_any_type(),
+            false,
+            None,
+            None,
+        )
+    }
+
+    // Go t == globalFunctionType 判定
+    fn is_global_function_type(&self, t: &Arc<Type>) -> bool {
+        t.flags.contains(TypeFlags::Object)
+            && self
+                .globals
+                .get("Function")
+                .zip(t.symbol.as_ref())
+                .is_some_and(|(function_sym, sym)| Arc::ptr_eq(function_sym, sym))
+    }
+}
+
+fn ptr_eq_opt<T>(a: &Option<Arc<T>>, b: &Option<Arc<T>>) -> bool {
+    match (a, b) {
+        (None, None) => true,
+        (Some(a), Some(b)) => Arc::ptr_eq(a, b),
+        _ => false,
     }
 }

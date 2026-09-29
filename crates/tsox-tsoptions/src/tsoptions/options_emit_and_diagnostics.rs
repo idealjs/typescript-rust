@@ -32,6 +32,27 @@ pub(crate) const EMIT_AND_DIAGNOSTICS: &[OptionDecl] = &[
         ..DEFAULT_DECL
     },
     OptionDecl {
+        name: "allowImportingTsExtensions",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+        ..DEFAULT_DECL
+    },
+    OptionDecl {
+        name: "allowUnreachableCode",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+        ..DEFAULT_DECL
+    },
+    OptionDecl {
+        name: "allowUnusedLabels",
+        short_name: None,
+        kind: OptionKind::Boolean,
+        is_file_path: false,
+        ..DEFAULT_DECL
+    },
+    OptionDecl {
         name: "checkJs",
         short_name: None,
         kind: OptionKind::Boolean,

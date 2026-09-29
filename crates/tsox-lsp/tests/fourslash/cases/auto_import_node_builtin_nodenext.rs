@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn auto_import_node_builtin_nodenext() {
     let content = r#"// @Filename: /tsconfig.json
@@ -17,6 +17,7 @@ declare module "fs" {
 declare module "node:fs" { export * from "fs"; }
 // @Filename: /index.ts
 existsSync/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("autoImportNodeBuiltinNodenext", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

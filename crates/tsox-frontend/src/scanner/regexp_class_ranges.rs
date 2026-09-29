@@ -1,6 +1,5 @@
 use crate::scanner::regexp::RegExpParser;
 use crate::scanner::regexp::decode_first_rune;
-use tsox_core::diagnostics;
 
 impl<'a> RegExpParser<'a> {
     pub(super) fn scan_class_ranges(&mut self) {

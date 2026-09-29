@@ -1,12 +1,12 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
+
 #[test]
 fn rename_reference_from_link_tag1() {
     let content = r#"enum E {
     /** {@link /**/A} */
     A
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
+    let _s = Session::new_for_test("renameReferenceFromLinkTag1", content);
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

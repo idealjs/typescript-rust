@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: opts640 := f.GetOptions()"]
+
 #[test]
 fn format_simulating_script_blocks() {
     let content = r#"/* BEGIN EXTERNAL SOURCE */
@@ -21,21 +21,17 @@ fn format_simulating_script_blocks() {
             var f = 1;
         /*end1*/
 /* END EXTERNAL SOURCE */"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatSimulatingScriptBlocks", content);
     // TODO: opts640 := f.GetOptions()
-    // TODO: opts640.FormatCodeSettings.BaseIndentSize = 12
-    fourslash::unsupported("Configure"); // f.Configure(t, opts640)
-    fourslash::unsupported("FormatSelection"); // f.FormatSelection(t, "begin1", "end1")
-    fourslash::unsupported("FormatSelection"); // f.FormatSelection(t, "begin2", "end2")
-    fourslash::unsupported("FormatSelection"); // f.FormatSelection(t, "begin3", "end3")
+    fourslash::configure_format_settings(&mut s, &[("base_indent_size", "12")]);
+    fourslash::format_selection(&mut s, "begin1", "end1");
+    fourslash::format_selection(&mut s, "begin2", "end2");
+    fourslash::format_selection(&mut s, "begin3", "end3");
     // TODO: opts794 := f.GetOptions()
-    // TODO: opts794.FormatCodeSettings.BaseIndentSize = 24
-    fourslash::unsupported("Configure"); // f.Configure(t, opts794)
-    fourslash::unsupported("FormatSelection"); // f.FormatSelection(t, "begin4", "end4")
-    fourslash::unsupported("FormatSelection"); // f.FormatSelection(t, "begin5", "end5")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"/* BEGIN EXTERNAL SOURCE */
+    fourslash::configure_format_settings(&mut s, &[("base_indent_size", "24")]);
+    fourslash::format_selection(&mut s, "begin4", "end4");
+    fourslash::format_selection(&mut s, "begin5", "end5");
+    fourslash::verify_current_file_content(&mut s, r#"/* BEGIN EXTERNAL SOURCE */
 
                         var a = 1;
                         alert("/********/");
@@ -52,6 +48,5 @@ fn format_simulating_script_blocks() {
             var e = "/********/";
             var f = 1;
 
-/* END EXTERNAL SOURCE */"#,
-    );
+/* END EXTERNAL SOURCE */"#);
 }

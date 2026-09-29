@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn auto_import_package_json_filter_existing_import3() {
     let content = r#"// @Filename: /home/src/workspaces/project/tsconfig.json
@@ -14,12 +14,12 @@ declare module "node:fs" {
 {}
 // @Filename: /home/src/workspaces/project/index.ts
 readFile/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportPackageJsonFilterExistingImport3", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{}, nil /*preferences*/)
-    fourslash::unsupported("GoToBOF"); // f.GoToBOF(t)
-    fourslash::unsupported("InsertLine"); // f.InsertLine(t, "import { writeFile } from \"node:fs\";")
+    // TODO: f.VerifyImportFixAtPosition(t, []string{}, nil /*preferences*/)
+    fourslash::go_to_bof(&mut s, );
+    fourslash::insert_line(&mut s, "import { writeFile } from \"node:fs\";");
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

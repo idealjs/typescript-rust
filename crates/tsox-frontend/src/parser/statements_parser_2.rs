@@ -9,19 +9,20 @@ impl Parser {
         let expression = if !self.has_preceding_line_break() {
             self.parse_expression()
         } else {
+            let pos = self.node_pos();
             Arc::new(Node::with_loc(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData {
                     text: String::new(),
                 }),
-                TextRange::new(self.token_pos(), self.token_pos()),
+                TextRange::new(pos, pos),
             ))
         };
 
         if !self.try_parse_semicolon() {
             self.parse_error_for_missing_semicolon_after(&expression);
         }
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ThrowStatement,
             NodeData::ThrowStatement(ThrowStatementData { expression }),
@@ -63,19 +64,11 @@ impl Parser {
         let pos = self.token_pos();
         self.expect(SyntaxKind::CatchKeyword);
         let variable_declaration = if self.parse_optional(SyntaxKind::OpenParenToken) {
-            let name = self.parse_identifier_or_pattern();
-            let type_node = self.parse_optional_type_annotation();
+            // Go parseCatchClause：走完整 parseVariableDeclaration（含初始化器，
+            // `catch (e = 1)` 由 checker 报 TS1197 而非解析失败）
+            let decl = self.parse_variable_declaration();
             self.expect(SyntaxKind::CloseParenToken);
-            Some(Arc::new(Node::with_loc(
-                SyntaxKind::VariableDeclaration,
-                NodeData::VariableDeclaration(VariableDeclarationData {
-                    name,
-                    exclamation_token: None,
-                    type_node,
-                    initializer: None,
-                }),
-                TextRange::new(pos, self.token_pos()),
-            )))
+            Some(decl)
         } else {
             None
         };
@@ -95,7 +88,7 @@ impl Parser {
         let pos = self.token_pos();
         self.expect(SyntaxKind::DebuggerKeyword);
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::DebuggerStatement,
             NodeData::DebuggerStatement,
@@ -110,7 +103,7 @@ impl Parser {
         if self.token == SyntaxKind::ColonToken && expression.kind == SyntaxKind::Identifier {
             self.next_token();
             let statement = self.parse_statement();
-            let end = self.token_pos();
+            let end = self.node_pos();
             return Arc::new(Node::with_loc(
                 SyntaxKind::LabeledStatement,
                 NodeData::LabeledStatement(LabeledStatementData {
@@ -124,7 +117,7 @@ impl Parser {
         if !self.try_parse_semicolon() {
             self.parse_error_for_missing_semicolon_after(&expression);
         }
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ExpressionStatement,
             NodeData::ExpressionStatement(ExpressionStatementData { expression }),
@@ -145,6 +138,7 @@ impl Parser {
                 self.parse_variable_statement()
             }
             SyntaxKind::IfKeyword => self.parse_if_statement(),
+            SyntaxKind::WithKeyword => self.parse_with_statement(),
             SyntaxKind::DoKeyword => self.parse_do_statement(),
             SyntaxKind::WhileKeyword => self.parse_while_statement(),
             SyntaxKind::ForKeyword => self.parse_for_statement(),
@@ -153,7 +147,9 @@ impl Parser {
             SyntaxKind::ReturnKeyword => self.parse_return_statement(),
             SyntaxKind::SwitchKeyword => self.parse_switch_statement(),
             SyntaxKind::ThrowKeyword => self.parse_throw_statement(),
-            SyntaxKind::TryKeyword => self.parse_try_statement(),
+            SyntaxKind::TryKeyword | SyntaxKind::CatchKeyword | SyntaxKind::FinallyKeyword => {
+                self.parse_try_statement()
+            }
             SyntaxKind::FunctionKeyword => self.parse_function_declaration(),
             SyntaxKind::ClassKeyword => self.parse_class_declaration(),
 
@@ -207,13 +203,30 @@ impl Parser {
         ))
     }
 
+    /// Go parseBlock：`{` 缺失时（shouldAdvance）报错推进并返回空块，
+    /// 不解析语句列表（stray catch/finally 的递归防护依赖这一点）
     pub(crate) fn parse_block(&mut self) -> Arc<Node> {
+        self.parse_block_ex(false)
+    }
+
+    /// Go parseBlock(ignoreMissingOpenBrace=true)：函数体等允许无 `{` 继续解析
+    pub(crate) fn parse_block_ex(&mut self, ignore_missing_open_brace: bool) -> Arc<Node> {
         let pos = self.token_pos();
-        self.expect(SyntaxKind::OpenBraceToken);
+        let open_brace_parsed = self.expect(SyntaxKind::OpenBraceToken);
+        if !open_brace_parsed && !ignore_missing_open_brace {
+            return Arc::new(Node::with_loc(
+                SyntaxKind::Block,
+                NodeData::Block(BlockData {
+                    statements: Arc::new(NodeList::default()),
+                    multi_line: false,
+                }),
+                TextRange::new(pos, pos),
+            ));
+        }
         let multi_line = self.has_preceding_line_break();
         let statements = self.parse_list(ParsingContext::BlockStatements, Parser::parse_statement);
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::Block,
             NodeData::Block(BlockData {
@@ -232,10 +245,10 @@ impl Parser {
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
-        let pos = self.token_pos();
+        let pos = Self::declaration_start(&modifiers, self.token_pos());
         let declaration_list = self.parse_variable_declaration_list(false);
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::VariableStatement,
             NodeData::VariableStatement(VariableStatementData {
@@ -246,7 +259,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_variable_declaration_list(&mut self, _in_for: bool) -> Arc<Node> {
+    pub(crate) fn parse_variable_declaration_list(&mut self, in_for: bool) -> Arc<Node> {
         let pos = self.token_pos();
         let flags = match self.token {
             SyntaxKind::VarKeyword => NodeFlags::empty(),
@@ -264,15 +277,30 @@ impl Parser {
         } else {
             self.next_token();
         }
-        let declarations = self.parse_delimited_list(
-            ParsingContext::VariableDeclarations,
-            if _in_for {
-                Parser::parse_variable_declaration
-            } else {
-                Parser::parse_variable_declaration_allow_exclamation
-            },
-        );
-        let end = self.token_pos();
+        let empty_declarations = self.token == SyntaxKind::OfKeyword
+            && self.next_is_identifier_and_close_paren();
+        let outer_disallow_in = self.disallow_in_context;
+        if in_for {
+            self.disallow_in_context = true;
+        }
+        let declarations = if empty_declarations {
+            let of_pos = self.scanner.full_start_pos();
+            NodeList {
+                loc: TextRange::new(of_pos, of_pos),
+                nodes: Vec::new(),
+            }
+        } else {
+            self.parse_delimited_list(
+                ParsingContext::VariableDeclarations,
+                if in_for {
+                    Parser::parse_variable_declaration
+                } else {
+                    Parser::parse_variable_declaration_allow_exclamation
+                },
+            )
+        };
+        self.disallow_in_context = outer_disallow_in;
+        let end = self.node_pos();
         let mut node = Node::with_loc(
             SyntaxKind::VariableDeclarationList,
             NodeData::VariableDeclarationList(VariableDeclarationListData {

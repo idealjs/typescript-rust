@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_on_narrowed_type_in_module() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: false
 var strOrNum: string | number;
 namespace m {
@@ -30,7 +30,7 @@ if (typeof m./*7*/exportedStrOrNum === "number") {
 else {
     strOrNum = m./*9*/exportedStrOrNum;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoOnNarrowedTypeInModule", content);
     fourslash::verify_quick_info_at(&mut s, "1", "var nonExportedStrOrNum: string | number", "");
     fourslash::verify_quick_info_at(&mut s, "2", "var nonExportedStrOrNum: number", "");
     fourslash::verify_quick_info_at(&mut s, "3", "var nonExportedStrOrNum: string", "");
@@ -40,13 +40,22 @@ else {
     fourslash::verify_quick_info_at(&mut s, "7", "var m.exportedStrOrNum: string | number", "");
     fourslash::verify_quick_info_at(&mut s, "8", "var m.exportedStrOrNum: number", "");
     fourslash::verify_quick_info_at(&mut s, "9", "var m.exportedStrOrNum: string", "");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "8", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "9", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
+    // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "3");
+    // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "4");
+    // TODO: f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "5");
+    // TODO: f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "6");
+    // TODO: f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "7");
+    // TODO: f.VerifyCompletions(t, "7", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "8");
+    // TODO: f.VerifyCompletions(t, "8", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "9");
+    // TODO: f.VerifyCompletions(t, "9", &fourslash.CompletionsExpectedList{
 }

@@ -13,7 +13,7 @@ impl Parser {
         self.expect(SyntaxKind::EqualsToken);
         let module_reference = self.parse_module_reference();
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ImportEqualsDeclaration,
             NodeData::ImportEqualsDeclaration(ImportEqualsDeclarationData {
@@ -41,7 +41,7 @@ impl Parser {
         self.expect(SyntaxKind::OpenParenToken);
         let expression = self.parse_module_specifier();
         self.expect(SyntaxKind::CloseParenToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ExternalModuleReference,
             NodeData::ExternalModuleReference(ExternalModuleReferenceData { expression }),
@@ -89,7 +89,7 @@ impl Parser {
             Parser::parse_import_attribute,
         );
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ImportAttributes,
             NodeData::ImportAttributes(ImportAttributesData {
@@ -189,7 +189,7 @@ impl Parser {
             Parser::parse_import_specifier,
         );
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::NamedImports,
             NodeData::NamedImports(NamedImportsData {

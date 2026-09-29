@@ -186,8 +186,47 @@ impl Checker {
             NodeData::ElementAccessExpression(ea) => match &ea.argument_expression.data {
                 NodeData::StringLiteral(s) => Some(s.text.clone()),
                 NodeData::NumericLiteral(n) => Some(n.text.clone()),
-                _ => None,
+                _ => self.enum_member_argument_name(&ea.argument_expression),
             },
+            _ => None,
+        }
+    }
+
+    // Go tryGetElementAccessExpressionName → tryGetNameFromEntityNameExpression：
+    // 枚举成员实参（E.A）取成员声明名，使 m[E.A] 的窄化引用可配对
+    fn enum_member_argument_name(&self, arg: &Arc<Node>) -> Option<String> {
+        let NodeData::PropertyAccessExpression(pae) = &arg.data else {
+            return None;
+        };
+        if !matches!(
+            pae.expression.kind,
+            SyntaxKind::Identifier | SyntaxKind::PropertyAccessExpression
+        ) {
+            return None;
+        }
+        let namespace = self.resolve_entity_name_chain(&pae.expression)?;
+        let member = namespace
+            .members
+            .get(pae.name.text())
+            .or_else(|| namespace.exports.get(pae.name.text()))
+            .cloned()?;
+        if !member.flags.contains(SymbolFlags::EnumMember) {
+            return None;
+        }
+        let decl = member.value_declaration.as_ref()?;
+        let NodeData::EnumMember(data) = &decl.data else {
+            return None;
+        };
+        Some(data.name.text().to_string())
+    }
+
+    fn resolve_entity_name_chain(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+        match &node.data {
+            NodeData::Identifier(_) => self.resolve_identifier(node),
+            NodeData::PropertyAccessExpression(pae) => {
+                let namespace = self.resolve_entity_name_chain(&pae.expression)?;
+                namespace.exports.get(pae.name.text()).cloned()
+            }
             _ => None,
         }
     }
@@ -226,7 +265,7 @@ impl Checker {
             ) {
                 return Some(current);
             }
-            current = Arc::clone(current.parent.as_ref()?);
+            current = Arc::clone(current.parent().as_ref()?);
         }
     }
 

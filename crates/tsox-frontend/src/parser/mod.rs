@@ -8,15 +8,24 @@ pub use impl_chunk::*;
 #[allow(unused_imports)]
 pub use parsing_context::*;
 pub(crate) mod jsdoc;
+pub(crate) mod parser_json;
 pub(crate) mod references;
+pub(crate) mod reparse_await;
 pub(crate) mod reparser;
 
-pub use jsdoc::parse_jsdoc_for_node;
-pub use references::{collect_external_module_references, set_external_module_indicator};
+pub use jsdoc::{parse_jsdoc_comment_range, parse_jsdoc_for_node};
+pub use references::{
+    cannot_resolve_module_error, collect_external_module_references,
+    set_external_module_indicator, EXCLUSIVELY_PREFIXED_NODE_CORE_MODULES,
+    UNPREFIXED_NODE_CORE_MODULES,
+};
 pub use reparser::reparse_tags;
 
 pub(crate) use crate::ast::*;
-pub(crate) use crate::scanner::{Scanner, token_to_string};
+pub(crate) use crate::scanner::{
+    Scanner, TOKEN_FLAGS_EXTENDED_UNICODE_ESCAPE, TOKEN_FLAGS_UNICODE_ESCAPE,
+    token_flags_intersects, token_to_string,
+};
 pub(crate) use std::sync::Arc;
 pub(crate) use tsox_core::core::text::TextRange;
 pub(crate) use tsox_core::diagnostics;
@@ -37,6 +46,7 @@ pub(crate) mod expressions_parser_4;
 pub(crate) mod expressions_parser_5;
 pub(crate) mod expressions_parser_6;
 pub(crate) mod expressions_parser_7;
+pub(crate) mod expressions_parser_8;
 pub(crate) mod impl_chunk_parser;
 pub(crate) mod impl_chunk_parser_2;
 pub(crate) mod impl_chunk_parser_3;
@@ -82,3 +92,6 @@ pub(crate) mod types_parser;
 pub(crate) mod types_parser_2;
 pub(crate) mod types_parser_3;
 pub(crate) mod types_parser_4;
+
+// r 轮接线:迁移批次模块
+pub mod mig;

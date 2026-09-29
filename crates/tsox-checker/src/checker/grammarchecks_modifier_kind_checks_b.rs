@@ -56,6 +56,18 @@ impl Checker {
                         &X_0_MODIFIER_CANNOT_APPEAR_ON_A_PARAMETER,
                         &["export".to_string()],
                     ));
+                } else if block_scope_kind == NodeFlags::Using {
+                    return Some(self.grammar_error_on_node_with_args(
+                        modifier,
+                        &X_0_MODIFIER_CANNOT_APPEAR_ON_A_USING_DECLARATION,
+                        &["export".to_string()],
+                    ));
+                } else if block_scope_kind == NodeFlags::AwaitUsing {
+                    return Some(self.grammar_error_on_node_with_args(
+                        modifier,
+                        &X_0_MODIFIER_CANNOT_APPEAR_ON_AN_AWAIT_USING_DECLARATION,
+                        &["export".to_string()],
+                    ));
                 }
                 *flags |= ModifierFlags::Export;
             }
@@ -109,6 +121,31 @@ impl Checker {
                         &X_0_MODIFIER_CANNOT_APPEAR_ON_A_PARAMETER,
                         &["declare".to_string()],
                     ));
+                } else if block_scope_kind == NodeFlags::Using {
+                    return Some(self.grammar_error_on_node_with_args(
+                        modifier,
+                        &X_0_MODIFIER_CANNOT_APPEAR_ON_A_USING_DECLARATION,
+                        &["declare".to_string()],
+                    ));
+                } else if block_scope_kind == NodeFlags::AwaitUsing {
+                    return Some(self.grammar_error_on_node_with_args(
+                        modifier,
+                        &X_0_MODIFIER_CANNOT_APPEAR_ON_AN_AWAIT_USING_DECLARATION,
+                        &["declare".to_string()],
+                    ));
+                } else if node
+                    .parent()
+                    .as_ref()
+                    .is_some_and(|p| p.kind == SyntaxKind::ModuleBlock)
+                    && node
+                        .parent()
+                        .as_ref()
+                        .is_some_and(|p| self.node_in_ambient_context(p))
+                {
+                    return Some(self.grammar_error_on_node(
+                        modifier,
+                        &A_DECLARE_MODIFIER_CANNOT_BE_USED_IN_AN_ALREADY_AMBIENT_CONTEXT,
+                    ));
                 }
                 *flags |= ModifierFlags::Ambient;
                 *last_declare = Some(Arc::clone(modifier));
@@ -136,7 +173,7 @@ impl Checker {
                     }
 
                     let parent_is_abstract_class = node
-                        .parent
+                        .parent()
                         .as_ref()
                         .map(|p| {
                             p.kind == SyntaxKind::ClassDeclaration
@@ -165,6 +202,15 @@ impl Checker {
                             &["private".to_string(), "abstract".to_string()],
                         ));
                     }
+                    if flags.contains(ModifierFlags::Override)
+                        && !modifier.flags.contains(NodeFlags::Reparsed)
+                    {
+                        return Some(self.grammar_error_on_node_with_args(
+                            modifier,
+                            &X_0_MODIFIER_MUST_PRECEDE_1_MODIFIER,
+                            &["abstract".to_string(), "override".to_string()],
+                        ));
+                    }
                 }
                 *flags |= ModifierFlags::Abstract;
             }
@@ -177,7 +223,7 @@ impl Checker {
                     ));
                 } else if flags.contains(ModifierFlags::Ambient)
                     || node
-                        .parent
+                        .parent()
                         .as_ref()
                         .map(|p| p.flags.contains(NodeFlags::Ambient))
                         .unwrap_or(false)

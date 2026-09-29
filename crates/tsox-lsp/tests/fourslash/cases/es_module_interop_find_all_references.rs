@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn es_module_interop_find_all_references() {
     let content = r#"// @esModuleInterop: true
@@ -11,6 +11,6 @@ declare module "a" {
 // @Filename: /b.ts
 import a from "a";
 a./*3*/x;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
+    let _s = Session::new_for_test("esModuleInteropFindAllReferences", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

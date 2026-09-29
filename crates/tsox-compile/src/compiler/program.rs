@@ -50,6 +50,16 @@ impl Program {
             )));
         }
 
+        if options.check_js.is_true() && !options.get_allow_js() {
+            diagnostics.push(Arc::new(Diagnostic::new(
+                None,
+                TextRange::default(),
+                tsox_core::diagnostics::messages_generated::
+                    OPTION_0_CANNOT_BE_SPECIFIED_WITHOUT_SPECIFYING_OPTION_1,
+                vec!["checkJs".to_string(), "allowJs".to_string()],
+            )));
+        }
+
         if !opts.config.file_names.is_empty() && !options.no_lib.is_true() {
             let lib_names = default_lib_file_names(&options);
             let mut visited: std::collections::HashSet<String> = std::collections::HashSet::new();
@@ -285,6 +295,7 @@ impl Program {
             diagnostics,
             host,
             config_file_name,
+            resolved_modules: HashMap::new(),
             symbol_map,
         }
     }

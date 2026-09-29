@@ -134,7 +134,7 @@ impl Checker {
                 None => Err((Arc::clone(name), String::new(), String::new())),
             },
             tsox_frontend::ast::NodeData::QualifiedName(data) => {
-                self.resolve_qualified_tail(&data.left, &data.right)
+                self.resolve_qualified_tail(&data.left, &data.right, true)
             }
 
             tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) => {
@@ -148,7 +148,7 @@ impl Checker {
                         | SyntaxKind::QualifiedName
                         | SyntaxKind::PropertyAccessExpression
                 ) {
-                    self.resolve_qualified_tail(base, &pa.name)
+                    self.resolve_qualified_tail(base, &pa.name, false)
                 } else {
                     Err((Arc::clone(name), String::new(), String::new()))
                 }
@@ -161,16 +161,80 @@ impl Checker {
         &mut self,
         left: &Arc<Node>,
         right: &Arc<Node>,
+        entity_name_ctx: bool,
     ) -> Result<Arc<Symbol>, (Arc<Node>, String, String)> {
         {
             let mut symbol = self.resolve_qualified_symbol_traced(left)?;
             let path_so_far = qualified_name_text(left);
+            // Go resolveQualifiedName：限定名左侧一律按 Namespace 含义解析
+            //（Go SymbolFlagsNamespace 含 Enum）。别名链断（对应
+            // unknownSymbol 全含义）整体按 unknown 传播不报错；类型含义命中的
+            // 左侧走 2694 type-as-namespace，其余 2503
+            if entity_name_ctx {
+                // Go resolveEntityName(left, SymbolFlagsNamespace)：meaning 过滤
+                // 逐层上溯，非 namespace 含义的就近遮蔽（模块内 interface 遮蔽
+                // 全局 namespace）被跳过，外层 namespace 含义符号胜出
+                if let Some(ns) = self.resolve_entity_name(
+                    left,
+                    tsox_frontend::ast::SymbolFlags::NAMESPACE,
+                    true,
+                    false,
+                    Some(left),
+                ) {
+                    symbol = ns;
+                } else {
+                    let (chain_flags, chain_complete) =
+                        self.symbol_flags_with_alias_chain_ex(&symbol);
+                    if !chain_flags.intersects(
+                        tsox_frontend::ast::SymbolFlags::NAMESPACE
+                            | tsox_frontend::ast::SymbolFlags::ENUM,
+                    ) {
+                        if !chain_complete {
+                            return Ok(symbol);
+                        }
+                        let leftmost = crate::checker::checker::base_identifier_of(left);
+                        if chain_flags.intersects(tsox_frontend::ast::SymbolFlags::TYPE) {
+                            return Err((leftmost, qualified_name_text(left), String::new()));
+                        }
+                        return Err((leftmost, String::new(), String::new()));
+                    }
+                }
+            }
             symbol = self.resolve_alias_base(symbol);
+            // re-export 链（import { foo } → export { foo } → import * as foo）
+            // 需循环 follow 到终点（namespace import 符号）才能查成员
+            let mut alias_guard = 0;
+            while symbol.flags == SymbolFlags::Alias && alias_guard < 10 {
+                let next = self.resolve_alias_base(Arc::clone(&symbol));
+                if !Arc::ptr_eq(&next, &symbol) {
+                    symbol = next;
+                    alias_guard += 1;
+                    continue;
+                }
+                // binder 未挂 export_symbol 的 import 别名：检查期解析成员
+                //（import {P as Q} from "a" → a 的导出 P → 其命名空间导入模块）
+                match self.resolve_import_alias_target_symbol(&symbol) {
+                    Some(resolved) if !Arc::ptr_eq(&resolved, &symbol) => {
+                        symbol = resolved;
+                        alias_guard += 1;
+                    }
+                    _ => break,
+                }
+            }
 
             if symbol.flags == SymbolFlags::Alias
                 && let Some(module_sym) = self.resolve_import_alias_module(&symbol)
             {
                 symbol = module_sym;
+            }
+
+            // Go resolveEntityName：import= require 的别名目标经
+            // resolveExternalModuleSymbol 穿透模块 export= 后再查成员
+            if symbol.flags.intersects(SymbolFlags::MODULE) {
+                let through = self.resolve_external_module_symbol_go_mut(&symbol);
+                if !Arc::ptr_eq(&through, &symbol) {
+                    symbol = through;
+                }
             }
 
             let text = right.text();
@@ -179,8 +243,22 @@ impl Checker {
                 .get(text)
                 .or_else(|| symbol.members.get(text))
                 .cloned()
+                .or_else(|| self.global_this_export(&symbol, text))
                 .or_else(|| self.ambient_namespace_local(&symbol, text))
-                .or_else(|| self.object_literal_export_member(&symbol, text));
+                .or_else(|| self.object_literal_export_member(&symbol, text))
+                .or_else(|| {
+                    // 文件模块的星号导出链兜底（export * / export type * 的
+                    // 成员在 exports 表外）
+                    if symbol.flags.intersects(
+                        SymbolFlags::ValueModule | SymbolFlags::NamespaceModule,
+                    ) || symbol.declarations.iter().any(|d| {
+                        d.kind == SyntaxKind::SourceFile
+                    }) {
+                        self.resolve_module_member_symbol(&symbol, text, 8)
+                    } else {
+                        None
+                    }
+                });
 
             if next.is_none()
                 && let Some(ea_sym) = symbol.exports.get("export=")
@@ -205,7 +283,11 @@ impl Checker {
                     let target = self.resolve_identifier(&ea.expression);
                     self.pop_scope();
                     if let Some(target) = target
-                        && target.flags.contains(SymbolFlags::ValueModule)
+                        // Go getExportsOfSymbol：export= 目标不论实例化状态
+                        // （纯类型命名空间 NamespaceModule 同样可被穿透查找）
+                        && target.flags.intersects(
+                            SymbolFlags::ValueModule | SymbolFlags::NamespaceModule,
+                        )
                     {
                         next = target
                             .exports
@@ -264,8 +346,9 @@ impl Checker {
                     let _ = path_so_far;
                     Err((
                         Arc::clone(right),
-                        Self::namespace_full_path(&symbol),
-                        text.to_string(),
+                        self.namespace_full_path(&symbol),
+                        self.node_source_text(right)
+                            .unwrap_or_else(|| text.to_string()),
                     ))
                 }
             }
@@ -273,12 +356,12 @@ impl Checker {
     }
 
     pub(crate) fn ambient_ancestor(&self, node: &Arc<Node>) -> bool {
-        let mut cur = node.parent.as_ref();
+        let mut cur = node.parent();
         while let Some(a) = cur {
             if a.has_syntactic_modifier(ModifierFlags::Ambient) {
                 return true;
             }
-            cur = a.parent.as_ref();
+            cur = a.parent();
         }
         false
     }

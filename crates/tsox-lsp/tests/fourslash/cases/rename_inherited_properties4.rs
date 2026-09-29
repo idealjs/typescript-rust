@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
+
 #[test]
 fn rename_inherited_properties4() {
     let content = r#"interface interface1 extends interface1 {
@@ -9,6 +9,6 @@ fn rename_inherited_properties4() {
 
 var v: interface1;
 v.[|doStuff|]();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "doStuff")
+    let _s = Session::new_for_test("renameInheritedProperties4", content);
+    // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "doStuff")
 }

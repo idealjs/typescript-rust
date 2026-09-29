@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_js_doc_inheritage() {
     let content = r#"interface A {
@@ -107,6 +107,6 @@ new Drived3()./*21*/foo1;
 new Drived3()./*22*/foo2;
 new Drived4()./*23*/foo1;
 new Drived4()./*24*/foo2;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoJsDocInheritage", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

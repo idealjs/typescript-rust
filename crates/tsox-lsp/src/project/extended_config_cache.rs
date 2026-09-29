@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use tsox_core::tspath::Path;
-use tsox_tsoptions::tsoptions::ParsedCommandLine;
+use tsox_tsoptions::mig::m5j_2::ParsedTsconfig;
 
 use super::owner_cache::OwnerCache;
 
@@ -14,7 +14,7 @@ pub struct ExtendedConfigParseArgs {
 
 #[derive(Clone)]
 pub struct ExtendedConfigCacheEntry {
-    pub command_line: Option<ParsedCommandLine>,
+    pub command_line: Option<ParsedTsconfig>,
     pub hash_lo: u64,
     pub hash_hi: u64,
 }
@@ -43,6 +43,10 @@ impl ExtendedConfigCache {
 
     pub fn has(&self, path: &Path) -> bool {
         self.inner.has(path)
+    }
+
+    pub fn len(&self) -> usize {
+        self.inner.len()
     }
 
     pub fn release(&self, path: &Path, owner: u64) {

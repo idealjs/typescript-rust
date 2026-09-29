@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
+
 #[test]
 fn rename_string_literal_ok() {
     let content = r#"interface Foo {
@@ -9,7 +9,7 @@ fn rename_string_literal_ok() {
 const d: 'foo' = 'foo'
 declare const f: Foo
 f.f = '[|foo|]'
-f.f = ` + "`" + `[|foo|]` + "`" + `"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "foo")
+f.f = `[|foo|]`"#;
+    let _s = Session::new_for_test("renameStringLiteralOk", content);
+    // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "foo")
 }

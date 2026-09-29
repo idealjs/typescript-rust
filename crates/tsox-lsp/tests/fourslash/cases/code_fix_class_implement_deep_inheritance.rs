@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFix"]
+
 #[test]
 fn code_fix_class_implement_deep_inheritance() {
     let content = r#"// @stableTypeOrdering: true
@@ -29,6 +29,6 @@ class C4 extends C3 implements I0, I4, I5 {
 
 interface I6 extends C4 {}
 class C5 implements I6 {}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
+    let _s = Session::new_for_test("codeFixClassImplementDeepInheritance", content);
+    // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

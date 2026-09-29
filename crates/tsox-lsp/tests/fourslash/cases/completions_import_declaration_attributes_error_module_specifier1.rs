@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_import_declaration_attributes_error_module_specifier1() {
     let content = r#"// @strict: true
@@ -10,6 +10,6 @@ interface ImportAttributes {
 }
 // @filename: index.ts
 import * as ns from () with { type: "/**/" };"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsImportDeclarationAttributesErrorModuleSpecifier1", content);
+    fourslash::verify_completions_exact_at(&mut s, Some(""), &["json"]);
 }

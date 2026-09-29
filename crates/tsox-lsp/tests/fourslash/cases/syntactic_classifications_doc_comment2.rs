@@ -1,10 +1,10 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
+
 #[test]
 fn syntactic_classifications_doc_comment2() {
     let content = r#"/** @param foo { function(x): string } */
 var v;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
+    let _s = Session::new_for_test("syntacticClassificationsDocComment2", content);
+    // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

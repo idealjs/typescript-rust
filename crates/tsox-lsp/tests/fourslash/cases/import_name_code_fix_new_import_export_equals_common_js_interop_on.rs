@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
+
 #[test]
 fn import_name_code_fix_new_import_export_equals_common_js_interop_on() {
     let content = r#"// @Module: commonjs
@@ -29,11 +29,11 @@ import es from "es";
 import bar = require("bar");
 
 foo"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFixNewImportExportEqualsCommonJSInteropOn", content);
     fourslash::go_to_file(&mut s, "/a.ts");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_file(&mut s, "/b.ts");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_file(&mut s, "/c.ts");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

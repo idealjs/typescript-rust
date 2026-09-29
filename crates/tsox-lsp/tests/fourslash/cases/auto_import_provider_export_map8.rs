@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn auto_import_provider_export_map8() {
     let content = r#"// @Filename: /home/src/workspaces/project/tsconfig.json
@@ -39,10 +39,12 @@ import { fooFromIndex } from "dependency";
 fooFrom/*cts*/
 // @Filename: /home/src/workspaces/project/src/foo.mts
 fooFrom/*mts*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportProvider_exportMap8", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "cts");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "cts", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "cts");
+    // TODO: f.VerifyCompletions(t, "cts", &fourslash.CompletionsExpectedList{
     fourslash::go_to_marker(&mut s, "mts");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "mts", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "mts");
+    // TODO: f.VerifyCompletions(t, "mts", &fourslash.CompletionsExpectedList{
 }

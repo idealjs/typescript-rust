@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn navbar01() {
     let content = r#"// @lib: es5
@@ -41,7 +41,7 @@ namespace Shapes {
 // Local variables
 var p: IPoint = new Shapes.Point(3, 4);
 var dist = p.getDist();"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("navbar01", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
+    // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

@@ -15,6 +15,27 @@ pub fn get_declaration_modifier_flags_from_symbol(s: &Symbol) -> ModifierFlags {
 }
 
 pub fn get_declaration_modifier_flags_from_symbol_ex(s: &Symbol, is_write: bool) -> ModifierFlags {
+    if s.check_flags.contains(CheckFlags::SYNTHETIC) {
+        let access_modifier = if !is_write && s.check_flags.contains(CheckFlags::ContainsPublic)
+            || is_write && s.check_flags.contains(CheckFlags::ContainsWritePublic)
+        {
+            ModifierFlags::Public
+        } else if !is_write && s.check_flags.contains(CheckFlags::ContainsProtected)
+            || is_write && s.check_flags.contains(CheckFlags::ContainsWriteProtected)
+        {
+            ModifierFlags::Protected
+        } else if !is_write && s.check_flags.contains(CheckFlags::ContainsPrivate)
+            || is_write && s.check_flags.contains(CheckFlags::ContainsWritePrivate)
+        {
+            ModifierFlags::Private
+        } else {
+            ModifierFlags::empty()
+        };
+        if s.check_flags.contains(CheckFlags::ContainsStatic) {
+            return access_modifier.union(ModifierFlags::Static);
+        }
+        return access_modifier;
+    }
     let base_decl = s
         .value_declaration
         .as_ref()
@@ -38,27 +59,12 @@ pub fn get_declaration_modifier_flags_from_symbol_ex(s: &Symbol, is_write: bool)
             .unwrap_or_else(|| Arc::clone(value_declaration));
         let flags = get_combined_modifier_flags(&declaration);
 
-        if let Some(parent) = &s.parent {
+        if let Some(parent) = &s.parent() {
             if !parent.flags.contains(SymbolFlags::Class) {
                 return flags.difference(ModifierFlags::AccessibilityModifier);
             }
         }
         return flags;
-    }
-    if s.check_flags.contains(CheckFlags::SYNTHETIC) {
-        let access_modifier = if s.check_flags.contains(CheckFlags::ContainsPrivate) {
-            ModifierFlags::Private
-        } else if s.check_flags.contains(CheckFlags::ContainsPublic) {
-            ModifierFlags::Public
-        } else {
-            ModifierFlags::Protected
-        };
-        let static_modifier = if s.check_flags.contains(CheckFlags::ContainsStatic) {
-            ModifierFlags::Static
-        } else {
-            ModifierFlags::empty()
-        };
-        return access_modifier.union(static_modifier);
     }
     if s.flags.contains(SymbolFlags::Prototype) {
         return ModifierFlags::Public.union(ModifierFlags::Static);

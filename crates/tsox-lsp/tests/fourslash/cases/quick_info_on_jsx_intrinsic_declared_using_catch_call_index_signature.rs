@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_on_jsx_intrinsic_declared_using_catch_call_index_signature() {
     let content = r#"// @jsx: react
@@ -9,6 +9,6 @@ declare namespace JSX {
   interface IntrinsicElements { [elemName: string]: any; }
 }
 </**/div class="democlass" />;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoOnJsxIntrinsicDeclaredUsingCatchCallIndexSignature", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

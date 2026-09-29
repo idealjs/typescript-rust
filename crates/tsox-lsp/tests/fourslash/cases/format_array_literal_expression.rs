@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.VerifyCurrentLineContent(t, `"]
+
 #[test]
 fn format_array_literal_expression() {
     let content = r#"export let Things = [{
@@ -24,8 +24,8 @@ export let Things2 = [
         Burrito: ['burrito', 'carne asada', 'tinga de res', 'tinga de pollo'], /*8*/
         Pie: 'pie'
     }];/*9*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formatArrayLiteralExpression", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"    Hat: 'hat',"#);
     fourslash::go_to_marker(&mut s, "2");

@@ -17,6 +17,7 @@ pub(crate) fn parse_option_value(
             OptionKind::String => "string",
             OptionKind::Number => "number",
             OptionKind::List => "list",
+            OptionKind::ListOrElement => "listOrElement",
             OptionKind::Enum => "string",
         }
     };
@@ -206,7 +207,7 @@ pub(crate) fn parse_option_value(
                 }
             }
         }
-        OptionKind::List => {
+        OptionKind::List | OptionKind::ListOrElement => {
             let val = inline_value.or_else(|| {
                 if i < args.len() && !args[i].starts_with('-') {
                     let v = args[i].clone();

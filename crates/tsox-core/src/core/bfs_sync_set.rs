@@ -21,4 +21,8 @@ impl<K: Eq + Hash + Clone> SyncSet<K> {
     pub fn has(&self, key: &K) -> bool {
         self.inner.lock().unwrap().contains(key)
     }
+
+    pub fn delete(&self, key: &K) {
+        self.inner.lock().unwrap().remove(key);
+    }
 }

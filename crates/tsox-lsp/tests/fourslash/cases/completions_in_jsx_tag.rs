@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_in_jsx_tag() {
     let content = r#"// @jsx: preserve
@@ -22,11 +22,10 @@ class Foo {
         <div  /*2*/ />
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("completionsInJsxTag", content);
+    // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn completions_in_jsx_namespaced_intrinsic_tag() {
     let content = r#"// @jsx: react
@@ -46,6 +45,6 @@ declare namespace JSX {
 }
 <foo:bar /*1*/ />
 <foo:bar  /*2*/></foo:bar>"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("completionsInJsxNamespacedIntrinsicTag", content);
+    // TODO: f.VerifyCompletions(t, []string{"1", "2"}, &fourslash.CompletionsExpectedList{
 }

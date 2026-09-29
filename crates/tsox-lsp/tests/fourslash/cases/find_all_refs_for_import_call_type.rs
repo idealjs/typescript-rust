@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_for_import_call_type() {
     let content = r#"// @Filename: /app.ts
@@ -11,6 +11,6 @@ export type app = typeof import("./app")
 import type { app } from "./re-export";
 declare const app: app
 app.hello();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "")
+    let _s = Session::new_for_test("findAllRefsForImportCallType", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "")
 }

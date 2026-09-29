@@ -167,6 +167,9 @@ impl Checker {
             SyntaxKind::ArrowFunction | SyntaxKind::ReturnStatement => {
                 self.get_contextual_type_for_return_expression(node, _context_flags)
             }
+            // Go getContextualTypeForYieldOperand：yield 操作数的上下文取
+            // 所在函数上下文返回型的 yield 迭代型（yield* 合成 Generator）
+            SyntaxKind::YieldExpression => self.get_contextual_type_for_yield_operand(&parent),
             SyntaxKind::CallExpression | SyntaxKind::NewExpression => {
                 self.get_contextual_type_for_argument(&parent, node)
             }
@@ -183,6 +186,12 @@ impl Checker {
             }
             SyntaxKind::PropertyAssignment | SyntaxKind::ShorthandPropertyAssignment => {
                 self.get_contextual_type_for_object_literal_element(&parent, _context_flags)
+            }
+            // 对象字面量方法成员：方法节点自身的上下文型（参数定型经此）
+            SyntaxKind::ObjectLiteralExpression
+                if node.kind == SyntaxKind::MethodDeclaration =>
+            {
+                self.get_contextual_type_for_object_literal_element(node, _context_flags)
             }
             SyntaxKind::ArrayLiteralExpression => {
                 self.get_contextual_type_for_array_literal_element(node, &parent, _context_flags)
@@ -226,9 +235,41 @@ impl Checker {
         node: &Arc<tsox_frontend::ast::Node>,
     ) -> Option<Arc<Signature>> {
         let signatures = self.get_signatures_of_type(t, SignatureKind::Call);
-        signatures
+        let applicable: Vec<Arc<Signature>> = signatures
             .into_iter()
-            .find(|s| !self.is_arity_smaller(s, node))
+            .filter(|s| !self.is_arity_smaller(s, node))
+            .collect();
+        if applicable.len() == 1 {
+            return applicable.into_iter().next();
+        }
+        self.get_intersected_signatures(applicable)
+    }
+
+    fn get_intersected_signatures(
+        &mut self,
+        signatures: Vec<Arc<Signature>>,
+    ) -> Option<Arc<Signature>> {
+        if !self.no_implicit_any {
+            return None;
+        }
+        let mut combined: Option<Arc<Signature>> = None;
+        for sig in signatures {
+            match &combined {
+                None => combined = Some(sig),
+                Some(c) if Arc::ptr_eq(c, &sig) => {}
+                Some(c) => {
+                    if self.compare_type_parameters_identical(
+                        &c.type_parameters,
+                        &sig.type_parameters,
+                    ) {
+                        combined = Some(self.combine_union_member_signature(c, &sig, false));
+                    } else {
+                        return None;
+                    }
+                }
+            }
+        }
+        combined
     }
 
     pub(crate) fn is_arity_smaller(&self, signature: &Arc<Signature>, target: &Arc<tsox_frontend::ast::Node>) -> bool {

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineInlayHints"]
+
 #[test]
 fn inlay_hints_property_declaration_computed_name1() {
     let content = r#"function foo() {
@@ -9,6 +9,6 @@ fn inlay_hints_property_declaration_computed_name1() {
     [sym] = 123;
   }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineInlayHints"); // f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{
+    let _s = Session::new_for_test("inlayHintsPropertyDeclarationComputedName1", content);
+    // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{
 }

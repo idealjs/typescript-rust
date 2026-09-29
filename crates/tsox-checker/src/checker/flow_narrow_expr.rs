@@ -26,6 +26,12 @@ impl Checker {
             }
         }
 
+        if expr.kind == SyntaxKind::NonNullExpression {
+            if let NodeData::NonNullExpression(n) = &expr.data {
+                return self.narrow_by_expression(type_, &n.expression, target, kind, depth);
+            }
+        }
+
         if expr.kind == SyntaxKind::BinaryExpression {
             if let NodeData::BinaryExpression(bin) = &expr.data {
                 if bin.operator_token.kind == SyntaxKind::AmpersandAmpersandToken {
@@ -243,7 +249,10 @@ impl Checker {
                 _ => {}
             }
         }
-        if kept.is_empty() || kept.len() == constituents.len() {
+        if kept.is_empty() {
+            return self.never_type();
+        }
+        if kept.len() == constituents.len() {
             return Arc::clone(type_);
         }
         self.flow_union_of(&kept)

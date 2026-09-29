@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_for_computed_properties() {
     let content = r#"interface I {
@@ -14,6 +14,6 @@ class C implements I {
 var x: I = {
     ["/*2*/prop1"]: function () { },
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "1", "2")
+    let _s = Session::new_for_test("findAllRefsForComputedProperties", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2")
 }

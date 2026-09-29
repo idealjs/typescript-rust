@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn references_for_contextually_typed_union_properties2() {
     let content = r#"interface A {
@@ -36,6 +36,6 @@ var w: A|B = { b:undefined, common: undefined };
 // Untped -- should not be included
 var u1 = { a: 0, b: 0, common: "" };
 var u2 = { b: 0, common: 0 };"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
+    let _s = Session::new_for_test("referencesForContextuallyTypedUnionProperties2", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

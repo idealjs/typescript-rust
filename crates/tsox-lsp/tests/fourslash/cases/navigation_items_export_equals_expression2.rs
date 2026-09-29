@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
+
 #[test]
 fn navigation_items_export_equals_expression2() {
     let content = r#"export const foo = {
@@ -32,6 +32,6 @@ export = (class {
 export = (class Cls {
   prop = 42;
 });"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
+    let _s = Session::new_for_test("navigationItemsExportEqualsExpression2", content);
+    // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

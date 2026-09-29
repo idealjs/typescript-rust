@@ -192,12 +192,12 @@ pub(crate) fn is_statement_kind(kind: SyntaxKind) -> bool {
 }
 
 pub(crate) fn is_declaration_name(node: &Arc<Node>) -> bool {
-    let Some(parent) = node.parent.as_ref() else {
+    let Some(parent) = node.parent() else {
         return false;
     };
     let parent_kind = parent.kind;
 
-    let name_field = tsox_frontend::ast::node_data_generated::node_name(parent);
+    let name_field = tsox_frontend::ast::node_data_generated::node_name(&parent);
     if let Some(name) = name_field {
         if std::ptr::eq(name.as_ref() as *const Node, node.as_ref() as *const Node) {
             return matches!(
@@ -236,13 +236,13 @@ pub(crate) fn is_declaration_name(node: &Arc<Node>) -> bool {
 }
 
 pub(crate) fn is_property_access_name(node: &Arc<Node>) -> bool {
-    let Some(parent) = node.parent.as_ref() else {
+    let Some(parent) = node.parent() else {
         return false;
     };
     if parent.kind != SyntaxKind::PropertyAccessExpression {
         return false;
     }
-    let Some(name_field) = tsox_frontend::ast::node_data_generated::node_name(parent) else {
+    let Some(name_field) = tsox_frontend::ast::node_data_generated::node_name(&parent) else {
         return false;
     };
     std::ptr::eq(

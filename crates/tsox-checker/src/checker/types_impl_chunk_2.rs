@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::types::*;
+use std::sync::atomic::AtomicBool;
 
 impl InterfaceTypeData {
     pub fn outer_type_parameters(&self) -> &[Arc<Type>] {
@@ -54,9 +55,12 @@ pub struct MappedTypeData {
     pub constraint_type: Option<Arc<Type>>,
     pub name_type: Option<Arc<Type>>,
     pub template_type: Option<Arc<Type>>,
+    pub template_node: Option<Arc<Node>>,
+    /// 惰性模板解析时依序应用的 (参数, 实参) 替换链（Go 实例化 mapper 的等价物）
+    pub template_subst: Option<Box<Vec<(Vec<Arc<Type>>, Vec<Arc<Type>>)>>>,
     pub modifiers_type: Option<Arc<Type>>,
     pub resolved_apparent_type: OnceLock<Arc<Type>>,
-    pub contains_error: bool,
+    pub contains_error: AtomicBool,
 }
 
 #[derive(Debug)]
@@ -101,6 +105,7 @@ pub struct IntersectionTypeData {
     pub union_or_intersection: UnionOrIntersectionTypeData,
     pub resolved_apparent_type: OnceLock<Arc<Type>>,
     pub unique_literal_filled_instantiation: OnceLock<Arc<Type>>,
+    pub resolved_properties: OnceLock<Vec<Arc<Symbol>>>,
 }
 
 #[derive(Debug)]
@@ -148,7 +153,7 @@ pub struct SubstitutionTypeData {
     pub constraint: Option<Arc<Type>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ConditionalRoot {
     pub node: Option<Arc<Node>>,
     pub check_type: Option<Arc<Type>>,

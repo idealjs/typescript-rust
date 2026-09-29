@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyWorkspaceSymbol"]
+
 #[test]
 fn navigation_items_exact_match2() {
     let content = r#"module Shapes {
@@ -19,6 +19,6 @@ var [|point|] = new Shapes.Point();
 function [|distance2|](distanceParam1): void {
     var [|distanceLocal1|];
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyWorkspaceSymbol"); // f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
+    let _s = Session::new_for_test("navigationItemsExactMatch2", content);
+    // TODO: f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
 }

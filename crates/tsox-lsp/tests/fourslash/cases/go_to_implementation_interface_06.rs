@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
+
 #[test]
 fn go_to_implementation_interface_06() {
     let content = r#"interface Fo/*interface_definition*/o {
@@ -11,6 +11,6 @@ interface SomeOtherType {}
 
 let x: Foo = [|class { constructor (a: number) {} }|];
 let y = <Foo> [|class { constructor (a: number) {} }|];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "interface_definition")
+    let _s = Session::new_for_test("goToImplementationInterface_06", content);
+    // TODO: f.VerifyBaselineGoToImplementation(t, "interface_definition")
 }

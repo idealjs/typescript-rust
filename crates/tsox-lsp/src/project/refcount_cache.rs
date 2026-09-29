@@ -20,6 +20,12 @@ pub struct RefCountCache<K: Eq + Hash + Clone, V: Clone> {
 }
 
 impl<K: Eq + Hash + Clone, V: Clone> RefCountCache<K, V> {
+    pub fn len(&self) -> usize {
+        self.entries.lock().unwrap().len()
+    }
+}
+
+impl<K: Eq + Hash + Clone, V: Clone> RefCountCache<K, V> {
     pub fn new(options: RefCountCacheOptions) -> Self {
         RefCountCache {
             options,

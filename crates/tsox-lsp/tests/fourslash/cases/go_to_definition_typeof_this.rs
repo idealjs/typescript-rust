@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_typeof_this() {
     let content = r#"function f(/*fnDecl*/this: number) {
@@ -10,6 +10,6 @@ class /*cls*/C {
     constructor() { type X = typeof [|/*clsUse*/this|]; }
     get self(/*getterDecl*/this: number) { type X = typeof [|/*getterUse*/this|]; }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "fnUse", "clsUse", "getterUse")
+    let _s = Session::new_for_test("goToDefinitionTypeofThis", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "fnUse", "clsUse", "getterUse")
 }

@@ -6,7 +6,6 @@ pub use resolver::{
 };
 
 pub(crate) use bitflags::bitflags;
-pub(crate) use tsox_core::tspath;
 
 #[derive(Clone, Debug, Default)]
 pub struct ResolvedModule {
@@ -14,9 +13,11 @@ pub struct ResolvedModule {
     pub original_path: String,
     pub extension: String,
     pub resolved_using_ts_extension: bool,
+    pub resolved_using_extra_extensions: bool,
     pub package_id: Option<PackageId>,
     pub is_external_library_import: bool,
     pub alternate_result: Option<String>,
+    pub resolution_diagnostics: Vec<DiagAndArgs>,
 }
 
 impl ResolvedModule {
@@ -32,6 +33,7 @@ pub struct ResolvedTypeReferenceDirective {
     pub original_path: String,
     pub package_id: Option<PackageId>,
     pub is_external_library_import: bool,
+    pub resolution_diagnostics: Vec<DiagAndArgs>,
 }
 
 impl ResolvedTypeReferenceDirective {
@@ -251,6 +253,8 @@ pub fn compare_pattern_keys(a: &str, b: &str) -> std::cmp::Ordering {
     Ordering::Equal
 }
 
+pub mod resolver_entrypoints;
+pub mod resolver_entrypoints_export_map;
 pub(crate) mod resolver_impl_chunk_3;
 pub(crate) mod resolver_impl_chunk_4;
 pub(crate) mod resolver_resolution_state_5;
@@ -262,3 +266,6 @@ pub(crate) mod resolver_resolution_state_9;
 pub(crate) mod resolver_tests;
 #[cfg(test)]
 pub(crate) mod tests;
+
+// r 轮接线:迁移批次模块
+pub mod mig;

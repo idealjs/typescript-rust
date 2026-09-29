@@ -89,7 +89,7 @@ impl Checker {
                 }
                 let shell = Arc::new(Type::new(
                     base.flags,
-                    TypeData::Object(ObjectTypeData {
+                    TypeData::Object(ObjectTypeData { node: None,
                         structured: StructuredTypeData {
                             members: o.structured.members.clone(),
                             properties: o.structured.properties.clone(),

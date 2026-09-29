@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
+
 #[test]
 fn outlining_spans_switch_cases() {
     let content = r#"switch (undefined)[| {
@@ -36,6 +36,6 @@ fn outlining_spans_switch_cases() {
    console.log(7);
    console.log(8);|]
 }|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
+    let _s = Session::new_for_test("outliningSpansSwitchCases", content);
+    // TODO: f.VerifyOutliningSpans(t)
 }

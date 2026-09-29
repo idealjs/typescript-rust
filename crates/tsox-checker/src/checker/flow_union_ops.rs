@@ -16,6 +16,8 @@ pub use crate::checker::flow_union_ops_checker_5::*;
 pub use crate::checker::flow_union_ops_checker_6::*;
 #[allow(unused_imports)]
 pub use crate::checker::flow_union_ops_checker_7::*;
+#[allow(unused_imports)]
+pub use crate::checker::flow_union_property_checker::*;
 pub(crate) use crate::checker::types::*;
 pub(crate) use std::sync::Arc;
 pub(crate) use tsox_frontend::ast::Node;

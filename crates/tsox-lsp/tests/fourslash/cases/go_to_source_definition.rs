@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
+
 #[test]
 fn go_to_source_node_modules_with_types() {
     let content = r#"// @moduleResolution: bundler
@@ -13,11 +13,10 @@ export declare const a: string;
 // @Filename: /home/src/workspaces/project/index.ts
 import { a } from "foo";
 [|a/*start*/|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "start")
+    let _s = Session::new_for_test("goToSourceNodeModulesWithTypes", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
 #[test]
 fn go_to_source_local_js_beside_dts() {
     let content = r#"// @Filename: /home/src/workspaces/project/a.js
@@ -27,11 +26,10 @@ export declare const a: string;
 // @Filename: /home/src/workspaces/project/index.ts
 import { a } from [|"./a"/*moduleSpecifier*/|];
 [|a/*identifier*/|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "identifier", "moduleSpecifier")
+    let _s = Session::new_for_test("goToSourceLocalJsBesideDts", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "identifier", "moduleSpecifier")
 }
 
-#[ignore = "generator: // Declaration is in a .ts file (not .d.ts),"]
 #[test]
 fn go_to_source_non_declaration_file() {
     // TODO: // Declaration is in a .ts file (not .d.ts),
@@ -42,11 +40,10 @@ export function /*target*/helper() { return 1; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { helper } from "./utils";
 helper/*usage*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
+    let _s = Session::new_for_test("goToSourceNonDeclarationFile", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
-#[ignore = "generator: // No implementation file can be resolved (types-only packag"]
 #[test]
 fn go_to_source_no_implementation_file() {
     // TODO: // No implementation file can be resolved (types-only package with no .js).
@@ -58,11 +55,10 @@ export declare function typesOnly(): void;
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importName*/typesOnly } from "pkg";
 typesOnly/*callSite*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importName", "callSite")
+    let _s = Session::new_for_test("goToSourceNoImplementationFile", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName", "callSite")
 }
 
-#[ignore = "generator: // .d.ts has a sourcemap pointing back to the original .ts s"]
 #[test]
 fn go_to_source_declaration_map_source_map() {
     // TODO: // .d.ts has a sourcemap pointing back to the original .ts source.
@@ -84,11 +80,10 @@ function greet() { return "hi"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { greet } from "pkg";
 greet/*usage*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
+    let _s = Session::new_for_test("goToSourceDeclarationMapSourceMap", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
-#[ignore = "generator: // findClosestDeclarationNode walks up parents and finds no "]
 #[test]
 fn go_to_source_declaration_map_fallback() {
     // TODO: // findClosestDeclarationNode walks up parents and finds no declaration,
@@ -114,11 +109,10 @@ function greet() { return "hi"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { greet } from "pkg";
 greet/*usage*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
+    let _s = Session::new_for_test("goToSourceDeclarationMapFallback", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
 #[test]
 fn go_to_source_named_exports_specifier() {
     let content = r#"// @moduleResolution: bundler
@@ -131,11 +125,10 @@ export function /*target*/foo() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { foo } from "pkg";
 const result = foo/*valueUsage*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "valueUsage")
+    let _s = Session::new_for_test("goToSourceNamedExportsSpecifier", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "valueUsage")
 }
 
-#[ignore = "generator: // Cursor on a /// <reference path='...'/> directive pointin"]
 #[test]
 fn go_to_source_triple_slash_reference() {
     // TODO: // Cursor on a /// <reference path="..."/> directive pointing to a .js file.
@@ -146,11 +139,10 @@ fn go_to_source_triple_slash_reference() {
 /// <reference path="./[|helper.js/*refPath*/|]" />
 declare function helper(): number;
 helper();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "refPath")
+    let _s = Session::new_for_test("goToSourceTripleSlashReference", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "refPath")
 }
 
-#[ignore = "generator: // (because the JS uses a different export pattern), the fal"]
 #[test]
 fn go_to_source_fallback_to_module_specifier() {
     // TODO: // When the specific name can't be found in the .js implementation file
@@ -166,11 +158,10 @@ export declare function internalHelper(): void;
 /*entryPoint*/Object.defineProperty(exports, "internalHelper", { value: function() {} });
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importName*/internalHelper } from "pkg";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importName")
+    let _s = Session::new_for_test("goToSourceFallbackToModuleSpecifier", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName")
 }
 
-#[ignore = "generator: // filterPreferredSourceDeclarations returns all declaration"]
 #[test]
 fn go_to_source_filter_preferred_fallback_all() {
     // TODO: // filterPreferredSourceDeclarations returns all declarations when none are
@@ -191,6 +182,6 @@ export const /*target*/value = 42;
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importName*/value } from "pkg";
 console.log(value);"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importName")
+    let _s = Session::new_for_test("goToSourceFilterPreferredFallbackAll", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName")
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn hover_alias_in_imported_file() {
     let content = r#"
@@ -22,11 +23,6 @@ export function processValue(value: any) {
   }
 }
 "#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "1",
-        "(alias) function isSomeAliasType(x: any): x is SomeAliasType<any>",
-        "",
-    );
+    let mut s = Session::new_for_test("hoverAliasInImportedFile", content);
+    fourslash::verify_quick_info_at(&mut s, "1", "(alias) function isSomeAliasType(x: any): x is SomeAliasType<any>", "");
 }

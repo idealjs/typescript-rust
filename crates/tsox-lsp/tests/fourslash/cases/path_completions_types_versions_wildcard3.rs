@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn path_completions_types_versions_wildcard3() {
     let content = r#"// @module: commonjs
@@ -24,10 +24,10 @@ export const blah = 0;
 export const one = 0;
 // @Filename: /a.ts
 import { } from "foo//**/";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("pathCompletionsTypesVersionsWildcard3", content);
+    fourslash::verify_completions_unsorted_at(&mut s, Some(""), &["browser", "nope", "dist"]);
     fourslash::insert(&mut s, "browser/");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_unsorted_at(&mut s, None, &["blah", "index", "subfolder"]);
     fourslash::insert(&mut s, "subfolder/");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_unsorted_at(&mut s, None, &["one"]);
 }

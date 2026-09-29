@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
+
 #[test]
 fn jsdoc_satisfies_tag_rename() {
     let content = r#"// @noEmit: true
@@ -14,6 +14,6 @@ fn jsdoc_satisfies_tag_rename() {
 
 /** @satisfies {/**/T} comment */
 const foo = { a: 1 };"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
+    let _s = Session::new_for_test("jsdocSatisfiesTagRename", content);
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

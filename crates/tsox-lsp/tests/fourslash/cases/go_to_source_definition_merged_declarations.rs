@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // When a symbol has merged declarations (class + namespace)"]
+
 #[test]
 fn go_to_source_merged_declaration_dedup() {
     // TODO: // When a symbol has merged declarations (class + namespace), source
@@ -23,6 +23,6 @@ Util.version = "1.0";
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importUtil*/Util } from "pkg";
 const u: /*typeRef*/Util = new Util();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importUtil", "typeRef")
+    let _s = Session::new_for_test("goToSourceMergedDeclarationDedup", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importUtil", "typeRef")
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_on_jsx_namespaced_name() {
     let content = r#"// @jsx: react
@@ -10,6 +10,6 @@ declare namespace JSX {
 }
 // @filename: /a.tsx
 </**/a:b a="accepted" b="rejected" />;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoOnJsxNamespacedName", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

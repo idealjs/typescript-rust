@@ -6,7 +6,7 @@ pub(crate) fn attach_explicit_type_arguments(t: &Arc<Type>, args: Vec<Arc<Type>>
     if let TypeData::Object(o) = &t.data {
         let mut rebuilt = Type::new(
             t.flags,
-            TypeData::Object(ObjectTypeData {
+            TypeData::Object(ObjectTypeData { node: None,
                 structured: StructuredTypeData {
                     members: o.structured.members.clone(),
                     properties: o.structured.properties.clone(),

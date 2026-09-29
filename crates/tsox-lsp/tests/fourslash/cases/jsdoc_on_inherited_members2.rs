@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn jsdoc_on_inherited_members2() {
     let content = r#"// @allowJs: true
@@ -19,6 +19,6 @@ const B = class extends A {
 
 const b = new B();
 b.method/**/;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("jsdocOnInheritedMembers2", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

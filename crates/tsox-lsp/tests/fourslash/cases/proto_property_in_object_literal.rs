@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn proto_property_in_object_literal() {
     let content = r#"var o1 = {
@@ -11,11 +11,13 @@ var o2 = {
 };
 o1./*1*/
 o2./*2*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("protoPropertyInObjectLiteral", content);
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "__proto__ = 10;");
     fourslash::verify_quick_info_at(&mut s, "1", "(property) \"__proto__\": number", "");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
+    // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "__proto__ = 10;");
     fourslash::verify_quick_info_at(&mut s, "2", "(property) __proto__: number", "");
 }

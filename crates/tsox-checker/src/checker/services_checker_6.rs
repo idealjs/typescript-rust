@@ -10,6 +10,7 @@ impl Checker {
     ) -> bool {
         let properties: Vec<Arc<Node>> = match &obj.data {
             NodeData::ObjectLiteralExpression(data) => data.properties.nodes.clone(),
+            NodeData::JsxAttributes(data) => data.properties.iter().cloned().collect(),
             _ => Vec::new(),
         };
         for property in &properties {
@@ -33,7 +34,7 @@ impl Checker {
             }
             if let Some(ref exp) = expected {
                 if is_literal_type(exp) {
-                    let prop_type = self.get_type_of_node(property);
+                    let prop_type = self.discriminant_property_value_type(property);
                     if !self.is_type_assignable_to(&prop_type, exp) {
                         return true;
                     }
@@ -41,6 +42,26 @@ impl Checker {
             }
         }
         false
+    }
+
+    /// 判别式属性的取值类型：JsxAttribute 走初始化式字面量（不经符号拓宽），
+    /// 其余按节点类型（Go getTypeOfNode）
+    fn discriminant_property_value_type(&mut self, property: &Arc<Node>) -> Arc<Type> {
+        if property.kind == SyntaxKind::JsxAttribute {
+            if let NodeData::JsxAttribute(d) = &property.data
+                && let Some(value) = &d.initializer
+            {
+                let expr = match &value.data {
+                    NodeData::JsxExpression(je) => je.expression.clone(),
+                    _ => Some(Arc::clone(value)),
+                };
+                if let Some(expr) = expr {
+                    return self.get_type_of_node(&expr);
+                }
+            }
+            return self.get_any_type();
+        }
+        self.get_type_of_node(property)
     }
 
     pub fn get_exports_and_properties_of_module(
@@ -58,7 +79,7 @@ impl Checker {
         exports
     }
 
-    pub fn get_exports_of_module_as_array(&self, module_symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> {
+    pub fn get_exports_of_module_as_array(&mut self, module_symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> {
         symbols_to_array(&self.get_exports_of_module_table(module_symbol))
     }
 
@@ -85,7 +106,7 @@ impl Checker {
         if let Some(ref sym) = symbol {
             if sym.flags.contains(SymbolFlags::EnumMember) {
                 if let Some(ref member) = sym.value_declaration {
-                    if let Some(ref parent) = member.parent {
+                    if let Some(ref parent) = member.parent() {
                         if parent.flags.contains(tsox_frontend::ast::NodeFlags::Const) {
                             return self.get_enum_member_value(member).value;
                         }
@@ -224,7 +245,7 @@ impl Checker {
             .cloned()
             .collect();
 
-        if let Some(ref parent) = node.parent {
+        if let Some(ref parent) = node.parent() {
             if parent.kind == SyntaxKind::ObjectLiteralExpression
                 || parent.kind == SyntaxKind::JsxAttributes
             {
@@ -267,11 +288,11 @@ impl Checker {
         &mut self,
         location: &Arc<Node>,
     ) -> Option<Arc<Symbol>> {
-        let parent = location.parent.as_ref()?;
-        let grandparent = parent.parent.as_ref()?;
+        let parent = location.parent()?;
+        let grandparent = parent.parent()?;
 
-        if is_array_literal_or_object_literal_destructuring_pattern(grandparent) {
-            if let Some(type_of_object_literal) = self.get_type_of_assignment_pattern(grandparent) {
+        if is_array_literal_or_object_literal_destructuring_pattern(&grandparent) {
+            if let Some(type_of_object_literal) = self.get_type_of_assignment_pattern(&grandparent) {
                 return self.get_property_of_type(&type_of_object_literal, location.text());
             }
         }
@@ -311,7 +332,7 @@ impl Checker {
                 }
                 _ => self.get_any_type(),
             };
-            let symbol = Arc::new(Symbol::new(SymbolFlags::Property, prop_name.clone()));
+            let symbol = Arc::new(Symbol::new(SymbolFlags::Property, prop_name));
             self.value_symbol_links
                 .get_or_default(&symbol)
                 .resolved_type = Some(Arc::clone(&elem_type));
@@ -324,7 +345,7 @@ impl Checker {
             id: crate::checker::types::next_type_id(),
             symbol: None,
             alias: None,
-            data: TypeData::Object(ObjectTypeData {
+            data: TypeData::Object(ObjectTypeData { node: None,
                 structured: StructuredTypeData {
                     members: table,
                     properties: props,

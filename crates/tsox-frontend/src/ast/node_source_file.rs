@@ -1,6 +1,15 @@
+use crate::ast::diagnostic::Diagnostic;
 use crate::ast::node_line_map::LineMap;
 use crate::ast::node_node::Node;
 use std::sync::Arc;
+
+fn bind_diagnostics_store(
+) -> &'static std::sync::RwLock<std::collections::HashMap<u64, Vec<Arc<Diagnostic>>>> {
+    static STORE: std::sync::OnceLock<
+        std::sync::RwLock<std::collections::HashMap<u64, Vec<Arc<Diagnostic>>>>,
+    > = std::sync::OnceLock::new();
+    STORE.get_or_init(|| std::sync::RwLock::new(std::collections::HashMap::new()))
+}
 
 #[derive(Debug)]
 pub struct SourceFile {
@@ -13,9 +22,9 @@ pub struct SourceFile {
 
     pub comment_directives: Vec<crate::scanner::CommentDirective>,
 
-    pub(crate) jsdoc_cache: std::sync::RwLock<std::collections::HashMap<u64, Vec<Arc<Node>>>>,
+    pub jsdoc_cache: std::sync::RwLock<std::collections::HashMap<u64, Vec<Arc<Node>>>>,
 
-    pub(crate) has_lazy_jsdoc: bool,
+    pub has_lazy_jsdoc: bool,
 
     pub is_declaration_file: bool,
 
@@ -34,11 +43,47 @@ pub struct SourceFile {
     pub uses_uri_style_node_core_modules: tsox_core::core::tristate::Tristate,
 
     pub has_parse_diagnostics: bool,
+
+    pub referenced_files: Vec<FileReference>,
+
+    pub type_reference_directives: Vec<FileReference>,
+
+    pub lib_reference_directives: Vec<FileReference>,
+
+    pub supplemental_source_files: Vec<std::sync::Arc<SourceFile>>,
+}
+
+#[derive(Debug, Clone)]
+pub struct FileReference {
+    pub range: tsox_core::core::text::TextRange,
+    pub file_name: String,
+    pub resolution_mode: tsox_core::core::compiler_options_kinds::ResolutionMode,
+    pub preserve: bool,
 }
 
 impl SourceFile {
     pub fn id(&self) -> u64 {
         self.node.id()
+    }
+
+    pub fn bind_diagnostics(&self) -> Vec<Arc<Diagnostic>> {
+        bind_diagnostics_store()
+            .read()
+            .unwrap()
+            .get(&self.id())
+            .cloned()
+            .unwrap_or_default()
+    }
+
+    pub fn set_bind_diagnostics(&self, diags: Vec<Arc<Diagnostic>>) {
+        bind_diagnostics_store()
+            .write()
+            .unwrap()
+            .insert(self.id(), diags);
+    }
+
+    pub fn supplemental_source_files(&self) -> Vec<std::sync::Arc<SourceFile>> {
+        self.supplemental_source_files.clone()
     }
 
     pub fn set_jsdoc_cache(&self, cache: std::collections::HashMap<u64, Vec<Arc<Node>>>) {

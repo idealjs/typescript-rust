@@ -142,17 +142,38 @@ impl Checker {
         } else {
             for t in &target_sigs {
                 let t = self.get_erased_signature(t);
+                let chain_len_before = self.relater_error_chain.len();
+                let mut should_elaborate_errors = self.relater_chain_active;
                 let mut found = false;
                 for s in &source_sigs {
                     let s = self.get_erased_signature(s);
+                    let saved_active = self.relater_chain_active;
+                    if !should_elaborate_errors {
+                        self.relater_chain_active = false;
+                    }
                     let related = self.compare_signatures_related(&s, &t, check_mode, relation);
+                    self.relater_chain_active = saved_active;
                     if !related.is_false() {
                         result = result.and(related);
+                        self.relater_error_chain.truncate(chain_len_before);
                         found = true;
                         break;
                     }
+                    should_elaborate_errors = false;
                 }
                 if !found {
+                    if should_elaborate_errors {
+                        let source_str = self.type_to_string(source);
+                        let sig_str = self.signature_display_colon(
+                            &t,
+                            if kind == SignatureKind::Construct { "new " } else { "" },
+                        );
+                        self.relater_report_error(
+                            tsox_core::diagnostics::messages_generated::
+                                TYPE_0_PROVIDES_NO_MATCH_FOR_THE_SIGNATURE_1,
+                            vec![source_str, sig_str],
+                        );
+                    }
                     return Ternary::False;
                 }
             }
@@ -196,11 +217,60 @@ impl Checker {
         _ignore_this_types: bool,
         ignore_return_types: bool,
     ) -> Ternary {
+        if source.type_parameters.len() != target.type_parameters.len() {
+            return Ternary::False;
+        }
+        if !target.type_parameters.is_empty() {
+            let mapper = crate::checker::mapper::new_array_type_mapper(
+                source.type_parameters.iter().map(Arc::clone).collect(),
+                target.type_parameters.iter().map(Arc::clone).collect(),
+            );
+            for i in 0..target.type_parameters.len() {
+                let s = Arc::clone(&source.type_parameters[i]);
+                let t = Arc::clone(&target.type_parameters[i]);
+                if Arc::ptr_eq(&s, &t) {
+                    continue;
+                }
+                let s_constraint = self
+                    .get_constraint_of_type_parameter(&s)
+                    .unwrap_or_else(|| self.unknown_type());
+                let t_constraint = self
+                    .get_constraint_of_type_parameter(&t)
+                    .unwrap_or_else(|| self.unknown_type());
+                let s_constraint = mapper.map(&s_constraint);
+                let s_default = self
+                    .get_default_from_type_parameter(&s)
+                    .unwrap_or_else(|| self.unknown_type());
+                let s_default = mapper.map(&s_default);
+                let t_default = self
+                    .get_default_from_type_parameter(&t)
+                    .unwrap_or_else(|| self.unknown_type());
+                if !self.is_type_related_to(&s_constraint, &t_constraint, RelationKind::Identity)
+                    || !self.is_type_related_to(&s_default, &t_default, RelationKind::Identity)
+                {
+                    return Ternary::False;
+                }
+            }
+        }
         let mut mode = SignatureCheckMode::StrictArity;
         if ignore_return_types {
             mode |= SignatureCheckMode::IgnoreReturnTypes;
         }
-        self.compare_signatures_related(source, target, mode, RelationKind::Identity)
+        // Go compareSignaturesIdentical：源签名以目标类型参数直接擦除
+        //（newTypeMapper + eraseTypeParameters），不走推断式上下文实例化
+        //（推断会把裸 T 擦成 any，吞掉 T 与 any 的不一致）
+        let target_params: Vec<Arc<Type>> =
+            target.type_parameters.iter().map(Arc::clone).collect();
+        let source = if target_params.is_empty() {
+            Arc::clone(source)
+        } else {
+            let saved_strict = self.erase_signature_strict;
+            self.erase_signature_strict = true;
+            let inst = self.get_signature_instantiation(source, &target_params);
+            self.erase_signature_strict = saved_strict;
+            inst
+        };
+        self.compare_signatures_related(&source, target, mode, RelationKind::Identity)
     }
 
     pub fn has_effective_rest_parameter(&mut self, sig: &Arc<Signature>) -> bool {

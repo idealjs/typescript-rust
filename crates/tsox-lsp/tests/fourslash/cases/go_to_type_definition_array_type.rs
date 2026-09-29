@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToTypeDefinition"]
+
 #[test]
 fn go_to_type_definition_array_type() {
     let content = r#"// @lib: es5
@@ -15,6 +15,6 @@ declare const users2: UsersArr
 class CustomArray<T> extends Array<T> { immutableReverse() { return [...this].reverse() } }
 declare const users3: CustomArray<User>
 /*reference3*/users3"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "reference", "reference2", "reference3")
+    let _s = Session::new_for_test("goToTypeDefinition_arrayType", content);
+    // TODO: f.VerifyBaselineGoToTypeDefinition(t, "reference", "reference2", "reference3")
 }

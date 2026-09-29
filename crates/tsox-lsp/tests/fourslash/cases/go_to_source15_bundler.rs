@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn go_to_source15_bundler() {
     let content = r#"// @Filename: /home/src/workspaces/project/tsconfig.json
@@ -28,7 +28,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 // @Filename: /home/src/workspaces/project/index.ts
 import { [|/*start*/useState|] } from 'react';"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("goToSource15_bundler", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "start")
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn formatting_on_variety() {
     let content = r#"function f(a,b,c,d){/*1*/
@@ -20,8 +20,8 @@ return e^f;/*10*/
 
 for (var i = 0   ; i < this.foo(); i++) {/*15*/
 }/*16*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formattingOnVariety", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"function f(a, b, c, d) {"#);
     fourslash::go_to_marker(&mut s, "2");

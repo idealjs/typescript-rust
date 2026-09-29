@@ -113,6 +113,7 @@ fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticTo
     match kind {
         SyntaxKind::NumericLiteral | SyntaxKind::BigIntLiteral => {
             return Some(SemanticToken {
+                node: Arc::clone(node),
                 token_type: token_type::NUMBER,
                 token_modifier: 0,
                 pos: node.pos(),
@@ -125,6 +126,7 @@ fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticTo
         | SyntaxKind::TemplateMiddle
         | SyntaxKind::TemplateTail => {
             return Some(SemanticToken {
+                node: Arc::clone(node),
                 token_type: token_type::STRING,
                 token_modifier: 0,
                 pos: node.pos(),
@@ -133,6 +135,7 @@ fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticTo
         }
         SyntaxKind::RegularExpressionLiteral => {
             return Some(SemanticToken {
+                node: Arc::clone(node),
                 token_type: token_type::REGEXP,
                 token_modifier: 0,
                 pos: node.pos(),
@@ -144,6 +147,7 @@ fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticTo
 
     if is_keyword_kind(kind) {
         return Some(SemanticToken {
+                node: Arc::clone(node),
             token_type: token_type::KEYWORD,
             token_modifier: 0,
             pos: node.pos(),
@@ -152,7 +156,7 @@ fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticTo
     }
 
     if kind == SyntaxKind::Identifier {
-        if let Some(parent) = node.parent.as_ref() {
+        if let Some(parent) = node.parent().as_ref() {
             let decl_type = token_from_declaration_mapping(parent.kind);
             if decl_type != token_type::INVALID {
                 let mut modifier = 0u32;
@@ -161,6 +165,7 @@ fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticTo
                     modifier |= token_modifier::DECLARATION | token_modifier::DEFINITION;
                 }
                 return Some(SemanticToken {
+                node: Arc::clone(node),
                     token_type: decl_type,
                     token_modifier: modifier,
                     pos: node.pos(),
@@ -177,6 +182,7 @@ fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticTo
                     modifier |= token_modifier::DECLARATION;
                 }
                 return Some(SemanticToken {
+                node: Arc::clone(node),
                     token_type: token_type_val,
                     token_modifier: modifier,
                     pos: node.pos(),
@@ -186,6 +192,7 @@ fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticTo
         }
 
         return Some(SemanticToken {
+                node: Arc::clone(node),
             token_type: token_type::VARIABLE,
             token_modifier: 0,
             pos: node.pos(),

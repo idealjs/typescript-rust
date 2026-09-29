@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn quick_info_js_doc_non_discriminated_union_shared_prop() {
     let content = r#"// @strict: false
@@ -44,11 +45,6 @@ const options: EntriesOptions[] = [
     format: "esm",
   },
 ];"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "1",
-        "(property) Entries.output?: string",
-        "Output info...",
-    );
+    let mut s = Session::new_for_test("quickInfoJsDocNonDiscriminatedUnionSharedProp", content);
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) Entries.output?: string", "Output info...");
 }

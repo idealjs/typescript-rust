@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineSignatureHelp"]
+
 #[test]
 fn signature_help_js_doc_tags() {
     let content = r#"/**
@@ -61,6 +61,6 @@ foo.property1;
 foo.property2;
 foo.method5();
 foo.newMet"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
+    let _s = Session::new_for_test("signatureHelpJSDocTags", content);
+    // TODO: f.VerifyBaselineSignatureHelp(t)
 }

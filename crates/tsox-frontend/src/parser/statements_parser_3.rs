@@ -66,19 +66,21 @@ impl Parser {
         } else if self.token == SyntaxKind::OpenBraceToken {
             self.parse_object_binding_pattern()
         } else {
-            self.parse_identifier_with_private_diagnostic(private_msg)
+            self.parse_binding_identifier_with_private_diagnostic(private_msg)
         }
     }
 
     pub(crate) fn parse_array_binding_pattern(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBracketToken);
-        let elements = self.parse_delimited_list(
-            ParsingContext::ArrayBindingElements,
-            Parser::parse_array_binding_element,
-        );
+        let elements = self.allow_in(|p| {
+            p.parse_delimited_list(
+                ParsingContext::ArrayBindingElements,
+                Parser::parse_array_binding_element,
+            )
+        });
         self.expect(SyntaxKind::CloseBracketToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ArrayBindingPattern,
             NodeData::BindingPattern(BindingPatternData {
@@ -121,12 +123,14 @@ impl Parser {
     pub(crate) fn parse_object_binding_pattern(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
-        let elements = self.parse_delimited_list(
-            ParsingContext::ObjectBindingElements,
-            Parser::parse_object_binding_element,
-        );
+        let elements = self.allow_in(|p| {
+            p.parse_delimited_list(
+                ParsingContext::ObjectBindingElements,
+                Parser::parse_object_binding_element,
+            )
+        });
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ObjectBindingPattern,
             NodeData::BindingPattern(BindingPatternData {
@@ -139,7 +143,7 @@ impl Parser {
     pub(crate) fn parse_object_binding_element(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         let dot_dot_dot_token = self.parse_optional_token(SyntaxKind::DotDotDotToken);
-        let is_identifier = self.is_identifier();
+        let is_identifier = self.is_binding_identifier();
         let property_name = self.parse_property_name();
         let (property_name, name) = if is_identifier && self.token != SyntaxKind::ColonToken {
             (None, Some(property_name))

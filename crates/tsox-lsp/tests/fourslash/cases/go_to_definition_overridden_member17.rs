@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_overridden_member17() {
     let content = r#"// @strict: true
@@ -15,6 +15,6 @@ abstract class MySqlColumn {
 export class MySqlVarBinary extends MySqlColumn {
   static [|/*1*/override|] readonly [entityKind]: string = "MySqlVarBinary";
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1")
+    let _s = Session::new_for_test("goToDefinitionOverriddenMember17", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

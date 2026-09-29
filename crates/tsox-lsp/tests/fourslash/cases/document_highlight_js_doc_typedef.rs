@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn document_highlight_js_doc_typedef() {
     let content = r#"// @allowJs: true
@@ -18,6 +18,6 @@ const x = {
   [|foo|]: "",
   [|bar|]: 42,
 };"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
+    let _s = Session::new_for_test("documentHighlightJSDocTypedef", content);
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

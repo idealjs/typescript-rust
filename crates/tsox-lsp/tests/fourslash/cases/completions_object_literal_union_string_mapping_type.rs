@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_object_literal_union_string_mapping_type() {
     let content = r#"type UnionType = {
@@ -17,7 +17,9 @@ const obj2: UnionType = {
   key1: "abc",
   /*2*/
 };"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsObjectLiteralUnionStringMappingType", content);
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
+    // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

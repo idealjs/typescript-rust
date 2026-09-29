@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn quick_info_on_this() {
     let content = r#"interface Restricted {
@@ -24,7 +25,7 @@ class Foo {
         console.log(th/*6*/is);
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoOnThis", content);
     fourslash::verify_quick_info_at(&mut s, "0", "this", "");
     fourslash::verify_quick_info_at(&mut s, "1", "this: void", "");
     fourslash::verify_quick_info_at(&mut s, "2", "this: this", "");

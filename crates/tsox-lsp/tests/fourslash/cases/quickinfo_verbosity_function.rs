@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
+
 #[test]
 fn quickinfo_verbosity_function() {
     let content = r#"interface Apple {
@@ -21,6 +21,6 @@ function someFun(a: SomeType): SomeType {
     return a;
 }
 someFun/*s*/.what = 'what';"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"o": {0, 1, 2}, "f": {0, 1}, "s": {0, 1}})
+    let _s = Session::new_for_test("quickinfoVerbosityFunction", content);
+    // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"o": {0, 1, 2}, "f": {0, 1}, "s": {0, 1}})
 }

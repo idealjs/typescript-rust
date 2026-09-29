@@ -87,6 +87,7 @@ fn compile_test_case(content: &TestCaseContent) -> CompilationOutput {
         compile_on_save: None,
         watch: false,
         watch_options: Default::default(),
+        ..Default::default()
     };
 
     let host = CompilerHostImpl::new(
@@ -98,6 +99,13 @@ fn compile_test_case(content: &TestCaseContent) -> CompilationOutput {
     let program = Arc::new(Program::new(ProgramOptions {
         config,
         host: Arc::new(host),
+        use_source_of_project_reference: false,
+        single_threaded: Default::default(),
+        create_checker_pool: None,
+        typings_location: String::new(),
+        project_name: String::new(),
+        tracing: None,
+        skip_module_resolution: false,
     }));
 
     let _pretty = false;

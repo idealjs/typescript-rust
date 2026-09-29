@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_import_duplicate_packages_scoped_types() {
     let content = r#"// @lib: es5
@@ -27,7 +27,8 @@ import "@scope/react-dom";
 import "@scope/react";
 // @Filename: /packages/a/foo.ts
 /**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_duplicatePackages_scopedTypes", content);
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

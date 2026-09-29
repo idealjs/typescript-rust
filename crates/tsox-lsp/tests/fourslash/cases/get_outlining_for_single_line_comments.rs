@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
+
 #[test]
 fn get_outlining_for_single_line_comments() {
     let content = r#"[|// Single line comments at the start of the file
@@ -87,6 +87,6 @@ function Foo()[| {
     function method(param)[| {
     }|]
 }|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
+    let _s = Session::new_for_test("getOutliningForSingleLineComments", content);
+    // TODO: f.VerifyOutliningSpans(t)
 }

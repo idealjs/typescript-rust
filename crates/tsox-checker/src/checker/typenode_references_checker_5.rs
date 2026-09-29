@@ -7,16 +7,45 @@ impl Checker {
         &mut self,
         members: &Arc<NodeList>,
     ) -> Arc<Type> {
+        self.build_interface_type_from_members_with_symbol(members, None, None)
+    }
+
+    pub(crate) fn build_interface_type_from_members_with_symbol(
+        &mut self,
+        members: &Arc<NodeList>,
+        symbol: Option<Arc<Symbol>>,
+        own_symbol: Option<&Arc<Symbol>>,
+    ) -> Arc<Type> {
         let mut symbol_table = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::new();
         let mut index_infos: Vec<Arc<crate::checker::IndexInfo>> = Vec::new();
 
         let mut call_signatures: Vec<Arc<Signature>> = Vec::new();
         let mut construct_signatures: Vec<Arc<Signature>> = Vec::new();
+        let mut implied_index: Option<crate::checker::IndexInfo> = None;
+        let mut deferred_accessors: Vec<Arc<Node>> = Vec::new();
         for member in members.iter() {
+            if implied_index.is_none()
+                && matches!(
+                    &member.data,
+                    NodeData::PropertySignatureDeclaration(_)
+                        | NodeData::MethodSignatureDeclaration(_)
+                        | NodeData::PropertyDeclaration(_)
+                        | NodeData::MethodDeclaration(_)
+                        | NodeData::GetAccessorDeclaration(_)
+                        | NodeData::SetAccessorDeclaration(_)
+                )
+            {
+                implied_index = self.implied_index_info_of_computed_member(member, &index_infos);
+            }
             match &member.data {
                 NodeData::PropertySignatureDeclaration(_) => {
-                    self.add_property_signature_member(member, &mut symbol_table, &mut props);
+                    self.add_property_signature_member(
+                        member,
+                        &mut symbol_table,
+                        &mut props,
+                        own_symbol,
+                    );
                 }
                 NodeData::MethodSignatureDeclaration(_) => {
                     self.add_method_signature_member(member, &mut symbol_table, &mut props);
@@ -31,10 +60,10 @@ impl Checker {
                     self.add_method_declaration_member(member, &mut symbol_table, &mut props);
                 }
                 NodeData::GetAccessorDeclaration(_) => {
-                    self.add_get_accessor_member(member, &mut symbol_table, &mut props);
+                    self.add_get_accessor_member(member, &mut symbol_table, &mut props, &mut deferred_accessors);
                 }
                 NodeData::SetAccessorDeclaration(_) => {
-                    self.add_set_accessor_member(member, &mut symbol_table, &mut props);
+                    self.add_set_accessor_member(member, &mut symbol_table, &mut props, &mut deferred_accessors);
                 }
                 NodeData::CallSignatureDeclaration(_) => {
                     self.add_call_signature_member(member, &mut call_signatures);
@@ -48,17 +77,29 @@ impl Checker {
                 _ => {}
             }
         }
+        if let Some(info) = implied_index
+            && !index_infos.iter().any(|i| {
+                i.key_type
+                    .as_ref()
+                    .is_some_and(|k| Some(k.flags) == info.key_type.as_ref().map(|kk| kk.flags))
+            })
+        {
+            index_infos.push(Arc::new(info));
+        }
+        if !deferred_accessors.is_empty() {
+            self.resolve_deferred_accessor_member_types(&deferred_accessors, &symbol_table);
+        }
 
         let call_signature_count = call_signatures.len();
         let mut signatures = call_signatures;
         signatures.extend(construct_signatures);
-        Arc::new(Type {
+                Arc::new(Type {
             flags: TypeFlags::Object,
-            object_flags: ObjectFlags::Anonymous,
+            object_flags: ObjectFlags::Anonymous | ObjectFlags::Interface,
             id: crate::checker::types::next_type_id(),
-            symbol: None,
+            symbol,
             alias: None,
-            data: TypeData::Object(ObjectTypeData {
+            data: TypeData::Object(ObjectTypeData { node: None,
                 structured: StructuredTypeData {
                     members: symbol_table,
                     properties: props,

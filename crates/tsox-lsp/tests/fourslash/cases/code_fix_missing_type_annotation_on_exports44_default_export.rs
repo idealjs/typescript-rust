@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFix"]
+
 #[test]
 fn code_fix_missing_type_annotation_on_exports44_default_export() {
     let content = r#"// @isolatedDeclarations: true
@@ -8,6 +8,6 @@ fn code_fix_missing_type_annotation_on_exports44_default_export() {
 // @lib: es2019
 // @Filename: /code.ts
 export default 1 + 1;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports44_default_export", content);
+    // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

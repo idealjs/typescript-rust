@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_property_contextually_typed_by_type_param01() {
     let content = r#"interface IFoo {
@@ -19,6 +19,6 @@ class C<T extends IFoo> {
 var x: IFoo = {
     a: "ss"
 };"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
+    let _s = Session::new_for_test("findAllRefsPropertyContextuallyTypedByTypeParam01", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_interface_after_implement() {
     let content = r#"interface /*interfaceDefinition*/sInt {
@@ -13,6 +13,6 @@ class iClass implements /*interfaceReference*/sInt {
     public sFn() {
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "interfaceReference")
+    let _s = Session::new_for_test("goToDefinitionInterfaceAfterImplement", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, false, "interfaceReference")
 }

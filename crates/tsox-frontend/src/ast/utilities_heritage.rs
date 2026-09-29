@@ -50,6 +50,6 @@ pub fn get_extends_heritage_clause_element(node: &Arc<Node>) -> Option<Arc<Node>
 }
 
 pub fn get_containing_class(node: &Arc<Node>) -> Option<Arc<Node>> {
-    let parent = node.parent.as_ref()?;
-    find_ancestor(parent, is_class_like)
+    let parent = node.parent()?;
+    find_ancestor(&parent, is_class_like)
 }

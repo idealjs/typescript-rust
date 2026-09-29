@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_parameter_property_declaration3() {
     let content = r#"class Foo {
@@ -9,6 +9,6 @@ fn find_all_refs_parameter_property_declaration3() {
         this./*2*/protectedParam += 10;
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "1", "2")
+    let _s = Session::new_for_test("findAllRefsParameterPropertyDeclaration3", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2")
 }

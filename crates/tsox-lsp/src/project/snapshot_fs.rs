@@ -7,6 +7,7 @@ use tsox_core::tspath::Path;
 use tsox_tsoptions::vfs::FS;
 
 use super::overlay_fs::{DiskFile, FileHandle, Overlay};
+use super::mig::m5e_7::RealpathAliasSet;
 
 pub trait FileSource: Send + Sync {
     fn fs(&self) -> &dyn FS;
@@ -20,6 +21,8 @@ pub struct SnapshotFS {
     pub fs: Arc<dyn FS>,
     pub overlays: HashMap<Path, Arc<Overlay>>,
     pub disk_files: HashMap<Path, Arc<DiskFile>>,
+    pub disk_directories: HashMap<Path, HashMap<Path, String>>,
+    pub node_modules_realpath_aliases: HashMap<Path, Arc<RealpathAliasSet>>,
     pub to_path: Box<dyn Fn(&str) -> Path + Send + Sync>,
 }
 
@@ -33,6 +36,8 @@ impl SnapshotFS {
             fs,
             overlays,
             disk_files: HashMap::new(),
+            disk_directories: HashMap::new(),
+            node_modules_realpath_aliases: HashMap::new(),
             to_path,
         }
     }

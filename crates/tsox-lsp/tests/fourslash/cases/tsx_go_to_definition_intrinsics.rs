@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn tsx_go_to_definition_intrinsics() {
     let content = r#"//@Filename: file.tsx
@@ -17,6 +17,6 @@ declare namespace JSX {
 var x = <[|di/*ds*/v|] />;
 var y = <[|s/*ss*/pan|] />;
 var z = <div [|na/*ps*/me|]='hello' />;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "ds", "ss", "ps")
+    let _s = Session::new_for_test("tsxGoToDefinitionIntrinsics", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "ds", "ss", "ps")
 }

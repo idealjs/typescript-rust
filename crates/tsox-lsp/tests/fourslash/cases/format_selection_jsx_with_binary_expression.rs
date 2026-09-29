@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatSelection"]
+
 #[test]
 fn format_selection_jsx_with_binary_expression() {
     let content = r#"//@Filename: file.tsx
@@ -19,11 +19,9 @@ function TestWidget() {
         </div>
     );
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatSelection"); // f.FormatSelection(t, "1", "2")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"function TestWidget() {
+    let mut s = Session::new_for_test("formatSelectionJsxWithBinaryExpression", content);
+    fourslash::format_selection(&mut s, "1", "2");
+    fourslash::verify_current_file_content(&mut s, r#"function TestWidget() {
     const test = true;
     return (
         <div>
@@ -37,6 +35,5 @@ function TestWidget() {
             <div>some text</div>
         </div>
     );
-}"#,
-    );
+}"#);
 }

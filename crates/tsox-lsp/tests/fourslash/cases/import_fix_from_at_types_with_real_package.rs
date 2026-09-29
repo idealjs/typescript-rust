@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // Another file already imports from `myLib` (resolving to @"]
+
 #[test]
 fn import_fix_from_at_types_with_real_package() {
     // TODO: // Simulate a project where both `myLib` (JS-only package) and `@types/myLib` (type declarations) ar
@@ -22,11 +22,10 @@ import { f1 } from "myLib";
 f1();
 // @Filename: /index.ts
 [|f2/*0*/();|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "0", []string{"myLib"}, nil /*preferences*/)
+    let _s = Session::new_for_test("importFixFromAtTypesWithRealPackage", content);
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "0", []string{"myLib"}, nil /*preferences*/)
 }
 
-#[ignore = "generator: // Like the above test, but the real package has an exports "]
 #[test]
 fn import_fix_from_at_types_with_real_package_exports() {
     // TODO: // Like the above test, but the real package has an exports field pointing to JS files.
@@ -47,6 +46,6 @@ import { f1 } from "myLib";
 f1();
 // @Filename: /index.ts
 [|f2/*0*/();|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "0", []string{"myLib"}, nil /*preferences*/)
+    let _s = Session::new_for_test("importFixFromAtTypesWithRealPackageExports", content);
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "0", []string{"myLib"}, nil /*preferences*/)
 }

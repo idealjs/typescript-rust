@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
+
 #[test]
 fn rename_reference_from_link_tag2() {
     let content = r#"// @Filename: /a.ts
@@ -11,6 +11,6 @@ enum E {
 interface Foo {
     foo: E.Foo;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
+    let _s = Session::new_for_test("renameReferenceFromLinkTag2", content);
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

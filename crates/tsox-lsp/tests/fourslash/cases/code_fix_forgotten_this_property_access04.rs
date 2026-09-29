@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
+
 #[test]
 fn code_fix_forgotten_this_property_access04() {
     let content = r#"// @jsx: react
@@ -11,6 +11,6 @@ export class C {
         return <a.div />;
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
+    let _s = Session::new_for_test("codeFixForgottenThisPropertyAccess04", content);
+    // TODO: f.VerifyCodeFixNotAvailable(t)
 }

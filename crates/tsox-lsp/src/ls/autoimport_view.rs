@@ -5,9 +5,7 @@ use tsox_compile::compiler::Program;
 use tsox_core::collections::multimap::MultiMap;
 use tsox_core::collections::set::Set;
 use tsox_core::core::tristate::Tristate;
-use tsox_core::tspath;
 use tsox_frontend::ast::SourceFile;
-use tsox_tsoptions::modulespecifiers;
 
 use crate::ls::autoimport::ModuleSpecifierEnding;
 use crate::ls::autoimport_export::Export;
@@ -49,7 +47,7 @@ impl PartialEq for ExistingImport {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FixAndExport {
     pub fix: Fix,
     pub export_: Export,

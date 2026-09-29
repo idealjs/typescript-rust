@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_order2() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /a.ts
 export const _aB: number;
 export const _Ab: number;
@@ -23,9 +23,9 @@ aB;|]
     Ab,
 } from "./a";
 aB;|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_order2", content);
     fourslash::go_to_file(&mut s, "/b.ts");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_file(&mut s, "/c.ts");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

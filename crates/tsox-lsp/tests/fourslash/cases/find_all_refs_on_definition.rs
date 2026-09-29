@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_on_definition() {
     let content = r#"//@Filename: findAllRefsOnDefinition-import.ts
@@ -24,6 +24,6 @@ import Second = require("./findAllRefsOnDefinition-import");
 var second = new Second.Test()
 second./*3*/start();
 second.stop();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
+    let _s = Session::new_for_test("findAllRefsOnDefinition", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

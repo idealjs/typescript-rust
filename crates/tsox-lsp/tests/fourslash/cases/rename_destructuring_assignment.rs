@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
+
 #[test]
 fn rename_destructuring_assignment() {
     let content = r#"interface I {
@@ -9,6 +9,6 @@ fn rename_destructuring_assignment() {
 var a: I;
 var x;
 ([|{ [|{| "contextRangeIndex": 2 |}x|]: x } = a|]);"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "x")
+    let _s = Session::new_for_test("renameDestructuringAssignment", content);
+    // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "x")
 }

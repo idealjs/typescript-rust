@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn references_for_inherited_properties7() {
     let content = r#"class class1 extends class1 {
@@ -19,6 +19,6 @@ class class2 extends class1 implements interface1 {
 var v: class2;
 v.doStuff();
 v.propName;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3", "4", "5")
+    let _s = Session::new_for_test("referencesForInheritedProperties7", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3", "4", "5")
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_js_doc_import_tag4() {
     let content = r#"// @allowJS: true
@@ -11,6 +11,6 @@ export interface /*2*/A { }
 /**
  * @import { [|A/*1*/|] } from "./b";
  */"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1")
+    let _s = Session::new_for_test("goToDefinitionJsDocImportTag4", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

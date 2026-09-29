@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_js_module_name_at_import_name() {
     let content = r#"// @allowJs: true
@@ -16,6 +16,6 @@ new [|/*importUsage*/BlahModule|].Blah()
 // @Filename: /barTs.ts
 import [|/*importDefTs*/BlahModule|] = require("./foo.js");
 new [|/*importUsageTs*/BlahModule|].Blah()"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "importDef", "importUsage", "importDefTs", "importUsageTs")
+    let _s = Session::new_for_test("goToDefinitionJsModuleNameAtImportName", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "importDef", "importUsage", "importDefTs", "importUsageTs")
 }

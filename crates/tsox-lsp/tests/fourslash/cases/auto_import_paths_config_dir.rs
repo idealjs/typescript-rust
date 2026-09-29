@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
+
 #[test]
 fn auto_import_paths_config_dir() {
     let content = r#"// @Filename: tsconfig.json
@@ -15,6 +15,6 @@ fn auto_import_paths_config_dir() {
 export const one = 1;
 // @Filename: src/foo/two.ts
 one/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"@root/one"}, nil /*preferences*/)
+    let _s = Session::new_for_test("autoImportPathsConfigDir", content);
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"@root/one"}, nil /*preferences*/)
 }

@@ -46,23 +46,33 @@ impl Checker {
                     if !self.expr_matches_target(receiver, target) {
                         continue;
                     }
-                    let Some(callback_arg) = call.arguments.nodes.first() else {
-                        continue;
-                    };
-                    let Some(u) = self.callback_predicate_type(callback_arg) else {
-                        continue;
-                    };
-
-                    let instantiated = if sig.type_parameters.is_empty() {
-                        Arc::clone(pred_type)
-                    } else {
-                        let args: Vec<Arc<Type>> =
-                            sig.type_parameters.iter().map(|_| Arc::clone(&u)).collect();
-                        self.substitute_infer_type_parameters(
-                            pred_type,
-                            &sig.type_parameters,
-                            &args,
-                        )
+                    // 有回调实参（Array.filter 谓词回灌类型参数 U）时经回调
+                    // 谓词定型；无参直谓词（isSundries(): this is X）按原样。
+                    // 谓词中的多态 this 按接收者当前型实例化（Go 经调用签名
+                    // 实例化后 this 已定型；`this is (this & {...})` 不替换
+                    // 会让交集中的 this 悬空，后续联合归并无法收纳）
+                    let instantiated = match call.arguments.nodes.first() {
+                        Some(callback_arg) => {
+                            let Some(u) = self.callback_predicate_type(callback_arg) else {
+                                continue;
+                            };
+                            if sig.type_parameters.is_empty() {
+                                substitute_this_type(self, pred_type, type_)
+                            } else {
+                                let args: Vec<Arc<Type>> = sig
+                                    .type_parameters
+                                    .iter()
+                                    .map(|_| Arc::clone(&u))
+                                    .collect();
+                                let substed = self.substitute_infer_type_parameters(
+                                    pred_type,
+                                    &sig.type_parameters,
+                                    &args,
+                                );
+                                substitute_this_type(self, &substed, type_)
+                            }
+                        }
+                        None => substitute_this_type(self, pred_type, type_),
                     };
                     return self.narrow_by_type_predicate(type_, &instantiated, assume_true);
                 }
@@ -79,7 +89,13 @@ impl Checker {
             if !self.expr_matches_target(arg, target) {
                 continue;
             }
-            return self.narrow_by_type_predicate(type_, pred_type, assume_true);
+            let instantiated_pred = if sig.type_parameters.is_empty() {
+                Arc::clone(pred_type)
+            } else {
+                let inferred = self.infer_call_type_arguments(expr, sig, &call.arguments.nodes);
+                self.substitute_infer_type_parameters(pred_type, &sig.type_parameters, &inferred)
+            };
+            return self.narrow_by_type_predicate(type_, &instantiated_pred, assume_true);
         }
         Arc::clone(type_)
     }
@@ -135,7 +151,13 @@ impl Checker {
                 continue;
             }
             if let Some(pred_type) = &predicate.t {
-                return self.intersect_or_narrow(type_, pred_type);
+                let instantiated_pred = if sig.type_parameters.is_empty() {
+                    Arc::clone(pred_type)
+                } else {
+                    let inferred = self.infer_call_type_arguments(call_expr, sig, &call.arguments.nodes);
+                    self.substitute_infer_type_parameters(pred_type, &sig.type_parameters, &inferred)
+                };
+                return self.intersect_or_narrow(type_, &instantiated_pred);
             }
 
             return self.remove_flags_from_union(type_, TYPE_FLAGS_NULLABLE);
@@ -230,6 +252,9 @@ impl Checker {
                 return Arc::clone(type_);
             }
         }
+        if narrow_to_value {
+            return self.narrow_type_by_type_name(type_, type_name);
+        }
         let matching_flags = match type_name {
             "string" => TYPE_FLAGS_STRING_LIKE,
             "number" => TYPE_FLAGS_NUMBER_LIKE,
@@ -241,33 +266,116 @@ impl Checker {
                 return self.filter_type_by_callable(type_, narrow_to_value);
             }
             "object" => {
-                if narrow_to_value {
-                    return self.filter_type_by_object(type_, is_loose);
-                }
                 return self.remove_object_from_union(type_);
             }
             _ => return Arc::clone(type_),
         };
-        if narrow_to_value {
-            self.filter_type_by_flags(type_, matching_flags)
-        } else {
-            self.remove_flags_from_union(type_, matching_flags)
-        }
+        let _ = is_loose;
+        self.remove_flags_from_union(type_, matching_flags)
     }
 
     pub(crate) fn narrow_by_truthiness(&self, type_: &Arc<Type>, kind: NarrowKind) -> Arc<Type> {
-        match kind {
-            NarrowKind::TrueBranch => {
-                let falsy_flags = TypeFlags::Undefined
-                    | TypeFlags::Null
-                    | TypeFlags::Void
-                    | TypeFlags::BooleanLiteral
-                    | TypeFlags::StringLiteral
-                    | TypeFlags::NumberLiteral;
-                self.remove_falsy_from_union(type_, falsy_flags)
-            }
-            NarrowKind::FalseBranch => self.filter_to_falsy(type_),
+        let constituents = self.constituent_types(&self.split_intrinsic_boolean(type_));
+        let kept: Vec<Arc<Type>> = constituents
+            .into_iter()
+            .filter(|t| match kind {
+                NarrowKind::TrueBranch => self.has_truthy_fact(t),
+                NarrowKind::FalseBranch => self.has_falsy_fact(t),
+            })
+            .collect();
+        if kept.is_empty() {
+            return self.never_type();
         }
+        if kept.len() == 1 {
+            return kept.into_iter().next().expect("exactly one");
+        }
+        self.flow_union_of(&kept)
+    }
+
+    fn split_intrinsic_boolean(&self, type_: &Arc<Type>) -> Arc<Type> {
+        if type_.flags.contains(TypeFlags::Boolean) && !type_.is_union() {
+            return self.flow_union_of(&[self.false_type(), self.true_type()]);
+        }
+        Arc::clone(type_)
+    }
+
+    // Go getTypeFactsWorker 的 Truthy 位：字面量按值判定，非字面
+    // number/string/bigint/boolean/enum 与 symbol/object/any 均持有
+    pub(crate) fn has_truthy_fact(&self, t: &Arc<Type>) -> bool {
+        let flags = t.flags;
+        if flags.contains(TypeFlags::Never)
+            || flags.intersects(TypeFlags::Undefined | TypeFlags::Null | TypeFlags::Void)
+        {
+            return false;
+        }
+        if flags.contains(TypeFlags::BooleanLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(lit.value, LiteralValue::Boolean(true)));
+        }
+        if flags.contains(TypeFlags::StringLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(&lit.value, LiteralValue::String(s) if !s.is_empty()));
+        }
+        if flags.contains(TypeFlags::NumberLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(&lit.value, LiteralValue::Number(n) if n.0 != 0.0));
+        }
+        if flags.contains(TypeFlags::BigIntLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(&lit.value, LiteralValue::BigInt(b) if !b.is_zero()));
+        }
+        true
+    }
+
+    // Go getTypeFactsWorker 的 Falsy 位：非字面 number/string/bigint/boolean/enum
+    // 双持有（两分支都保留）；symbol/object/nonPrimitive 仅非 strict 持有；
+    // any/unknown/类型参数等 instantiable 走 UnknownFacts（全持有）
+    pub(crate) fn has_falsy_fact(&self, t: &Arc<Type>) -> bool {
+        let flags = t.flags;
+        if flags.contains(TypeFlags::Never) {
+            return false;
+        }
+        if flags.intersects(TypeFlags::Undefined | TypeFlags::Null | TypeFlags::Void) {
+            return true;
+        }
+        if flags.contains(TypeFlags::BooleanLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(lit.value, LiteralValue::Boolean(false)));
+        }
+        if flags.contains(TypeFlags::StringLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(&lit.value, LiteralValue::String(s) if s.is_empty()));
+        }
+        if flags.contains(TypeFlags::NumberLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(&lit.value, LiteralValue::Number(n) if n.0 == 0.0));
+        }
+        if flags.contains(TypeFlags::BigIntLiteral) {
+            return matches!(&t.data, TypeData::Literal(lit)
+                if matches!(&lit.value, LiteralValue::BigInt(b) if b.is_zero()));
+        }
+        if flags.intersects(
+            TypeFlags::Number
+                | TypeFlags::String
+                | TypeFlags::StringMapping
+                | TypeFlags::TemplateLiteral
+                | TypeFlags::BigInt
+                | TypeFlags::Boolean
+                | TypeFlags::Enum
+                | TypeFlags::EnumLiteral,
+        ) {
+            return true;
+        }
+        if flags.intersects(
+            TypeFlags::ESSymbol
+                | TypeFlags::UniqueESSymbol
+                | TypeFlags::Object
+                | TypeFlags::NonPrimitive
+                | TypeFlags::Intersection,
+        ) {
+            return !self.strict_null_checks;
+        }
+        true
     }
 
     pub(crate) fn narrow_by_optionality(
@@ -297,5 +405,41 @@ impl Checker {
         }
 
         Arc::clone(type_)
+    }
+}
+
+/// 谓词型中的多态 this 按接收者当前型替换（Go 调用签名实例化后的形态）
+pub(crate) fn substitute_this_type(
+    checker: &mut Checker,
+    t: &Arc<Type>,
+    replacement: &Arc<Type>,
+) -> Arc<Type> {
+    if let Some(tp) = match &t.data {
+        TypeData::TypeParameter(tp) if tp.is_this_type => Some(()),
+        _ => None,
+    } {
+        let _ = tp;
+        return Arc::clone(replacement);
+    }
+    match &t.data {
+        TypeData::Union(u) => {
+            let parts: Vec<Arc<Type>> = u
+                .union_or_intersection
+                .types
+                .iter()
+                .map(|inner| substitute_this_type(checker, inner, replacement))
+                .collect();
+            checker.get_union_type(parts)
+        }
+        TypeData::Intersection(i) => {
+            let parts: Vec<Arc<Type>> = i
+                .union_or_intersection
+                .types
+                .iter()
+                .map(|inner| substitute_this_type(checker, inner, replacement))
+                .collect();
+            checker.get_intersection_type(parts)
+        }
+        _ => Arc::clone(t),
     }
 }

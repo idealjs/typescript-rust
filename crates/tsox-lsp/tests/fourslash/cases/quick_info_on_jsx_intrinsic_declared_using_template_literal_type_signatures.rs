@@ -1,18 +1,18 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_on_jsx_intrinsic_declared_using_template_literal_type_signatures() {
     let content = r#"// @jsx: react
 // @filename: /a.tsx
 declare namespace JSX {
   interface IntrinsicElements {
-    [k: ` + "`" + `foo${string}` + "`" + `]: any;
-    [k: ` + "`" + `foobar${string}` + "`" + `]: any;
+    [k: `foo${string}`]: any;
+    [k: `foobar${string}`]: any;
   }
 }
 </*1*/foobaz />;
 </*2*/foobarbaz />;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoOnJsxIntrinsicDeclaredUsingTemplateLiteralTypeSignatures", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

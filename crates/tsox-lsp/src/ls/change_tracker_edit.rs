@@ -39,6 +39,7 @@ pub enum TrailingTriviaOption {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
+#[allow(dead_code)]
 pub(super) enum TrackerEditKind {
     Text = 1,
     Remove = 2,
@@ -47,6 +48,7 @@ pub(super) enum TrackerEditKind {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct TrackerEdit {
     pub(super) kind: TrackerEditKind,
     pub(super) range: Range,
@@ -61,6 +63,7 @@ pub struct TrackerEdit {
 
 #[derive(Debug, Clone)]
 pub struct NodesInsertedAtStartState {
+    #[allow(dead_code)]
     pub(super) node: Arc<Node>,
     #[allow(dead_code)]
     pub(super) source_file_file_name: String,

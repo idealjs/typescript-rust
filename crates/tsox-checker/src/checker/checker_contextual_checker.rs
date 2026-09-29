@@ -96,14 +96,31 @@ impl Checker {
                     file,
                     anchor,
                     PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
-                    vec![missing[0].clone(), src_str, tgt_str],
+                    vec![crate::checker::property_name_for_display(&missing[0]), src_str, tgt_str],
                 ));
             } else if missing.len() > 1 {
+                let (message, args) = if missing.len() > 5 {
+                    (
+                        tsox_core::diagnostics::messages_generated::
+                            TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2_AND_3_MORE,
+                        vec![
+                            src_str,
+                            tgt_str,
+                            crate::checker::property_names_for_display(&missing[..4]),
+                            (missing.len() - 4).to_string(),
+                        ],
+                    )
+                } else {
+                    (
+                        TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
+                        vec![src_str, tgt_str, crate::checker::property_names_for_display(&missing)],
+                    )
+                };
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,
                     anchor,
-                    TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
-                    vec![src_str, tgt_str, missing.join(", ")],
+                    message,
+                    args,
                 ));
             }
             return;
@@ -114,13 +131,33 @@ impl Checker {
                 let loc = self
                     .find_object_literal_property_name_node(expr, &excess)
                     .unwrap_or(expr.loc);
-                let tgt_str = self.type_to_string(target);
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    self.current_file.clone(),
-                    loc,
-                    OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
-                    vec![excess, tgt_str],
-                ));
+                let filtered_target = self.excess_check_error_target(target);
+                let tgt_str = self.type_to_string(&filtered_target);
+                // Go reportUnmatchedPropertyForExcessProperty：字面量自身元素命中
+                // 拼写建议时换 TS2561 文案
+                if let Some(sugg) = self.suggestion_for_nonexistent_property(&excess, &filtered_target) {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        loc,
+                        tsox_core::diagnostics::messages_generated::
+                            OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_BUT_0_DOES_NOT_EXIST_IN_TYPE_1_DID_YOU_MEAN_TO_WRITE_2,
+                        vec![
+                            crate::checker::property_name_for_display(&excess),
+                            tgt_str,
+                            sugg,
+                        ],
+                    ));
+                } else {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        loc,
+                        OBJECT_LITERAL_MAY_ONLY_SPECIFY_KNOWN_PROPERTIES_AND_0_DOES_NOT_EXIST_IN_TYPE_1,
+                        vec![
+                            crate::checker::property_name_for_display(&excess),
+                            tgt_str,
+                        ],
+                    ));
+                }
                 return;
             }
             let missing = self.get_missing_required_properties(&expr_type, target);
@@ -132,14 +169,31 @@ impl Checker {
                     file,
                     missing_anchor,
                     PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
-                    vec![missing[0].clone(), src_str, tgt_str],
+                    vec![crate::checker::property_name_for_display(&missing[0]), src_str, tgt_str],
                 ));
             } else if missing.len() > 1 {
+                let (message, args) = if missing.len() > 5 {
+                    (
+                        tsox_core::diagnostics::messages_generated::
+                            TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2_AND_3_MORE,
+                        vec![
+                            src_str,
+                            tgt_str,
+                            crate::checker::property_names_for_display(&missing[..4]),
+                            (missing.len() - 4).to_string(),
+                        ],
+                    )
+                } else {
+                    (
+                        TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
+                        vec![src_str, tgt_str, crate::checker::property_names_for_display(&missing)],
+                    )
+                };
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,
                     missing_anchor,
-                    TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
-                    vec![src_str, tgt_str, missing.join(", ")],
+                    message,
+                    args,
                 ));
             }
             return;
@@ -193,12 +247,13 @@ impl Checker {
             .symbol
             .as_ref()
             .is_some_and(|s| s.name == "Promise");
+        if is_promise
+            && let Some(obj) = declared.as_object()
+            && let Some(t) = obj.type_arguments.first()
+        {
+            return Arc::clone(t);
+        }
         if is_promise {
-            if let crate::checker::TypeData::Object(obj) = &declared.data {
-                if let Some(t) = obj.type_arguments.first() {
-                    return Arc::clone(t);
-                }
-            }
             return self.get_any_type();
         }
         declared
@@ -244,7 +299,7 @@ impl Checker {
 
     pub(crate) fn get_promised_type_of_promise(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
         if t.symbol.as_ref().is_some_and(|s| s.name == "Promise") {
-            if let crate::checker::TypeData::Object(obj) = &t.data {
+            if let Some(obj) = t.as_object() {
                 if let Some(first) = obj.type_arguments.first() {
                     return Some(Arc::clone(first));
                 }
@@ -260,17 +315,45 @@ impl Checker {
         if then_type.flags.contains(TypeFlags::Any) {
             return None;
         }
-        let then_signatures = self.get_signatures_of_type(&then_type, SignatureKind::Call);
-        let then_sig = then_signatures.first()?;
-        let onfulfilled = then_sig.parameters.first()?;
-        let callback_type = self.get_type_of_symbol(onfulfilled);
-        if callback_type.flags.contains(TypeFlags::Any) {
+        let then_signatures = self.call_signatures_through_unions(&then_type);
+        let onfulfilled_types: Vec<Arc<Type>> = then_signatures
+            .iter()
+            .filter_map(|sig| {
+                sig.parameters.first().map(|p| self.get_type_of_symbol(p))
+            })
+            .collect();
+        let onfulfilled_types: Vec<Arc<Type>> = onfulfilled_types
+            .into_iter()
+            .filter(|t| !t.flags.contains(TypeFlags::Any))
+            .collect();
+        if onfulfilled_types.is_empty() {
             return None;
         }
-        let callback_signatures = self.get_signatures_of_type(&callback_type, SignatureKind::Call);
-        let callback_sig = callback_signatures.first()?;
-        let value_param = callback_sig.parameters.first()?;
-        Some(self.get_type_of_symbol(value_param))
+        let callback_type = self.get_union_type(onfulfilled_types);
+        let callback_signatures = self.call_signatures_through_unions(&callback_type);
+        let value_types: Vec<Arc<Type>> = callback_signatures
+            .iter()
+            .filter_map(|sig| {
+                sig.parameters.first().map(|p| self.get_type_of_symbol(p))
+            })
+            .collect();
+        if value_types.is_empty() {
+            return None;
+        }
+        Some(self.get_union_type(value_types))
+    }
+
+    fn call_signatures_through_unions(&self, t: &Arc<Type>) -> Vec<Arc<Signature>> {
+        if t.is_union()
+            && let Some(types) = t.types()
+        {
+            let mut all = Vec::new();
+            for m in types {
+                all.extend(self.call_signatures_through_unions(m));
+            }
+            return all;
+        }
+        self.get_signatures_of_type(t, SignatureKind::Call)
     }
 
     pub(crate) fn declared_annotation_type_of(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {

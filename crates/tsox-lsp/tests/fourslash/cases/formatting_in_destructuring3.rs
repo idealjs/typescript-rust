@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn formatting_in_destructuring3() {
     let content = r#"/*1*/const {
@@ -8,8 +8,8 @@ fn formatting_in_destructuring3() {
 /*3*/    b,
 /*4*/} = {a: 1, b: 2};
 /*5*/const {a: c} = {a: 1, b: 2};"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formattingInDestructuring3", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"const {"#);
     fourslash::go_to_marker(&mut s, "2");

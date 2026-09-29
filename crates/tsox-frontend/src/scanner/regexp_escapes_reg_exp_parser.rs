@@ -189,8 +189,32 @@ impl<'a> RegExpParser<'a> {
                         self.inc_pos(1);
                     }
                     let hex = &self.text[hex_start..self.pos];
-                    if self.char() == '}' {
+                    if hex.is_empty() {
+                        self.error(tsox_core::diagnostics::HEXADECIMAL_DIGIT_EXPECTED, self.pos, 0);
+                        return self.text[start..self.pos].to_string();
+                    }
+                    let value = u64::from_str_radix(hex, 16).unwrap_or(u64::MAX);
+                    let mut invalid = false;
+                    if value > 0x10FFFF {
+                        self.error(
+                            tsox_core::diagnostics::AN_EXTENDED_UNICODE_ESCAPE_VALUE_MUST_BE_BETWEEN_0X0_AND_0X10FFFF_INCLUSIVE,
+                            hex_start,
+                            self.pos - hex_start,
+                        );
+                        invalid = true;
+                    }
+                    if self.pos >= self.body_end {
+                        self.error(tsox_core::diagnostics::UNEXPECTED_END_OF_TEXT, self.pos, 0);
+                        invalid = true;
+                    } else if self.char() == '}' {
                         self.inc_pos(1);
+                    } else {
+                        self.error(
+                            tsox_core::diagnostics::UNTERMINATED_UNICODE_ESCAPE_SEQUENCE,
+                            self.pos,
+                            0,
+                        );
+                        invalid = true;
                     }
                     if !any_unicode_mode {
                         self.error(
@@ -198,6 +222,9 @@ impl<'a> RegExpParser<'a> {
                             start,
                             self.pos - start,
                         );
+                    }
+                    if invalid {
+                        return self.text[start..self.pos].to_string();
                     }
                     if let Ok(n) = u32::from_str_radix(hex, 16) {
                         if let Some(c) = char::from_u32(n) {

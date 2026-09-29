@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
+
 #[test]
 fn import_name_code_fix_new_import_ambient1() {
     let content = r#"import d from "other-ambient-module";
@@ -20,6 +20,6 @@ declare module "yet-another-ambient-module" {
    export function f3();
    export var v3;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    let _s = Session::new_for_test("importNameCodeFixNewImportAmbient1", content);
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

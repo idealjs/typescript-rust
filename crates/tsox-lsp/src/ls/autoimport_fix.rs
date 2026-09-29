@@ -6,7 +6,6 @@ use crate::lsp::lsproto::TextEdit;
 use tsox_core::core::compiler_options::CompilerOptions;
 use tsox_frontend::ast::Node;
 use tsox_frontend::ast::SourceFile;
-use tsox_tsoptions::modulespecifiers;
 
 use crate::ls::autoimport::AddAsTypeOnly;
 use crate::ls::autoimport::AutoImportFix;

@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 
 use crate::lsp::lsproto;
-use tsox_core::diagnostics;
 
 use super::watch::WatcherID;
 
@@ -14,6 +13,8 @@ pub trait Client: Send + Sync {
 
     fn unwatch_files(&self, id: &WatcherID)
     -> Result<(), Box<dyn std::error::Error + Send + Sync>>;
+
+    fn register_content_mapper_extensions(&self, extensions: &[String]) -> Result<(), String>;
 
     fn refresh_diagnostics(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>>;
 
@@ -43,6 +44,8 @@ pub trait Client: Send + Sync {
         telemetry: &lsproto::TelemetryEvent,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>>;
 
+    fn get_locale(&self) -> tsox_core::locale::Locale;
+
     fn is_active(&self) -> bool;
 }
 
@@ -61,6 +64,10 @@ impl Client for NopClient {
         &self,
         _id: &WatcherID,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+        Ok(())
+    }
+
+    fn register_content_mapper_extensions(&self, _extensions: &[String]) -> Result<(), String> {
         Ok(())
     }
 
@@ -102,6 +109,10 @@ impl Client for NopClient {
         _telemetry: &lsproto::TelemetryEvent,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         Ok(())
+    }
+
+    fn get_locale(&self) -> tsox_core::locale::Locale {
+        tsox_core::locale::Locale::default()
     }
 
     fn is_active(&self) -> bool {

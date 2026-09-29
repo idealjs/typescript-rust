@@ -12,9 +12,12 @@ impl Parser {
             token,
             diagnostics: Vec::new(),
             language_variant: LanguageVariant::Standard,
+            javascript_file: false,
             last_template_literal_was_middle: false,
             yield_context: false,
             await_context: false,
+            decorator_context: false,
+            disallow_in_context: false,
             parsing_contexts: 0,
         };
 
@@ -30,6 +33,18 @@ impl Parser {
         parser.language_variant = language_variant;
         parser.scanner.set_language_variant(language_variant);
         parser
+    }
+
+    pub(crate) fn set_javascript_file(&mut self, javascript_file: bool) {
+        self.javascript_file = javascript_file;
+    }
+
+    pub(crate) fn allow_in<T>(&mut self, f: impl FnOnce(&mut Self) -> T) -> T {
+        let outer = self.disallow_in_context;
+        self.disallow_in_context = false;
+        let result = f(self);
+        self.disallow_in_context = outer;
+        result
     }
 
     pub fn parse_source_file(file_name: impl Into<String>) -> SourceFile {
@@ -53,8 +68,15 @@ impl Parser {
             _ => LanguageVariant::Standard,
         };
         let mut parser = Parser::new_with_language_variant(text.clone(), language_variant);
-        let statements = parser.parse_list(ParsingContext::SourceElements, Parser::parse_statement);
-        let end_of_file = parser.create_token_node();
+        parser.set_javascript_file(matches!(script_kind, ScriptKind::Js | ScriptKind::Jsx));
+        let (statements, end_of_file) = if matches!(script_kind, ScriptKind::Json) {
+            parser.parse_json_text()
+        } else {
+            let statements =
+                parser.parse_list(ParsingContext::SourceElements, Parser::parse_statement);
+            let end_of_file = parser.create_token_node();
+            (statements, end_of_file)
+        };
         let pos = 0usize;
         let end = end_of_file.end();
 
@@ -92,6 +114,7 @@ impl Parser {
             NodeData::SourceFile(SourceFileData {
                 statements: Arc::new(statements),
                 end_of_file_token: end_of_file,
+                global_exports: None,
             }),
             TextRange::new(pos, end),
             context_flags,
@@ -116,9 +139,14 @@ impl Parser {
             common_js_module_indicator: None,
             uses_uri_style_node_core_modules: tsox_core::core::tristate::Tristate::Unknown,
             has_parse_diagnostics: !parser.diagnostics.is_empty(),
+            referenced_files: Vec::new(),
+            type_reference_directives: Vec::new(),
+            lib_reference_directives: Vec::new(),
+            supplemental_source_files: Vec::new(),
         };
 
         references::set_external_module_indicator(&mut file);
+        crate::parser::reparse_await::reparse_top_level_await(&mut file, &mut parser.diagnostics);
         references::collect_external_module_references(&mut file);
 
         Self::apply_jsdoc_reparser(&mut file);
@@ -150,8 +178,10 @@ impl Parser {
             return;
         }
 
-        let (end_of_file_token, old_loc) = match &file.node.data {
-            NodeData::SourceFile(d) => (d.end_of_file_token.clone(), file.node.loc),
+        let (end_of_file_token, old_loc, old_flags) = match &file.node.data {
+            NodeData::SourceFile(d) => {
+                (d.end_of_file_token.clone(), file.node.loc, file.node.flags)
+            }
             _ => return,
         };
         let new_statements_node_list = Arc::new(NodeList {
@@ -164,18 +194,31 @@ impl Parser {
             ),
             nodes: new_statements,
         });
-        let new_node = Arc::new(Node::with_loc(
+        let new_node = Arc::new(Node::with_loc_flags(
             SyntaxKind::SourceFile,
             NodeData::SourceFile(SourceFileData {
                 statements: new_statements_node_list,
                 end_of_file_token,
+                global_exports: None,
             }),
             old_loc,
+            old_flags,
         ));
         file.node = new_node;
     }
 
     pub(crate) fn next_token(&mut self) -> SyntaxKind {
+        if is_keyword_kind(self.token)
+            && token_flags_intersects(
+                self.scanner.token_flags(),
+                TOKEN_FLAGS_UNICODE_ESCAPE | TOKEN_FLAGS_EXTENDED_UNICODE_ESCAPE,
+            )
+        {
+            self.parse_error_at_current_token(
+                tsox_core::diagnostics::KEYWORDS_CANNOT_CONTAIN_ESCAPE_CHARACTERS,
+                &[],
+            );
+        }
         self.token = self.scanner.scan();
         self.drain_scanner_errors();
         self.token
@@ -195,6 +238,18 @@ impl Parser {
             }
             crate::scanner::DiagnosticKind::UnterminatedStringLiteral => {
                 tsox_core::diagnostics::UNTERMINATED_STRING_LITERAL
+            }
+            crate::scanner::DiagnosticKind::HexadecimalDigitExpected => {
+                tsox_core::diagnostics::HEXADECIMAL_DIGIT_EXPECTED
+            }
+            crate::scanner::DiagnosticKind::UnexpectedEndOfText => {
+                tsox_core::diagnostics::UNEXPECTED_END_OF_TEXT
+            }
+            crate::scanner::DiagnosticKind::UnicodeEscapeOutOfRange => {
+                tsox_core::diagnostics::AN_EXTENDED_UNICODE_ESCAPE_VALUE_MUST_BE_BETWEEN_0X0_AND_0X10FFFF_INCLUSIVE
+            }
+            crate::scanner::DiagnosticKind::UnterminatedUnicodeEscape => {
+                tsox_core::diagnostics::UNTERMINATED_UNICODE_ESCAPE_SEQUENCE
             }
             crate::scanner::DiagnosticKind::UnterminatedTemplateLiteral => {
                 tsox_core::diagnostics::UNTERMINATED_TEMPLATE_LITERAL
@@ -221,14 +276,60 @@ impl Parser {
                 tsox_core::diagnostics::NUMERIC_SEPARATORS_ARE_NOT_ALLOWED_HERE
             }
             crate::scanner::DiagnosticKind::RegexMessage(msg) => msg,
+            crate::scanner::DiagnosticKind::RegexMessageWithArg(msg, _arg) => msg,
+            crate::scanner::DiagnosticKind::OctalEscapeSequenceNotAllowed => {
+                tsox_core::diagnostics::OCTAL_ESCAPE_SEQUENCES_ARE_NOT_ALLOWED_USE_THE_SYNTAX_0
+            }
+            crate::scanner::DiagnosticKind::EscapeSequenceNotAllowed => {
+                tsox_core::diagnostics::ESCAPE_SEQUENCE_0_IS_NOT_ALLOWED
+            }
+            crate::scanner::DiagnosticKind::IdentifierFollowsNumeric => {
+                tsox_core::diagnostics::AN_IDENTIFIER_OR_KEYWORD_CANNOT_IMMEDIATELY_FOLLOW_A_NUMERIC_LITERAL
+            }
+            crate::scanner::DiagnosticKind::BigIntExponentialNotation => {
+                tsox_core::diagnostics::A_BIGINT_LITERAL_CANNOT_USE_EXPONENTIAL_NOTATION
+            }
+            crate::scanner::DiagnosticKind::BigIntMustBeInteger => {
+                tsox_core::diagnostics::A_BIGINT_LITERAL_MUST_BE_AN_INTEGER
+            }
+            crate::scanner::DiagnosticKind::DigitExpected => {
+                tsox_core::diagnostics::DIGIT_EXPECTED
+            }
+            crate::scanner::DiagnosticKind::BinaryDigitExpected => {
+                tsox_core::diagnostics::BINARY_DIGIT_EXPECTED
+            }
+            crate::scanner::DiagnosticKind::OctalDigitExpected => {
+                tsox_core::diagnostics::OCTAL_DIGIT_EXPECTED
+            }
+            crate::scanner::DiagnosticKind::MultipleConsecutiveNumericSeparators => {
+                tsox_core::diagnostics::MULTIPLE_CONSECUTIVE_NUMERIC_SEPARATORS_ARE_NOT_PERMITTED
+            }
         };
         let args: Vec<String> = match err.kind {
             crate::scanner::DiagnosticKind::OctalLiteralNotAllowed => {
+                // Go scanNumber：suggestion = "0o" + FormatInt(val, 8)，
+                // 前导零被规范化
                 let token_text = &self.scanner.text()
                     [err.pos..(err.pos + err.length).min(self.scanner.text().len())];
                 let octal_digits = token_text.strip_prefix('-').unwrap_or(token_text);
                 let digits = octal_digits.strip_prefix('0').unwrap_or(octal_digits);
-                vec![format!("0o{digits}")]
+                let val = i64::from_str_radix(digits, 8).unwrap_or(0);
+                let sign = if token_text.starts_with('-') { "-" } else { "" };
+                vec![format!("{sign}0o{val:o}")]
+            }
+            crate::scanner::DiagnosticKind::RegexMessageWithArg(_, arg) => vec![arg.to_string()],
+            crate::scanner::DiagnosticKind::OctalEscapeSequenceNotAllowed => {
+                let token_text = &self.scanner.text()
+                    [err.pos..(err.pos + err.length).min(self.scanner.text().len())];
+                let digits = token_text.strip_prefix('\\').unwrap_or(token_text);
+                let code = i64::from_str_radix(digits, 8).unwrap_or(0);
+                vec![format!("\\x{:02x}", code)]
+            }
+            crate::scanner::DiagnosticKind::EscapeSequenceNotAllowed => {
+                let token_text = self.scanner.text()
+                    [err.pos..(err.pos + err.length).min(self.scanner.text().len())]
+                    .to_string();
+                vec![token_text]
             }
             _ => Vec::new(),
         };
@@ -259,13 +360,23 @@ impl Parser {
     }
 
     pub(crate) fn next_template_token(&mut self) -> SyntaxKind {
-        self.token = self.scanner.scan_template_continuation();
+        self.next_template_token_ex(false)
+    }
+
+    pub(crate) fn next_template_token_ex(&mut self, is_tagged: bool) -> SyntaxKind {
+        self.token = self.scanner.scan_template_continuation_ex(!is_tagged);
         self.drain_scanner_errors();
         self.token
     }
 
     pub(crate) fn token_pos(&self) -> usize {
         self.scanner.token_pos()
+    }
+
+    /// Go Parser.nodePos：节点 end 取当前 token 的 fullStart（即刚消费完的
+    /// 语法 token 的真实结尾），不得吞下一 token 的前导 trivia
+    pub(crate) fn node_pos(&self) -> usize {
+        self.scanner.full_start_pos()
     }
 
     pub(crate) fn token_end(&self) -> usize {

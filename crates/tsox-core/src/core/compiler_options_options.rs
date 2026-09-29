@@ -2,7 +2,7 @@ use crate::core::compiler_options_kinds::*;
 use crate::core::tristate::Tristate;
 use std::collections::HashMap;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 pub struct CompilerOptions {
     pub allow_js: Tristate,
     pub allow_arbitrary_extensions: Tristate,
@@ -60,6 +60,7 @@ pub struct CompilerOptions {
     pub no_implicit_this: Tristate,
     pub no_implicit_returns: Tristate,
     pub no_emit_helpers: Tristate,
+    pub run_external_code: Tristate,
     pub no_lib: Tristate,
     pub no_property_access_from_index_signature: Tristate,
     pub no_unchecked_indexed_access: Tristate,

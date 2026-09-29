@@ -44,7 +44,7 @@ impl Parser {
         self.parse_semicolon();
         let members = self.parse_list(ParsingContext::TypeMembers, Parser::parse_type_member);
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
 
         Arc::new(Node::with_loc(
             SyntaxKind::MappedType,
@@ -84,7 +84,7 @@ impl Parser {
         self.expect(SyntaxKind::OpenBraceToken);
         let members = self.parse_list(ParsingContext::TypeMembers, Parser::parse_type_member);
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::TypeLiteral,
             NodeData::TypeLiteralNode(TypeLiteralNodeData {
@@ -102,7 +102,7 @@ impl Parser {
             Parser::parse_tuple_element_type,
         );
         self.expect(SyntaxKind::CloseBracketToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::TupleType,
             NodeData::TupleTypeNode(TupleTypeNodeData {
@@ -130,7 +130,7 @@ impl Parser {
         let type_node = self.parse_type();
 
         if self.parse_optional(SyntaxKind::QuestionToken) {
-            let end = self.token_pos();
+            let end = self.node_pos();
             return Arc::new(Node::with_loc(
                 SyntaxKind::OptionalType,
                 NodeData::OptionalTypeNode(OptionalTypeNodeData { type_node }),
@@ -211,7 +211,7 @@ impl Parser {
         self.expect(SyntaxKind::OpenParenToken);
         let type_node = self.parse_type();
         self.expect(SyntaxKind::CloseParenToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ParenthesizedType,
             NodeData::ParenthesizedTypeNode(ParenthesizedTypeNodeData { type_node }),

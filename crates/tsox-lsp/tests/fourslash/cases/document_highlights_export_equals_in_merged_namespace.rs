@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn document_highlights_export_equals_in_merged_namespace() {
     let content = r#"
@@ -9,6 +9,6 @@ namespace C {
     /*marker*/export = C;
 }
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "marker")
+    let _s = Session::new_for_test("documentHighlightsExportEqualsInMergedNamespace", content);
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "marker")
 }

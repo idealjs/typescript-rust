@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn formatting_illegal_import_clause() {
     let content = r#"var expect = require('expect.js');
@@ -19,8 +19,8 @@ describe('<Failed />', () => {
   it('redirects to order summary', () => {
   });
 });"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formattingIllegalImportClause", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"import React from 'react';"#);
 }

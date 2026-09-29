@@ -15,7 +15,13 @@ impl Checker {
                 }
                 SyntaxKind::UniqueKeyword => {
                     if data.type_node.kind == SyntaxKind::SymbolKeyword {
-                        self.es_symbol_type()
+                        let target = node
+                            .parent()
+                            .map(|p| {
+                                crate::checker::checker_es_symbol::walk_up_parenthesized_types(&p)
+                            })
+                            .unwrap_or_else(|| Arc::clone(node));
+                        self.get_es_symbol_like_type_for_node(&target)
                     } else {
                         self.error_type()
                     }
@@ -42,6 +48,17 @@ impl Checker {
                             });
                         }
                     }
+                    // readonly T[] 的数组形态：带 IsReadonlyArray 标志的数组实例。
+                    // 不能经 ReadonlyArray 接口实例化承载：lib 自身成员
+                    // （flatMap 的 U | readonly U[] 等）会在接口解析期自引用重入，
+                    // 触发降级使实例化永不上缓存
+                    if self.is_array_type(&inner)
+                        && let Some(element) = inner
+                            .as_object()
+                            .and_then(|o| o.type_arguments.first().cloned())
+                    {
+                        return self.create_array_type_ex(element, true);
+                    }
                     inner
                 }
                 _ => self.error_type(),
@@ -66,7 +83,8 @@ impl Checker {
             let object_type = self.get_type_from_type_node(&object_type_node);
             let index_type = self.get_type_from_type_node(&index_type_node);
 
-            if self.should_defer_indexed_access_type(&object_type, &index_type) {
+            let defer = self.should_defer_indexed_access_type(&object_type, &index_type);
+            if defer {
                 Arc::new(Type::new(
                     TypeFlags::IndexedAccess,
                     TypeData::IndexedAccess(IndexedAccessTypeData {
@@ -174,11 +192,22 @@ impl Checker {
     }
 
     pub(crate) fn get_type_from_mapped_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
-        if let Some(t) = self.get_cached_type(node) {
-            return t;
+        // mapped 实例随类型实参语境变化（接口成员在声明期解析为裸类型参数
+        // 版本，实例化期必须重解析），缓存按 (节点, 栈哈希) 区分；无栈语境
+        // 的结果才写入免哈希节点缓存
+        let key = (node.id() as usize, self.type_argument_stack_hash());
+        if let Some(t) = self.type_node_subst_cache.get(&key) {
+            return Arc::clone(t);
         }
         let result = self.build_mapped_type(node);
-        self.cache_type(node, result.clone());
+        self.attach_alias_for_type_node(node, &result);
+        if self.type_argument_stack.is_empty() {
+            self.cache_type(node, result.clone());
+        }
+        if self.type_node_subst_cache.len() >= self.type_node_subst_cache_limit {
+            self.type_node_subst_cache.clear();
+        }
+        self.type_node_subst_cache.insert(key, Arc::clone(&result));
         result
     }
 
@@ -187,6 +216,7 @@ impl Checker {
             return t;
         }
         let result = self.build_conditional_type(node);
+        self.attach_alias_for_type_node(node, &result);
         self.cache_type(node, result.clone());
         result
     }
@@ -200,14 +230,14 @@ impl Checker {
             let mut in_extends_clause = false;
             let mut cur = Some(Arc::clone(node));
             while let Some(n) = cur {
-                if let Some(p) = n.parent.clone()
+                if let Some(p) = n.parent()
                     && let NodeData::ConditionalTypeNode(cd) = &p.data
                     && Arc::ptr_eq(&cd.extends_type, &n)
                 {
                     in_extends_clause = true;
                     break;
                 }
-                cur = n.parent.clone();
+                cur = n.parent();
             }
             if !in_extends_clause {
                 let already = self

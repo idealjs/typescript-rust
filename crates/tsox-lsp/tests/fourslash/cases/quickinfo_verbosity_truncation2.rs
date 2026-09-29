@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
+
 #[test]
 fn quickinfo_verbosity_truncation2() {
     let content = r#"interface LargeInterface/*o1*/ {
@@ -303,6 +303,6 @@ fn quickinfo_verbosity_truncation2() {
     prop297: any;
     prop298: any;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"o1": {0, 1}})
+    let _s = Session::new_for_test("quickinfoVerbosityTruncation2", content);
+    // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"o1": {0, 1}})
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn rename_in_configured_project() {
     let content = r#"// @Filename: referencesForGlobals_1.ts
@@ -9,7 +9,7 @@ fn rename_in_configured_project() {
 var y = [|globalName|];
 // @Filename: tsconfig.json
 { "files": ["referencesForGlobals_1.ts", "referencesForGlobals_2.ts"], "compilerOptions": { "lib": ["es5"] } }"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("renameInConfiguredProject", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, ToAny(f.Ranges()[1:])...)
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, ToAny(f.Ranges()[1:])...)
 }

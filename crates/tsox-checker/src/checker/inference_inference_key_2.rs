@@ -88,6 +88,8 @@ pub struct InferenceContext {
     pub mapper: Option<Arc<TypeMapper>>,
     pub return_mapper: Option<Arc<TypeMapper>>,
     pub outer_return_mapper: Option<Arc<TypeMapper>>,
+    pub inferred_type_parameters: Vec<Option<Arc<Type>>>,
+    pub non_fixing_mapper: Option<Arc<TypeMapper>>,
 }
 
 impl InferenceContext {
@@ -99,6 +101,8 @@ impl InferenceContext {
             mapper: None,
             return_mapper: None,
             outer_return_mapper: None,
+            inferred_type_parameters: Vec::new(),
+            non_fixing_mapper: None,
         }
     }
 }
@@ -118,6 +122,10 @@ pub(crate) struct InferenceState<'a> {
     pub(crate) expanding_flags: ExpandingFlags,
     pub(crate) propagation_type: Option<Arc<Type>>,
 
+    pub(crate) source_stack: Vec<Arc<Type>>,
+    pub(crate) target_stack: Vec<Arc<Type>>,
+
     pub(crate) visited: HashMap<(u32, u32), InferencePriority>,
+    pub(crate) once_visited: HashMap<(u32, u32), InferencePriority>,
     pub(crate) depth: i32,
 }

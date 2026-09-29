@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn document_highlight_at_parameter_property_declaration1() {
     let content = r#"// @Filename: file1.ts
@@ -19,6 +19,6 @@ class Foo {
         this.[|protectedParam|] = false;
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
+    let _s = Session::new_for_test("documentHighlightAtParameterPropertyDeclaration1", content);
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

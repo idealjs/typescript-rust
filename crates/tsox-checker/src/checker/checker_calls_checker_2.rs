@@ -19,6 +19,17 @@ impl Checker {
         } else {
             TYPE_0_HAS_NO_CALL_SIGNATURES
         };
+        let error_target: Arc<Node> =
+            if tsox_frontend::ast::node_data_generated::is_property_access_expression(callee_expr)
+                && callee_expr
+                    .parent()
+                    .is_some_and(|p| p.kind == SyntaxKind::CallExpression)
+            {
+                callee_expr.name().cloned().unwrap_or_else(|| Arc::clone(callee_expr))
+            } else {
+                Arc::clone(callee_expr)
+            };
+        let error_loc = error_target.loc;
         let chain = if callee_type.flags.contains(TypeFlags::Union)
             && let Some(u) = callee_type.as_union_or_intersection()
         {
@@ -63,14 +74,14 @@ impl Checker {
             };
             let mut outer = tsox_frontend::ast::Diagnostic::new(
                 self.current_file.clone(),
-                callee_expr.loc,
+                error_loc,
                 msg,
                 vec![union_str],
             );
             if let Some(first) = first_without.filter(|_| has_signatures) {
                 outer.message_chain = vec![tsox_frontend::ast::Diagnostic::new(
                     self.current_file.clone(),
-                    callee_expr.loc,
+                    error_loc,
                     no_sigs,
                     vec![first],
                 )];
@@ -81,6 +92,12 @@ impl Checker {
                 && self.is_never_intersection(callee_type)
             {
                 "never".to_string()
+            } else if callee_type.flags.contains(TypeFlags::TypeParameter) {
+                match self.get_constraint_of_type_parameter(callee_type) {
+                    Some(c) if !c.flags.contains(TypeFlags::Unknown) => self.type_to_string(&c),
+                    _ if self.strict_null_checks => "unknown".to_string(),
+                    _ => "{}".to_string(),
+                }
             } else {
                 match self.primitive_apparent_name(callee_type) {
                     Some(name) => name.to_string(),
@@ -89,14 +106,14 @@ impl Checker {
             };
             vec![tsox_frontend::ast::Diagnostic::new(
                 self.current_file.clone(),
-                callee_expr.loc,
+                error_loc,
                 no_sigs,
                 vec![apparent_str],
             )]
         };
         let mut diag = tsox_frontend::ast::Diagnostic::new(
             self.current_file.clone(),
-            callee_expr.loc,
+            error_loc,
             head,
             vec![],
         );

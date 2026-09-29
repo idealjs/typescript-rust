@@ -1,14 +1,14 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_unused_interface_in_namespace1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @noUnusedLocals: true
  [| namespace greeter {
     interface interface1 {
     }
 } |]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `
+    let _s = Session::new_for_test("codeFixUnusedInterfaceInNamespace1", content);
+    // TODO: f.VerifyRangeAfterCodeFix(t, `
 }

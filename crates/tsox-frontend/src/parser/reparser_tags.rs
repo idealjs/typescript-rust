@@ -42,12 +42,48 @@ fn reparse_unhosted(tag: &Arc<Node>, parent: &Arc<Node>, js_doc: &Arc<Node>) -> 
     }
 }
 
+use crate::parser::reparser_type_literal::property_tags_to_signatures;
+
+fn js_doc_property_tags_after(js_doc: &Arc<Node>, typedef_tag: &Arc<Node>) -> Vec<Arc<Node>> {
+    let tags = match &js_doc.data {
+        NodeData::JSDoc(d) => d.tags.as_ref(),
+        _ => None,
+    };
+    let Some(tags) = tags else {
+        return Vec::new();
+    };
+    let mut result = Vec::new();
+    let mut after = false;
+    for t in tags.iter() {
+        if Arc::ptr_eq(t, typedef_tag) {
+            after = true;
+            continue;
+        }
+        if !after {
+            continue;
+        }
+        // 对齐 Go parseJSDocTypeReferenceAndPopularTags 的子标签收集：
+        // property 之外的合法子标签（type/template/this）跳过继续，
+        // 其余标签（unknown、param 等）终止收集，rewind 后不再回看
+        match t.kind {
+            SyntaxKind::JSDocTypedefTag | SyntaxKind::JSDocCallbackTag => break,
+            SyntaxKind::JSDocPropertyTag => result.push(Arc::clone(t)),
+            SyntaxKind::JSDocTypeTag | SyntaxKind::JSDocTemplateTag | SyntaxKind::JSDocThisTag => {}
+            _ => break,
+        }
+    }
+    result
+}
+
 fn reparse_typedef_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>> {
     let (type_expression, full_name) = match &tag.data {
         NodeData::JSDocTypedefTag(d) => {
-            let te = d.type_expression.as_ref()?;
             let name = d.name.as_ref()?;
-            (te.clone(), name.clone())
+            // @typedef 无类型表达式：隐式 Object（@property 标签并入）
+            match d.type_expression.as_ref() {
+                Some(te) => (Some(te.clone()), name.clone()),
+                None => (None, name.clone()),
+            }
         }
         _ => return None,
     };
@@ -62,14 +98,46 @@ fn reparse_typedef_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>>
     let inner_name = get_innermost_name_of_jsdoc_namespace(&full_name);
     let type_parameters = gather_type_parameters(js_doc, true);
 
-    let type_node = match type_expression.kind {
-        SyntaxKind::JSDocTypeExpression => match &type_expression.data {
-            NodeData::JSDocTypeExpression(d) => d.type_node.clone(),
+    let mut type_node = match &type_expression {
+        Some(te) => match te.kind {
+            SyntaxKind::JSDocTypeExpression => match &te.data {
+                NodeData::JSDocTypeExpression(d) => d.type_node.clone(),
+                _ => return None,
+            },
+            SyntaxKind::JSDocTypeLiteral => reparse_jsdoc_type_literal(te),
             _ => return None,
         },
-        SyntaxKind::JSDocTypeLiteral => reparse_jsdoc_type_literal(&type_expression),
-        _ => return None,
+        None => Arc::new(Node::with_loc(
+            SyntaxKind::TypeReference,
+            NodeData::TypeReferenceNode(TypeReferenceNodeData {
+                type_name: Arc::new(Node::with_loc(
+                    SyntaxKind::Identifier,
+                    NodeData::Identifier(IdentifierData {
+                        text: "Object".to_string(),
+                    }),
+                    tag.loc,
+                )),
+                type_arguments: None,
+            }),
+            tag.loc,
+        )),
     };
+
+    // @typedef {Object} 后跟 @property 标签：属性并入类型字面量（tsc jsdoc 解析器行为）；
+    // 无效标签自然跳过，只收集 JSDocPropertyTag
+    let property_tags: Vec<Arc<Node>> = js_doc_property_tags_after(js_doc, tag);
+    if !property_tags.is_empty()
+        && matches!(type_node.data, NodeData::TypeReferenceNode(_))
+        && matches!(&type_node.data, NodeData::TypeReferenceNode(tr) if tr.type_name.text() == "Object")
+    {
+        let members = Arc::new(NodeList::new(property_tags_to_signatures(&property_tags)));
+        type_node = Arc::new(Node::with_loc_flags(
+            SyntaxKind::TypeLiteral,
+            NodeData::TypeLiteralNode(TypeLiteralNodeData { members }),
+            tag.loc,
+            NodeFlags::Reparsed,
+        ));
+    }
 
     let type_alias = Arc::new(Node::with_loc_flags(
         SyntaxKind::TypeAliasDeclaration,

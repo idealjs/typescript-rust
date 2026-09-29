@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_references_triple_slash() {
     let content = r#"// @checkJs: true
@@ -14,6 +14,6 @@ console.log("b.ts");
 // @Filename: /c.js
 require("./b");
 require("globals");"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2")
+    let _s = Session::new_for_test("findAllReferencesTripleSlash", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

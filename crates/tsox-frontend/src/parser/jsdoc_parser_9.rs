@@ -29,33 +29,40 @@ impl crate::parser::Parser {
     }
 
     pub(crate) fn skip_whitespace_or_asterisk(&mut self) -> String {
-        let mut indent_text = String::new();
-        let mut preceding_line_break = false;
+        let mut indents = String::new();
+        let mut preceding_line_break = self.scanner.has_preceding_line_break();
         let mut seen_line_break = false;
 
+        // Go：星号仅在换行后（行首装饰）才被消费，标签名紧邻的 *
+        // 留给 trailing 注释按 SawAsterisk 规则记录
         loop {
+            let consumes = match self.token {
+                SyntaxKind::AsteriskToken => preceding_line_break,
+                SyntaxKind::WhitespaceTrivia | SyntaxKind::NewLineTrivia => true,
+                _ => false,
+            };
+            if !consumes {
+                break;
+            }
             match self.token {
-                SyntaxKind::WhitespaceTrivia => {
-                    if preceding_line_break {
-                        indent_text = String::new();
-                        seen_line_break = true;
-                    }
-                    indent_text.push_str(self.scanner.token_text());
-                    preceding_line_break = false;
-                }
                 SyntaxKind::NewLineTrivia => {
                     preceding_line_break = true;
+                    seen_line_break = true;
+                    indents.clear();
                 }
                 SyntaxKind::AsteriskToken => {
                     preceding_line_break = false;
+                    indents.push_str(self.scanner.token_text());
                 }
-                _ => break,
+                _ => {
+                    indents.push_str(self.scanner.token_text());
+                }
             }
             self.next_token_jsdoc();
         }
 
         if seen_line_break {
-            indent_text
+            indents
         } else {
             String::new()
         }
@@ -214,6 +221,24 @@ pub(crate) fn jsdoc_parser_key(file_name: &str, text: &str) -> (u64, u64, u64) {
         (text.len() as u64) ^ head,
         tail,
     )
+}
+
+/// 按给定注释区间解析 JSDoc（补全等位置驱动路径使用，不依附具体节点）
+pub fn parse_jsdoc_comment_range(
+    source_file: &crate::ast::SourceFile,
+    pos: usize,
+    end: usize,
+) -> Option<Arc<Node>> {
+    let text = &source_file.text;
+    let key = jsdoc_parser_key(&source_file.file_name, text);
+    JSDOC_PARSER.with(|cell| {
+        let mut slot = cell.borrow_mut();
+        if slot.as_ref().map(|(k, _)| *k) != Some(key) {
+            *slot = Some((key, crate::parser::Parser::new(text.clone())));
+        }
+        let parser = &mut slot.as_mut().unwrap().1;
+        parser.parse_jsdoc_comment(pos, end, pos)
+    })
 }
 
 pub fn parse_jsdoc_for_node(source_file: &crate::ast::SourceFile, node: &Node) -> Vec<Arc<Node>> {

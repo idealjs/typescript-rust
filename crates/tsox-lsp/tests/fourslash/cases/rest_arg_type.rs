@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn rest_arg_type() {
     let content = r#"class Test {
@@ -30,26 +31,16 @@ var t7: (...a1: string[]) => void = (/*t71*/f1, /*t72*/f2, /*t73*/f3) => { }; //
 var t8: (...a1: string[]) => void = (/*t8*/f1: number[]) => { };
 // Explicit initialization value
 var t9: (a1: string[], a2: string[]) => void = (/*t91*/f1 = 4, /*t92*/f2 = [false, true]) => { };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("restArgType", content);
     fourslash::verify_quick_info_at(&mut s, "1", "(parameter) restArgs: any[]", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(parameter) restArgs: any[]", "");
     fourslash::verify_quick_info_at(&mut s, "3", "(parameter) y: string[]", "");
     fourslash::verify_quick_info_at(&mut s, "4", "(parameter) y1: string[]", "");
     fourslash::verify_quick_info_at(&mut s, "5", "(parameter) y2: string", "");
     fourslash::verify_quick_info_at(&mut s, "t1", "(parameter) f1: [a1: string, a2: string]", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "t2",
-        "(parameter) f1: [a1: string, ...a2: string[]]",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "t2", "(parameter) f1: [a1: string, ...a2: string[]]", "");
     fourslash::verify_quick_info_at(&mut s, "t31", "(parameter) f1: number", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "t32",
-        "(parameter) f2: [a2: boolean, ...c: string[]]",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "t32", "(parameter) f2: [a2: boolean, ...c: string[]]", "");
     fourslash::verify_quick_info_at(&mut s, "t4", "(parameter) f1: string[]", "");
     fourslash::verify_quick_info_at(&mut s, "t5", "(parameter) f1: string", "");
     fourslash::verify_quick_info_at(&mut s, "t61", "(parameter) f1: string", "");

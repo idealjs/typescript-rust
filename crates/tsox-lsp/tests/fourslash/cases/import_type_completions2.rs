@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn import_type_completions2() {
     let content = r#"// @target: esnext
@@ -8,7 +8,8 @@ fn import_type_completions2() {
 export const Foo = {};
 // @filename: /bar.ts
 [|import type F/**/|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importTypeCompletions2", content);
     fourslash::go_to_file(&mut s, "/bar.ts");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

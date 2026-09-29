@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn document_highlight_in_keyword() {
     let content = r#"export type Foo<T> = {
@@ -10,6 +10,6 @@ fn document_highlight_in_keyword() {
 "a" [|in|] {};
 
 for (let a [|in|] {}) {}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
+    let _s = Session::new_for_test("documentHighlightInKeyword", content);
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
 }

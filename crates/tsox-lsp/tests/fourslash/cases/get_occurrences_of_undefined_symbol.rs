@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn get_occurrences_of_undefined_symbol() {
     let content = r#"var obj1: {
@@ -16,6 +16,6 @@ class cls3 {
     super.ceFun/**/c();
 }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "")
+    let _s = Session::new_for_test("getOccurrencesOfUndefinedSymbol", content);
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "")
 }

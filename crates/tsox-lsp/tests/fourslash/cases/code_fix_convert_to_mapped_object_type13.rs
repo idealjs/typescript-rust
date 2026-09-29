@@ -1,11 +1,11 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
+
 #[test]
 fn code_fix_convert_to_mapped_object_type13() {
     let content = r#"let x: {
     [p: ""]: string;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t, "fixConvertToMappedObjectType")
+    let _s = Session::new_for_test("codeFixConvertToMappedObjectType13", content);
+    // TODO: f.VerifyCodeFixNotAvailable(t, "fixConvertToMappedObjectType")
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_literal_overload() {
     let content = r#"// @allowJs: true
@@ -18,8 +18,12 @@ addListener("/*ts*/");
 (<ListenerComponent type="/*tsx*/" />);
 // @Filename: /b.js
 addListener("/*js*/");"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"ts", "tsx", "js"}, &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsLiteralOverload", content);
+    for m in ["ts", "tsx", "js"] {
+        fourslash::verify_completions_exact_at(&mut s, Some(m), &["", "drag", "dragenter"]);
+    }
     fourslash::insert(&mut s, "drag");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"ts", "tsx", "js"}, &fourslash.CompletionsExpectedList{
+    for m in ["ts", "tsx", "js"] {
+        fourslash::verify_completions_exact_at(&mut s, Some(m), &["", "drag", "dragenter"]);
+    }
 }

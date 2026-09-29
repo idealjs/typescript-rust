@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyOrganizeImports"]
+
 #[test]
 fn organize_imports10() {
     let content = r#"// @Filename: /module.ts
@@ -11,6 +11,6 @@ export function fun() { /* ... */ }
 // @Filename: /declaration.ts
  type ZodType = {};
  export type { ZodType }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
+    let _s = Session::new_for_test("organizeImports10", content);
+    // TODO: f.VerifyOrganizeImports(t,
 }

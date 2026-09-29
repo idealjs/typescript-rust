@@ -13,13 +13,14 @@ impl Checker {
                     SyntaxKind::NamespaceImport
                         | SyntaxKind::ImportSpecifier
                         | SyntaxKind::NamespaceExport
+                        | SyntaxKind::ExportSpecifier
                 )
             })?
             .clone();
 
         let mut cur = decl;
         for _ in 0..4 {
-            let Some(parent) = cur.parent.clone() else {
+            let Some(parent) = cur.parent() else {
                 return None;
             };
             if parent.kind == SyntaxKind::ExportDeclaration {
@@ -103,10 +104,14 @@ impl Checker {
             return;
         }
         let read = |p: &str| self.program.read_file(p);
+        // Go checkImportDeclaration 按 getModeForUsageLocation 取模式；
+        // attrs 覆盖已在上方早退，这里用当前文件的默认解析格式
+        let resolution_mode =
+            tsox_tsoptions::tsoptions::implied_node_format_of_file(&file.file_name, &read);
         let target_path = match self.program.resolve_external_module_path(
             &spec_text,
             &file.file_name,
-            ModuleKind::None,
+            resolution_mode,
         ) {
             Some(p) => p,
             None => return,
@@ -135,31 +140,125 @@ impl Checker {
     }
 
     pub(crate) fn check_declaration_nameability(&mut self, stmt: &Arc<Node>) {
+        let Some(file) = self.nameability_file_guards() else {
+            return;
+        };
+        if stmt.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Export) {
+            let tsox_frontend::ast::NodeData::VariableStatement(data) = &stmt.data else {
+                return;
+            };
+            let tsox_frontend::ast::NodeData::VariableDeclarationList(list) =
+                &data.declaration_list.data
+            else {
+                return;
+            };
+            let (mut imported_files, spec_names) = self.nameability_import_context(&file);
+            let imported_symbol_ids = self.imported_binding_symbol_ids(&file);
+            for d in list.declarations.iter() {
+                let tsox_frontend::ast::NodeData::VariableDeclaration(vd) = &d.data else {
+                    continue;
+                };
+
+                if let Some(init) = &vd.initializer {
+                    let mut import_expr = Some(Arc::clone(init));
+                    if let Some(inner) = import_expr.take() {
+                        let unwrapped = match &inner.data {
+                            NodeData::AwaitExpression(a) => Some(Arc::clone(&a.expression)),
+                            _ => Some(inner),
+                        };
+                        if let Some(call) = unwrapped
+                            && call.kind == SyntaxKind::CallExpression
+                            && let Some(spec) = self.spec_of_dynamic_import_call(&call)
+                            && let Some(path) = self.program.resolve_external_module_path(
+                                &spec,
+                                &file.file_name,
+                                tsox_core::core::compiler_options::ModuleKind::ESNext,
+                            )
+                            && !imported_files.contains(&path)
+                        {
+                            imported_files.push(path);
+                        }
+                    }
+                }
+
+                if vd.type_node.is_some() {
+                    continue;
+                }
+                let Some(sym) = self.program.symbol_map().symbol_of(d).cloned() else {
+                    continue;
+                };
+                let var_name = vd.name.text().to_string();
+                let t = self.get_type_of_symbol(&sym);
+                self.check_type_nameability(
+                    &file,
+                    &vd.name,
+                    &var_name,
+                    &t,
+                    &imported_files,
+                    &spec_names,
+                    &imported_symbol_ids,
+                );
+            }
+        }
+    }
+
+    pub(crate) fn check_declaration_nameability_export_default(&mut self, stmt: &Arc<Node>) {
+        let Some(file) = self.nameability_file_guards() else {
+            return;
+        };
+        let tsox_frontend::ast::NodeData::ExportAssignment(data) = &stmt.data else {
+            return;
+        };
+        if data.is_export_equals {
+            return;
+        }
+        let (imported_files, spec_names) = self.nameability_import_context(&file);
+        let imported_symbol_ids = self.imported_binding_symbol_ids(&file);
+        // Go 声明发射：`export default <非 identifier 表达式>` 合成
+        // `declare const _default: <表达式类型>` 并经 tracker 序列化该类型
+        //（fallback 节点 = ExportAssignment）；identifier 形态原样重发标识符，
+        // 不写类型，不做可命名性检查
+        let t = if data.expression.kind == SyntaxKind::Identifier {
+            let Some(sym) = self.program.symbol_map().symbol_of(stmt).cloned() else {
+                return;
+            };
+            self.get_type_of_symbol(&sym)
+        } else {
+            self.get_type_of_node(&data.expression)
+        };
+        self.check_type_nameability(
+            &file,
+            stmt,
+            "default",
+            &t,
+            &imported_files,
+            &spec_names,
+            &imported_symbol_ids,
+        );
+    }
+
+    fn nameability_file_guards(&self) -> Option<Arc<SourceFile>> {
         if !self.program.options().declaration.is_true() {
-            return;
+            return None;
         }
-        let Some(file) = self.current_file.clone() else {
-            return;
-        };
+        let file = self.current_file.clone()?;
         if file.file_name.starts_with("bundled://") || file.is_declaration_file {
-            return;
+            return None;
         }
-
         if file.file_name.contains("/node_modules/") {
-            return;
+            return None;
         }
-        let tsox_frontend::ast::NodeData::VariableStatement(data) = &stmt.data else {
-            return;
-        };
-        let has_export = stmt.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Export);
-        if !has_export {
-            return;
-        }
+        Some(file)
+    }
 
+    fn nameability_import_context(
+        &self,
+        file: &Arc<SourceFile>,
+    ) -> (Vec<String>, Vec<String>) {
         let mut imported_files: Vec<String> = Vec::new();
         let mut spec_names: Vec<String> = Vec::new();
         let NodeData::SourceFile(sfd) = &file.node.data else {
-            return;
+            return (imported_files, spec_names);
         };
         for st in sfd.statements.iter() {
             let spec = match &st.data {
@@ -183,76 +282,42 @@ impl Checker {
                 imported_files.push(p);
             }
         }
-        let tsox_frontend::ast::NodeData::VariableDeclarationList(list) =
-            &data.declaration_list.data
-        else {
-            return;
+        (imported_files, spec_names)
+    }
+
+    fn imported_binding_symbol_ids(&self, file: &Arc<SourceFile>) -> Vec<u64> {
+        let NodeData::SourceFile(sfd) = &file.node.data else {
+            return Vec::new();
         };
-        for d in list.declarations.iter() {
-            let tsox_frontend::ast::NodeData::VariableDeclaration(vd) = &d.data else {
+        let mut ids = Vec::new();
+        for st in sfd.statements.iter() {
+            let NodeData::ImportDeclaration(imp) = &st.data else {
                 continue;
             };
-
-            if let Some(init) = &vd.initializer {
-                let mut import_expr = Some(Arc::clone(init));
-                if let Some(inner) = import_expr.take() {
-                    let unwrapped = match &inner.data {
-                        NodeData::AwaitExpression(a) => Some(Arc::clone(&a.expression)),
-                        _ => Some(inner),
-                    };
-                    if let Some(call) = unwrapped
-                        && call.kind == SyntaxKind::CallExpression
-                        && let Some(spec) = self.spec_of_dynamic_import_call(&call)
-                        && let Some(path) = self.program.resolve_external_module_path(
-                            &spec,
-                            &file.file_name,
-                            tsox_core::core::compiler_options::ModuleKind::ESNext,
-                        )
-                        && !imported_files.contains(&path)
-                    {
-                        imported_files.push(path);
+            let Some(clause) = &imp.import_clause else {
+                continue;
+            };
+            let NodeData::ImportClause(ic) = &clause.data else {
+                continue;
+            };
+            let mut bindings: Vec<Arc<Node>> = Vec::new();
+            if let Some(name) = &ic.name {
+                bindings.push(Arc::clone(name));
+            }
+            if let Some(named) = &ic.named_bindings {
+                if let NodeData::NamedImports(ni) = &named.data {
+                    for el in ni.elements.iter() {
+                        bindings.push(Arc::clone(el));
                     }
                 }
             }
-
-            if vd.type_node.is_some() {
-                continue;
+            for b in bindings {
+                if let Some(sym) = self.program.symbol_map().symbol_of(&b).cloned() {
+                    ids.push(sym.id());
+                }
             }
-            let Some(sym) = self.program.symbol_map().symbol_of(d).cloned() else {
-                continue;
-            };
-            let var_name = vd.name.text().to_string();
-            let t = self.get_type_of_symbol(&sym);
-            let Some(target) = t.symbol.clone() else {
-                continue;
-            };
-            let Some(target_file) = target
-                .declarations
-                .first()
-                .and_then(|dn| self.get_source_file_of_node(dn))
-            else {
-                continue;
-            };
-            if target_file.file_name == file.file_name
-                || !target_file.file_name.contains("/node_modules/")
-                || imported_files.contains(&target_file.file_name)
-            {
-                continue;
-            }
-
-            if self.symbol_in_ambient_module_named(&target, &spec_names) {
-                continue;
-            }
-
-            let spec = relative_emit_specifier(&file.file_name, &target_file.file_name);
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                Some(file.clone()),
-                vd.name.loc,
-                tsox_core::diagnostics::messages_generated::
-                    THE_INFERRED_TYPE_OF_0_CANNOT_BE_NAMED_WITHOUT_A_REFERENCE_TO_2_FROM_1_THIS_IS_LIKELY_NOT_PORTABLE_A_TYPE_ANNOTATION_IS_NECESSARY,
-                vec![var_name, spec, target.name.clone()],
-            ));
         }
+        ids
     }
 
     pub(crate) fn symbol_in_ambient_module_named(
@@ -264,7 +329,7 @@ impl Checker {
             return false;
         }
         for decl in &symbol.declarations {
-            let mut cur = decl.parent.as_ref();
+            let mut cur = decl.parent();
             while let Some(n) = cur {
                 if let NodeData::ModuleDeclaration(md) = &n.data
                     && md.name.kind == SyntaxKind::StringLiteral
@@ -275,7 +340,7 @@ impl Checker {
                 if n.kind == SyntaxKind::SourceFile {
                     break;
                 }
-                cur = n.parent.as_ref();
+                cur = n.parent();
             }
         }
         false

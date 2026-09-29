@@ -4,9 +4,12 @@ use crate::checker::checker_statements::*;
 
 impl Checker {
     pub fn check_import_equals_conflicts(&mut self, node: &Arc<Node>) {
+        self.check_external_import_in_namespace(node);
         if matches!(
             node.kind,
-            SyntaxKind::ImportDeclaration | SyntaxKind::ImportEqualsDeclaration
+            SyntaxKind::ImportDeclaration
+                | SyntaxKind::ImportEqualsDeclaration
+                | SyntaxKind::ExportDeclaration
         ) && self.ambient_context_depth > 0
             && self
                 .current_file
@@ -15,56 +18,48 @@ impl Checker {
         {
             let spec = match &node.data {
                 tsox_frontend::ast::NodeData::ImportDeclaration(d) => {
-                    Some(d.module_specifier.text().to_string())
+                    Some((d.module_specifier.text().to_string(), d.module_specifier.loc))
                 }
+                tsox_frontend::ast::NodeData::ExportDeclaration(d) => d
+                    .module_specifier
+                    .as_ref()
+                    .map(|s| (s.text().to_string(), s.loc)),
                 tsox_frontend::ast::NodeData::ImportEqualsDeclaration(d) => {
                     if let tsox_frontend::ast::NodeData::ExternalModuleReference(ext) =
                         &d.module_reference.data
                     {
-                        Some(ext.expression.text().to_string())
+                        Some((ext.expression.text().to_string(), ext.expression.loc))
                     } else {
                         None
                     }
                 }
                 _ => None,
             };
-            if let Some(spec) = spec {
+            if let Some((spec, spec_loc)) = spec {
                 let relative = spec.starts_with("./")
                     || spec.starts_with("../")
                     || spec.starts_with(".\\")
                     || spec.starts_with("..\\");
                 if relative {
-                    let file = self.current_file.clone();
-                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                            file,
-                            node.loc,
-                            tsox_core::diagnostics::messages_generated::
-                                IMPORT_OR_EXPORT_DECLARATION_IN_AN_AMBIENT_MODULE_DECLARATION_CANNOT_REFERENCE_MODULE_THROUGH_RELATIVE_MODULE_NAME,
-                            vec![],
-                        ));
-
-                    let spec_loc = match &node.data {
-                        tsox_frontend::ast::NodeData::ImportDeclaration(d) => {
-                            d.module_specifier.loc
-                        }
-                        tsox_frontend::ast::NodeData::ImportEqualsDeclaration(d) => {
-                            if let tsox_frontend::ast::NodeData::ExternalModuleReference(ext) =
-                                &d.module_reference.data
-                            {
-                                ext.expression.loc
-                            } else {
-                                d.module_reference.loc
-                            }
-                        }
-                        _ => node.loc,
-                    };
+                    let top_level_aug = crate::checker::utilities_get_assignment_target::
+                        is_top_level_in_external_module_augmentation(node);
                     let spec_trimmed = spec.trim_matches(['"', '\'', '`']).to_string();
-                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    if top_level_aug {
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                             self.current_file.clone(),
                             spec_loc,
                             tsox_core::diagnostics::messages_generated::CANNOT_FIND_MODULE_0_OR_ITS_CORRESPONDING_TYPE_DECLARATIONS,
                             vec![spec_trimmed],
                         ));
+                    } else {
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            node.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                IMPORT_OR_EXPORT_DECLARATION_IN_AN_AMBIENT_MODULE_DECLARATION_CANNOT_REFERENCE_MODULE_THROUGH_RELATIVE_MODULE_NAME,
+                            vec![],
+                        ));
+                    }
                 }
             }
         }
@@ -222,27 +217,81 @@ impl Checker {
                             &tsox_core::diagnostics::messages_generated::IMPORT_NAME_CANNOT_BE_0,
                         );
                     }
-
-                    let non_alias_flags = alias_sym.flags.difference(SymbolFlags::Alias);
-                    let has_local_conflict = target_resolved
-                        && alias_sym.declarations.iter().any(|dd| dd.id() != node.id())
-                        && !non_alias_flags.is_empty()
-                        && {
-                            let value_side = non_alias_flags.intersects(SymbolFlags::VALUE);
-                            let type_side = non_alias_flags.intersects(SymbolFlags::TYPE);
-                            (value_side && target.flags.intersects(SymbolFlags::VALUE))
-                                || (type_side && target.flags.intersects(SymbolFlags::TYPE))
-                        };
-                    if has_local_conflict {
-                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                                self.current_file.clone(),
-                                node.loc,
-                                tsox_core::diagnostics::messages_generated::
-                                    IMPORT_DECLARATION_CONFLICTS_WITH_LOCAL_DECLARATION_OF_0,
-                                vec![d.name.text().to_string()],
-                            ));
-                    }
                 }
+            }
+        }
+    }
+}
+
+impl Checker {
+    /// Go checkExternalImportOrExportDeclaration：import/export 声明带外部
+    /// 模块名且不在文件顶层、也不在 ambient 模块块内时，import 形态报
+    /// TS1147；嵌套（namespace 内）的 import= 声明不在 program 级扫描
+    /// （collectModuleReferences 仅遍历顶层），此处补报模块不可解析 TS2307
+    fn check_external_import_in_namespace(&mut self, node: &Arc<Node>) {
+        if !matches!(
+            node.kind,
+            SyntaxKind::ImportDeclaration | SyntaxKind::ImportEqualsDeclaration | SyntaxKind::ExportDeclaration
+        ) {
+            return;
+        }
+        let module_name = match &node.data {
+            tsox_frontend::ast::NodeData::ImportDeclaration(d) => Some(d.module_specifier.clone()),
+            tsox_frontend::ast::NodeData::ExportDeclaration(d) => d.module_specifier.clone(),
+            tsox_frontend::ast::NodeData::ImportEqualsDeclaration(d) => {
+                if let tsox_frontend::ast::NodeData::ExternalModuleReference(ext) =
+                    &d.module_reference.data
+                {
+                    Some(ext.expression.clone())
+                } else {
+                    None
+                }
+            }
+            _ => None,
+        };
+        let Some(module_name) = module_name else {
+            return;
+        };
+        if module_name.kind != SyntaxKind::StringLiteral {
+            return;
+        }
+        let parent = node.parent();
+        let in_ambient_external_module = parent.as_ref().is_some_and(|p| {
+            p.kind == SyntaxKind::ModuleBlock
+                && p
+                    .parent()
+                    .is_some_and(|gp| tsox_frontend::ast::is_ambient_module(&gp))
+        });
+        if parent.is_none()
+            || parent.is_some_and(|p| p.kind == SyntaxKind::SourceFile)
+            || in_ambient_external_module
+        {
+            return;
+        }
+        let message = if node.kind == SyntaxKind::ExportDeclaration {
+            tsox_core::diagnostics::messages_generated::
+                EXPORT_DECLARATIONS_ARE_NOT_PERMITTED_IN_A_NAMESPACE
+        } else {
+            tsox_core::diagnostics::messages_generated::
+                IMPORT_DECLARATIONS_IN_A_NAMESPACE_CANNOT_REFERENCE_A_MODULE
+        };
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            self.current_file.clone(),
+            module_name.loc,
+            message,
+            Vec::new(),
+        ));
+        if node.kind == SyntaxKind::ImportEqualsDeclaration {
+            let spec = module_name.text().trim_matches(['"', '\'', '`']).to_string();
+            if self.resolve_module_file_symbol(&spec).is_none() {
+                let (message, args) =
+                    tsox_frontend::parser::cannot_resolve_module_error(&self.compiler_options, &spec);
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    module_name.loc,
+                    message.clone(),
+                    args,
+                ));
             }
         }
     }

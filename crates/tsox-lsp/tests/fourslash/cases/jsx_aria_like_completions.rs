@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn jsx_aria_like_completions() {
     let content = r#"//@Filename: file.tsx
@@ -13,6 +13,7 @@ declare namespace JSX {
     interface ElementAttributesProperty { props: any }
 }
 const a = <div {...{}} /*1*/></div>;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("jsxAriaLikeCompletions", content);
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

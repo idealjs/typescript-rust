@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_js_doc_import_tag_attributes_error_module_specifier1() {
     let content = r#"// @strict: true
@@ -12,6 +12,6 @@ interface ImportAttributes {
 }
 // @filename: index.js
 /** @import * as ns from () with { type: "/**/" } */"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsJSDocImportTagAttributesErrorModuleSpecifier1", content);
+    fourslash::verify_completions_exact_at(&mut s, Some(""), &["json"]);
 }

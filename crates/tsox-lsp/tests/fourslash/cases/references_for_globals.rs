@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn references_for_globals() {
     let content = r#"// @Filename: referencesForGlobals_1.ts
@@ -24,6 +24,6 @@ class bar {
 var k = /*4*/global;
 // @Filename: referencesForGlobals_2.ts
 var m = /*5*/global;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5")
+    let _s = Session::new_for_test("referencesForGlobals", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5")
 }

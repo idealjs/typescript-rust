@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyNonSuggestionDiagnostics"]
+
 #[test]
 fn issue57585_2() {
     let content = r#"// @strict: true
@@ -73,7 +73,7 @@ gen(function* () {
   const b/*1*/ = yield* succeed(2);
   return a + b;
 });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("issue57585_2", content);
     fourslash::verify_quick_info_at(&mut s, "1", "const b: number", "");
-    fourslash::unsupported("VerifyNonSuggestionDiagnostics"); // f.VerifyNonSuggestionDiagnostics(t, nil)
+    // TODO: f.VerifyNonSuggestionDiagnostics(t, nil)
 }

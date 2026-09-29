@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn go_to_source7_conditionally_minified() {
     let content = r#"// @lib: es5
@@ -28,7 +28,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 // @Filename: /home/src/workspaces/project/index.ts
 import { [|/*start*/useState|] } from 'react';"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("goToSource7_conditionallyMinified", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "start")
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }

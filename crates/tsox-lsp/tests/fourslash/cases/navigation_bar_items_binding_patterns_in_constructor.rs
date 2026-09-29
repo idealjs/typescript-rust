@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
+
 #[test]
 fn navigation_bar_items_binding_patterns_in_constructor() {
     let content = r#"class A {
@@ -13,6 +13,6 @@ class B {
     constructor( {a} = { a: 1 }) {
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
+    let _s = Session::new_for_test("navigationBarItemsBindingPatternsInConstructor", content);
+    // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

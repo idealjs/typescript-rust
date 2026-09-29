@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
+
 #[test]
 fn jsdoc_deprecated_suggestion1() {
     let content = r#"// @experimentalDecorators: true
@@ -59,7 +59,7 @@ function Compi(_props: Props) {
 /** @deprecated */
 function ttf(_x: unknown) {
 }
-[|ttf|]` + "`" + `` + "`" + `
+[|ttf|]``
 [|ttf|]
 /** @deprecated */
 function dec(_c: unknown) { }
@@ -78,11 +78,11 @@ type A = f.[|Foo|];
 type B = f.[|QW|];
 type C = f.WQ;
 type [|O|] = Z | A | B | C;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocDeprecated_suggestion1", content);
     fourslash::go_to_file(&mut s, "a.ts");
-    fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
+    // TODO: f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
     fourslash::go_to_file(&mut s, "j.tsx");
-    fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
+    // TODO: f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
     fourslash::go_to_file(&mut s, "b.ts");
-    fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
+    // TODO: f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

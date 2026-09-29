@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn get_java_script_syntactic_diagnostics24() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @allowJs: true
 // @Filename: a.js
 function Person(age) {
@@ -15,11 +15,6 @@ function Person(age) {
 }
 let x = new Person(100);
 x.canVote/**/;"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "",
-        "(property) Person.canVote: number | boolean",
-        "",
-    );
+    let mut s = Session::new_for_test("getJavaScriptSyntacticDiagnostics24", content);
+    fourslash::verify_quick_info_at(&mut s, "", "(property) Person.canVote: number | boolean", "");
 }

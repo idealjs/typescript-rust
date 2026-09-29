@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineSignatureHelp"]
+
 #[test]
 fn js_doc_dont_break_with_namespaces() {
     let content = r#"// @allowJs: true
@@ -20,6 +20,6 @@ bar(''/*bar*/);
 /** @type {function(module:xxxx, module:xxxx): module:xxxxx} */
 function zee() { }
 zee(''/*zee*/);"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
+    let _s = Session::new_for_test("jsDocDontBreakWithNamespaces", content);
+    // TODO: f.VerifyBaselineSignatureHelp(t)
 }

@@ -22,11 +22,58 @@ impl Checker {
             expanding_flags: ExpandingFlags::None,
             propagation_type: None,
             visited: HashMap::new(),
+            once_visited: HashMap::new(),
+            source_stack: Vec::new(),
+            target_stack: Vec::new(),
             depth: 0,
         };
         if let (Some(source), Some(target)) = (original_source, original_target) {
             self.infer_from_types(&mut state, &source, &target);
         }
+    }
+
+    fn min_priority(a: InferencePriority, b: InferencePriority) -> InferencePriority {
+        if a.bits() < b.bits() {
+            a
+        } else {
+            b
+        }
+    }
+
+    fn invoke_once(
+        &mut self,
+        state: &mut InferenceState,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        action: impl FnOnce(&mut Self, &mut InferenceState, &Arc<Type>, &Arc<Type>),
+    ) {
+        let key = (source.id, target.id);
+        if let Some(&status) = state.once_visited.get(&key) {
+            state.inference_priority = Self::min_priority(state.inference_priority, status);
+            return;
+        }
+        state.once_visited.insert(key, InferencePriority::Circularity);
+        let save_priority = state.inference_priority;
+        state.inference_priority = InferencePriority::MaxValue;
+        let save_expanding = state.expanding_flags;
+        state.source_stack.push(Arc::clone(source));
+        state.target_stack.push(Arc::clone(target));
+        if self.inference_is_deeply_nested_type(source, &state.source_stack, 2) {
+            state.expanding_flags |= ExpandingFlags::Source;
+        }
+        if self.inference_is_deeply_nested_type(target, &state.target_stack, 2) {
+            state.expanding_flags |= ExpandingFlags::Target;
+        }
+        if state.expanding_flags != ExpandingFlags::Both {
+            action(self, state, source, target);
+        } else {
+            state.inference_priority = InferencePriority::Circularity;
+        }
+        state.target_stack.pop();
+        state.source_stack.pop();
+        state.expanding_flags = save_expanding;
+        state.once_visited.insert(key, state.inference_priority);
+        state.inference_priority = Self::min_priority(state.inference_priority, save_priority);
     }
 
     pub(crate) fn infer_from_types(
@@ -54,32 +101,6 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
     ) {
-        if let (TypeData::Conditional(sc), TypeData::Conditional(tc)) = (&source.data, &target.data)
-        {
-            let same_root = match (
-                sc.root.as_ref().and_then(|r| r.node.as_ref()),
-                tc.root.as_ref().and_then(|r| r.node.as_ref()),
-            ) {
-                (Some(sn), Some(tn)) => sn.id() == tn.id(),
-                _ => false,
-            };
-            let no_infers = |c: &crate::checker::types::ConditionalTypeData| {
-                c.root
-                    .as_ref()
-                    .map(|r| r.infer_type_parameters.is_empty())
-                    .unwrap_or(true)
-            };
-            if same_root && no_infers(sc) && no_infers(tc) {
-                if let (Some(scheck), Some(tcheck)) = (&sc.check_type, &tc.check_type) {
-                    self.infer_from_types(state, scheck, tcheck);
-                }
-                if let (Some(sextends), Some(textends)) = (&sc.extends_type, &tc.extends_type) {
-                    self.infer_from_types(state, sextends, textends);
-                }
-                return;
-            }
-        }
-
         if Arc::ptr_eq(source, target)
             && source
                 .flags
@@ -98,13 +119,23 @@ impl Checker {
                 vec![Arc::clone(source)]
             };
             let target_types = target.types().unwrap_or_default().to_vec();
-            let (temp_sources, temp_targets) =
-                self.infer_from_matching_types(state, &source_types, &target_types, true);
-            if temp_targets.is_empty() {
+            let (temp_sources, temp_targets) = self.infer_from_matching_types(
+                state,
+                &source_types,
+                &target_types,
+                MatchingKind::OrBaseIdentical,
+            );
+            let (sources, targets) = self.infer_from_matching_types(
+                state,
+                &temp_sources,
+                &temp_targets,
+                MatchingKind::CloselyMatched,
+            );
+            if targets.is_empty() {
                 return;
             }
-            let target = self.get_union_type(temp_targets);
-            if temp_sources.is_empty() {
+            let target = self.get_union_type(targets);
+            if sources.is_empty() {
                 self.infer_with_priority(
                     state,
                     source,
@@ -113,8 +144,15 @@ impl Checker {
                 );
                 return;
             }
-            let source = self.get_union_type(temp_sources);
-            self.infer_from_types_union(state, &source, &target);
+            let source = self.get_union_type(sources);
+            if target.flags.contains(TypeFlags::Union) {
+                let target_list: Vec<Arc<Type>> = target.types().unwrap_or_default().to_vec();
+                self.infer_to_multiple_types_union(state, &source, &target_list);
+            } else {
+                // 匹配消去后归约为单成分：继续主流程（Go 分支重赋值
+                // source/target 后继续执行，走 TypeVariable 登记）
+                self.infer_from_types_inner(state, &source, &target);
+            }
             return;
         }
 
@@ -123,43 +161,155 @@ impl Checker {
             return;
         }
 
-        if target.flags.contains(TypeFlags::TypeParameter) {
-            self.infer_to_type_variable(state, source, target);
+        // Go TypeFlagsTypeVariable 为复合标志：TypeParameter | IndexedAccess | Substitution，
+        // 延迟 IndexedAccess（反向映射的 T[K]）同样登记候选
+        if target
+            .flags
+            .intersects(TypeFlags::TypeParameter | TypeFlags::IndexedAccess)
+        {
+            let both_indexed = source.flags.contains(TypeFlags::IndexedAccess)
+                && target.flags.contains(TypeFlags::IndexedAccess);
+            let matched = state.inferences.iter().any(|info| {
+                crate::checker::utilities::type_parameters_match(&info.type_parameter, target)
+            });
+            if !both_indexed || matched {
+                self.infer_to_type_variable(state, source, target);
+                return;
+            }
+            // Go inferFromTypes：source/target 均为索引访问且 target 非推断目标
+            // （如 U[L]，被推断的是 U 与 L）时分解成分推断 —— T[K] 对 U[L]
+            // 产生 T→U、K→L 两组候选（higherOrder 签名关系推断依赖）
+            if let (TypeData::IndexedAccess(sd), TypeData::IndexedAccess(td)) =
+                (&source.data, &target.data)
+            {
+                if let (Some(so), Some(to)) = (&sd.object_type, &td.object_type) {
+                    self.infer_from_types(state, so, to);
+                }
+                if let (Some(si), Some(ti)) = (&sd.index_type, &td.index_type) {
+                    self.infer_from_types(state, si, ti);
+                }
+            }
             return;
         }
 
-        if target.flags.contains(TypeFlags::Object) {
-            self.infer_from_object_types(state, source, target);
+        // Go inferFromTypes switch：双侧均 keyof（Index）时对操作数做反变推断
+        //（keyof T 对 keyof U 产生 T→U 的 contra 候选，f3 形态
+        // {[K in keyof T]: T[K]} 对 {[K in keyof U]: U[K]} 的成分推断依赖）
+        if source.flags.contains(TypeFlags::Index)
+            && target.flags.contains(TypeFlags::Index)
+            && let (TypeData::Index(si), TypeData::Index(ti)) = (&source.data, &target.data)
+            && let (Some(so), Some(to)) = (si.target.clone(), ti.target.clone())
+        {
+            let saved_contra = state.contravariant;
+            state.contravariant = true;
+            self.infer_from_types(state, &so, &to);
+            state.contravariant = saved_contra;
             return;
+        }
+
+        // Go inferFromTypes switch 的 source-union 分发：source 为联合而
+        // target 非联合时按成分推断（如 ActionFunction<X> | undefined →
+        // 带调用签名的结构目标）
+        if source.flags.contains(TypeFlags::Union) {
+            if let Some(members) = source.types() {
+                for m in members {
+                    self.infer_from_types(state, m, target);
+                }
+                return;
+            }
+        }
+
+        if target.flags.contains(TypeFlags::Conditional) {
+            self.invoke_once(state, source, target, |c, s, src, tgt| {
+                c.infer_to_conditional_type(s, src, tgt)
+            });
+            return;
+        }
+
+        if target.flags.contains(TypeFlags::TemplateLiteral)
+            && let TypeData::TemplateLiteral(tl) = &target.data
+        {
+            self.infer_to_template_literal_type(state, source, tl);
+            return;
+        }
+
+        let source = Arc::clone(source);
+        if self.is_generic_mapped_type_by_constraint(&source)
+            && self.is_generic_mapped_type_by_constraint(target)
+        {
+            self.invoke_once(state, &source, target, |c, s, src, tgt| {
+                c.infer_from_generic_mapped_types(s, src, tgt)
+            });
+        }
+        let mut source = source;
+        if !(state.priority.contains(InferencePriority::NoConstraints)
+            && source.flags.intersects(
+                crate::checker::types::TYPE_FLAGS_INSTANTIABLE | TypeFlags::Intersection,
+            ))
+        {
+            let apparent_source = match self.boxed_apparent_type_of_primitive(&source) {
+                Some(boxed) => boxed,
+                None => self.get_apparent_type(&source),
+            };
+            if !Arc::ptr_eq(&apparent_source, &source)
+                && !apparent_source
+                    .flags
+                    .intersects(TypeFlags::Object | TypeFlags::Intersection)
+            {
+                self.infer_from_types(state, &apparent_source, target);
+                return;
+            }
+            source = apparent_source;
+        }
+        if source.flags.intersects(TypeFlags::Object | TypeFlags::Intersection) {
+            self.invoke_once(state, &source, target, |c, s, src, tgt| {
+                c.infer_from_object_types(s, src, tgt)
+            });
         }
     }
 
-    pub(crate) fn infer_from_types_union(
+    fn infer_to_conditional_type(
         &mut self,
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
     ) {
-        let source_types = if source.flags.contains(TypeFlags::Union) {
-            source.types().unwrap_or_default().to_vec()
-        } else {
-            vec![Arc::clone(source)]
+        let tc = match &target.data {
+            TypeData::Conditional(tc) => tc,
+            _ => return,
         };
-        let target_types = target.types().unwrap_or_default().to_vec();
-        let (sources, targets) =
-            self.infer_from_matching_types(state, &source_types, &target_types, false);
-        if targets.is_empty() {
+        if let TypeData::Conditional(sc) = &source.data {
+            if let (Some(scheck), Some(tcheck)) = (&sc.check_type, &tc.check_type) {
+                self.infer_from_types(state, scheck, tcheck);
+            }
+            if let (Some(sextends), Some(textends)) = (&sc.extends_type, &tc.extends_type) {
+                self.infer_from_types(state, sextends, textends);
+            }
+            let s_true = self.get_forced_branch_type_of_conditional_type(source, true);
+            let t_true = self.get_forced_branch_type_of_conditional_type(target, true);
+            if let (Some(s), Some(t)) = (&s_true, &t_true) {
+                self.infer_from_types(state, s, t);
+            }
+            let s_false = self.get_forced_branch_type_of_conditional_type(source, false);
+            let t_false = self.get_forced_branch_type_of_conditional_type(target, false);
+            if let (Some(s), Some(t)) = (&s_false, &t_false) {
+                self.infer_from_types(state, s, t);
+            }
             return;
         }
-        let target = self.get_union_type(targets);
-        if sources.is_empty() {
-            self.infer_with_priority(state, source, &target, InferencePriority::NakedTypeVariable);
-            return;
+        let group_priority = if state.contravariant && !state.bivariant {
+            InferencePriority::ContravariantConditional
+        } else {
+            InferencePriority::None
+        };
+        let mut branch_types = Vec::new();
+        if let Some(t) = self.get_forced_branch_type_of_conditional_type(target, true) {
+            branch_types.push(t);
         }
-        let source = self.get_union_type(sources);
-        for t in target.types().unwrap_or(&[]) {
-            self.infer_from_types(state, &source, t);
+        if let Some(t) = self.get_forced_branch_type_of_conditional_type(target, false) {
+            branch_types.push(t);
         }
+        self.infer_to_multiple_types_non_union(state, source, &branch_types, group_priority);
     }
 
     pub(crate) fn infer_from_types_intersection(
@@ -195,6 +345,11 @@ impl Checker {
         if self.is_from_inference_blocked_source(source) {
             return;
         }
+        // NoInfer 形态不产候选：Go 检查期对 NoInfer 包裹的上下文成员解析为
+        // never/零候选（终值回退约束或 unknown），此处按形态守卫等价实现
+        if self.is_no_infer_type(source) {
+            return;
+        }
 
         let inference_idx = state.inferences.iter().position(|info| {
             crate::checker::utilities::type_parameters_match(&info.type_parameter, target)
@@ -214,6 +369,19 @@ impl Checker {
         }
         if !inference.is_fixed {
             let candidate = propagation_type.unwrap_or_else(|| Arc::clone(source));
+            // CS 实参部分代入后的回声域内自引用推断（T←T）无信息量：Go 用
+            // non-fixing mapper 让上下文化实参的类型参数引用替换为已推断值，
+            // 此处以候选与被推断类型参数符号等价拦截；域外（如递归泛型调用
+            // Generator<U> → Generator<U> 的实参推断）自引用候选合法，
+            // Go getCovariantInference 取其公共超类型即类型参数自身
+            if self.cs_echo_inference
+                && crate::checker::utilities::type_parameters_match(
+                    &candidate,
+                    &inference.type_parameter,
+                )
+            {
+                return;
+            }
             if priority.bits() < inference.priority.bits() {
                 inference.candidates.clear();
                 inference.candidate_depths.clear();
@@ -229,15 +397,6 @@ impl Checker {
                         .iter()
                         .any(|c| Arc::ptr_eq(c, &candidate))
                     {
-                        if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
-                            eprintln!(
-                                "[contra-rec] depth={} biv={} tp={} cand={}",
-                                depth,
-                                bivariant,
-                                self.type_to_string(&inference.type_parameter),
-                                self.type_to_string(&candidate)
-                            );
-                        }
                         inference.contra_candidates.push(candidate);
                         cleared = true;
                     }
@@ -253,9 +412,15 @@ impl Checker {
                     }
                 }
             }
+            // Go inference.go:207：仅当类型参数不在原始目标的顶层位置时清除 topLevel
+            let at_top_level = match state.original_target.as_ref() {
+                Some(orig) => self.is_type_parameter_at_top_level(orig, target, 0),
+                None => true,
+            };
             if !priority.contains(InferencePriority::ReturnType)
                 && target.flags.contains(TypeFlags::TypeParameter)
                 && inference.top_level
+                && !at_top_level
             {
                 inference.top_level = false;
                 cleared = true;

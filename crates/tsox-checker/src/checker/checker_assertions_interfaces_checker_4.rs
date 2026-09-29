@@ -9,7 +9,7 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         match &member.data {
             tsox_frontend::ast::NodeData::GetAccessorDeclaration(d) => {
-                Some(self.infer_function_return_type(d.body.as_ref(), d.type_node.as_ref()))
+                Some(self.infer_function_return_type(Some(member), d.body.as_ref(), d.type_node.as_ref()))
             }
             tsox_frontend::ast::NodeData::SetAccessorDeclaration(d) => {
                 let tn = d.parameters.iter().next().and_then(|p| match &p.data {
@@ -44,13 +44,79 @@ impl Checker {
             return;
         }
 
+        // Go checkIndexConstraints 尾部：number 索引值型须可赋给 string 索引值型
+        //（TS2413，static 侧经由构造类型同样触发）
+        let string_index = index_infos.iter().find(|i| {
+            i.key_type
+                .as_ref()
+                .is_some_and(|k| k.flags.contains(TypeFlags::String))
+        });
+        let number_index = index_infos.iter().find(|i| {
+            i.key_type
+                .as_ref()
+                .is_some_and(|k| k.flags.contains(TypeFlags::Number))
+        });
+        if let (Some(si), Some(ni)) = (string_index, number_index)
+            && let (Some(sv), Some(nv)) = (si.value_type.as_ref(), ni.value_type.as_ref())
+            && !self.is_type_assignable_to(nv, sv)
+        {
+            // Go checkIndexConstraintForIndexSignature：错误锚点取本类型符号
+            // 内声明的那个索引签名（number 优先，其次 string），都非本地且没
+            // 有任何单一基类型同时持有两者时锚定接口声明名
+            let parent_in_type = |d: &Arc<Node>| -> bool {
+                d.parent().is_some_and(|p| {
+                    t.symbol
+                        .as_ref()
+                        .is_some_and(|sym| sym.declarations.iter().any(|dd| Arc::ptr_eq(dd, &p)))
+                })
+            };
+            let num_local = ni.declaration.as_ref().is_some_and(parent_in_type);
+            let str_local = si.declaration.as_ref().is_some_and(parent_in_type);
+            let anchor = if num_local {
+                ni.declaration.as_ref().map(|d| d.loc)
+            } else if str_local {
+                si.declaration.as_ref().map(|d| d.loc)
+            } else if declaration.kind == SyntaxKind::InterfaceDeclaration {
+                let base_has_both = self.interface_base_types(declaration).iter().any(|base| {
+                    let infos = self.get_index_infos_of_type(base);
+                    infos.iter().any(|i| {
+                        i.key_type
+                            .as_ref()
+                            .is_some_and(|k| k.flags.contains(TypeFlags::String))
+                    }) && infos.iter().any(|i| {
+                        i.key_type
+                            .as_ref()
+                            .is_some_and(|k| k.flags.contains(TypeFlags::Number))
+                    })
+                });
+                if base_has_both {
+                    None
+                } else {
+                    declaration.name().map(|n| n.loc)
+                }
+            } else {
+                None
+            };
+            if let Some(name_loc) = anchor {
+                let sv_str = self.type_to_string(sv);
+                let nv_str = self.type_to_string(nv);
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    name_loc,
+                    tsox_core::diagnostics::messages_generated::
+                        X_0_INDEX_TYPE_1_IS_NOT_ASSIGNABLE_TO_2_INDEX_TYPE_3,
+                    vec!["number".to_string(), nv_str, "string".to_string(), sv_str],
+                ));
+            }
+        }
+
         let local_index: Option<Arc<crate::checker::IndexInfo>> = index_infos
             .iter()
             .find(|info| {
                 info.declaration
                     .as_ref()
-                    .and_then(|d| d.parent.as_ref())
-                    .is_some_and(|p| Arc::ptr_eq(p, declaration))
+                    .and_then(|d| d.parent())
+                    .is_some_and(|p| Arc::ptr_eq(&p, declaration))
             })
             .cloned();
         let is_interface = declaration.kind == SyntaxKind::InterfaceDeclaration;
@@ -60,7 +126,7 @@ impl Checker {
                 continue;
             };
             if first_decl
-                .parent
+                .parent()
                 .as_ref()
                 .is_some_and(|p| Arc::ptr_eq(p, declaration))
             {
@@ -238,5 +304,31 @@ impl Checker {
                 );
             }
         }
+    }
+
+    fn interface_base_types(&mut self, declaration: &Arc<Node>) -> Vec<Arc<Type>> {
+        let tsox_frontend::ast::NodeData::InterfaceDeclaration(d) = &declaration.data else {
+            return Vec::new();
+        };
+        let Some(clauses) = &d.heritage_clauses else {
+            return Vec::new();
+        };
+        let mut result = Vec::new();
+        for clause in clauses.iter() {
+            let tsox_frontend::ast::NodeData::HeritageClause(hc) = &clause.data else {
+                continue;
+            };
+            for h in hc.types.iter() {
+                match &h.data {
+                    tsox_frontend::ast::NodeData::TypeReferenceNode(_) => {
+                        result.push(self.get_type_from_type_node(h));
+                    }
+                    tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(ed) => {
+                        result.push(self.get_type_of_node(&ed.expression));
+                    }
+                    _ => {}
+                }
+            }        }
+        result
     }
 }

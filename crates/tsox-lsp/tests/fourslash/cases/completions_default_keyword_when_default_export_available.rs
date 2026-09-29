@@ -1,11 +1,12 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_default_keyword_when_default_export_available() {
     let content = r#"// @filename: index.ts
 export default function () {}
 def/*1*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsDefaultKeywordWhenDefaultExportAvailable", content);
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

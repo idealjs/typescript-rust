@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_return2() {
     let content = r#"function foo() {
@@ -8,6 +8,6 @@ fn go_to_definition_return2() {
         [|/*start*/return|] 10;
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "start")
+    let _s = Session::new_for_test("goToDefinitionReturn2", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "start")
 }

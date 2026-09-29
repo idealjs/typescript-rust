@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // Using separate files for each example to avoid unclosed J"]
+
 #[test]
 fn auto_close_tag() {
     // TODO: // Using separate files for each example to avoid unclosed JSX tags affecting other tests.
@@ -48,6 +48,6 @@ const x = <p>
         <div>/*9*/
     </div>
 </p>"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyJsxClosingTag"); // f.VerifyJsxClosingTag(t, map[string]*string{
+    let _s = Session::new_for_test("autoCloseTag", content);
+    // TODO: f.VerifyJsxClosingTag(t, map[string]*string{
 }

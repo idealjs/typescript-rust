@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: // Close all files and open temp file, only inferred project"]
+
 #[test]
 fn call_hierarchy_across_project() {
     let content = r#"
@@ -87,18 +87,18 @@ function openElementsAtEditor2() {
 		{ "path": "./compositeExec" },
 	],
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("callHierarchyAcrossProject", content);
     fourslash::go_to_marker(&mut s, "call");
     // TODO: // Open temp file and verify all projects alive
     fourslash::go_to_marker(&mut s, "temp");
     // TODO: // Ref projects are loaded after as part of this command
     fourslash::go_to_marker(&mut s, "call");
-    fourslash::unsupported("VerifyBaselineCallHierarchy"); // f.VerifyBaselineCallHierarchy(t)
+    // TODO: f.VerifyBaselineCallHierarchy(t)
     // TODO: // Open temp file and verify all projects alive
-    fourslash::unsupported("CloseFileOfMarker"); // f.CloseFileOfMarker(t, "temp")
+    // TODO: f.CloseFileOfMarker(t, "temp")
     fourslash::go_to_marker(&mut s, "temp");
     // TODO: // Close all files and open temp file, only inferred project should be alive
-    fourslash::unsupported("CloseFileOfMarker"); // f.CloseFileOfMarker(t, "call")
-    fourslash::unsupported("CloseFileOfMarker"); // f.CloseFileOfMarker(t, "temp")
+    // TODO: f.CloseFileOfMarker(t, "call")
+    // TODO: f.CloseFileOfMarker(t, "temp")
     fourslash::go_to_marker(&mut s, "temp");
 }

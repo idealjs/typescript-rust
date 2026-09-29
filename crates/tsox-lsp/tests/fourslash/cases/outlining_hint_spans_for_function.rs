@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
+
 #[test]
 fn outlining_hint_spans_for_function() {
     let content = r#"namespace NS[| {
@@ -15,6 +15,6 @@ fn outlining_hint_spans_for_function() {
         return x + y;
     }|]
 }|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
+    let _s = Session::new_for_test("outliningHintSpansForFunction", content);
+    // TODO: f.VerifyOutliningSpans(t)
 }

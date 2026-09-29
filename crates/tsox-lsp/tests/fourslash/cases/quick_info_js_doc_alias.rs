@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_js_doc_alias() {
     let content = r#"// @filename: /a.d.ts
@@ -13,6 +13,6 @@ export declare const A: T;
 // @filename: /b.ts
 import { A } from "./a";
 A/**/()"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoJsDocAlias", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

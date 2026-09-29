@@ -89,7 +89,8 @@ let p;
         NodeData::TypeAliasDeclaration(d) => {
             assert_eq!(node_text(&d.name), "Point");
 
-            assert_eq!(d.type_node.kind, SyntaxKind::TypeReference);
+            // @property 标签并入：Object 引用替换为含成员的类型字面量（tsc 语义）
+            assert_eq!(d.type_node.kind, SyntaxKind::TypeLiteral);
         }
         _ => panic!("expected TypeAliasDeclaration"),
     }
@@ -187,7 +188,9 @@ let x;
     };
     let reparsed = reparse_tags(&stmts[0], &jsdocs);
 
-    assert_eq!(reparsed.len(), 0);
+    // Go reparser：带子句的 @import 重宿主为 JS import 声明
+    assert_eq!(reparsed.len(), 1);
+    assert_eq!(reparsed[0].kind, SyntaxKind::ImportDeclaration);
 }
 
 #[test]
@@ -262,6 +265,7 @@ pub(crate) fn test_get_innermost_name_namespace() {
         NodeData::ModuleDeclaration(ModuleDeclarationData {
             modifiers: None,
             keyword: SyntaxKind::NamespaceKeyword,
+            attributes: None,
             name: Arc::new(Node::with_loc(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData {
@@ -278,6 +282,7 @@ pub(crate) fn test_get_innermost_name_namespace() {
         NodeData::ModuleDeclaration(ModuleDeclarationData {
             modifiers: None,
             keyword: SyntaxKind::NamespaceKeyword,
+            attributes: None,
             name: Arc::new(Node::with_loc(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData {

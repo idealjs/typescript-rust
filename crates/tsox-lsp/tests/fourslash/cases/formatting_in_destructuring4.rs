@@ -1,17 +1,16 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: opts198 := f.GetOptions()"]
+
 #[test]
 fn formatting_in_destructuring4() {
     let content = r#"/*1*/const { 
 /*2*/    a,
 /*3*/    b,
 /*4*/} = { a: 1, b: 2 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingInDestructuring4", content);
     // TODO: opts198 := f.GetOptions()
-    // TODO: opts198.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingNonemptyBraces = core.TSFalse
-    fourslash::unsupported("Configure"); // f.Configure(t, opts198)
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    fourslash::configure_format_settings(&mut s, &[("insert_space_after_opening_and_before_closing_nonempty_braces", "false")]);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"const {"#);
     fourslash::go_to_marker(&mut s, "2");

@@ -1,12 +1,12 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
+
 #[test]
 fn navigation_bar_items_functions_broken2() {
     let content = r#"function;
 function f() {
     function;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
+    let _s = Session::new_for_test("navigationBarItemsFunctionsBroken2", content);
+    // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

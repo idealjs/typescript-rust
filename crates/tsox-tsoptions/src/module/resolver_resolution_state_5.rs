@@ -69,6 +69,8 @@ impl<'a> ResolutionState<'a> {
             resolved_package_directory: false,
             candidate_ending_is_from_config: false,
             export_target_depth: 0,
+            resolution_diagnostics: Vec::new(),
+            unresolved_terminal: false,
         }
     }
 
@@ -92,7 +94,10 @@ impl<'a> ResolutionState<'a> {
     ) -> Option<Resolved> {
         if !tsox_core::tspath::has_trailing_directory_separator(candidate) {
             let parent_of_candidate = tsox_core::tspath::get_directory_path(candidate);
-            if !self.fs.directory_exists(&parent_of_candidate) {
+            // 根目录（无斜杠路径的父目录为空串）视作存在，允许根下文件解析
+            if !parent_of_candidate.is_empty()
+                && !self.fs.directory_exists(&parent_of_candidate)
+            {
                 return CONTINUE_SEARCHING;
             }
             if let Some(resolved) = self.load_module_from_file(extensions, candidate) {

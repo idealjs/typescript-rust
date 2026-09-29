@@ -1,5 +1,7 @@
 pub(crate) use crate::checker::checker::*;
 #[allow(unused_imports)]
+pub use crate::checker::checker_statements_alias_symbol::*;
+#[allow(unused_imports)]
 pub use crate::checker::checker_statements_checker::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_statements_checker_2::*;
@@ -27,3 +29,5 @@ pub(crate) use tsox_frontend::ast::NodeData;
 pub(crate) use tsox_frontend::ast::NodeFlags;
 pub(crate) use tsox_frontend::ast::SymbolFlags;
 pub(crate) use tsox_frontend::ast::SyntaxKind;
+
+pub(crate) use tsox_core::diagnostics::messages_generated::UNUSED_LABEL;

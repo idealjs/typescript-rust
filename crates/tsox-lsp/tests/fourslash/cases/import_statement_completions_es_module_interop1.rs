@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn import_statement_completions_es_module_interop1() {
     let content = r#"// @esModuleInterop: false
@@ -12,5 +12,6 @@ export = foo;
 // @Filename: /importExportEquals.ts
 [|import f/**/|]"#;
     let mut s = Session::new_with_capabilities(content, None);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

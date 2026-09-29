@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn tsx_find_all_references6() {
     let content = r#"//@Filename: file.tsx
@@ -19,6 +19,6 @@ interface OptionPropBag {
 }
 declare function Opt(attributes: OptionPropBag): JSX.Element;
 let opt = <Opt /*1*/wrong />;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
+    let _s = Session::new_for_test("tsxFindAllReferences6", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

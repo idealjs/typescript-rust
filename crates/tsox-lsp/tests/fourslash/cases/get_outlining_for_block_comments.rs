@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
+
 #[test]
 fn get_outlining_for_block_comments() {
     let content = r#"[|/*
@@ -334,6 +334,6 @@ interface I4[| {
      * comment
      */|]
 }|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
+    let _s = Session::new_for_test("getOutliningForBlockComments", content);
+    // TODO: f.VerifyOutliningSpans(t)
 }

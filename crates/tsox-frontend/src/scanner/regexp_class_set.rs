@@ -1,7 +1,6 @@
 use crate::scanner::regexp::ClassSetExpressionType;
 use crate::scanner::regexp::RegExpParser;
 use crate::scanner::regexp::decode_first_rune;
-use tsox_core::diagnostics;
 
 impl<'a> RegExpParser<'a> {
     pub(super) fn scan_class_set_expression(&mut self) {
@@ -62,10 +61,11 @@ impl<'a> RegExpParser<'a> {
                         !is_character_complement && expression_may_contain_strings;
                     return;
                 } else {
-                    self.error(
+                    self.error_arg(
                         tsox_core::diagnostics::UNEXPECTED_0_DID_YOU_MEAN_TO_ESCAPE_IT_WITH_BACKSLASH,
                         self.pos,
                         1,
+                        '&',
                     );
                 }
             }
@@ -158,18 +158,20 @@ impl<'a> RegExpParser<'a> {
                             2,
                         );
                         if self.char() == '&' {
-                            self.error(
+                            self.error_arg(
                                 tsox_core::diagnostics::UNEXPECTED_0_DID_YOU_MEAN_TO_ESCAPE_IT_WITH_BACKSLASH,
                                 self.pos,
                                 1,
+                                '&',
                             );
                             self.inc_pos(1);
                         }
                     } else {
-                        self.error(
+                        self.error_arg(
                             tsox_core::diagnostics::UNEXPECTED_0_DID_YOU_MEAN_TO_ESCAPE_IT_WITH_BACKSLASH,
                             self.pos - 1,
                             1,
+                            '&',
                         );
                     }
                     operand = self.text[start..self.pos].to_string();
@@ -239,18 +241,20 @@ impl<'a> RegExpParser<'a> {
                             );
                         }
                         if self.char() == '&' {
-                            self.error(
+                            self.error_arg(
                                 tsox_core::diagnostics::UNEXPECTED_0_DID_YOU_MEAN_TO_ESCAPE_IT_WITH_BACKSLASH,
                                 self.pos,
                                 1,
+                                '&',
                             );
                             self.inc_pos(1);
                         }
                     } else {
-                        self.error(
+                        self.error_arg(
                             tsox_core::diagnostics::UNEXPECTED_0_DID_YOU_MEAN_TO_ESCAPE_IT_WITH_BACKSLASH,
                             self.pos - 1,
                             1,
+                            '&',
                         );
                     }
                 }

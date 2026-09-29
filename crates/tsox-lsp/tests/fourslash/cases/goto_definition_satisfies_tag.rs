@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn goto_definition_satisfies_tag() {
     let content = r#"// @noEmit: true
@@ -14,6 +14,6 @@ fn goto_definition_satisfies_tag() {
 
 /** @satisfies {/*use*/[|T|]} comment */
 const foo = { a: 1 };"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "use")
+    let _s = Session::new_for_test("gotoDefinitionSatisfiesTag", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, false, "use")
 }

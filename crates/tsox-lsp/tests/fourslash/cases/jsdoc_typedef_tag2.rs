@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn jsdoc_typedef_tag2() {
     let content = r#"// @lib: es5
@@ -23,8 +23,9 @@ function a(my2) {
 function b(my2) {
     my2.yes./*2*/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocTypedefTag2", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("1"), &["charAt"], &[]);
+    fourslash::go_to_marker(&mut s, "2");
+    // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

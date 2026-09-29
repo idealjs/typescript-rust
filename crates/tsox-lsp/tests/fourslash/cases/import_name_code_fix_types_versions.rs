@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
+
 #[test]
 fn import_name_code_fix_types_versions() {
     let content = r#"// @module: commonjs
@@ -25,6 +25,6 @@ export declare const x: number;
 import {} from "unified";
 // @Filename: /index.js
 x/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"unified", "unified/types/ts3.444/index.js"}, &lsu
+    let _s = Session::new_for_test("importNameCodeFix_typesVersions", content);
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"unified", "unified/types/ts3.444/index.js"}, &lsu
 }

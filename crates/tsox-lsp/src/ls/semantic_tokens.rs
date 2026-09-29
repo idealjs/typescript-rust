@@ -9,6 +9,7 @@ pub(crate) use crate::lsp::lsproto_lsp::Range;
 pub(crate) use tsox_checker::checker::Checker;
 pub(crate) use tsox_compile::compiler::Program;
 pub(crate) use tsox_frontend::ast::SourceFile;
+pub(crate) use tsox_frontend::ast::Node;
 pub(crate) use tsox_frontend::ast::node::LineMap;
 
 pub(crate) use super::language_service::LanguageService;
@@ -56,6 +57,7 @@ pub mod token_modifier {
 }
 
 pub struct SemanticToken {
+    pub node: Arc<Node>,
     pub token_type: u32,
     pub token_modifier: u32,
     pub pos: usize,

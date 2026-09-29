@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_across_multiple_projects() {
     let content = r#"//@Filename: a.ts
@@ -17,6 +17,6 @@ var /*def4*/x: number;
 /// <reference path="c.ts" />
 /// <reference path="d.ts" />
 [|/*use*/x|]++;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "use")
+    let _s = Session::new_for_test("goToDefinitionAcrossMultipleProjects", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "use")
 }

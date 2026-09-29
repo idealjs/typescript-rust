@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: // Verify auto-import completions don't panic when importing"]
+
 #[test]
 fn auto_import_css_module() {
     let content = r#"
@@ -19,7 +19,8 @@ declare module "./styles.css" {
 // @Filename: /index.ts
 myClass/**/
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportCssModule", content);
     // TODO: // Verify auto-import completions don't panic when importing from .css module augmentation
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

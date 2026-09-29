@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.BaselineAutoImportsCompletions"]
+
 #[test]
 fn auto_import_typedef_missing_name() {
     let content = r#"// @allowJs: true
@@ -11,7 +11,7 @@ fn auto_import_typedef_missing_name() {
 export function doSomething() {}
 // @Filename: /index.ts
 doSomething/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportTypedefMissingName", content);
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
+    // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }

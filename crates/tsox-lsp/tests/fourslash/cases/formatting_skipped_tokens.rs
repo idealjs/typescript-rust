@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn formatting_skipped_tokens() {
     let content = r#"/*1*/foo(): Bar { }
@@ -11,8 +11,8 @@ function a(
 /*4*/    : T) { }
 }
 /*5*/var x       ="#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formattingSkippedTokens", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"foo(): Bar { }"#);
     fourslash::go_to_marker(&mut s, "2");

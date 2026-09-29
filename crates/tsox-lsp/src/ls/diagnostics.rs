@@ -5,7 +5,6 @@ use std::sync::Arc;
 use crate::lsp::lsproto_lsp::DocumentUri;
 use crate::lsp::lsproto_lsp::Position;
 use crate::lsp::lsproto_lsp::Range;
-use tsox_compile::compiler;
 use tsox_core::diagnostics::Category;
 use tsox_frontend::ast::Diagnostic as AstDiagnostic;
 use tsox_frontend::ast::SourceFile;
@@ -22,6 +21,9 @@ impl LanguageService {
 
         let mut all_diagnostics: Vec<Arc<AstDiagnostic>> = Vec::new();
         for diag in program.diagnostics() {
+            if !program.includes_semantic_diagnostic(diag) {
+                continue;
+            }
             if diag
                 .file
                 .as_ref()
@@ -31,10 +33,28 @@ impl LanguageService {
                 all_diagnostics.push(Arc::clone(diag));
             }
         }
+        // binder 层诊断（重复声明等）与 checker 诊断合并（对齐 program.get_semantic_diagnostics）
+        for diag in &program.symbol_map().binder_diagnostics {
+            let owned = diag.clone();
+            if !program.includes_semantic_diagnostic(&owned) {
+                continue;
+            }
+            if owned
+                .file
+                .as_ref()
+                .map(|f| f.file_name == *file_name)
+                .unwrap_or(false)
+            {
+                all_diagnostics.push(Arc::new(owned));
+            }
+        }
 
         let checker = program.build_checker();
         let semantic_diagnostics = checker.get_semantic_diagnostics();
         for diag in &semantic_diagnostics {
+            if !program.includes_semantic_diagnostic(diag) {
+                continue;
+            }
             if diag
                 .file
                 .as_ref()
@@ -214,8 +234,9 @@ fn category_to_severity(category: Category) -> u32 {
     match category {
         Category::Error => 1,
         Category::Warning => 2,
-        Category::Suggestion => 3,
-        Category::Message => 4,
+        // Go lsconv：Suggestion→Hint(4)、Message→Information(3)
+        Category::Suggestion => 4,
+        Category::Message => 3,
     }
 }
 

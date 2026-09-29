@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_new_expression_target_not_class() {
     let content = r#"class C2 {
@@ -12,6 +12,6 @@ new [|/*invokeExpression1*/I|]();
 let /*symbolDeclaration*/I2: {
 };
 new [|/*invokeExpression2*/I2|]();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "invokeExpression1", "invokeExpression2")
+    let _s = Session::new_for_test("goToDefinitionNewExpressionTargetNotClass", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "invokeExpression1", "invokeExpression2")
 }

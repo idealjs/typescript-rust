@@ -8,11 +8,12 @@ impl Checker {
             .value_declaration
             .as_ref()
             .or_else(|| symbol.declarations.first());
-        if let Some(mut current) = decl {
+        if let Some(decl_arc) = decl.cloned() {
+            let mut current = decl_arc;
             loop {
                 match current.kind {
                     SyntaxKind::VariableDeclaration => {
-                        let is_var = current.parent.as_ref().is_some_and(|parent| {
+                        let is_var = current.parent().is_some_and(|parent| {
                             parent.kind == SyntaxKind::VariableDeclarationList
                                 && !parent.flags.intersects(
                                     tsox_frontend::ast::NodeFlags::Let
@@ -26,7 +27,7 @@ impl Checker {
                     }
                     SyntaxKind::BindingElement
                     | SyntaxKind::ObjectBindingPattern
-                    | SyntaxKind::ArrayBindingPattern => match current.parent.as_ref() {
+                    | SyntaxKind::ArrayBindingPattern => match current.parent() {
                         Some(parent) => current = parent,
                         None => break,
                     },
@@ -64,12 +65,15 @@ impl Checker {
                 let window = &text[lo.min(text.len())..(start + 6).min(text.len())];
                 window.contains("const")
             });
-        is_const_enum && enum_decl_count > 0 && !self.compiler_options.isolated_modules.is_true()
+        is_const_enum
+            && enum_decl_count > 0
+            && !self.compiler_options.isolated_modules.is_true()
+            && !self.compiler_options.verbatim_module_syntax.is_true()
     }
 
     pub(crate) fn is_used_in_type_position(&self, node: &Arc<Node>) -> bool {
         let in_tp_default = {
-            let mut cur = node.parent.as_ref();
+            let mut cur = node.parent();
             let mut hit = false;
             while let Some(a) = cur {
                 if a.kind == SyntaxKind::TypeParameter {
@@ -86,12 +90,12 @@ impl Checker {
                 ) {
                     break;
                 }
-                cur = a.parent.as_ref();
+                cur = a.parent();
             }
             hit
         };
         let in_type_position = {
-            let mut cur = node.parent.as_ref();
+            let mut cur = node.parent();
             let mut hit = false;
             while let Some(a) = cur {
                 if matches!(
@@ -107,7 +111,6 @@ impl Checker {
                         | SyntaxKind::FunctionType
                         | SyntaxKind::ConstructorType
                         | SyntaxKind::QualifiedName
-                        | SyntaxKind::HeritageClause
                 ) {
                     hit = true;
                     break;
@@ -122,7 +125,7 @@ impl Checker {
                 ) {
                     break;
                 }
-                cur = a.parent.as_ref();
+                cur = a.parent();
             }
             hit
         };

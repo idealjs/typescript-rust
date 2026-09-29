@@ -42,8 +42,8 @@ impl Parser {
 
         self.next_token();
         let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
-        let name = if self.is_identifier() {
-            Some(self.parse_identifier())
+        let name = if self.is_binding_identifier() {
+            Some(self.parse_binding_identifier_with_private_diagnostic(None))
         } else {
             None
         };
@@ -74,15 +74,21 @@ impl Parser {
         let pos = self.token_pos();
         self.next_token();
         let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
-        let name = if self.is_identifier() {
-            Some(self.parse_identifier())
+        let name = if self.is_binding_identifier() {
+            Some(self.parse_binding_identifier_with_private_diagnostic(None))
         } else {
             None
         };
+        let saved_yield = self.yield_context;
+        let saved_await = self.await_context;
+        self.yield_context = asterisk_token.is_some();
+        self.await_context = false;
         let type_parameters = self.parse_optional_type_parameters();
         let parameters = self.parse_parameter_list();
         let type_node = self.parse_optional_return_type();
-        let body = self.parse_block();
+        let body = self.parse_block_ex(true);
+        self.yield_context = saved_yield;
+        self.await_context = saved_await;
         let end = body.end();
         Arc::new(Node::with_loc(
             SyntaxKind::FunctionExpression,
@@ -104,19 +110,19 @@ impl Parser {
         let pos = self.token_pos();
         self.next_token();
 
-        let name = if self.is_identifier()
+        let name = if self.is_binding_identifier()
             && !matches!(
                 self.token,
                 SyntaxKind::ExtendsKeyword | SyntaxKind::ImplementsKeyword
             ) {
-            Some(self.parse_identifier())
+            Some(self.parse_binding_identifier_with_private_diagnostic(None))
         } else {
             None
         };
         let type_parameters = self.parse_optional_type_parameters();
         let heritage_clauses = self.parse_heritage_clauses();
         let members = self.parse_class_members();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ClassExpression,
             NodeData::ClassExpression(ClassExpressionData {
@@ -243,9 +249,14 @@ impl Parser {
             let question_token = self.create_token_node();
             self.next_token();
             let when_true = self.parse_expression();
-            let colon_token = self.create_token_node();
-            self.expect(SyntaxKind::ColonToken);
-            let when_false = self.parse_assignment_expression();
+            // Go parseConditionalExpressionRest：冒号缺失时报错并给缺失
+            // token，false 分支用缺失标识符（不吞后续语句）
+            let colon_token = self.parse_expected_token_colon();
+            let when_false = if colon_token.end() > colon_token.pos() {
+                self.parse_assignment_expression()
+            } else {
+                self.missing_identifier_expression()
+            };
             let end = when_false.end();
             expr = Arc::new(Node::with_loc(
                 SyntaxKind::ConditionalExpression,

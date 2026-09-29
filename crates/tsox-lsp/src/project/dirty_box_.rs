@@ -61,7 +61,18 @@ impl<T: Clone> DirtyBox<T> {
         self.delete = true;
     }
 
-    pub fn finalize(&self) -> (&T, bool) {
-        (&self.value, self.dirty || self.delete)
+    pub fn deleted(&self) -> bool {
+        self.delete
+    }
+
+    pub fn finalize(&self) -> (T, bool)
+    where
+        T: Default,
+    {
+        if self.delete {
+            (T::default(), true)
+        } else {
+            (self.value.clone(), self.dirty)
+        }
     }
 }

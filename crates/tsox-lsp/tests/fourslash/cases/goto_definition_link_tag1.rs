@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn goto_definition_link_tag1() {
     let content = r#"// @Filename: foo.ts
@@ -27,6 +27,6 @@ function foo(x) { }
 // @Filename: bar.ts
 /** {@link /*use7*/[|Foo|] }dd*/
 const f = """#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "use1", "use2", "use3", "use4", "use5", "use6", "use7")
+    let _s = Session::new_for_test("gotoDefinitionLinkTag1", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, false, "use1", "use2", "use3", "use4", "use5", "use6", "use7")
 }

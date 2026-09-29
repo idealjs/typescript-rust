@@ -3,6 +3,24 @@
 use crate::parser::statements::*;
 
 impl Parser {
+    pub(crate) fn parse_with_statement(&mut self) -> Arc<Node> {
+        let pos = self.token_pos();
+        self.expect(SyntaxKind::WithKeyword);
+        self.expect(SyntaxKind::OpenParenToken);
+        let expression = self.parse_expression();
+        self.expect(SyntaxKind::CloseParenToken);
+        let statement = self.parse_statement();
+        let end = statement.end();
+        Arc::new(Node::with_loc(
+            SyntaxKind::WithStatement,
+            NodeData::WithStatement(WithStatementData {
+                expression,
+                statement,
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
     pub(crate) fn parse_if_statement(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.expect(SyntaxKind::IfKeyword);
@@ -38,7 +56,7 @@ impl Parser {
         let expression = self.parse_expression();
         self.expect(SyntaxKind::CloseParenToken);
         self.parse_optional(SyntaxKind::SemicolonToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::DoStatement,
             NodeData::DoStatement(DoStatementData {
@@ -69,6 +87,7 @@ impl Parser {
 
     pub(crate) fn parse_for_statement(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
+        let context_flags = self.context_flags_now();
         self.expect(SyntaxKind::ForKeyword);
 
         let await_modifier = if self.token == SyntaxKind::AwaitKeyword {
@@ -86,7 +105,11 @@ impl Parser {
             ) {
                 Some(self.parse_variable_declaration_list(true))
             } else {
-                Some(self.parse_expression())
+                let outer_disallow_in = self.disallow_in_context;
+                self.disallow_in_context = true;
+                let expr = self.parse_expression();
+                self.disallow_in_context = outer_disallow_in;
+                Some(expr)
             }
         } else {
             None
@@ -98,7 +121,7 @@ impl Parser {
             self.expect(SyntaxKind::CloseParenToken);
             let statement = self.parse_statement();
             let end = statement.end();
-            return Arc::new(Node::with_loc(
+            return Arc::new(Node::with_loc_flags(
                 SyntaxKind::ForInStatement,
                 NodeData::ForInOrOfStatement(ForInOrOfStatementData {
                     await_modifier: None,
@@ -107,6 +130,7 @@ impl Parser {
                     statement,
                 }),
                 TextRange::new(pos, end),
+                context_flags,
             ));
         }
         if self.token == SyntaxKind::OfKeyword {
@@ -115,7 +139,7 @@ impl Parser {
             self.expect(SyntaxKind::CloseParenToken);
             let statement = self.parse_statement();
             let end = statement.end();
-            return Arc::new(Node::with_loc(
+            return Arc::new(Node::with_loc_flags(
                 SyntaxKind::ForOfStatement,
                 NodeData::ForInOrOfStatement(ForInOrOfStatementData {
                     await_modifier,
@@ -124,6 +148,7 @@ impl Parser {
                     statement,
                 }),
                 TextRange::new(pos, end),
+                context_flags,
             ));
         }
 
@@ -161,7 +186,7 @@ impl Parser {
         self.expect(SyntaxKind::BreakKeyword);
         let label = self.parse_identifier_if_not_semicolon();
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::BreakStatement,
             NodeData::BreakStatement(BreakStatementData { label }),
@@ -174,7 +199,7 @@ impl Parser {
         self.expect(SyntaxKind::ContinueKeyword);
         let label = self.parse_identifier_if_not_semicolon();
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ContinueStatement,
             NodeData::ContinueStatement(ContinueStatementData { label }),
@@ -199,7 +224,7 @@ impl Parser {
             None
         };
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ReturnStatement,
             NodeData::ReturnStatement(ReturnStatementData { expression }),
@@ -233,7 +258,7 @@ impl Parser {
             Parser::parse_case_or_default_clause,
         );
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::CaseBlock,
             NodeData::CaseBlock(CaseBlockData {
@@ -253,7 +278,7 @@ impl Parser {
                 ParsingContext::SwitchClauseStatements,
                 Parser::parse_statement,
             );
-            let end = self.token_pos();
+            let end = self.node_pos();
             Arc::new(Node::with_loc(
                 SyntaxKind::CaseClause,
                 NodeData::CaseOrDefaultClause(CaseOrDefaultClauseData {
@@ -270,7 +295,7 @@ impl Parser {
                 ParsingContext::SwitchClauseStatements,
                 Parser::parse_statement,
             );
-            let end = self.token_pos();
+            let end = self.node_pos();
             Arc::new(Node::with_loc(
                 SyntaxKind::DefaultClause,
                 NodeData::CaseOrDefaultClause(CaseOrDefaultClauseData {

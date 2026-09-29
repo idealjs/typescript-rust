@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_module_none2() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @module: none
 // @moduleResolution: bundler
 // @target: es2015
@@ -11,8 +11,9 @@ fn auto_import_module_none2() {
 export const x: number;
 // @Filename: /index.ts
  x/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("ReplaceLine"); // f.ReplaceLine(t, 0, "import { x } from 'dep'; x;")
-    fourslash::unsupported("VerifyNonSuggestionDiagnostics"); // f.VerifyNonSuggestionDiagnostics(t, nil)
+    let mut s = Session::new_for_test("autoImportModuleNone2", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    // TODO: f.ReplaceLine(t, 0, "import { x } from 'dep'; x;")
+    // TODO: f.VerifyNonSuggestionDiagnostics(t, nil)
 }

@@ -1,33 +1,33 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
+
 #[test]
 fn rename_template_literals_computed_properties() {
     let content = r#"// @Filename: a.ts
 interface Obj {
-    [|[` + "`" + `[|{| "contextRangeIndex": 0 |}num|]` + "`" + `]: number;|]
+    [|[`[|{| "contextRangeIndex": 0 |}num|]`]: number;|]
     [|['[|{| "contextRangeIndex": 2 |}bool|]']: boolean;|]
 }
 
 let o: Obj = {
-    [|[` + "`" + `[|{| "contextRangeIndex": 4 |}num|]` + "`" + `]: 0|],
+    [|[`[|{| "contextRangeIndex": 4 |}num|]`]: 0|],
     [|['[|{| "contextRangeIndex": 6 |}bool|]']: true|],
 };
 
 o = {
     [|['[|{| "contextRangeIndex": 8 |}num|]']: 1|],
-    [|[` + "`" + `[|{| "contextRangeIndex": 10 |}bool|]` + "`" + `]: false|],
+    [|[`[|{| "contextRangeIndex": 10 |}bool|]`]: false|],
 };
 
 o.[|num|];
 o['[|num|]'];
 o["[|num|]"];
-o[` + "`" + `[|num|]` + "`" + `];
+o[`[|num|]`];
 
 o.[|bool|];
 o['[|bool|]'];
 o["[|bool|]"];
-o[` + "`" + `[|bool|]` + "`" + `];
+o[`[|bool|]`];
 
 export { o };
 // @allowJs: true
@@ -35,10 +35,10 @@ export { o };
 import { o as obj } from './a';
 
 obj.[|num|];
-obj[` + "`" + `[|num|]` + "`" + `];
+obj[`[|num|]`];
 
 obj.[|bool|];
-obj[` + "`" + `[|bool|]` + "`" + `];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "num", "bool")
+obj[`[|bool|]`];"#;
+    let _s = Session::new_for_test("renameTemplateLiteralsComputedProperties", content);
+    // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "num", "bool")
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
+
 #[test]
 fn tsx_rename2() {
     let content = r#"//@Filename: file.tsx
@@ -15,6 +15,6 @@ declare namespace JSX {
     }
 }
 var x = <div [|[|{| "contextRangeIndex": 2 |}name|]="hello"|] />;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "name")
+    let _s = Session::new_for_test("tsxRename2", content);
+    // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "name")
 }

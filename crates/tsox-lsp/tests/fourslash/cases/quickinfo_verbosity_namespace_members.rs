@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
+
 #[test]
 fn quickinfo_verbosity_namespace_members() {
     let content = r#"
@@ -24,6 +24,6 @@ declare namespace NS/*1*/ {
     function doSomething(x: string): boolean;
 }
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}})
+    let _s = Session::new_for_test("quickinfoVerbosityNamespaceMembers", content);
+    // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}})
 }

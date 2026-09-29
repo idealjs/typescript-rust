@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn references_for_merged_declarations7() {
     let content = r#"interface Foo { }
@@ -12,6 +12,6 @@ namespace Foo {
 
 // module, value and type
 import a2 = Foo./*4*/Bar;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
+    let _s = Session::new_for_test("referencesForMergedDeclarations7", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

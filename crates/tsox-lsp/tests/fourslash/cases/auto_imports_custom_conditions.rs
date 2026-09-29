@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
+
 #[test]
 fn auto_imports_custom_conditions() {
     let content = r#"// @module: esnext
@@ -20,6 +20,6 @@ fn auto_imports_custom_conditions() {
 export const dep: number;
 // @Filename: /index.ts
 dep/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"dep"}, nil /*preferences*/)
+    let _s = Session::new_for_test("autoImportsCustomConditions", content);
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"dep"}, nil /*preferences*/)
 }

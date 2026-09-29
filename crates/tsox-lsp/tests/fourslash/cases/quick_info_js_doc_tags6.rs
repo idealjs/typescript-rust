@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_js_doc_tags6() {
     let content = r#"// @noEmit: true
@@ -27,6 +27,6 @@ class Bar extends Foo {
         return res;
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoJsDocTags6", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

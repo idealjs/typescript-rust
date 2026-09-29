@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn tsx_completion_in_function_expression_of_children_callback1() {
     let content = r#"//@module: commonjs
@@ -29,6 +29,6 @@ function UserName() {
         </FetchUser>
     );
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("tsxCompletionInFunctionExpressionOfChildrenCallback1", content);
+    fourslash::verify_completions_exact_at(&mut s, Some(""), &["Name"]);
 }

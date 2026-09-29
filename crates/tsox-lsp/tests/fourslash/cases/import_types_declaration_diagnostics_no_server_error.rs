@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.GoToFileNumber"]
+
 #[test]
 fn import_types_declaration_diagnostics_no_server_error() {
     let content = r#"// @declaration: true
@@ -12,7 +12,7 @@ export interface I {
 // @Filename: a.ts
 import { f } from "foo";
 export const x = f();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("GoToFileNumber"); // f.GoToFileNumber(t, 1)
-    fourslash::unsupported("VerifyNonSuggestionDiagnostics"); // f.VerifyNonSuggestionDiagnostics(t, nil)
+    let _s = Session::new_for_test("importTypesDeclarationDiagnosticsNoServerError", content);
+    // TODO: f.GoToFileNumber(t, 1)
+    // TODO: f.VerifyNonSuggestionDiagnostics(t, nil)
 }

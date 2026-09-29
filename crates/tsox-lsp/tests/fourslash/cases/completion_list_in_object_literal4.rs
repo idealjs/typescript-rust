@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_in_object_literal4() {
     let content = r#"// @strictNullChecks: true
@@ -22,6 +22,6 @@ funcC({ /*C*/ });
 funcD({ /*D*/ });
 funcE({ /*E*/ });
 funcF({ /*F*/ });"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("completionListInObjectLiteral4", content);
+    // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

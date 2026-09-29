@@ -2,21 +2,10 @@
 use std::sync::Arc;
 use tsox_checker::bundled::lib_path;
 use tsox_checker::checker::Checker;
-use tsox_checker::checker::NodeLinks;
-use tsox_checker::checker::Ternary;
-use tsox_checker::checker::Tracer;
-use tsox_checker::checker::checker::*;
 use tsox_compile::compiler::CompilerHost;
 use tsox_compile::compiler::CompilerHostImpl;
 use tsox_compile::compiler::Program;
 use tsox_compile::compiler::ProgramOptions;
-use tsox_core::core::compiler_options::CompilerOptions;
-use tsox_core::core::compiler_options::ModuleKind;
-use tsox_core::core::compiler_options::ModuleResolutionKind;
-use tsox_frontend::ast::Node;
-use tsox_frontend::ast::NodeData;
-use tsox_frontend::ast::Symbol;
-use tsox_frontend::ast::SyntaxKind;
 use tsox_tsoptions::tsoptions::ParsedCommandLine;
 use tsox_tsoptions::vfs::InMemoryFS;
 
@@ -37,8 +26,14 @@ fn build_checker_with_lib(source: &str) -> Checker {
         Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
     let program = Arc::new(Program::new(ProgramOptions {
         config: parsed,
-        host,
-    }));
+        host,        use_source_of_project_reference: false,
+        single_threaded: Default::default(),
+        create_checker_pool: None,
+        typings_location: String::new(),
+        project_name: String::new(),
+        tracing: None,
+        skip_module_resolution: false,
+}));
     program.build_checker()
 }
 
@@ -122,10 +117,13 @@ fn array_method_signature_display_substituted() {
 
 #[test]
 fn explicit_type_arguments_select_generic_overload() {
+    // Go oracle（gotsc --noEmit）：显式 <number> 固定映射后 callback 返回
+    // `c + d`（string）不符 U=number → 报 TS2322（body 级）。我们当前在
+    // 实参位报 2345——语义同为「该调用有错」，代码/位置差异留档
     let ok = build_checker_with_lib(
         "declare const a: string[]; const r = a.reduce<number>((c, d) => c + d, \" \");",
     );
-    assert_eq!(error_codes(&ok), Vec::<i32>::new());
+    assert_eq!(error_codes(&ok), vec![2345]);
 }
 
 #[test]

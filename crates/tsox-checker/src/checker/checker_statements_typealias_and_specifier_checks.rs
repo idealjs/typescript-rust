@@ -16,6 +16,15 @@ impl Checker {
             self.check_module_specifier_members(node);
             self.check_module_export_names(node);
         }
+        if node.kind == SyntaxKind::ImportDeclaration
+            && self.ambient_context_depth == 0
+            && self
+                .current_file
+                .as_ref()
+                .is_none_or(|f| !f.file_name.starts_with("bundled://"))
+        {
+            self.check_import_untyped_module(node);
+        }
 
         if matches!(
             node.kind,
@@ -31,9 +40,31 @@ impl Checker {
             self.check_module_format_mismatch(node);
         }
 
+        if node.kind == SyntaxKind::TypeAliasDeclaration {
+            self.check_grammar_modifiers(node);
+            if let Some(name) = node.name() {
+                self.check_reserved_type_name(
+                    &name,
+                    &tsox_core::diagnostics::messages_generated::TYPE_ALIAS_NAME_CANNOT_BE_0,
+                );
+            }
+            if let Some(parent) = node.parent()
+                && !self.container_allows_block_scoped_variable(&parent)
+                && let Some(name) = node.name()
+            {
+                self.grammar_error_on_node_with_args(
+                    &name,
+                    &tsox_core::diagnostics::messages_generated::
+                        X_0_DECLARATIONS_CAN_ONLY_BE_DECLARED_INSIDE_A_BLOCK,
+                    &["type".to_string()],
+                );
+            }
+        }
+
         if node.kind == SyntaxKind::TypeAliasDeclaration
             && let tsox_frontend::ast::NodeData::TypeAliasDeclaration(d) = &node.data
         {
+            self.check_exports_on_merged_declarations(node);
             self.check_type_annotation(&d.type_node);
 
             if !self
@@ -41,7 +72,20 @@ impl Checker {
                 .as_ref()
                 .is_some_and(|f| f.file_name.starts_with("bundled://"))
             {
+                let alias_symbol = node
+                    .name()
+                    .and_then(|n| self.program.symbol_map().symbol_of(&n).cloned())
+                    .or_else(|| self.program.symbol_map().symbol_of(node).cloned());
+                let alias_guard_pushed = alias_symbol.as_ref().is_some_and(|sym| {
+                    self.push_type_resolution(
+                        Arc::as_ptr(sym) as *const tsox_frontend::ast::Symbol,
+                        crate::checker::TypeResolutionProperty::DeclaredType,
+                    )
+                });
                 let _ = self.get_type_from_type_node(&d.type_node);
+                if alias_guard_pushed {
+                    self.pop_type_resolution();
+                }
             }
         }
 

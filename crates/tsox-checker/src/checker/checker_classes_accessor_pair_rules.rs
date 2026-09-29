@@ -3,6 +3,23 @@
 use crate::checker::checker_classes::*;
 
 impl Checker {
+    /// 成员键：标识符/字面量按文本，well-known 计算名按内部名
+    fn member_key_of(&self, node: &Arc<Node>) -> Option<String> {
+        let name = node.name()?;
+        match name.kind {
+            SyntaxKind::Identifier | SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral => {
+                Some(name.text().to_string())
+            }
+            SyntaxKind::ComputedPropertyName => {
+                let tsox_frontend::ast::NodeData::ComputedPropertyName(cd) = &name.data else {
+                    return None;
+                };
+                crate::binder::symbols_binder_4::well_known_symbol_member_name(&cd.expression)
+            }
+            _ => None,
+        }
+    }
+
     pub(crate) fn check_accessor_pair_rules(
         &mut self,
         node: &Arc<Node>,
@@ -91,12 +108,12 @@ impl Checker {
             if node.kind == SyntaxKind::GetAccessor
                 && let Some(class) = self.enclosing_class_stack.last().cloned()
                 && let tsox_frontend::ast::NodeData::GetAccessorDeclaration(gd) = &node.data
-                && gd.name.kind == SyntaxKind::Identifier
             {
                 let setter = Self::class_members_of(&class).iter().find_map(|m| {
                     if let tsox_frontend::ast::NodeData::SetAccessorDeclaration(sd) = &m.data
-                        && sd.name.kind == SyntaxKind::Identifier
-                        && sd.name.text() == gd.name.text()
+                        && self.member_key_of(m).is_some_and(|k| {
+                            k == self.member_key_of(node).unwrap_or_default()
+                        })
                     {
                         Some((Arc::clone(m), sd.name.loc))
                     } else {

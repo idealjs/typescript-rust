@@ -224,7 +224,7 @@ impl Binder {
         let mut node = Arc::clone(loop_node);
         let mut cursor = &mut self.active_label_list;
         loop {
-            let Some(parent) = node.parent.clone() else {
+            let Some(parent) = node.parent() else {
                 break;
             };
             if parent.kind != SyntaxKind::LabeledStatement {

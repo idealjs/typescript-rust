@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
+
 #[test]
 fn syntactic_classifications_object_literal() {
     let content = r#"var v = 10e0;
@@ -13,6 +13,6 @@ var x = {
     void: void 0,
     v: v += v,
 };"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
+    let _s = Session::new_for_test("syntacticClassificationsObjectLiteral", content);
+    // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

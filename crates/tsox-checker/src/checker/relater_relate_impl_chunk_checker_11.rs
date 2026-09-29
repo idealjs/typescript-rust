@@ -67,6 +67,13 @@ impl Checker {
             target = canonical_target;
         }
 
+        let source_rest = self.get_non_array_rest_type(&source);
+        let target_rest = self.get_non_array_rest_type(&target);
+        if source_rest.is_some() || target_rest.is_some() {
+            let rest = source_rest.or(target_rest).unwrap();
+            self.report_unreliable_markers(&rest);
+        }
+
         let strict_variance = !check_mode.contains(SignatureCheckMode::Callback)
             && self.strict_function_types
             && !self.signature_is_method_or_constructor(&target);
@@ -88,7 +95,7 @@ impl Checker {
                         );
                     }
                     if related.is_false() {
-                        related = self.compare_types(target_this, source_this, relation, false);
+                        related = self.compare_types(target_this.clone(), source_this, relation, false);
                     }
                     if related.is_false() {
                         return Ternary::False;

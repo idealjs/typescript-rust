@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_for_quoted_property_in_property_assignment2() {
     let content = r#"export interface Config {
@@ -17,7 +17,9 @@ config = {
        '[|/*1*/|]': ''
    }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionForQuotedPropertyInPropertyAssignment2", content);
+    fourslash::go_to_marker(&mut s, "0");
+    // TODO: f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

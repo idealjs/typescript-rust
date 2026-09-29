@@ -23,7 +23,40 @@ impl Checker {
 
     pub(crate) fn type_to_string_ex_worker(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String {
         if let Some(name) = t.intrinsic_name() {
+            if name == "error" {
+                return "any".to_string();
+            }
             return name.to_string();
+        }
+
+        if let Some(sym) = t.symbol.as_ref()
+            && t.flags.contains(TypeFlags::EnumLiteral)
+            && !t.flags.contains(TypeFlags::Union)
+        {
+            // 枚举字面量类型按「枚举.成员」展示（Go typeToString 走符号链）
+            let member = sym.name.clone();
+            let qualifier = sym
+                .parent()
+                .map(|p| format!("{}.", self.namespace_qualified_name(&p)))
+                .unwrap_or_default();
+            return format!("{qualifier}{member}");
+        }
+
+        // 别名优先于结构展示（Go typeToTypeNodeHelper 复用 typeAlias 符号）；
+        // 条件类型另有分支：先尝试解析再回落别名
+        if let Some(alias) = &t.alias
+            && let Some(sym) = &alias.symbol
+            && !matches!(&t.data, TypeData::Conditional(_))
+        {
+            let args: Vec<String> = alias
+                .type_arguments
+                .iter()
+                .map(|a| self.type_to_string_ex(a, flags))
+                .collect();
+            if args.is_empty() {
+                return sym.name.clone();
+            }
+            return format!("{}<{}>", sym.name, args.join(", "));
         }
 
         if let Some(val) = t.literal_value() {
@@ -150,6 +183,13 @@ impl Checker {
             }
         }
         if let TypeData::Conditional(c) = &t.data {
+            // 可解析的条件（checkType 已具体）先取解析值；泛型挂起的条件
+            // resolve 返回 None，维持别名原样显示
+            if c.resolved_true_type.get().is_none() && c.resolved_false_type.get().is_none()
+                && let Some(resolved) = self.resolve_conditional_type(t)
+            {
+                return self.type_to_string_ex(&resolved, flags);
+            }
             if let Some(alias) = &t.alias
                 && let Some(sym) = &alias.symbol
             {
@@ -226,8 +266,24 @@ impl Checker {
         }
 
         if let Some(structured) = t.as_structured() {
-            if structured.call_signature_count > 0 && t.symbol.is_none() {
+            // Go createTypeNodeFromObjectType：仅当无属性/索引签名且恰好一条调用
+            // （或构造）签名时才输出裸函数形态，否则保留完整对象字面量
+            if t.symbol.is_none()
+                && structured.signatures.len() == 1
+                && structured.properties.is_empty()
+                && structured.index_infos.is_empty()
+            {
                 return self.function_type_to_string(t, structured, flags);
+            }
+        }
+
+        if t.object_flags.contains(ObjectFlags::Anonymous) {
+            if let Some(structured) = t.as_structured()
+                && structured.properties.is_empty()
+                && structured.signatures.is_empty()
+                && structured.index_infos.is_empty()
+            {
+                return "{}".to_string();
             }
         }
 
@@ -243,7 +299,11 @@ impl Checker {
             {
                 return self.object_literal_to_string(t, structured, flags);
             }
-            if t.object_flags.contains(ObjectFlags::ObjectLiteral) && t.symbol.is_none() {
+            if t
+                .symbol
+                .as_ref()
+                .is_none_or(|s| s.name.starts_with('\u{FE}'))
+            {
                 return "{}".to_string();
             }
         }
@@ -273,8 +333,5 @@ impl Checker {
 
 pub(crate) fn node_name_probe(d: &Arc<tsox_frontend::ast::Node>) -> Option<String> {
     let r = tsox_frontend::ast::node_data_generated::node_name(d).map(|n| n.text().to_string());
-    if std::env::var_os("TSOX_DEBUG_SYMBOL").is_some() {
-        eprintln!("[tup-label] decl={:?} -> {:?}", d.kind, r);
-    }
     r
 }

@@ -6,6 +6,16 @@ pub const FILENAME_DIRECTIVE: &str = "@Filename:";
 pub const SYMLINK_DIRECTIVE: &str = "@SYMlink:";
 pub const GLOBAL_OPTIONS_DIRECTIVE: &str = "@GlobalOptions:";
 
+fn strip_directive<'a>(rest: &'a str, directive: &str) -> Option<&'a str> {
+    let rb = rest.as_bytes();
+    let db = directive.as_bytes();
+    if rb.len() >= db.len() && rb[..db.len()].eq_ignore_ascii_case(db) {
+        Some(&rest[db.len()..])
+    } else {
+        None
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Marker {
     pub file_name: String,
@@ -62,9 +72,21 @@ impl FileAccumulator {
 
     fn finish(mut self, default_name: &str, data: &mut TestData) {
         if self.is_empty() {
+            // 无内容无文件名的头部选项行（首个 @Filename 前的 // @option）按
+            // Go fourslash 语义并入全项目选项
+            for (k, v) in self.options {
+                data.global_options.entry(k).or_insert(v);
+            }
             return;
         }
         let name = self.name.take().unwrap_or_else(|| default_name.to_string());
+        // Go GetNormalizedAbsolutePath(fileName, "/")：@Filename 相对名规范化
+        // 为虚拟根下绝对路径（packages/x → /packages/x）
+        let name = if name.starts_with('/') {
+            name
+        } else {
+            format!("/{name}")
+        };
         let joined = self.lines.join("\n");
         let (content, head_options, markers, ranges) = parse_file_content(&name, &joined);
         for (k, v) in head_options {
@@ -90,18 +112,20 @@ pub fn parse_test_data(contents: &str, default_file_name: &str) -> TestData {
 
     for line in contents.split('\n') {
         let trimmed = line.trim_start();
-        if let Some(rest) = trimmed.strip_prefix("// ") {
-            if let Some(f) = rest.strip_prefix(FILENAME_DIRECTIVE) {
+        // 指令形态两种：`// @Filename:` 与 `//@Filename:`（tsc fourslash 均合法）
+        let rest_after_slashes = trimmed.strip_prefix("//").map(|r| r.trim_start_matches(' '));
+        if let Some(rest) = rest_after_slashes {
+            if let Some(f) = strip_directive(rest, FILENAME_DIRECTIVE) {
                 acc.finish(default_file_name, &mut data);
                 acc = FileAccumulator::new();
                 acc.name = Some(f.trim().to_string());
                 continue;
             }
-            if let Some(s) = rest.strip_prefix(SYMLINK_DIRECTIVE) {
+            if let Some(s) = strip_directive(rest, SYMLINK_DIRECTIVE) {
                 acc.symlink = Some(s.trim().to_string());
                 continue;
             }
-            if let Some(g) = rest.strip_prefix(GLOBAL_OPTIONS_DIRECTIVE) {
+            if let Some(g) = strip_directive(rest, GLOBAL_OPTIONS_DIRECTIVE) {
                 for kv in g.split(',') {
                     if let Some((k, v)) = kv.split_once(':') {
                         data.global_options
@@ -134,6 +158,19 @@ pub fn parse_test_data(contents: &str, default_file_name: &str) -> TestData {
     data
 }
 
+/// Go chompLeadingSpace：所有非空行均以空格开头时，每行剥掉 1 个前导空格
+fn chomp_leading_space(content: &str) -> String {
+    let lines: Vec<&str> = content.split('\n').collect();
+    if lines.iter().any(|l| !l.is_empty() && !l.starts_with(' ')) {
+        return content.to_string();
+    }
+    lines
+        .iter()
+        .map(|l| l.get(1..).unwrap_or(""))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
 fn parse_file_content(
     file_name: &str,
     content: &str,
@@ -143,6 +180,7 @@ fn parse_file_content(
     Vec<Marker>,
     Vec<RangeMarker>,
 ) {
+    let content = chomp_leading_space(content);
     let chars: Vec<char> = content.chars().collect();
     let mut out = String::new();
     let mut markers: Vec<Marker> = Vec::new();
@@ -202,16 +240,27 @@ fn parse_file_content(
                 if prev == '|' && cur == '}' {
                     let (src, _) = open_source.take().unwrap();
                     let text: String = chars[src + 2..i - 1].iter().collect();
+                    let data = text.trim().to_string();
+                    // Go getObjectMarker：按 JSON 解析，"name" 字段可用作标记名
+                    let name = serde_json::from_str::<serde_json::Value>(&format!("{{ {data} }}"))
+                        .ok()
+                        .and_then(|v| {
+                            v.get("name")
+                                .and_then(|n| n.as_str())
+                                .filter(|n| !n.is_empty())
+                                .map(str::to_string)
+                        });
                     markers.push(Marker {
                         file_name: file_name.into(),
                         position: src - difference,
-                        name: None,
-                        data: Some(text.trim().to_string()),
+                        name,
+                        data: Some(data),
                     });
                     if let Some(last) = open_ranges.last_mut() {
                         last.1 = markers.last().cloned();
                     }
-                    flush(&mut out, &chars, &mut last_normal, Some(i + 1));
+                    // 对象标记文本不入内容：仅推进续写位置（Go lastNormalCharPosition = i + 1）
+                    last_normal = i + 1;
                     difference += i + 1 - src;
                     state = 0;
                 }

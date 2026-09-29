@@ -5,13 +5,19 @@ use super::*;
 pub(crate) fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTypesDirective> {
     let mut types = Vec::new();
     let mut line_start = 0usize;
-    for line in text.lines() {
+    let mask = code_line_mask(text);
+    for (idx, raw_line) in text.split('\n').enumerate() {
+        let line = raw_line.strip_suffix('\r').unwrap_or(raw_line);
         let trimmed = line.trim_start();
         let leading = line.len() - trimmed.len();
         let Some(rest) = trimmed.strip_prefix("///") else {
-            line_start += line.len() + 1;
+            line_start += raw_line.len() + 1;
             continue;
         };
+        if !mask.get(idx).copied().unwrap_or(true) {
+            line_start += raw_line.len() + 1;
+            continue;
+        }
 
         for quote in ['"', '\''] {
             let marker = format!("types={quote}");
@@ -53,7 +59,7 @@ pub(crate) fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTyp
                 }
             }
         }
-        line_start += line.len() + 1;
+        line_start += raw_line.len() + 1;
     }
     types
 }
@@ -61,6 +67,8 @@ pub(crate) fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTyp
 pub(crate) fn load_lib_recursive(
     lib_name: &str,
     host: &dyn CompilerHost,
+    options: &CompilerOptions,
+    resolver: &tsox_tsoptions::module::Resolver,
     source_files: &mut Vec<Arc<SourceFile>>,
     by_name: &mut HashMap<String, Arc<SourceFile>>,
     default_lib_names: &mut std::collections::HashSet<String>,
@@ -70,7 +78,7 @@ pub(crate) fn load_lib_recursive(
     if !visited.insert(lib_name.to_string()) {
         return;
     }
-    let path = tsox_core::tspath::combine_paths(host.default_library_path(), &[lib_name]);
+    let path = super::lib_replacement::resolve_lib_file_path(lib_name, options, resolver, host);
     let text = match host.fs().read_file(&path) {
         Some(t) => t,
         None => {
@@ -84,6 +92,8 @@ pub(crate) fn load_lib_recursive(
         load_lib_recursive(
             &ref_name,
             host,
+            options,
+            resolver,
             source_files,
             by_name,
             default_lib_names,
@@ -233,6 +243,9 @@ pub struct DuplicateSourceFile {
     pub file_name: String,
     pub hash: u128,
     pub script_kind: tsox_frontend::ast::ScriptKind,
+    /// ContentMapper 是产出该重复文件的内容映射器标识，非内容映射文件为空
+    pub content_mapper: String,
+    pub is_content_mapper_failure_stub: bool,
 }
 
 #[derive(Debug, Clone, Default)]

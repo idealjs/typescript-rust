@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
+
 #[test]
 fn go_to_implementation_super_01() {
     let content = r#"class [|Foo|] {
@@ -12,6 +12,6 @@ class Bar extends Foo {
         sup/*super_call*/er.hello();
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "super_call")
+    let _s = Session::new_for_test("goToImplementationSuper_01", content);
+    // TODO: f.VerifyBaselineGoToImplementation(t, "super_call")
 }

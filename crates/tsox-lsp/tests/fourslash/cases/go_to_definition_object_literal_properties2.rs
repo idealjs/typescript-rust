@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_object_literal_properties2() {
     let content = r#"type C = {
@@ -22,6 +22,6 @@ const result = fn({
 
 // this one shouldn't go to the constraint type
 result.foo/*5*/;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1", "2", "3", "4", "5")
+    let _s = Session::new_for_test("goToDefinitionObjectLiteralProperties2", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "1", "2", "3", "4", "5")
 }

@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn unused_localsin_constructor_fs1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @noUnusedLocals: true
 // @noUnusedParameters:true
 class greeter {
@@ -11,6 +11,6 @@ class greeter {
         var unused = 20;
     } |]
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `constructor() {
+    let _s = Session::new_for_test("unusedLocalsinConstructorFS1", content);
+    // TODO: f.VerifyRangeAfterCodeFix(t, `constructor() {
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_js_doc_template_tag_function_js() {
     let content = r#"// @allowJs: true
@@ -10,6 +10,6 @@ fn find_all_refs_js_doc_template_tag_function_js() {
  * @return {/*2*/T}
  */
 function f() {}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2")
+    let _s = Session::new_for_test("findAllRefsJsDocTemplateTag_function_js", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
 }

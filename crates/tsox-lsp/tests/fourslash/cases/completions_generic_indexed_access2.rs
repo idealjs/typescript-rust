@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_generic_indexed_access2() {
     let content = r#"export type GetMethodsForType<T, G extends string> = { [K in keyof T]:
@@ -25,6 +25,7 @@ export declare function testIt<T, G extends string>(): (input: any, method: GetM
 const t = testIt<Sample, "Sample">()
 
 const i = t(null, { name: "addBook", group: "Sample", payload: { /**/ } })"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsGenericIndexedAccess2", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

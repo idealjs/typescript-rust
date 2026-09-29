@@ -13,6 +13,11 @@ pub enum DiagnosticKind {
     UnterminatedTemplateLiteral,
     UnterminatedRegularExpression,
 
+    HexadecimalDigitExpected,
+    UnexpectedEndOfText,
+    UnicodeEscapeOutOfRange,
+    UnterminatedUnicodeEscape,
+
     UnknownRegularExpressionFlag,
 
     DuplicateRegularExpressionFlag,
@@ -25,7 +30,26 @@ pub enum DiagnosticKind {
 
     NumericSeparatorNotAllowed,
 
+    MultipleConsecutiveNumericSeparators,
+
     RegexMessage(tsox_core::diagnostics::Message),
+    RegexMessageWithArg(tsox_core::diagnostics::Message, char),
+
+    OctalEscapeSequenceNotAllowed,
+
+    EscapeSequenceNotAllowed,
+
+    IdentifierFollowsNumeric,
+
+    BigIntExponentialNotation,
+
+    BigIntMustBeInteger,
+
+    DigitExpected,
+
+    BinaryDigitExpected,
+
+    OctalDigitExpected,
 }
 
 pub type TokenFlags = u32;

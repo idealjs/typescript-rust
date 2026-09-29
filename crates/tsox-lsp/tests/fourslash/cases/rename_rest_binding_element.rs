@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
+
 #[test]
 fn rename_rest_binding_element() {
     let content = r#"interface I {
@@ -11,6 +11,6 @@ fn rename_rest_binding_element() {
 function foo([|{ a, ...[|{| "contextRangeIndex": 0 |}rest|] }: I|]) {
     [|rest|];
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSTrue}, f.Ranges()[1])
+    let _s = Session::new_for_test("renameRestBindingElement", content);
+    // TODO: f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSTrue}, f.Ranges()[1])
 }

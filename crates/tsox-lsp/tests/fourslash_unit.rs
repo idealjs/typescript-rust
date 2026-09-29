@@ -49,3 +49,4 @@ fn jsdoc_range_on_interface_member() {
     assert_eq!(jds.len(), 1, "jsdoc 数不符 pos={}", sig.pos());
 }
 
+

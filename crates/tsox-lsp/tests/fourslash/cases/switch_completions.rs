@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn switch_completions() {
     let content = r#"enum E { A, B }
@@ -28,9 +28,12 @@ declare let x: "foo" | "bar";
 switch (x) {
     case ('/*4*/')
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("switchCompletions", content);
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
+    // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "3");
+    // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("4"), &["foo", "bar"], &[]);
 }

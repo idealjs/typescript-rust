@@ -105,12 +105,12 @@ impl Binder {
         }
 
         {
-            let mut anc = node.parent.as_ref();
+            let mut anc = node.parent();
             while let Some(a) = anc {
                 if a.has_syntactic_modifier(ModifierFlags::Ambient) {
                     return;
                 }
-                anc = a.parent.as_ref();
+                anc = a.parent();
             }
         }
         let Some(kind) = tsox_frontend::scanner::string_to_keyword(node.text()) else {

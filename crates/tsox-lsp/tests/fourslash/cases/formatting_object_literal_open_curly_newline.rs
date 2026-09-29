@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: opts444 := f.GetOptions()"]
+
 #[test]
 fn formatting_object_literal_open_curly_newline() {
     let content = r#"
@@ -14,11 +14,9 @@ var clear =
     }
 };
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"
+    let mut s = Session::new_for_test("formattingObjectLiteralOpenCurlyNewline", content);
+    fourslash::format_document(&mut s, "");
+    fourslash::verify_current_file_content(&mut s, r#"
 var clear =
 {
     outerKey:
@@ -28,15 +26,11 @@ var clear =
             2
     }
 };
-"#,
-    );
+"#);
     // TODO: opts444 := f.GetOptions()
-    // TODO: opts444.FormatCodeSettings.IndentMultiLineObjectLiteralBeginningOnBlankLine = core.TSTrue
-    fourslash::unsupported("Configure"); // f.Configure(t, opts444)
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"
+    fourslash::configure_format_settings(&mut s, &[("indent_multi_line_object_literal_beginning_on_blank_line", "true")]);
+    fourslash::format_document(&mut s, "");
+    fourslash::verify_current_file_content(&mut s, r#"
 var clear =
     {
         outerKey:
@@ -46,6 +40,5 @@ var clear =
                     2
             }
     };
-"#,
-    );
+"#);
 }

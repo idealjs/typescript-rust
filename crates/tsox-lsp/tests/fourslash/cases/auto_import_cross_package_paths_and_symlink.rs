@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn auto_import_cross_package_paths_and_symlink() {
     let content = r#"// @Filename: /home/src/workspaces/project/packages/common/package.json
@@ -34,8 +34,8 @@ export function Tooltip {};
 // @Filename: /home/src/workspaces/project/packages/app/lib/index.ts
 Tooltip/**/
 // @link: /home/src/workspaces/project/packages/common -> /home/src/workspaces/project/node_modules/@company/common"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportCrossPackage_pathsAndSymlink", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"@company/common"}, nil /*preferences*/)
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"@company/common"}, nil /*preferences*/)
 }

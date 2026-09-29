@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn quick_info_on_class_merged_with_function() {
     let content = r#"namespace Test {
@@ -14,6 +15,6 @@ fn quick_info_on_class_merged_with_function() {
         }
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoOnClassMergedWithFunction", content);
     fourslash::verify_quick_info_at(&mut s, "", "(property) myProp: string", "");
 }

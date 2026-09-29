@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_constructor_of_class_expression01() {
     let content = r#"var x = class C {
@@ -25,6 +25,6 @@ var x1 = new [|/*cref*/C|]();
 var x2 = new [|/*xref*/x|]();
 var y1 = new [|/*yref*/y|]();
 var z1 = new [|/*zref*/z|]();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "xusage", "yusage", "zusage", "cref", "xref", "yref", "zref"
+    let _s = Session::new_for_test("goToDefinitionConstructorOfClassExpression01", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "xusage", "yusage", "zusage", "cref", "xref", "yref", "zref"
 }

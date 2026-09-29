@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
+
 #[test]
 fn code_fix_convert_to_type_only_import2() {
     let content = r#"// @module: esnext
@@ -16,7 +16,7 @@ declare const a: A;
 declare const b: B;
 declare const c: C;
 console.log(a, b, c);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixConvertToTypeOnlyImport2", content);
     fourslash::go_to_file(&mut s, "imports.ts");
-    fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
+    // TODO: f.VerifyCodeFixNotAvailable(t)
 }

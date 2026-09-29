@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn unused_function_in_namespace_with_trivia() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @noUnusedLocals: true
 [| namespace greeter {
   // Do not remove
@@ -13,6 +13,6 @@ fn unused_function_in_namespace_with_trivia() {
   function function1() {
   }/*1*/
 } |]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `namespace greeter {
+    let _s = Session::new_for_test("unusedFunctionInNamespaceWithTrivia", content);
+    // TODO: f.VerifyRangeAfterCodeFix(t, `namespace greeter {
 }

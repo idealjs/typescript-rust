@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_apparent_type_properties() {
     let content = r#"interface Number {
@@ -10,6 +10,6 @@ fn go_to_definition_apparent_type_properties() {
 var o = 0;
 o.[|/*reference1*/myObjectMethod|]();
 o[[|"/*reference2*/myObjectMethod"|]]();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "reference1", "reference2")
+    let _s = Session::new_for_test("goToDefinitionApparentTypeProperties", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "reference1", "reference2")
 }

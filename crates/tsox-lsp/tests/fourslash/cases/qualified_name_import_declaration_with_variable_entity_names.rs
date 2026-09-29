@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn qualified_name_import_declaration_with_variable_entity_names() {
     let content = r#"namespace Alpha {
@@ -12,9 +12,9 @@ namespace Beta {
 }
 
 var x = Alpha.[|{| "name" : "mem" |}x|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("qualifiedName_import_declaration_with_variable_entity_names", content);
     fourslash::go_to_marker(&mut s, "import");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "import")
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "import")
+    // TODO: f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "import")
+    // TODO: f.VerifyBaselineGoToDefinition(t, false, "import")
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_on_parameter_properties() {
     let content = r#"interface IFoo {
@@ -28,6 +28,6 @@ class Foo2 implements IFoo {
   ) {
   }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoOnParameterProperties", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

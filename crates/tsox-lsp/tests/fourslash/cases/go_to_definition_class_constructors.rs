@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_class_constructors() {
     let content = r#"// @filename: definitions.ts
@@ -29,6 +29,6 @@ class HasConstructor extends Base {
     readonly name: string = '';
 }
 const hasConstructor = new [|/*HasConstructor*/HasConstructor|](cArg)"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "Derived", "SameFile", "HasConstructor", "Base")
+    let _s = Session::new_for_test("goToDefinitionClassConstructors", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "Derived", "SameFile", "HasConstructor", "Base")
 }

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_import_filtered_by_package_json_peer_dependencies() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"//@noEmit: true
 //@Filename: /package.json
 {
@@ -27,6 +27,7 @@ export declare var ReactFake: any;
 }
 //@Filename: /src/index.ts
 const x = Re/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsImport_filteredByPackageJson_peerDependencies", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

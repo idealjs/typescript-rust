@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn generic_type_with_multiple_bases1_multi_file() {
     let content = r#"// @Filename: genericTypeWithMultipleBases_0.ts
@@ -19,6 +19,7 @@ interface iScope<TModel> extends iBaseScope, iMover {
 var x: iScope<number>;
 // @Filename: genericTypeWithMultipleBases_4.ts
 x./**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("genericTypeWithMultipleBases1MultiFile", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

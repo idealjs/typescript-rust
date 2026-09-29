@@ -2,9 +2,11 @@
 
 use std::sync::Arc;
 
+use crate::ls::autoimport_import_adder::ImportAdder;
 use crate::ls::lsutil::UserPreferences;
 use tsox_checker::checker::Checker;
 use tsox_compile::compiler::Program;
+use tsox_frontend::ast::mig::m3b_2::NodeFactory;
 use tsox_frontend::ast::Node;
 use tsox_frontend::ast::Symbol;
 
@@ -19,14 +21,22 @@ pub const PRESERVE_OPTIONAL_FLAGS_ALL: u32 =
     PRESERVE_OPTIONAL_FLAGS_METHOD | PRESERVE_OPTIONAL_FLAGS_PROPERTY;
 
 pub struct MissingMemberFixer<'a> {
-    pub type_checker: &'a Checker,
+    pub type_checker: &'a mut Checker,
     pub program: &'a Program,
     pub preferences: &'a UserPreferences,
+    /// Go missingMemberFixer.importAdder；Rust ImportAdder 构造受
+    /// Arc<Checker> 通道限制（见 progress_notes_r59A.md），先以 None 缺省
+    pub import_adder: Option<ImportAdder>,
+    /// Go missingMemberFixer.locale（locale.FromContext(ctx) 注入）
+    pub locale: tsox_core::locale::Locale,
+    /// Go changeTracker.NodeFactory；Rust change_tracker::Tracker 无工厂字段，
+    /// 工厂随 fixer 携带（Go 侧该字段在本文件仅作节点工厂使用）
+    pub node_factory: NodeFactory,
 }
 
 impl<'a> MissingMemberFixer<'a> {
     pub fn new(
-        type_checker: &'a Checker,
+        type_checker: &'a mut Checker,
         program: &'a Program,
         preferences: &'a UserPreferences,
     ) -> Self {
@@ -34,6 +44,9 @@ impl<'a> MissingMemberFixer<'a> {
             type_checker,
             program,
             preferences,
+            import_adder: None,
+            locale: tsox_core::locale::Locale(String::new()),
+            node_factory: NodeFactory::new(),
         }
     }
 
@@ -52,7 +65,7 @@ impl LanguageService {
     pub fn new_missing_member_fixer<'a>(
         &'a self,
         _program: &'a Program,
-        _type_checker: &'a Checker,
+        _type_checker: &'a mut Checker,
     ) -> MissingMemberFixer<'a> {
         MissingMemberFixer::new(_type_checker, _program, self.user_preferences())
     }

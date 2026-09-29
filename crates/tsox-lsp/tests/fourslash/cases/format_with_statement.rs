@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: opts227 := f.GetOptions()"]
+
 #[test]
 fn format_with_statement() {
     let content = r#"with /*1*/(foo.bar)
@@ -12,11 +12,10 @@ fn format_with_statement() {
 with (bar.blah)/*4*/
 {/*5*/
 }/*6*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatWithStatement", content);
     // TODO: opts227 := f.GetOptions()
-    // TODO: opts227.FormatCodeSettings.PlaceOpenBraceOnNewLineForControlBlocks = core.TSFalse
-    fourslash::unsupported("Configure"); // f.Configure(t, opts227)
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    fourslash::configure_format_settings(&mut s, &[("place_open_brace_on_new_line_for_control_blocks", "false")]);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"with (foo.bar) {"#);
     fourslash::go_to_marker(&mut s, "3");
@@ -26,9 +25,8 @@ with (bar.blah)/*4*/
     fourslash::go_to_marker(&mut s, "6");
     fourslash::verify_current_line_content(&mut s, r#"}"#);
     // TODO: opts565 := f.GetOptions()
-    // TODO: opts565.FormatCodeSettings.PlaceOpenBraceOnNewLineForControlBlocks = core.TSTrue
-    fourslash::unsupported("Configure"); // f.Configure(t, opts565)
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    fourslash::configure_format_settings(&mut s, &[("place_open_brace_on_new_line_for_control_blocks", "true")]);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"with (foo.bar)"#);
     fourslash::go_to_marker(&mut s, "2");

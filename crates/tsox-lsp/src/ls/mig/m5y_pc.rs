@@ -1,0 +1,513 @@
+#![allow(dead_code, unused_imports, unused_variables)]
+
+use std::sync::Arc;
+
+use tsox_frontend::ast::{self, Node, NodeList};
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum PseudoTypeKind {
+    Direct,
+    Inferred,
+    NoResult,
+    MaybeConstLocation,
+    Union,
+    Undefined,
+    Null,
+    Any,
+    String,
+    Number,
+    BigInt,
+    Boolean,
+    False,
+    True,
+    SingleCallSignature,
+    Tuple,
+    ObjectLiteral,
+    StringLiteral,
+    NumericLiteral,
+    BigIntLiteral,
+}
+
+#[derive(Clone)]
+pub struct PseudoTypeBase;
+
+#[derive(Clone)]
+pub struct PseudoTypeDirect {
+    pub type_node: Arc<Node>,
+}
+
+#[derive(Clone)]
+pub struct PseudoTypeInferred {
+    pub expression: Arc<Node>,
+    pub error_nodes: Vec<Arc<Node>>,
+    pub is_signature_return: bool,
+}
+
+#[derive(Clone)]
+pub struct PseudoTypeNoResult {
+    pub declaration: Arc<Node>,
+}
+
+#[derive(Clone)]
+pub struct PseudoTypeMaybeConstLocation {
+    pub node: Arc<Node>,
+    pub const_type: Option<Box<PseudoType>>,
+    pub regular_type: Option<Box<PseudoType>>,
+}
+
+#[derive(Clone)]
+pub struct PseudoTypeUnion {
+    pub types: Vec<PseudoType>,
+}
+
+#[derive(Clone)]
+pub struct PseudoTypeSingleCallSignature {
+    pub signature: Arc<Node>,
+    pub parameters: Vec<PseudoParameter>,
+    pub type_parameters: Vec<Arc<Node>>,
+    pub return_type: Option<Box<PseudoType>>,
+}
+
+#[derive(Clone)]
+pub struct PseudoTypeTuple {
+    pub elements: Vec<PseudoType>,
+}
+
+#[derive(Clone)]
+pub struct PseudoTypeObjectLiteral {
+    pub elements: Vec<PseudoObjectElement>,
+}
+
+#[derive(Clone)]
+pub struct PseudoTypeLiteral {
+    pub node: Arc<Node>,
+}
+
+#[derive(Clone)]
+pub enum PseudoTypeData {
+    Base(PseudoTypeBase),
+    Direct(PseudoTypeDirect),
+    Inferred(PseudoTypeInferred),
+    NoResult(PseudoTypeNoResult),
+    MaybeConstLocation(PseudoTypeMaybeConstLocation),
+    Union(PseudoTypeUnion),
+    SingleCallSignature(PseudoTypeSingleCallSignature),
+    Tuple(PseudoTypeTuple),
+    ObjectLiteral(PseudoTypeObjectLiteral),
+    Literal(PseudoTypeLiteral),
+}
+
+#[derive(Clone)]
+pub struct PseudoType {
+    pub kind: PseudoTypeKind,
+    pub data: PseudoTypeData,
+}
+
+pub fn new_pseudo_type(kind: PseudoTypeKind, data: PseudoTypeData) -> PseudoType {
+    PseudoType { kind, data }
+}
+
+impl PseudoType {
+    pub fn as_pseudo_type(&self) -> &PseudoType {
+        self
+    }
+
+    pub fn as_pseudo_type_direct(&self) -> Option<&PseudoTypeDirect> {
+        match &self.data {
+            PseudoTypeData::Direct(d) => Some(d),
+            _ => None,
+        }
+    }
+
+    pub fn as_pseudo_type_inferred(&self) -> Option<&PseudoTypeInferred> {
+        match &self.data {
+            PseudoTypeData::Inferred(d) => Some(d),
+            _ => None,
+        }
+    }
+
+    pub fn as_pseudo_type_no_result(&self) -> Option<&PseudoTypeNoResult> {
+        match &self.data {
+            PseudoTypeData::NoResult(d) => Some(d),
+            _ => None,
+        }
+    }
+
+    pub fn as_pseudo_type_maybe_const_location(&self) -> Option<&PseudoTypeMaybeConstLocation> {
+        match &self.data {
+            PseudoTypeData::MaybeConstLocation(d) => Some(d),
+            _ => None,
+        }
+    }
+
+    pub fn as_pseudo_type_union(&self) -> Option<&PseudoTypeUnion> {
+        match &self.data {
+            PseudoTypeData::Union(d) => Some(d),
+            _ => None,
+        }
+    }
+
+    pub fn as_pseudo_type_single_call_signature(&self) -> Option<&PseudoTypeSingleCallSignature> {
+        match &self.data {
+            PseudoTypeData::SingleCallSignature(d) => Some(d),
+            _ => None,
+        }
+    }
+
+    pub fn as_pseudo_type_tuple(&self) -> Option<&PseudoTypeTuple> {
+        match &self.data {
+            PseudoTypeData::Tuple(d) => Some(d),
+            _ => None,
+        }
+    }
+
+    pub fn as_pseudo_type_object_literal(&self) -> Option<&PseudoTypeObjectLiteral> {
+        match &self.data {
+            PseudoTypeData::ObjectLiteral(d) => Some(d),
+            _ => None,
+        }
+    }
+
+    pub fn as_pseudo_type_literal(&self) -> Option<&PseudoTypeLiteral> {
+        match &self.data {
+            PseudoTypeData::Literal(d) => Some(d),
+            _ => None,
+        }
+    }
+}
+
+pub fn pseudo_type_undefined() -> PseudoType {
+    new_pseudo_type(PseudoTypeKind::Undefined, PseudoTypeData::Base(PseudoTypeBase))
+}
+
+pub fn pseudo_type_null() -> PseudoType {
+    new_pseudo_type(PseudoTypeKind::Null, PseudoTypeData::Base(PseudoTypeBase))
+}
+
+pub fn pseudo_type_any() -> PseudoType {
+    new_pseudo_type(PseudoTypeKind::Any, PseudoTypeData::Base(PseudoTypeBase))
+}
+
+pub fn pseudo_type_string() -> PseudoType {
+    new_pseudo_type(PseudoTypeKind::String, PseudoTypeData::Base(PseudoTypeBase))
+}
+
+pub fn pseudo_type_number() -> PseudoType {
+    new_pseudo_type(PseudoTypeKind::Number, PseudoTypeData::Base(PseudoTypeBase))
+}
+
+pub fn pseudo_type_big_int() -> PseudoType {
+    new_pseudo_type(PseudoTypeKind::BigInt, PseudoTypeData::Base(PseudoTypeBase))
+}
+
+pub fn pseudo_type_boolean() -> PseudoType {
+    new_pseudo_type(PseudoTypeKind::Boolean, PseudoTypeData::Base(PseudoTypeBase))
+}
+
+pub fn pseudo_type_false() -> PseudoType {
+    new_pseudo_type(PseudoTypeKind::False, PseudoTypeData::Base(PseudoTypeBase))
+}
+
+pub fn pseudo_type_true() -> PseudoType {
+    new_pseudo_type(PseudoTypeKind::True, PseudoTypeData::Base(PseudoTypeBase))
+}
+
+pub fn new_pseudo_type_direct(type_node: Arc<Node>) -> PseudoType {
+    new_pseudo_type(
+        PseudoTypeKind::Direct,
+        PseudoTypeData::Direct(PseudoTypeDirect { type_node }),
+    )
+}
+
+pub fn new_pseudo_type_inferred(expr: Arc<Node>, is_signature_return: bool) -> PseudoType {
+    new_pseudo_type(
+        PseudoTypeKind::Inferred,
+        PseudoTypeData::Inferred(PseudoTypeInferred {
+            expression: expr,
+            error_nodes: Vec::new(),
+            is_signature_return,
+        }),
+    )
+}
+
+pub fn new_pseudo_type_inferred_with_errors(
+    expr: Arc<Node>,
+    is_signature_return: bool,
+    error_nodes: Vec<Arc<Node>>,
+) -> PseudoType {
+    new_pseudo_type(
+        PseudoTypeKind::Inferred,
+        PseudoTypeData::Inferred(PseudoTypeInferred {
+            expression: expr,
+            error_nodes,
+            is_signature_return,
+        }),
+    )
+}
+
+pub fn new_pseudo_type_no_result(decl: Arc<Node>) -> PseudoType {
+    new_pseudo_type(
+        PseudoTypeKind::NoResult,
+        PseudoTypeData::NoResult(PseudoTypeNoResult { declaration: decl }),
+    )
+}
+
+pub fn new_pseudo_type_maybe_const_location(
+    loc: Arc<Node>,
+    const_type: Option<PseudoType>,
+    regular_type: Option<PseudoType>,
+) -> PseudoType {
+    new_pseudo_type(
+        PseudoTypeKind::MaybeConstLocation,
+        PseudoTypeData::MaybeConstLocation(PseudoTypeMaybeConstLocation {
+            node: loc,
+            const_type: const_type.map(Box::new),
+            regular_type: regular_type.map(Box::new),
+        }),
+    )
+}
+
+pub fn new_pseudo_type_union(types: Vec<PseudoType>) -> PseudoType {
+    new_pseudo_type(PseudoTypeKind::Union, PseudoTypeData::Union(PseudoTypeUnion { types }))
+}
+
+pub fn new_pseudo_type_single_call_signature(
+    signature: Arc<Node>,
+    parameters: Vec<PseudoParameter>,
+    type_parameters: Vec<Arc<Node>>,
+    return_type: Option<PseudoType>,
+) -> PseudoType {
+    new_pseudo_type(
+        PseudoTypeKind::SingleCallSignature,
+        PseudoTypeData::SingleCallSignature(PseudoTypeSingleCallSignature {
+            signature,
+            parameters,
+            type_parameters,
+            return_type: return_type.map(Box::new),
+        }),
+    )
+}
+
+pub fn new_pseudo_type_tuple(elements: Vec<PseudoType>) -> PseudoType {
+    new_pseudo_type(PseudoTypeKind::Tuple, PseudoTypeData::Tuple(PseudoTypeTuple { elements }))
+}
+
+pub fn new_pseudo_type_object_literal(elements: Vec<PseudoObjectElement>) -> PseudoType {
+    new_pseudo_type(
+        PseudoTypeKind::ObjectLiteral,
+        PseudoTypeData::ObjectLiteral(PseudoTypeObjectLiteral { elements }),
+    )
+}
+
+pub fn new_pseudo_type_string_literal(node: Arc<Node>) -> PseudoType {
+    new_pseudo_type(
+        PseudoTypeKind::StringLiteral,
+        PseudoTypeData::Literal(PseudoTypeLiteral { node }),
+    )
+}
+
+pub fn new_pseudo_type_numeric_literal(node: Arc<Node>) -> PseudoType {
+    new_pseudo_type(
+        PseudoTypeKind::NumericLiteral,
+        PseudoTypeData::Literal(PseudoTypeLiteral { node }),
+    )
+}
+
+pub fn new_pseudo_type_big_int_literal(node: Arc<Node>) -> PseudoType {
+    new_pseudo_type(
+        PseudoTypeKind::BigIntLiteral,
+        PseudoTypeData::Literal(PseudoTypeLiteral { node }),
+    )
+}
+
+#[derive(Clone)]
+pub struct PseudoParameter {
+    pub rest: bool,
+    pub name: Arc<Node>,
+    pub optional: bool,
+    pub type_: PseudoType,
+}
+
+pub fn new_pseudo_parameter(
+    is_rest: bool,
+    name: Arc<Node>,
+    is_optional: bool,
+    type_: PseudoType,
+) -> PseudoParameter {
+    PseudoParameter {
+        rest: is_rest,
+        name,
+        optional: is_optional,
+        type_,
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum PseudoObjectElementKind {
+    Method,
+    PropertyAssignment,
+    SetAccessor,
+    GetAccessor,
+}
+
+#[derive(Clone)]
+pub struct PseudoObjectMethod {
+    pub signature: Arc<Node>,
+    pub type_parameters: Vec<Arc<Node>>,
+    pub parameters: Vec<PseudoParameter>,
+    pub return_type: Option<Box<PseudoType>>,
+}
+
+#[derive(Clone)]
+pub struct PseudoPropertyAssignment {
+    pub readonly: bool,
+    pub type_: PseudoType,
+}
+
+#[derive(Clone)]
+pub struct PseudoSetAccessor {
+    pub signature: Arc<Node>,
+    pub parameter: PseudoParameter,
+}
+
+#[derive(Clone)]
+pub struct PseudoGetAccessor {
+    pub signature: Arc<Node>,
+    pub type_: PseudoType,
+}
+
+#[derive(Clone)]
+pub enum PseudoObjectElementData {
+    Method(PseudoObjectMethod),
+    PropertyAssignment(PseudoPropertyAssignment),
+    SetAccessor(PseudoSetAccessor),
+    GetAccessor(PseudoGetAccessor),
+}
+
+#[derive(Clone)]
+pub struct PseudoObjectElement {
+    pub name: Arc<Node>,
+    pub optional: bool,
+    pub kind: PseudoObjectElementKind,
+    pub data: PseudoObjectElementData,
+}
+
+pub fn new_pseudo_object_element(
+    kind: PseudoObjectElementKind,
+    name: Arc<Node>,
+    optional: bool,
+    data: PseudoObjectElementData,
+) -> PseudoObjectElement {
+    PseudoObjectElement {
+        name,
+        optional,
+        kind,
+        data,
+    }
+}
+
+impl PseudoObjectElement {
+    pub fn as_pseudo_object_element(&self) -> &PseudoObjectElement {
+        self
+    }
+
+    pub fn signature(&self) -> Option<&Arc<Node>> {
+        match &self.data {
+            PseudoObjectElementData::Method(d) => Some(&d.signature),
+            PseudoObjectElementData::SetAccessor(d) => Some(&d.signature),
+            PseudoObjectElementData::GetAccessor(d) => Some(&d.signature),
+            _ => None,
+        }
+    }
+
+    pub fn as_pseudo_object_method(&self) -> Option<&PseudoObjectMethod> {
+        match &self.data {
+            PseudoObjectElementData::Method(d) => Some(d),
+            _ => None,
+        }
+    }
+
+    pub fn as_pseudo_property_assignment(&self) -> Option<&PseudoPropertyAssignment> {
+        match &self.data {
+            PseudoObjectElementData::PropertyAssignment(d) => Some(d),
+            _ => None,
+        }
+    }
+
+    pub fn as_pseudo_set_accessor(&self) -> Option<&PseudoSetAccessor> {
+        match &self.data {
+            PseudoObjectElementData::SetAccessor(d) => Some(d),
+            _ => None,
+        }
+    }
+
+    pub fn as_pseudo_get_accessor(&self) -> Option<&PseudoGetAccessor> {
+        match &self.data {
+            PseudoObjectElementData::GetAccessor(d) => Some(d),
+            _ => None,
+        }
+    }
+}
+
+pub fn new_pseudo_object_method(
+    signature: Arc<Node>,
+    name: Arc<Node>,
+    optional: bool,
+    type_parameters: Vec<Arc<Node>>,
+    parameters: Vec<PseudoParameter>,
+    return_type: Option<PseudoType>,
+) -> PseudoObjectElement {
+    new_pseudo_object_element(
+        PseudoObjectElementKind::Method,
+        name,
+        optional,
+        PseudoObjectElementData::Method(PseudoObjectMethod {
+            signature,
+            type_parameters,
+            parameters,
+            return_type: return_type.map(Box::new),
+        }),
+    )
+}
+
+pub fn new_pseudo_property_assignment(
+    readonly: bool,
+    name: Arc<Node>,
+    optional: bool,
+    type_: PseudoType,
+) -> PseudoObjectElement {
+    new_pseudo_object_element(
+        PseudoObjectElementKind::PropertyAssignment,
+        name,
+        optional,
+        PseudoObjectElementData::PropertyAssignment(PseudoPropertyAssignment { readonly, type_ }),
+    )
+}
+
+pub fn new_pseudo_set_accessor(
+    signature: Arc<Node>,
+    name: Arc<Node>,
+    optional: bool,
+    parameter: PseudoParameter,
+) -> PseudoObjectElement {
+    new_pseudo_object_element(
+        PseudoObjectElementKind::SetAccessor,
+        name,
+        optional,
+        PseudoObjectElementData::SetAccessor(PseudoSetAccessor { signature, parameter }),
+    )
+}
+
+pub fn new_pseudo_get_accessor(
+    signature: Arc<Node>,
+    name: Arc<Node>,
+    optional: bool,
+    type_: PseudoType,
+) -> PseudoObjectElement {
+    new_pseudo_object_element(
+        PseudoObjectElementKind::GetAccessor,
+        name,
+        optional,
+        PseudoObjectElementData::GetAccessor(PseudoGetAccessor { signature, type_ }),
+    )
+}

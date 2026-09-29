@@ -1,5 +1,4 @@
 use super::types::{ModulePath, ModuleSpecifierEnding, NodeModulePathParts};
-use tsox_core::tspath;
 use tsox_core::tspath::ComparePathsOptions;
 
 pub fn contains_node_modules(s: &str) -> bool {

@@ -101,13 +101,13 @@ impl ResponseMessage {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum MessageData {
     Request(RequestMessage),
     Response(ResponseMessage),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Message {
     pub kind: crate::jsonrpc::jsonrpc::MessageKind,
     pub msg: MessageData,

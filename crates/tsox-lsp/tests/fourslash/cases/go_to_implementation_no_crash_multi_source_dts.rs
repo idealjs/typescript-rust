@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: //   - col 11 onwards maps to b.ts"]
+
 #[test]
 fn go_to_implementation_no_crash_multi_source_dts() {
     // TODO: // combined.d.ts has a source map with two sources: a.ts and b.ts.
@@ -23,6 +23,6 @@ export declare class Bar {
 import { Bar } from './combined';
 declare const bar: Bar;
 bar./*impl*/method();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "impl")
+    let _s = Session::new_for_test("goToImplementationNoCrashMultiSourceDts", content);
+    // TODO: f.VerifyBaselineGoToImplementation(t, "impl")
 }

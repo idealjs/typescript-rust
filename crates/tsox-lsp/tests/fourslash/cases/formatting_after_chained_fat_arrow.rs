@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.VerifyCurrentLineContent(t, `"]
+
 #[test]
 fn formatting_after_chained_fat_arrow() {
     let content = r#"var x = n => p => {
@@ -8,8 +8,8 @@ fn formatting_after_chained_fat_arrow() {
         void 0;
     }/**/
 };"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingAfterChainedFatArrow", content);
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    fourslash::format_document(&mut s, "");
     // TODO: f.VerifyCurrentLineContent(t, `
 }

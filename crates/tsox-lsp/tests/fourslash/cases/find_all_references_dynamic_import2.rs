@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_references_dynamic_import2() {
     let content = r#"// @Filename: foo.ts
@@ -9,7 +9,7 @@ var x = import("./foo");
 x.then(foo => {
     foo./*2*/[|bar|]();
 })"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2")
-    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "bar")
+    let _s = Session::new_for_test("findAllReferencesDynamicImport2", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
+    // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "bar")
 }

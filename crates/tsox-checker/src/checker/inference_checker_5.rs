@@ -7,9 +7,9 @@ impl Checker {
         &mut self,
         node: &Arc<tsox_frontend::ast::Node>,
     ) -> Option<Arc<Signature>> {
-        let mut parent = node.parent.clone()?;
+        let mut parent = node.parent()?;
         while parent.kind == SyntaxKind::ParenthesizedExpression {
-            parent = parent.parent.clone()?;
+            parent = parent.parent()?;
         }
         let tsox_frontend::ast::NodeData::CallExpression(call) = &parent.data else {
             return None;
@@ -68,7 +68,7 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
 
-        let declaration = node.parent.as_ref()?;
+        let declaration = node.parent().as_ref()?;
 
         let is_initializer = match &declaration.data {
             NodeData::VariableDeclaration(data) => data
@@ -121,8 +121,8 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
 
-        let binding_pattern = binding_element.parent.as_ref()?;
-        let var_declaration = binding_pattern.parent.as_ref()?;
+        let binding_pattern = binding_element.parent().as_ref()?;
+        let var_declaration = binding_pattern.parent().as_ref()?;
 
         let var_data = match &var_declaration.data {
             NodeData::VariableDeclaration(d) => d,
@@ -189,17 +189,19 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
 
-        let parent = node.parent.as_ref()?;
+        let parent = node.parent().as_ref()?;
         match &parent.data {
             NodeData::VariableDeclaration(data) => data
                 .type_node
                 .as_ref()
                 .map(|tn| self.get_type_from_type_node(tn)),
             NodeData::ReturnStatement(_) => {
-                let fn_node = parent.parent.as_ref()?;
+                let fn_node = parent.parent().as_ref()?;
                 self.get_return_type_annotation_of_function(fn_node)
             }
-            _ => None,
+            // 其余位（属性值/数组元素/实参等）走通用上下文定型
+            //（Go inferTypeArguments 用 getContextualType 全量分发）
+            _ => self.get_contextual_type(node, ContextFlags::None),
         }
     }
 
@@ -227,7 +229,7 @@ impl Checker {
         _node: &Arc<tsox_frontend::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
-        let mut current = _node.parent.as_ref()?.clone();
+        let mut current = _node.parent().as_ref()?.clone();
         loop {
             match current.kind {
                 SyntaxKind::FunctionDeclaration
@@ -239,7 +241,7 @@ impl Checker {
                 | SyntaxKind::SetAccessor => break,
                 SyntaxKind::SourceFile => return None,
                 _ => {
-                    current = current.parent.as_ref()?.clone();
+                    current = current.parent().as_ref()?.clone();
                 }
             }
         }
@@ -272,9 +274,9 @@ impl Checker {
             }
         }
 
-        let mut parent = fn_node.parent.clone()?;
+        let mut parent = fn_node.parent()?;
         while parent.kind == SyntaxKind::ParenthesizedExpression {
-            parent = parent.parent.clone()?;
+            parent = parent.parent()?;
         }
         if let NodeData::CallExpression(call) = &parent.data {
             if Arc::ptr_eq(&call.expression, fn_node) {

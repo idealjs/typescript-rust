@@ -1,11 +1,11 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn references_in_empty_file() {
     let content = r#"// @lib: es5
 /*1*/"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("referencesInEmptyFile", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

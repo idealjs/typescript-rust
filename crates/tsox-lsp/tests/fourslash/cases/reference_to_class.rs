@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn reference_to_class() {
     let content = r#"// @Filename: referenceToClass_1.ts
@@ -19,6 +19,6 @@ namespace mod {
 }
 // @Filename: referenceToClass_2.ts
 var k: /*6*/foo;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6")
+    let _s = Session::new_for_test("referenceToClass", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6")
 }

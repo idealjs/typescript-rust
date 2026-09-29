@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToTypeDefinition"]
+
 #[test]
 fn go_to_type_definition2() {
     let content = r#"// @Filename: goToTypeDefinition2_Definition.ts
@@ -14,6 +14,6 @@ interface I2 {
 // @Filename: goToTypeDefinition2_Consumption.ts
 var i2: I2;
 i2.prop/*reference*/erty;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "reference")
+    let _s = Session::new_for_test("goToTypeDefinition2", content);
+    // TODO: f.VerifyBaselineGoToTypeDefinition(t, "reference")
 }

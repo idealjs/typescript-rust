@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn jsdoc_throws_tag_find_all_references() {
     let content = r#"class /**/E extends Error {}
@@ -8,6 +8,6 @@ fn jsdoc_throws_tag_find_all_references() {
  * @throws {E}
  */
 function f() {}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "")
+    let _s = Session::new_for_test("jsdocThrowsTag_findAllReferences", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "")
 }

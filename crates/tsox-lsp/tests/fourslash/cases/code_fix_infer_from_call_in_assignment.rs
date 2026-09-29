@@ -1,14 +1,14 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_infer_from_call_in_assignment() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @noImplicitAny: true
 function inferAny( [| app |] ) {
     const result = app.use('hi')
     return result
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `app: { use: (arg0: string) => any }`, false, 0, 0)
+    let _s = Session::new_for_test("codeFixInferFromCallInAssignment", content);
+    // TODO: f.VerifyRangeAfterCodeFix(t, `app: { use: (arg0: string) => any }`, false, 0, 0)
 }

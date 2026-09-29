@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_for_string_literal_with_dynamic_import() {
     let content = r#"// @typeRoots: fourslash/my_typings
@@ -15,9 +15,10 @@ const a = import("..//*3*/");
 /*someFile2*/
 // @Filename: fourslash/my_typings/some-module/index.d.ts
 export var x = 9;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionForStringLiteralWithDynamicImport", content);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("0"), &["someFile1", "my_typings", "sub"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("1"), &["someFile2"]);
+    fourslash::go_to_marker(&mut s, "2");
+    // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_unsorted_at(&mut s, Some("3"), &["fourslash"]);
 }

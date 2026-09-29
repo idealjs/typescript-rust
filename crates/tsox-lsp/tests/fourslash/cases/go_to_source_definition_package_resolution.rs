@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // NoDts resolver can't resolve 'foo' to any .js (only @type"]
+
 #[test]
 fn go_to_source_at_types_package() {
     // TODO: // NoDts resolver can't resolve "foo" to any .js (only @types/foo has .d.ts),
@@ -17,11 +17,10 @@ export function /*target*/bar() { return "hello"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { bar } from "foo";
 bar/*usage*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
+    let _s = Session::new_for_test("goToSourceAtTypesPackage", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
-#[ignore = "generator: // When the .d.ts is index.d.ts, tryPackageRootFirst is true"]
 #[test]
 fn go_to_source_package_index_dts() {
     // TODO: // When the .d.ts is index.d.ts, tryPackageRootFirst is true,
@@ -36,11 +35,10 @@ export function /*target*/greet() { return "hi"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { greet } from "pkg";
 greet/*usage*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
+    let _s = Session::new_for_test("goToSourcePackageIndexDts", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
-#[ignore = "generator: // there's no main entry, but subpath resolution ('pkg/index"]
 #[test]
 fn go_to_source_package_root_then_subpath() {
     // TODO: // tryPackageRootFirst is true (index.d.ts), root resolution fails because
@@ -55,11 +53,10 @@ export function /*target*/work() {}
 // @Filename: /home/src/workspaces/project/index.ts
 import { work } from "pkg";
 work/*usage*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
+    let _s = Session::new_for_test("goToSourcePackageRootThenSubpath", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
-#[ignore = "generator: // falls back to subpath."]
 #[test]
 fn go_to_source_package_root_falls_back_to_subpath() {
     // TODO: // tryPackageRootFirst is true (index.d.ts), root resolution fails,
@@ -74,11 +71,10 @@ export function /*target*/work() {}
 // @Filename: /home/src/workspaces/project/index.ts
 import { work } from "pkg";
 work/*usage*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
+    let _s = Session::new_for_test("goToSourcePackageRootFallsBackToSubpath", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
-#[ignore = "generator: // Subpath resolution succeeds when the d.ts is NOT index.d."]
 #[test]
 fn go_to_source_subpath_not_index() {
     // TODO: // Subpath resolution succeeds when the d.ts is NOT index.d.ts.
@@ -92,6 +88,6 @@ export function /*target*/util() {}
 // @Filename: /home/src/workspaces/project/index.ts
 import { util } from "pkg";
 util/*usage*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
+    let _s = Session::new_for_test("goToSourceSubpathNotIndex", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }

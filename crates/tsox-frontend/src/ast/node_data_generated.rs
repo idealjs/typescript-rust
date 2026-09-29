@@ -574,7 +574,7 @@ pub struct TemplateSpanData {
 #[derive(Debug)]
 pub struct TaggedTemplateExpressionData {
     pub tag: Arc<Node>,
-    pub question_dot_token: Arc<Node>,
+    pub question_dot_token: Option<Arc<Node>>,
     pub type_arguments: Option<Arc<NodeList>>,
     pub template: Arc<Node>,
 }
@@ -1089,6 +1089,7 @@ pub struct JSDocNameReferenceData {
 pub struct SourceFileData {
     pub statements: Arc<NodeList>,
     pub end_of_file_token: Arc<Node>,
+    pub global_exports: Option<super::symbol::SymbolTable>,
 }
 
 #[derive(Debug)]
@@ -1096,6 +1097,7 @@ pub struct ModuleDeclarationData {
     pub modifiers: Option<Arc<ModifierList>>,
     pub keyword: SyntaxKind,
     pub name: Arc<Node>,
+    pub attributes: Option<Arc<Node>>,
     pub body: Option<Arc<Node>>,
 }
 
@@ -1387,6 +1389,8 @@ pub enum NodeData {
     SyntheticReferenceExpression(SyntheticReferenceExpressionData),
     JSDocTypeLiteral(JSDocTypeLiteralData),
     JSDocParameterOrPropertyTag(JSDocParameterOrPropertyTagData),
+    FlowReduceLabelData(crate::ast::mig::m3e::FlowReduceLabelData),
+    FlowSwitchClauseData(crate::ast::mig::m3e::FlowSwitchClauseData),
 }
 
 pub fn for_each_child<F>(node: &Node, mut visitor: F) -> bool
@@ -2561,7 +2565,9 @@ where
             if visitor(&data.tag) {
                 return true;
             }
-            if visitor(&data.question_dot_token) {
+            if let Some(child) = &data.question_dot_token
+                && visitor(child)
+            {
                 return true;
             }
             if let Some(list) = &data.type_arguments {

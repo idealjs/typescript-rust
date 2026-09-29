@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineCodeLens"]
+
 #[test]
 fn code_lens_function_expressions01() {
     let content = r#"
@@ -32,6 +32,6 @@ namedFn2();
 let namedFn3 = function namedFn3() {};
 const namedFn4 = function namedFn4() {};
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineCodeLens"); // f.VerifyBaselineCodeLens(t, &lsutil.UserPreferences{
+    let _s = Session::new_for_test("codeLensFunctionExpressions01", content);
+    // TODO: f.VerifyBaselineCodeLens(t, &lsutil.UserPreferences{
 }

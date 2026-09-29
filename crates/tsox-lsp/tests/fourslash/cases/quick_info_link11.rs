@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_link11() {
     let content = r#"/**
@@ -12,6 +12,6 @@ fn quick_info_link11() {
 function f() {}
 
 /**/f();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoLink11", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

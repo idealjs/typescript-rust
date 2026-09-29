@@ -15,7 +15,7 @@ impl Checker {
         {
             return true;
         }
-        let mut cur = Some(node);
+        let mut cur = Some(Arc::clone(node));
         while let Some(n) = cur {
             if n.has_syntactic_modifier(ModifierFlags::Ambient) {
                 return true;
@@ -23,15 +23,34 @@ impl Checker {
 
             if matches!(
                 n.kind,
-                SyntaxKind::VariableStatement
-                    | SyntaxKind::ClassDeclaration
-                    | SyntaxKind::FunctionDeclaration
+                SyntaxKind::ClassDeclaration | SyntaxKind::FunctionDeclaration | SyntaxKind::Block
             ) {
                 break;
             }
-            cur = n.parent.as_ref();
+            cur = n.parent();
         }
         false
+    }
+
+    // Go shouldCheckErasableSyntax + c.error：erasableSyntaxOnly 且非 JS 文件时
+    // 在指定 span 报 TS1294
+    pub(crate) fn erasable_syntax_error(
+        &mut self,
+        node: &Arc<Node>,
+        loc: tsox_core::core::text::TextRange,
+    ) {
+        if !self.compiler_options.erasable_syntax_only.is_true()
+            || tsox_frontend::ast::is_in_js_file(node)
+        {
+            return;
+        }
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            self.current_file.clone(),
+            loc,
+            tsox_core::diagnostics::messages_generated::
+                THIS_SYNTAX_IS_NOT_ALLOWED_WHEN_ERASABLESYNTAXONLY_IS_ENABLED,
+            Vec::new(),
+        ));
     }
 
     pub(crate) fn check_cjs_reserved_top_level_name(&mut self, node: &Arc<Node>, name: &Arc<Node>) {
@@ -53,7 +72,7 @@ impl Checker {
         }
 
         let mut top_level = false;
-        let mut p = node.parent.as_ref();
+        let mut p = node.parent();
         while let Some(parent) = p {
             match parent.kind {
                 SyntaxKind::SourceFile => {
@@ -61,7 +80,7 @@ impl Checker {
                     break;
                 }
                 SyntaxKind::VariableDeclarationList | SyntaxKind::VariableStatement => {
-                    p = parent.parent.as_ref();
+                    p = parent.parent();
                 }
                 _ => break,
             }
@@ -71,6 +90,13 @@ impl Checker {
         }
 
         if self.declaration_is_ambient(node) {
+            return;
+        }
+        // Go：非实例化 namespace 不做此检查
+        if node.kind == SyntaxKind::ModuleDeclaration
+            && tsox_frontend::ast::utilities::get_module_instance_state(node)
+                != tsox_frontend::ast::utilities::ModuleInstanceState::Instantiated
+        {
             return;
         }
         let emit_format = self.program.get_emit_module_format_of_file(&file.file_name);
@@ -88,9 +114,9 @@ impl Checker {
             ));
         } else if text == "__esModule" {
             let var_stmt = node
-                .parent
+                .parent()
                 .as_ref()
-                .and_then(|list| list.parent.as_ref())
+                .and_then(|list| list.parent())
                 .filter(|stmt| stmt.kind == SyntaxKind::VariableStatement);
             let exported =
                 var_stmt.is_some_and(|stmt| stmt.has_syntactic_modifier(ModifierFlags::Export));
@@ -103,6 +129,24 @@ impl Checker {
                 tsox_core::diagnostics::messages_generated::
                     IDENTIFIER_EXPECTED_ESMODULE_IS_RESERVED_AS_AN_EXPORTED_MARKER_WHEN_TRANSFORMING_ECMASCRIPT_MODULES,
                 Vec::new(),
+            ));
+        } else if text == "Object"
+            && !matches!(
+                node.kind,
+                SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
+            )
+        {
+            // Go checkCollisionWithGlobalObjectInGeneratedCode：CommonJS 下
+            // 顶层 Object 名保留
+            if emit_format != ModuleKind::CommonJS {
+                return;
+            }
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                name.loc,
+                tsox_core::diagnostics::messages_generated::
+                    DUPLICATE_IDENTIFIER_0_COMPILER_RESERVES_NAME_1_IN_TOP_LEVEL_SCOPE_OF_A_MODULE,
+                vec![text.clone(), text],
             ));
         } else if text == "Object" && node.kind == SyntaxKind::ClassDeclaration {
             if emit_format != ModuleKind::CommonJS {
@@ -130,47 +174,6 @@ impl Checker {
                 vec![module_str],
             ));
         }
-    }
-
-    pub(crate) fn check_for_of_iterated_type(
-        &mut self,
-        statement: &Arc<Node>,
-        expression: &Arc<Node>,
-    ) {
-        let readonly_array_exists = match self.globals.get("ReadonlyArray") {
-            Some(sym) => !sym.members.is_empty(),
-            None => false,
-        };
-        if !readonly_array_exists {
-            return;
-        }
-        let t = self.get_type_of_node(expression);
-        if t.flags.contains(TypeFlags::Any | TypeFlags::Never) {
-            return;
-        }
-        let mut parts: Vec<Arc<Type>> = Vec::new();
-        if t.is_union() {
-            parts = self.constituent_types(&t);
-        } else {
-            parts.push(t.clone());
-        }
-        for part in &parts {
-            let is_string_like = part
-                .flags
-                .intersects(TypeFlags::String | TypeFlags::StringLiteral);
-            if !(self.is_array_type(part) || self.is_tuple_type(part) || is_string_like) {
-                let type_str = self.type_to_string(&t);
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    self.current_file.clone(),
-                    expression.loc,
-                    tsox_core::diagnostics::messages_generated::
-                        TYPE_0_IS_NOT_AN_ARRAY_TYPE_OR_A_STRING_TYPE,
-                    vec![type_str],
-                ));
-                return;
-            }
-        }
-        let _ = statement;
     }
 
     pub(crate) fn check_for_initializer(&mut self, node: &Arc<Node>) {
@@ -204,28 +207,6 @@ impl Checker {
                             if let tsox_frontend::ast::NodeData::ComputedPropertyName(cd) = &pn.data
                             {
                                 self.check_expression(&cd.expression);
-
-                                let expr_type = self.get_type_of_node(&cd.expression);
-                                let is_any = match &expr_type.data {
-                                    crate::checker::types::TypeData::Union(u) => u
-                                        .union_or_intersection
-                                        .types
-                                        .iter()
-                                        .any(|t| t.flags.contains(TypeFlags::Any)),
-                                    _ => expr_type.flags.contains(TypeFlags::Any),
-                                };
-                                if is_any {
-                                    let file = self.current_file.clone();
-                                    let type_str = self.type_to_string(&expr_type);
-                                    let diagnostic = tsox_frontend::ast::Diagnostic::new(
-                                        file,
-                                        cd.expression.loc,
-                                        tsox_core::diagnostics::messages_generated::
-                                            TYPE_0_CANNOT_BE_USED_AS_AN_INDEX_TYPE,
-                                        vec![type_str],
-                                    );
-                                    self.diagnostics.add(diagnostic);
-                                }
                             }
                         }
                     }

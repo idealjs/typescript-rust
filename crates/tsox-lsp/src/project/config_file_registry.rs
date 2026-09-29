@@ -23,6 +23,8 @@ pub struct ConfigFileEntry {
     pub retaining_open_files: HashMap<Path, ()>,
 
     pub retaining_configs: HashMap<Path, ()>,
+
+    pub root_files_watch: Option<std::sync::Arc<super::watch::WatchedFiles<Vec<String>>>>,
 }
 
 impl ConfigFileEntry {
@@ -35,6 +37,7 @@ impl ConfigFileEntry {
             retaining_projects: HashMap::new(),
             retaining_open_files: HashMap::new(),
             retaining_configs: HashMap::new(),
+            root_files_watch: None,
         }
     }
 
@@ -46,6 +49,7 @@ impl ConfigFileEntry {
             retaining_projects: HashMap::new(),
             retaining_open_files: HashMap::new(),
             retaining_configs: HashMap::new(),
+            root_files_watch: None,
         };
         entry.retaining_configs.insert(extending_config_path, ());
         entry

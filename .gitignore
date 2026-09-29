@@ -6,3 +6,9 @@ crates/tsox/tests/baselines/local/
 # submodule 全量/验证跑日志：结论记入 TESTING.md，原始日志不入库
 *.log
 __pycache__/
+fullrun.log
+# 修复循环每轮轮转产物(当前轮 corpus_results.csv 与 corpus_skips.csv 入库,prev/diff 不入)
+corpus_results.prev.csv
+corpus_results.diff
+corpus_skips.prev.csv
+corpus_skips.diff

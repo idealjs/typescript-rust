@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_of_split_interface() {
     let content = r#"interface A {
@@ -34,7 +34,7 @@ var ci: I;
 ci./*1*/b;
 var ci1: I1;
 ci1./*2*/b;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListOfSplitInterface", content);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("1"), &["i1", "i2", "i3", "a", "b", "c"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("2"), &["i11", "i12", "a", "b", "b1"]);
 }

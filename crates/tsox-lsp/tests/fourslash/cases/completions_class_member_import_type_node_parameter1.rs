@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_class_member_import_type_node_parameter1() {
     let content = r#"// @module: node18
@@ -16,6 +16,7 @@ export declare class PreTrainedModel {
 export declare class BlenderbotSmallPreTrainedModel extends PreTrainedModel {
   /*1*/
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsClassMemberImportTypeNodeParameter1", content);
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

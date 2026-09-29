@@ -4,6 +4,52 @@
 
 - git commit 只在用户明确指示时执行（如「提交一下」）；文档或代码修改后只落盘，不主动提交
 - 主分支（main）不频繁小步提交，提交时机与粒度由用户决定
+- 合并 subagent 分支一律用 rebase 方式：把分支提交 rebase 到目标分支后 fast-forward（或等价的 rebase-merge），不产生 merge commit
+
+### 语料修复飞轮
+
+主 agent 是唯一构建者与测试者；subagent 全程**纯文本**（在隔离 worktree 内操作，禁构建、禁跑测试，输出 patch / 独立 commit），由主 agent 按分发顺序统一合并。
+
+```mermaid
+flowchart TD
+    START["飞轮入口（主 agent 串行）<br/>锁定基线：commit / corpus_skips / ignore / 基线 diff"]
+    START --> NR["主 agent：cargo test --no-run<br/>ulimit -v 4194304 · TSOX_SUBMODULE_LIMIT=0"]
+    NR --> NRQ{"零编译错误？"}
+    NRQ -->|否| CUT_C["脚本机械切割编译错误<br/>按 crate / 错误码 / 错误签名 → 单文件分片队列"]
+    CUT_C --> DISP_C["主 agent 派发一片 = 一个文件<br/>修复 subagent（隔离 worktree · 纯文本）<br/>只读：repo / Go oracle / 编译错误 / 基线 diff<br/>禁止：任何 cargo · 编译 · 测试<br/>输出：patch / 独立 commit"]
+    DISP_C --> MERGE_C["主 agent 合并：rebase / cherry-pick<br/>冲突就地解决 · 修复记录追加到 todos/corpus-fix-notes.md"]
+    MERGE_C --> WAIT_C{"编译分片队列发完？"}
+    WAIT_C -->|否：派下一片（单发串行）| DISP_C
+    WAIT_C -->|是| NR
+    NRQ -->|是| RUN["主 agent：全量语料测试<br/>cargo test --release --no-fail-fast"]
+    RUN --> EXP["主 agent 导出<br/>corpus_results.csv / corpus_skips.csv"]
+    EXP --> TQ{"FAIL = 0？"}
+    TQ -->|否| CUT_T["脚本机械切割 FAIL<br/>按错误签名 → 单用例分片队列<br/>flaky 候选单独标记"]
+    CUT_T --> DISP_T["主 agent 派发一片 = 一个用例<br/>修复 subagent（隔离 worktree · 纯文本）<br/>只读：repo / Go oracle / 失败信息 / 基线 diff<br/>允许：改生产代码 + 测试代码<br/>禁止：任何 cargo · 编译 · 测试<br/>输出：patch / 独立 commit"]
+    DISP_T --> MERGE_T["主 agent 合并：rebase / cherry-pick<br/>冲突就地解决 · 修复记录追加到 todos/corpus-fix-notes.md"]
+    MERGE_T --> WAIT_T{"测试分片队列发完？"}
+    WAIT_T -->|否：派下一片（单发串行）| DISP_T
+    WAIT_T -->|是| NR
+    TQ -->|是| CHK{"新增 skip / ignore / flaky？"}
+    CHK -->|否| END["结束 · 汇总报告<br/>编译零错误 / FAIL 清零 / skip 无新增 / diff 清单"]
+    CHK -->|是| HUMAN["人工确认：保留或撤回"]
+    CUT_T -.->|"flaky / 超时 / OOM：主 agent 隔离重跑"| RUN
+    MERGE_C -.->|"熔断：max_round / max_attempts / 无进展"| HUMAN
+    MERGE_T -.->|"熔断：max_round / max_attempts / 无进展"| HUMAN
+```
+
+- **基线锁定（入口）**：主 agent 串行记录当前 commit、corpus_skips 状态、ignore 清单、基线 diff，作为本轮飞轮的对照基线。
+- **编译闸门**：`cargo test --no-run`（ulimit -v 4194304，TSOX_SUBMODULE_LIMIT=0）。有编译错误则脚本机械切割（按 crate / 错误码 / 错误签名），进入编译分片循环；零错误才放行测试闸门。
+- **测试闸门**：`cargo test --release --no-fail-fast` 全量语料 → `corpus_csv_export.py` 出双表。FAIL > 0 则脚本机械切割（按错误签名 / 用例簇，flaky 候选单独标记），进入测试分片循环；测试修复合并后**必须回到编译闸门**（改动可能引入编译错）。
+- **分发（两轮同规，单发串行 · 2026-09-29 用户拍板）**：脚本仍机械切割出全量分片队列，但主 agent **一次只派发一片**：编译轮一个文件、测试轮一个用例，in-flight 恒为 1；**不做多族 / 多分片并发分发**（旧「并发 8-12 · 名额一空立即补发」口径废止）。每片修复返回即合并，并把该次修复记录（文件/用例、根因、对照的 Go 源、改动点、结果与 CSV 变化）追加到仓库级笔记 `todos/corpus-fix-notes.md`（最新在上；系统记忆已清空，仓库内文件是唯一留存），然后才派发下一片；队列发完回对应闸门做一次复验。
+- **subagent 契约（纯文本）**：隔离 worktree；只读 repo / Go oracle（`/home/cqh/workspace/typescript-go`）/ 派发 prompt 内联的错误清单与基线 diff；禁止任何 cargo 命令、编译、测试；测试分片允许改生产代码 + 测试代码；按根因增量独立 commit；汇报**函数变更表**（缺表打回）。30 分钟预算（剩 6 分钟强制收尾）、单根因 10 分钟熔断、Bash 连续 3 次故障写交接退出。**禁止用空壳实现消错**：恒返 `None`/空函数体/`let _ =` 丢弃结果/捏造常量值/删真实逻辑换占位，均属编造行为迁就编译——符号不存在时只允许三选一：grep 到真实等价符号改接线、按 Go 移植最小真实实现、保留错误记交接留给下一轮。主 agent 收集时抽查 diff，发现 None 化/空壳模式整轮回滚重派。
+- **合并**：主 agent 每片返回即 rebase / cherry-pick 回主仓，冲突按 Go 语义就地解决；全部片发完后回对应闸门做一次复验（不逐片复验）。
+- **异常路由**：flaky / 超时 / OOM 由主 agent 隔离重跑判定，不入分片；熔断条件（max_round / max_attempts / 无进展）触发即停轮交人工；轮末新增 skip / ignore / flaky 必须人工确认保留或撤回，未经批注不得视为收敛。
+- **收敛**：编译零错误 + FAIL = 0 + skip 无新增 + diff 清单，四项齐备飞轮结束。
+
+函数靠齐追踪表：`python3 tools/gen_func_alignment.py` 生成仓库根 `func_alignment.csv`（静态抓取 Go/Rust 两侧全部函数名，camelCase↔snake_case 由脚本归一为 `norm_name` 排序键，单表左右对照：已匹配的两侧同行展示，未匹配按 go_only/rust_only 标注且同名/近名行相邻；match_type 按 exact/suffix_variant/fuzzy/go_only/rust_only 分级）。每次修复中某个 Go 函数被靠齐后，主 agent 在收集裁决时执行 `--mark --go <函数名> --status yes|partial|no --round <轮次> --note <备注>` 标记该行；重新生成保留已有标记。该表与仓库根 CSV 同为 subagent 只读，用于快速掌握哪些 Go 函数已靠齐、哪些尚无对应。
+
+**靠齐判定纪律（不可违反）**：我们在做的是**按名称匹配迁移，只以 `func_alignment.csv` 表格数据为准**。不得随意以其他方式（报告声称、语义判断、探针观察等）认为匹配完成。
 
 ## 代码规范
 
@@ -53,6 +99,17 @@
 - 批量语料/生成型用例 → `tests/<套件名>/` 单一目标（见上）
 - 多进程编排（需要启动外部服务，无浏览器）→ CI 中的集成 job
 - 浏览器 UI 端到端 → 独立的 Playwright 工程
+
+### 测试运行规范
+
+- Rust 全量/批量测试：`(ulimit -v 4194304; cargo test --release --no-fail-fast)`，内存限制必须保留（RLIMIT_AS 4GB——2026-09-29 用户指示由 8GB 降档：语料 worker 每用例独立进程实际峰值远低于此，fourslash OOM 的瓶颈是套件累计驻留而非单限值，降档防宿主内存压力）；release 相对 debug 有 5 倍执行提速（fourslash 4471 用例单二进制约 60s，构建成本远小于收益）
+- Rust 单条用例调试迭代：debug 构建可接受（编译快，单条秒级），同样保留内存限制
+- Go oracle：`GOMEMLIMIT=4GiB go test -count=1 ./...`（Go 运行时对 RLIMIT_AS 敏感，用软限）
+- 全量语料的内存护栏脚本 `tools/fourslash_shard.py`（分片 + 单线程 + RSS 采样 + 断点续跑），批量回归异常排查时启用
+
+超限的表现是进程被提前杀死或输出不完整；此时按内存/死循环根因排查（受控探针测斜率、变体二分）。
+
+- 批量/全量测试运行后，执行 `python3 tools/corpus_csv_export.py fullrun.log` 更新仓库根 `corpus_results.csv`：只记 FAIL 用例，表头 `key,seconds`，key 为 `compiler/<用例名>`，按 key 字典序；脚本自动将上一轮存为 `corpus_results.prev.csv` 并生成 `corpus_results.diff`
 
 ## 文档规范
 

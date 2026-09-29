@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: }"]
+
 #[test]
 fn tsx_rename5() {
     let content = r#"//@Filename: file.tsx
@@ -18,7 +18,7 @@ class MyClass {
 
 [|var [|{| "contextRangeIndex": 0 |}nn|]: string;|]
 var x = <MyClass name={[|nn|]}></MyClass>;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "nn")
+    let _s = Session::new_for_test("tsxRename5", content);
+    // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "nn")
     // TODO: }
 }

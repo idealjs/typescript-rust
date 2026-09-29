@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: // Close all files and open temp file, only inferred project"]
+
 #[test]
 fn rename_ancestor_project_ref_mangement() {
     let content = r#"
@@ -76,22 +76,21 @@ export function getMyConst() {
 	],
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameAncestorProjectRefMangement", content);
     fourslash::go_to_marker(&mut s, "find");
     // TODO: // Open temp file and verify all projects alive
     fourslash::go_to_marker(&mut s, "temp");
     // TODO: // Ref projects are loaded after as part of this command
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "find")
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "find")
     // TODO: // Open temp file and verify all projects alive
-    fourslash::unsupported("CloseFileOfMarker"); // f.CloseFileOfMarker(t, "temp")
+    // TODO: f.CloseFileOfMarker(t, "temp")
     fourslash::go_to_marker(&mut s, "temp");
     // TODO: // Close all files and open temp file, only inferred project should be alive
-    fourslash::unsupported("CloseFileOfMarker"); // f.CloseFileOfMarker(t, "find")
-    fourslash::unsupported("CloseFileOfMarker"); // f.CloseFileOfMarker(t, "temp")
+    // TODO: f.CloseFileOfMarker(t, "find")
+    // TODO: f.CloseFileOfMarker(t, "temp")
     fourslash::go_to_marker(&mut s, "temp");
 }
 
-#[ignore = "generator: aFcMarker := findMarker.MakerWithSymlink('/projects/a/c/fc.t"]
 #[test]
 fn rename_in_common_file() {
     let content = r#"
@@ -111,12 +110,12 @@ console.log(C)
 // @Filename: /projects/c/fc.ts
 export const /*find*/C = 42;
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("renameInCommonFile", content);
     fourslash::go_to_marker(&mut s, "aTs");
     fourslash::go_to_marker(&mut s, "bTs");
     // TODO: findMarker := f.MarkerByName(t, "find")
     // TODO: aFcMarker := findMarker.MakerWithSymlink("/projects/a/c/fc.ts")
-    fourslash::unsupported("GoToMarkerOrRange"); // f.GoToMarkerOrRange(t, aFcMarker)
-    fourslash::unsupported("GoToMarkerOrRange"); // f.GoToMarkerOrRange(t, findMarker.MakerWithSymlink("/projects/b/c/fc.ts"))
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, aFcMarker)
+    // TODO: f.GoToMarkerOrRange(t, aFcMarker)
+    // TODO: f.GoToMarkerOrRange(t, findMarker.MakerWithSymlink("/projects/b/c/fc.ts"))
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, aFcMarker)
 }

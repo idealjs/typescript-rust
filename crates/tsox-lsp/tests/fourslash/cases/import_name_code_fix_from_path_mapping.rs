@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
+
 #[test]
 fn import_name_code_fix_from_path_mapping() {
     let content = r#"// @Filename: /a.ts
@@ -16,7 +16,7 @@ foo;
         }
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_fromPathMapping", content);
     fourslash::go_to_file(&mut s, "/x/y.ts");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

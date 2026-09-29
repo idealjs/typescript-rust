@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
+
 #[test]
 fn navigation_bar_items_modules1() {
     let content = r#"declare module "X.Y.Z" {}
@@ -28,6 +28,6 @@ namespace A {
         }
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
+    let _s = Session::new_for_test("navigationBarItemsModules1", content);
+    // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

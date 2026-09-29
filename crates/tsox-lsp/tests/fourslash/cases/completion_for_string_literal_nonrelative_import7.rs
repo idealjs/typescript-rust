@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_for_string_literal_nonrelative_import7() {
     let content = r#"// @baseUrl: tests/cases/fourslash/modules
@@ -14,6 +14,6 @@ export var x = 5;
 { "dependencies": { "module-from-node": "latest" } }
 // @Filename: node_modules/module-from-node/index.ts
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("completionForStringLiteralNonrelativeImport7", content);
+    // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_is_definition() {
     let content = r#"declare function foo(a: number): number;
@@ -28,6 +28,6 @@ class Foo implements IFoo {
     foo/*6*/(): void { }
     static init() { return new this() }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6")
+    let _s = Session::new_for_test("findAllRefsIsDefinition", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6")
 }

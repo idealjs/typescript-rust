@@ -3,7 +3,6 @@ use crate::ls::lsutil_user_preferences_enums::*;
 use crate::ls::lsutil_user_preferences_raw_fields::apply_raw_fields;
 
 use tsox_core::core::tristate::Tristate;
-use tsox_tsoptions::modulespecifiers;
 
 use crate::ls::lsutil_format_code_options::FormatCodeSettings;
 use crate::ls::lsutil_format_code_options::get_default_format_code_settings;
@@ -71,7 +70,7 @@ pub fn new_default_user_preferences() -> UserPreferences {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct UserPreferences {
     pub format_code_settings: FormatCodeSettings,
 
@@ -215,7 +214,7 @@ impl UserPreferences {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct InlayHintsPreferences {
     pub include_inlay_parameter_name_hints: IncludeInlayParameterNameHints,
     pub include_inlay_parameter_name_hints_when_argument_matches_name: Tristate,
@@ -227,7 +226,7 @@ pub struct InlayHintsPreferences {
     pub include_inlay_enum_member_value_hints: Tristate,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct CodeLensUserPreferences {
     pub references_code_lens_enabled: Tristate,
     pub implementations_code_lens_enabled: Tristate,

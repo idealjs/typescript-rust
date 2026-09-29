@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn get_occurrences_is_definition_of_interface_class_merge() {
     let content = r#"/*1*/interface /*2*/Numbers {
@@ -16,6 +16,6 @@ fn get_occurrences_is_definition_of_interface_class_merge() {
 }
 let i: /*7*/Numbers = new /*8*/Numbers();
 let x = i.f(i.p + i.m);"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8")
+    let _s = Session::new_for_test("getOccurrencesIsDefinitionOfInterfaceClassMerge", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8")
 }

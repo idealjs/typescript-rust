@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn goto_definition_property_access_expression_heritage_clause() {
     let content = r#"class B {}
@@ -9,6 +9,6 @@ function foo() {
 }
 class C extends (foo()).[|/*B*/B|] {}
 class C1 extends foo().[|/*B1*/B|] {}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "B", "B1")
+    let _s = Session::new_for_test("gotoDefinitionPropertyAccessExpressionHeritageClause", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "B", "B1")
 }

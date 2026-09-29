@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_overloads_in_multiple_property_accesses() {
     let content = r#"namespace A {
@@ -11,6 +11,6 @@ fn go_to_definition_overloads_in_multiple_property_accesses() {
     }
 }
 A.B.[|/*2*/f|]("");"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "2")
+    let _s = Session::new_for_test("goToDefinitionOverloadsInMultiplePropertyAccesses", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "2")
 }

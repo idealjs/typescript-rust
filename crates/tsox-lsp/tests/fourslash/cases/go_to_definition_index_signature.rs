@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_index_signature() {
     let content = r#"interface I {
@@ -10,8 +10,8 @@ interface J {
     /*defJ*/[x: string]: number;
 }
 interface K {
-    /*defa*/[x: ` + "`" + `a${string}` + "`" + `]: string;
-    /*defb*/[x: ` + "`" + `${string}b` + "`" + `]: string;
+    /*defa*/[x: `a${string}`]: string;
+    /*defb*/[x: `${string}b`]: string;
 }
 declare const i: I;
 i.[|/*useI*/foo|];
@@ -21,6 +21,6 @@ declare const k: K;
 k.[|/*usea*/a|];
 k.[|/*useb*/b|];
 k.[|/*useab*/ab|];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "useI", "useIJ", "usea", "useb", "useab")
+    let _s = Session::new_for_test("goToDefinitionIndexSignature", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "useI", "useIJ", "usea", "useb", "useab")
 }

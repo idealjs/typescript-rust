@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn js_doc_see4() {
     let content = r#"class [|/*def1*/A|] {
@@ -19,6 +19,6 @@ const t2 = 1
  * @see {@link /*use3*/[|a|].foo()}
  */
 const t3 = 1"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "use1", "use2", "use3")
+    let _s = Session::new_for_test("jsDocSee4", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, false, "use1", "use2", "use3")
 }

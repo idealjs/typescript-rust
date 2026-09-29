@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_class_extend_abstract_some_properties_present() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: false
 // @noImplicitOverride: true
 abstract class A {
@@ -16,6 +16,6 @@ class C extends A {[|
    |]constructor(public x: number) { super(); }
    y: number;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `
+    let _s = Session::new_for_test("codeFixClassExtendAbstractSomePropertiesPresent", content);
+    // TODO: f.VerifyRangeAfterCodeFix(t, `
 }

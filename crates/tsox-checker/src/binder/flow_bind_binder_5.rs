@@ -95,12 +95,38 @@ impl Binder {
             return;
         }
         self.expando_assignments
-            .push((Arc::clone(node), self.block_scope_container.clone()));
+            .push(crate::binder::binder::ExpandoAssignmentInfo {
+                node: Arc::clone(node),
+                block_scope_container: self.block_scope_container.clone(),
+                container: self.container.clone(),
+            });
+    }
+
+    fn lookup_entity_single_scope(
+        &self,
+        base_name: &str,
+        scope: &Option<Arc<Node>>,
+    ) -> Option<Arc<Symbol>> {
+        let sc = scope.as_ref()?;
+        if let Some(sym) = self
+            .symbol_map
+            .locals
+            .get(&sc.id())
+            .and_then(|l| l.get(base_name))
+        {
+            return Some(Arc::clone(sym));
+        }
+        let sym = self.symbol_map.symbol_of(sc)?;
+        sym.exports
+            .get(base_name)
+            .or_else(|| sym.members.get(base_name))
+            .cloned()
     }
 
     pub(crate) fn process_expando_assignments(&mut self) {
         let assignments = std::mem::take(&mut self.expando_assignments);
-        for (node, scope_start) in assignments {
+        for info in assignments {
+            let node = info.node;
             let NodeData::BinaryExpression(bin) = &node.data else {
                 continue;
             };
@@ -110,43 +136,28 @@ impl Binder {
                 _ => continue,
             };
             let base_name = base.text();
-            let mut target: Option<Arc<Symbol>> = None;
-            let mut scope = scope_start;
-            while let Some(sc) = scope {
-                if let Some(sym) = self
-                    .symbol_map
-                    .locals
-                    .get(&sc.id())
-                    .and_then(|l| l.get(base_name))
-                {
-                    target = Some(Arc::clone(sym));
-                    break;
-                }
-
-                if matches!(
-                    sc.kind,
-                    SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration
-                ) && let Some(sym) = self.symbol_map.symbol_of(&sc)
-                {
-                    let hit = sym
-                        .members
-                        .get(base_name)
-                        .or_else(|| sym.exports.get(base_name))
-                        .cloned();
-                    if let Some(h) = hit {
-                        target = Some(h);
-                        break;
-                    }
-                }
-                scope = sc.parent.clone();
-            }
+            let target = self
+                .lookup_entity_single_scope(base_name, &info.block_scope_container)
+                .or_else(|| self.lookup_entity_single_scope(base_name, &info.container));
             let Some(sym) = target else { continue };
 
-            if !sym
+            // tsc getExpandoSymbol：函数声明，或初始化为函数表达式/箭头函数的变量
+            let expando_eligible = sym
                 .value_declaration
                 .as_ref()
-                .is_some_and(|d| d.kind == SyntaxKind::FunctionDeclaration)
-            {
+                .is_some_and(|d| match &d.data {
+                    NodeData::FunctionDeclaration(_) => true,
+                    NodeData::VariableDeclaration(vd) => {
+                        vd.initializer.as_ref().is_some_and(|init| {
+                            matches!(
+                                init.kind,
+                                SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction
+                            )
+                        })
+                    }
+                    _ => false,
+                });
+            if !expando_eligible {
                 continue;
             }
             let member_name: Option<String> = match &bin.left.data {
@@ -154,6 +165,7 @@ impl Binder {
                 NodeData::ElementAccessExpression(eae) => match &eae.argument_expression.data {
                     NodeData::StringLiteral(s) => Some(s.text.clone()),
                     NodeData::NumericLiteral(n) => Some(n.text.clone()),
+                    NodeData::NoSubstitutionTemplateLiteral(t) => Some(t.text.clone()),
                     _ => None,
                 },
                 _ => None,
@@ -195,7 +207,7 @@ impl Binder {
                             let prop_mut = Arc::as_ptr(&prop) as *mut Symbol;
                             unsafe {
                                 (*prop_mut).declarations.push(Arc::clone(&node));
-                                (*prop_mut).parent = Some(Arc::clone(&sym));
+                                (*prop_mut).set_parent(&sym);
                             }
                             let sym_mut = Arc::as_ptr(&sym) as *mut Symbol;
                             unsafe {
@@ -222,7 +234,7 @@ impl Binder {
                             let p_mut = Arc::as_ptr(&p) as *mut Symbol;
                             unsafe {
                                 (*p_mut).declarations.push(Arc::clone(&node));
-                                (*p_mut).parent = Some(Arc::clone(&sym));
+                                (*p_mut).set_parent(&sym);
                             }
                             let sym_mut = Arc::as_ptr(&sym) as *mut Symbol;
                             unsafe {
@@ -277,10 +289,10 @@ impl Binder {
     }
 
     pub(crate) fn is_in_for_in_or_of_head(node: &Arc<Node>) -> bool {
-        let Some(parent) = &node.parent else {
+        let Some(parent) = &node.parent() else {
             return false;
         };
-        let Some(grandparent) = &parent.parent else {
+        let Some(grandparent) = &parent.parent() else {
             return false;
         };
         matches!(

@@ -6,17 +6,42 @@ use crate::checker::checker::*;
 
 impl Checker {
     pub(crate) fn get_type_of_element_access(&mut self, node: &Arc<Node>) -> Arc<Type> {
-        let (obj_expr, arg_expr) = match &node.data {
-            tsox_frontend::ast::NodeData::ElementAccessExpression(data) => {
-                (&data.expression, &data.argument_expression)
-            }
+        let (obj_expr, arg_expr, question_dot) = match &node.data {
+            tsox_frontend::ast::NodeData::ElementAccessExpression(data) => (
+                &data.expression,
+                &data.argument_expression,
+                data.question_dot_token.is_some(),
+            ),
             _ => return self.get_any_type(),
         };
 
+        let obj_precheck = self.get_type_of_node(obj_expr);
+        let obj_checked = if question_dot {
+            obj_precheck
+        } else {
+            self.check_non_null_type(&obj_precheck, obj_expr)
+        };
+        if crate::checker::utilities::is_type_error(&obj_checked) {
+            return obj_checked;
+        }
         {
+            let skip_index_check = obj_checked.flags.intersects(TypeFlags::Any);
             let arg_type = self.get_type_of_node(arg_expr);
 
-            let is_type_param_or_union_of = arg_type.is_type_parameter()
+            if arg_type
+                .flags
+                .intersects(TypeFlags::Index | TypeFlags::IndexedAccess | TypeFlags::TemplateLiteral)
+                || matches!(&arg_type.data, TypeData::IndexedAccess(_))
+            {
+                if obj_checked.flags.intersects(TypeFlags::Any | TypeFlags::Unknown) {
+                    return obj_checked;
+                }
+                let deferred = self.deferred_indexed_access(&obj_checked, &arg_type);
+                return self.flow_type_of_access_expression(node, None, deferred);
+            }
+
+            let is_type_param_or_union_of = skip_index_check
+                || arg_type.is_type_parameter()
                 || (arg_type.is_union()
                     && arg_type
                         .types()
@@ -38,6 +63,7 @@ impl Checker {
                             | TypeFlags::Number
                             | TypeFlags::NumberLiteral
                             | TypeFlags::ESSymbol
+                            | TypeFlags::UniqueESSymbol
                             | TypeFlags::EnumLiteral
                             | TypeFlags::StringMapping,
                     ) {
@@ -54,17 +80,61 @@ impl Checker {
                 }
             }
         }
-        let obj_type = self.get_type_of_node(obj_expr);
+        let obj_type = obj_checked;
+        let effective_arg = self.effective_index_arg_type(arg_expr);
 
         if obj_type.flags.contains(TypeFlags::Union)
             && let Some(members) = obj_type.types().map(|ts| ts.to_vec())
         {
+            let dynamic = effective_arg
+                .flags
+                .intersects(TypeFlags::String | TypeFlags::Number)
+                && !effective_arg.flags.intersects(
+                    TypeFlags::Any | TypeFlags::StringLiteral | TypeFlags::NumberLiteral,
+                );
+            let non_any: Vec<&Arc<Type>> = members
+                .iter()
+                .filter(|m| {
+                    !m.flags.contains(TypeFlags::Any)
+                        && !(question_dot
+                            && m.flags.intersects(TypeFlags::Null | TypeFlags::Undefined))
+                })
+                .collect();
+            if dynamic
+                && !non_any.is_empty()
+                && !non_any.iter().all(|m| {
+                    self.member_allows_dynamic_index(
+                        m,
+                        effective_arg.flags.contains(TypeFlags::String),
+                    )
+                })
+            {
+                self.report_element_access_implicit_any(node, &obj_type, arg_expr, &effective_arg);
+                return self.get_any_type();
+            }
+            let literal_name = self.literal_element_access_name(arg_expr);
             let mut elem_types: Vec<Arc<Type>> = Vec::new();
             for m in &members {
                 if m.flags.contains(TypeFlags::Any) {
                     continue;
                 }
-                let t = self.element_access_result_type(node, m, arg_expr);
+                if question_dot && m.flags.intersects(TypeFlags::Null | TypeFlags::Undefined) {
+                    continue;
+                }
+                // Go createUnionOrIntersectionProperty：联合成分缺该名属性且为
+                // 对象字面量（无 spread）时贡献 undefined，不报 nia
+                if let Some(name) = &literal_name
+                    && m.object_flags.contains(crate::checker::types::ObjectFlags::ObjectLiteral)
+                    && !m
+                        .object_flags
+                        .contains(crate::checker::types::ObjectFlags::ContainsSpread)
+                    && self.get_property_of_type(m, name).is_none()
+                {
+                    elem_types.push(self.undefined_type());
+
+                    continue;
+                }
+                let t = self.element_access_result_type(node, m, arg_expr, &effective_arg, false);
                 if !t.flags.contains(TypeFlags::Any) {
                     elem_types.push(t);
                 }
@@ -74,7 +144,41 @@ impl Checker {
             }
             return self.get_any_type();
         }
-        self.element_access_result_type(node, &obj_type, arg_expr)
+        self.element_access_result_type(node, &obj_type, arg_expr, &effective_arg, true)
+    }
+
+    fn index_access_with_no_unchecked_undefined(
+        &mut self,
+        t: Arc<Type>,
+        from_index_signature: bool,
+    ) -> Arc<Type> {
+        if self.no_unchecked_indexed_access && from_index_signature {
+            return self.get_union_type(vec![t, self.undefined_type()]);
+        }
+        t
+    }
+
+    fn member_allows_dynamic_index(&self, m: &Arc<Type>, want_string: bool) -> bool {        if m.flags.intersects(TypeFlags::Any | TypeFlags::Unknown | TypeFlags::Never) {
+            return true;
+        }
+        let has = |string: bool| {
+            m.as_structured().is_some_and(|s| {
+                s.index_infos.iter().any(|info| {
+                    info.key_type
+                        .as_ref()
+                        .is_some_and(|k| k.flags.contains(if string {
+                            TypeFlags::String
+                        } else {
+                            TypeFlags::Number
+                        }))
+                })
+            })
+        };
+        if want_string {
+            has(true)
+        } else {
+            has(false) || self.is_array_type(m) || self.is_tuple_type(m) || has(true)
+        }
     }
 
     fn element_access_result_type(
@@ -82,54 +186,163 @@ impl Checker {
         node: &Arc<Node>,
         obj_type: &Arc<Type>,
         arg_expr: &Arc<Node>,
+        effective_arg: &Arc<Type>,
+        report_nia: bool,
     ) -> Arc<Type> {
-        if self.is_tuple_type(obj_type) {
-            if let Some(index) = self.get_constant_numeric_value(arg_expr) {
-                if let Some(t) = self.get_tuple_element_type(obj_type, index as usize) {
-                    return t;
+        // Go getIndexedAccessTypeOrUndefined：命名属性访问（含知名符号
+        // `[Symbol.iterator]`、字面量下标命中的成员）先于数组/元组下标捷径
+        let early_prop_name = self
+            .property_name_from_index(&effective_arg)
+            .or_else(|| self.literal_element_access_name(arg_expr));
+        let named_member_hit = early_prop_name
+            .as_ref()
+            .and_then(|name| self.get_property_of_type(obj_type, name));
+
+        if named_member_hit.is_none() {
+            if self.is_tuple_type(obj_type) {
+                if let Some(index) = self.get_constant_numeric_value(arg_expr) {
+                    if let Some(t) = self.get_tuple_element_type(obj_type, index as usize) {
+                        return t;
+                    }
                 }
+
+                return self.get_any_type();
             }
 
-            return self.get_any_type();
+            if self.is_array_type(obj_type) {
+                if report_nia
+                    && !effective_arg.flags.intersects(
+                        TypeFlags::Number
+                            | TypeFlags::NumberLiteral
+                            | TypeFlags::Any
+                            | TypeFlags::EnumLiteral,
+                    )
+                {
+                    self.report_element_access_implicit_any(
+                        node,
+                        obj_type,
+                        arg_expr,
+                        effective_arg,
+                    );
+                }
+                let element = self.get_array_element_type(obj_type);
+                if self.no_unchecked_indexed_access {
+                    let union = self.get_union_type(vec![element, self.undefined_type()]);
+                    return self.flow_type_of_access_expression(node, None, union);
+                }
+                return element;
+            }
         }
 
-        if self.is_array_type(obj_type) {
-            return self.get_array_element_type(obj_type);
-        }
-
-        if let Some(member_name) = self.literal_element_access_name(arg_expr) {
+        let prop_name = self
+            .property_name_from_index(&effective_arg)
+            .or_else(|| self.literal_element_access_name(arg_expr));
+        if let Some(member_name) = prop_name {
             if let Some(sym) = self.get_property_of_type(obj_type, &member_name) {
+                if let tsox_frontend::ast::NodeData::ElementAccessExpression(data) = &node.data {
+                    let self_access = self.is_self_type_access(&data.expression, obj_type);
+                    self.mark_property_as_referenced_ex(&sym, Some(node), Some(self_access));
+                }
+                let from_index_signature = !matches!(&obj_type.data, crate::checker::types::TypeData::Tuple(_))
+                    && element_name_resolved_from_index(obj_type, &member_name);
                 if let Some(substituted) = self.instantiate_array_member_type(obj_type, &sym) {
-                    return self.flow_type_of_access_expression(node, Some(&sym), substituted);
+                    let t = self.index_access_with_no_unchecked_undefined(
+                        substituted,
+                        from_index_signature,
+                    );
+                    return self.flow_type_of_access_expression(node, Some(&sym), t);
                 }
                 let prop_type = self.get_type_of_symbol(&sym);
-                return self.flow_type_of_access_expression(node, Some(&sym), prop_type);
+                let t =
+                    self.index_access_with_no_unchecked_undefined(prop_type, from_index_signature);
+                return self.flow_type_of_access_expression(node, Some(&sym), t);
             }
         }
 
-        if let Some(structured) = obj_type.as_structured() {
-            for info in &structured.index_infos {
-                if let Some(key_type) = &info.key_type {
-                    if key_type.flags.contains(crate::checker::TypeFlags::String)
-                        || key_type.flags.contains(crate::checker::TypeFlags::Number)
-                    {
-                        if let Some(val_type) = &info.value_type {
-                            let val_type = Arc::clone(val_type);
-                            return self.flow_type_of_access_expression(node, None, val_type);
+        if matches!(&obj_type.data, crate::checker::types::TypeData::Mapped(_)) {
+            let mapped_result = self.get_indexed_access_type(obj_type, &effective_arg);
+            if !mapped_result.flags.contains(TypeFlags::Any) {
+                return self.flow_type_of_access_expression(node, None, mapped_result);
+            }
+        }
+
+        if let Some(sym) = obj_type
+            .symbol
+            .as_ref()
+            .filter(|s| s.flags.intersects(tsox_frontend::ast::SymbolFlags::ENUM))
+            .map(Arc::clone)
+        {
+            let all_string_members = !sym.members.is_empty()
+                && sym.members.entries.values().all(|m| {
+                    m.declarations.iter().all(|d| {
+                        matches!(
+                            &d.data,
+                            tsox_frontend::ast::NodeData::EnumMember(em)
+                                if em.initializer.as_ref().is_some_and(|init| {
+                                    init.kind == SyntaxKind::StringLiteral
+                                })
+                        )
+                    })
+                });
+            let arg_is_number = matches!(arg_expr.kind, SyntaxKind::NumericLiteral)
+                || effective_arg.flags.intersects(
+                    TypeFlags::Number | TypeFlags::NumberLiteral | TypeFlags::EnumLiteral,
+                );
+            if arg_is_number && !all_string_members {
+                let s = self.string_type();
+                return self.flow_type_of_access_expression(node, None, s);
+            }
+        }
+
+        // Go getApplicableIndexInfos 按全类型取索引签名（交集各成分合并，
+        // 见 getIndexInfosOfType）；交集型自身 structured.index_infos 为空
+        for info in self.get_index_infos_of_type(obj_type) {
+            if let Some(key_type) = &info.key_type {
+                if key_type.flags.contains(crate::checker::TypeFlags::String)
+                    || key_type.flags.contains(crate::checker::TypeFlags::Number)
+                {
+                    if let Some(val_type) = &info.value_type {
+                        if self.no_unchecked_indexed_access {
+                            let union = self.get_union_type(vec![
+                                Arc::clone(val_type),
+                                self.undefined_type(),
+                            ]);
+                            return self.flow_type_of_access_expression(node, None, union);
                         }
+                        let val_type = Arc::clone(val_type);
+                        return self.flow_type_of_access_expression(node, None, val_type);
                     }
                 }
             }
         }
+        if let Some(val_type) = self.primitive_interface_index_value(obj_type) {
+            return self.flow_type_of_access_expression(node, None, val_type);
+        }
 
+        if report_nia {
+            self.report_element_access_implicit_any(node, obj_type, arg_expr, effective_arg);
+        }
         self.get_any_type()
     }
+}
 
-    fn literal_element_access_name(&self, arg: &Arc<Node>) -> Option<String> {
-        match &arg.data {
-            tsox_frontend::ast::NodeData::StringLiteral(data) => Some(data.text.clone()),
-            tsox_frontend::ast::NodeData::NumericLiteral(data) => Some(data.text.clone()),
-            _ => None,
-        }
+fn element_name_resolved_from_index(obj_type: &Arc<Type>, name: &str) -> bool {
+    let Some(structured) = obj_type.as_structured() else {
+        return false;
+    };
+    if structured.members.get(name).is_some() {
+        return false;
     }
+    let numeric = name.parse::<f64>().is_ok();
+    structured.index_infos.iter().any(|info| {
+        let Some(key) = &info.key_type else {
+            return false;
+        };
+        let applicable = if numeric {
+            key.flags.contains(TypeFlags::Number)
+        } else {
+            key.flags.contains(TypeFlags::String)
+        };
+        applicable && info.value_type.is_some()
+    })
 }

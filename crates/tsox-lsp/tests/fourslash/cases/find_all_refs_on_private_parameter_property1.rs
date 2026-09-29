@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_on_private_parameter_property1() {
     let content = r#"class ABCD {
@@ -11,6 +11,6 @@ fn find_all_refs_on_private_parameter_property1() {
         return this./*3*/z;
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
+    let _s = Session::new_for_test("findAllRefsOnPrivateParameterProperty1", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

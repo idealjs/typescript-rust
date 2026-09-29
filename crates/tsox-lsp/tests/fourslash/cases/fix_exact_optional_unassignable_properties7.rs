@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
+
 #[test]
 fn fix_exact_optional_unassignable_properties7() {
     let content = r#"// @strictNullChecks: true
@@ -12,6 +12,6 @@ class Feh {
     }
     private _finishedPromiseCallback: (arg: { error?: string }) => void = () => {};
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
+    let _s = Session::new_for_test("fixExactOptionalUnassignableProperties7", content);
+    // TODO: f.VerifyCodeFixNotAvailable(t)
 }

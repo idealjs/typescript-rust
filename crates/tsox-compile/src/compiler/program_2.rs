@@ -3,7 +3,7 @@
 use super::*;
 
 impl Program {
-    pub fn new(opts: ProgramOptions) -> Self {
+    pub fn new(opts: ProgramOptions) -> Arc<Self> {
         let host = opts.host;
         let mut options = opts.config.compiler_options.clone();
         let config_file_name = opts.config.config_file_name.clone();
@@ -18,29 +18,6 @@ impl Program {
             std::collections::HashSet::new();
         let mut diagnostics: Vec<Arc<Diagnostic>> = Vec::new();
 
-        if options.module_resolution == ModuleResolutionKind::Node10 {
-            let mut deprecation = Diagnostic::new(
-                None,
-                TextRange::default(),
-                tsox_core::diagnostics::messages_generated::
-                    OPTION_0_1_IS_DEPRECATED_AND_WILL_STOP_FUNCTIONING_IN_TYPESCRIPT_2_SPECIFY_COMPILEROPTION_IGNOREDEPRECATIONS_COLON_3_TO_SILENCE_THIS_ERROR,
-                vec![
-                    "moduleResolution".to_string(),
-                    "node10".to_string(),
-                    "7.0".to_string(),
-                    "6.0".to_string(),
-                ],
-            );
-            deprecation.message_chain = vec![Diagnostic::new(
-                None,
-                TextRange::default(),
-                tsox_core::diagnostics::messages_generated::
-                    VISIT_HTTPS_COLON_SLASH_SLASHAKA_MS_SLASHTS6_FOR_MIGRATION_INFORMATION,
-                Vec::new(),
-            )];
-            diagnostics.push(Arc::new(deprecation));
-        }
-
         if !options.lib.is_empty() && options.no_lib.is_true() {
             diagnostics.push(Arc::new(Diagnostic::new(
                 None,
@@ -50,6 +27,104 @@ impl Program {
             )));
         }
 
+        let module_in_node_family = matches!(
+            options.module,
+            ModuleKind::Node16 | ModuleKind::Node18 | ModuleKind::Node20 | ModuleKind::NodeNext
+        );
+        let effective_resolution = options.get_module_resolution_kind();
+        let resolution_in_node_family = matches!(
+            effective_resolution,
+            tsox_core::core::compiler_options::ModuleResolutionKind::Node16
+                | tsox_core::core::compiler_options::ModuleResolutionKind::NodeNext
+        );
+        if module_in_node_family && !resolution_in_node_family {
+            let module_kind_name = match options.module {
+                ModuleKind::Node18 => "node18",
+                ModuleKind::Node20 => "node20",
+                ModuleKind::NodeNext => "nodenext",
+                _ => "node16",
+            };
+            let mapped_resolution = if options.module == ModuleKind::NodeNext {
+                "NodeNext"
+            } else {
+                "Node16"
+            };
+            diagnostics.push(Arc::new(Diagnostic::new(
+                None,
+                TextRange::default(),
+                tsox_core::diagnostics::messages_generated::
+                    OPTION_MODULERESOLUTION_MUST_BE_SET_TO_0_OR_LEFT_UNSPECIFIED_WHEN_OPTION_MODULE_IS_SET_TO_1,
+                vec![mapped_resolution.to_string(), module_kind_name.to_string()],
+            )));
+        } else if resolution_in_node_family && !module_in_node_family {
+            let resolution_name =
+                if effective_resolution == tsox_core::core::compiler_options::ModuleResolutionKind::NodeNext {
+                    "NodeNext"
+                } else {
+                    "Node16"
+                };
+            diagnostics.push(Arc::new(Diagnostic::new(
+                None,
+                TextRange::default(),
+                tsox_core::diagnostics::messages_generated::
+                    OPTION_MODULE_MUST_BE_SET_TO_0_WHEN_OPTION_MODULERESOLUTION_IS_SET_TO_1,
+                vec![resolution_name.to_string(), resolution_name.to_string()],
+            )));
+        }
+
+        if options.emit_declaration_only.is_true() && !options.get_emit_declarations() {
+            diagnostics.push(Arc::new(Diagnostic::new(
+                None,
+                TextRange::default(),
+                tsox_core::diagnostics::messages_generated::
+                    OPTION_0_CANNOT_BE_SPECIFIED_WITHOUT_SPECIFYING_OPTION_1_OR_OPTION_2,
+                vec![
+                    "emitDeclarationOnly".to_string(),
+                    "declaration".to_string(),
+                    "composite".to_string(),
+                ],
+            )));
+        }
+
+        if options.declaration_map.is_true() && !options.get_emit_declarations() {
+            diagnostics.push(Arc::new(Diagnostic::new(
+                None,
+                TextRange::default(),
+                tsox_core::diagnostics::messages_generated::
+                    OPTION_0_CANNOT_BE_SPECIFIED_WITHOUT_SPECIFYING_OPTION_1_OR_OPTION_2,
+                vec![
+                    "declarationMap".to_string(),
+                    "declaration".to_string(),
+                    "composite".to_string(),
+                ],
+            )));
+        }
+
+        if options.isolated_declarations.is_true() {
+            if !options.get_emit_declarations() {
+                diagnostics.push(Arc::new(Diagnostic::new(
+                    None,
+                    TextRange::default(),
+                    tsox_core::diagnostics::messages_generated::
+                        OPTION_0_CANNOT_BE_SPECIFIED_WITHOUT_SPECIFYING_OPTION_1_OR_OPTION_2,
+                    vec![
+                        "isolatedDeclarations".to_string(),
+                        "declaration".to_string(),
+                        "composite".to_string(),
+                    ],
+                )));
+            }
+        }
+
+        let resolution_host: Arc<dyn tsox_tsoptions::module::ResolutionHost + Send + Sync> =
+            Arc::new(ResolutionHostAdapter::new(host.as_ref()));
+        let resolver = tsox_tsoptions::module::Resolver::new(
+            resolution_host,
+            Arc::new(options.clone()),
+            String::new(),
+            String::new(),
+        );
+
         if !opts.config.file_names.is_empty() && !options.no_lib.is_true() {
             let lib_names = default_lib_file_names(&options);
             let mut visited: std::collections::HashSet<String> = std::collections::HashSet::new();
@@ -57,6 +132,8 @@ impl Program {
                 load_lib_recursive(
                     lib_name,
                     host.as_ref(),
+                    &options,
+                    &resolver,
                     &mut source_files,
                     &mut by_name,
                     &mut default_lib_names,
@@ -67,6 +144,10 @@ impl Program {
         }
 
         let allow_js = options.get_allow_js();
+        let mut resolved_modules: HashMap<
+            String,
+            Vec<(String, Option<tsox_tsoptions::module::ResolvedModule>)>,
+        > = HashMap::new();
         for file_name in &opts.config.file_names {
             load_source_file_with_references(
                 file_name,
@@ -79,16 +160,17 @@ impl Program {
         }
 
         {
-            let resolution_host: Arc<dyn tsox_tsoptions::module::ResolutionHost + Send + Sync> =
-                Arc::new(ResolutionHostAdapter::new(host.as_ref()));
-            let resolver = tsox_tsoptions::module::Resolver::new(
-                resolution_host,
-                Arc::new(options.clone()),
-                String::new(),
-                String::new(),
-            );
+            let resolver = &resolver;
 
             let mut visited: std::collections::HashSet<String> = by_name.keys().cloned().collect();
+            let mut pid_first_path: HashMap<tsox_tsoptions::module::PackageId, String> =
+                HashMap::new();
+            package_dedupe::prewalk_package_first_paths(
+                &resolver,
+                host.as_ref(),
+                &source_files,
+                &mut pid_first_path,
+            );
             let mut stack: Vec<Arc<SourceFile>> = Vec::new();
 
             let expanded_types: Vec<String> = if options.types.iter().any(|t| t == "*") {
@@ -114,6 +196,34 @@ impl Program {
                     tsox_core::core::compiler_options::ModuleKind::None,
                     None,
                 );
+                let type_entry_resolved = resolved
+                    .as_ref()
+                    .is_some_and(|tr| tr.is_resolved());
+                if !type_entry_resolved {
+                    let mut diag = tsox_frontend::ast::Diagnostic::new(
+                        None,
+                        TextRange::default(),
+                        tsox_core::diagnostics::messages_generated::
+                            CANNOT_FIND_TYPE_DEFINITION_FILE_FOR_0,
+                        vec![type_name.clone()],
+                    );
+                    let mut reason = tsox_frontend::ast::Diagnostic::new(
+                        None,
+                        TextRange::default(),
+                        tsox_core::diagnostics::messages_generated::
+                            THE_FILE_IS_IN_THE_PROGRAM_BECAUSE_COLON,
+                        Vec::new(),
+                    );
+                    reason.message_chain = vec![tsox_frontend::ast::Diagnostic::new(
+                        None,
+                        TextRange::default(),
+                        tsox_core::diagnostics::messages_generated::
+                            ENTRY_POINT_OF_TYPE_LIBRARY_0_SPECIFIED_IN_COMPILEROPTIONS,
+                        vec![type_name.clone()],
+                    )];
+                    diag.message_chain = vec![reason];
+                    diagnostics.push(Arc::new(diag));
+                }
                 if let Some(resolved_tr) = resolved {
                     if resolved_tr.is_resolved() {
                         let resolved_path = resolved_tr.resolved_file_name.as_str();
@@ -164,6 +274,21 @@ impl Program {
                         mode,
                         None,
                     );
+                    let type_ref_resolved = resolved
+                        .as_ref()
+                        .is_some_and(|tr| tr.is_resolved());
+                    if !type_ref_resolved {
+                        diagnostics.push(Arc::new(tsox_frontend::ast::Diagnostic::new(
+                            Some(Arc::clone(&file)),
+                            TextRange::new(
+                                type_ref.types_value_range.0,
+                                type_ref.types_value_range.1,
+                            ),
+                            tsox_core::diagnostics::messages_generated::
+                                CANNOT_FIND_TYPE_DEFINITION_FILE_FOR_0,
+                            vec![type_ref.name.clone()],
+                        )));
+                    }
                     if let Some(resolved_tr) = resolved {
                         if resolved_tr.is_resolved() {
                             let resolved_path = resolved_tr.resolved_file_name.as_str();
@@ -183,25 +308,114 @@ impl Program {
                     }
                 }
 
+                // side-effect import（无 import clause）按语句扫描收集
+                // specifier 节点 id
+                let side_effect_spec_ids: std::collections::HashSet<u64> = {
+                    let mut ids = std::collections::HashSet::new();
+                    if let tsox_frontend::ast::NodeData::SourceFile(sf) = &file.node.data {
+                        for stmt in sf.statements.iter() {
+                            if let tsox_frontend::ast::NodeData::ImportDeclaration(d) = &stmt.data {
+                                if d.import_clause.is_none() {
+                                    ids.insert(d.module_specifier.id());
+                                }
+                            }
+                        }
+                    }
+                    ids
+                };
+                let mut resolution_diag_keys: std::collections::HashSet<
+                    (String, tsox_core::core::compiler_options::ModuleKind),
+                > = std::collections::HashSet::new();
                 for import_node in &file.imports {
                     let module_spec = import_node.text();
                     if module_spec.is_empty() {
                         continue;
                     }
-                    let (resolved, _traces) = resolver.resolve_module_name(
+                    // Go processImport 经 getModeForUsageLocation 取模式：
+                    // 显式 resolution-mode 覆盖优先，否则用文件默认解析模式
+                    let override_mode = import_resolution_mode_override(import_node);
+                    let resolution_mode = if matches!(
+                        override_mode,
+                        tsox_core::core::compiler_options::ModuleKind::None
+                    ) {
+                        tsox_tsoptions::tsoptions::implied_node_format_of_file(
+                            &file.file_name,
+                            &|p| host.fs().read_file(p),
+                        )
+                    } else {
+                        override_mode
+                    };
+                    let (resolved, resolution_diags) = resolver.resolve_module_name(
                         module_spec,
                         &file.file_name,
-                        import_resolution_mode_override(import_node),
+                        resolution_mode,
                         None,
                     );
+                    resolved_modules
+                        .entry(file.file_name.clone())
+                        .or_default()
+                        .push((module_spec.to_string(), resolved.clone()));
+                    if resolution_diag_keys.insert((module_spec.to_string(), resolution_mode)) {
+                        for d in resolution_diags {
+                            diagnostics.push(Arc::new(Diagnostic::new(
+                                None,
+                                tsox_core::core::text::TextRange::new(0, 0),
+                                *d.message,
+                                d.args,
+                            )));
+                        }
+                    }
                     let is_resolved = resolved.as_ref().map(|m| m.is_resolved()).unwrap_or(false);
+                    let lib_diagnostics_skipped = options.skip_lib_check.is_true()
+                        && (file.is_declaration_file
+                            || is_external_library_file(&file.file_name));
                     if is_resolved {
                         let resolved_module = resolved.unwrap();
-                        let resolved_path = resolved_module.resolved_file_name.as_str();
-                        if visited.insert(resolved_path.to_string()) {
+                        // Go tsc 默认 preserveSymlinks=false：解析结果经 realpath
+                        // 规范化回真实路径，符号链接目标与原文件合一
+                        let resolved_path = host
+                            .fs()
+                            .realpath(resolved_module.resolved_file_name.as_str());
+                        let first_path = resolved_module
+                            .package_id
+                            .as_ref()
+                            .and_then(|pid| pid_first_path.get(pid))
+                            .cloned();
+                        if first_path.as_deref() != Some(resolved_path.as_str()) {
+                            let target = first_path.as_deref().and_then(|first| {
+                                let key = tsox_core::tspath::normalize_path(first);
+                                by_name
+                                    .get(&key)
+                                    .or_else(|| by_name.get(first))
+                                    .cloned()
+                                    .or_else(|| {
+                                        load_source_file_with_references(
+                                            first,
+                                            host.as_ref(),
+                                            &mut source_files,
+                                            &mut by_name,
+                                            &mut diagnostics,
+                                            allow_js,
+                                        );
+                                        by_name
+                                            .get(&key)
+                                            .or_else(|| by_name.get(first))
+                                            .cloned()
+                                    })
+                            });
+                            if let Some(existing) = target {
+                                visited.insert(resolved_path.clone());
+                                let normalized =
+                                    tsox_core::tspath::normalize_path(&resolved_path);
+                                by_name.insert(normalized, Arc::clone(&existing));
+                                by_name.insert(resolved_path, existing);
+                                continue;
+                            }
+                        }
+                        if visited.insert(resolved_path.clone()) {
                             let pre = source_files.len();
                             load_source_file_with_references(
-                                resolved_path,
+                                &resolved_path,
                                 host.as_ref(),
                                 &mut source_files,
                                 &mut by_name,
@@ -210,28 +424,91 @@ impl Program {
                             );
                             stack.extend(source_files[pre..].iter().cloned());
                         }
-                    } else if module_spec.starts_with('.')
-                        || !ambient_module_exists(&source_files, module_spec)
+                    } else if ((module_spec.starts_with('.')
+                        && !pattern_ambient_module_exists(&source_files, module_spec)
+                        && !node_next_needs_extension(
+                            &options,
+                            &file.file_name,
+                            module_spec,
+                            &|p| host.fs().read_file(p),
+                        ))
+                        || (!module_spec.starts_with('.')
+                            && !ambient_module_exists(&source_files, module_spec)
+                            && !tsox_frontend::ast::pattern_ambient_module_with_attributes_exists(
+                                &source_files,
+                                module_spec,
+                                import_node
+                                    .parent()
+                                    .as_ref()
+                                    .and_then(tsox_frontend::ast::import_attributes_of_declaration)
+                                    .as_ref(),
+                            )))
+                        && !lib_diagnostics_skipped
                     {
-                        let mut module_not_found = Diagnostic::new(
-                            Some(file.clone()),
-                            import_node.loc,
-                            tsox_core::diagnostics::CANNOT_FIND_MODULE_0_OR_ITS_CORRESPONDING_TYPE_DECLARATIONS,
-                            vec![module_spec.to_string()],
-                        );
-
-                        if let Some(alt) =
-                            resolved.as_ref().and_then(|m| m.alternate_result.clone())
-                        {
-                            module_not_found.message_chain = vec![Diagnostic::new(
+                        // TS2307 报告位：ImportType（含动态 import() 类型位）由
+                        // checker 报，这里跳过避免双报
+                        let from_import_type = {
+                            let mut cur = import_node.parent();
+                            let mut hit = false;
+                            for _ in 0..4 {
+                                match cur {
+                                    Some(p) if p.kind == tsox_frontend::ast::SyntaxKind::ImportType => {
+                                        hit = true;
+                                        break;
+                                    }
+                                    Some(p) => cur = p.parent(),
+                                    None => break,
+                                }
+                            }
+                            hit
+                        };
+                        if !from_import_type {
+                            if super::program_directive_filter::suppressed_by_preceding_directive(
+                                &file,
+                                import_node.loc.pos(),
+                            ) {
+                                continue;
+                            }
+                            // Go checkImportDeclaration：side-effect import（无 import
+                            // clause）且未显式 noUncheckedSideEffectImports=false 时用
+                            // TS2882 专用消息；常规导入经 node 核心模块专用文案选择
+                            let is_side_effect = side_effect_spec_ids.contains(&import_node.id());
+                            let (message, args): (_, Vec<String>) = if is_side_effect
+                                && !options.no_unchecked_side_effect_imports.is_false()
+                            {
+                                (
+                                    tsox_core::diagnostics::messages_generated::
+                                        CANNOT_FIND_MODULE_OR_TYPE_DECLARATIONS_FOR_SIDE_EFFECT_IMPORT_OF_0,
+                                    vec![module_spec.to_string()],
+                                )
+                            } else {
+                                let (msg, args) =
+                                    tsox_frontend::parser::cannot_resolve_module_error(
+                                        &options,
+                                        &module_spec,
+                                    );
+                                (*msg, args)
+                            };
+                            let mut module_not_found = Diagnostic::new(
                                 Some(file.clone()),
                                 import_node.loc,
-                                tsox_core::diagnostics::messages_generated::
-                                    THERE_ARE_TYPES_AT_0_BUT_THIS_RESULT_COULD_NOT_BE_RESOLVED_UNDER_YOUR_CURRENT_MODULERESOLUTION_SETTING_CONSIDER_UPDATING_TO_NODE16_NODENEXT_OR_BUNDLER,
-                                vec![alt],
-                            )];
+                                message,
+                                args,
+                            );
+
+                            if let Some(alt) =
+                                resolved.as_ref().and_then(|m| m.alternate_result.clone())
+                            {
+                                module_not_found.message_chain = vec![Diagnostic::new(
+                                    Some(file.clone()),
+                                    import_node.loc,
+                                    tsox_core::diagnostics::messages_generated::
+                                        THERE_ARE_TYPES_AT_0_BUT_THIS_RESULT_COULD_NOT_BE_RESOLVED_UNDER_YOUR_CURRENT_MODULERESOLUTION_SETTING_CONSIDER_UPDATING_TO_NODE16_NODENEXT_OR_BUNDLER,
+                                    vec![alt],
+                                )];
+                            }
+                            diagnostics.push(Arc::new(module_not_found));
                         }
-                        diagnostics.push(Arc::new(module_not_found));
                     }
                 }
 
@@ -276,14 +553,35 @@ impl Program {
             diagnostics.push(Arc::new(err.clone()));
         }
 
+        apply_module_detection_force(&options, host.as_ref(), &source_files);
+
         let mut binder = Binder::new();
         for file in &source_files {
             binder.bind_source_file(file);
         }
         let symbol_map = std::mem::take(&mut binder.symbol_map);
 
-        Program {
+        let compare_paths_options = tsox_core::tspath::ComparePathsOptions {
+            use_case_sensitive_file_names: host.use_case_sensitive_file_names(),
+            current_directory: host.current_directory().to_string(),
+        };
+        let program_tracing = opts.tracing.clone();
+        let program_opts = ProgramOptions {
+            config: opts.config.clone(),
+            host: Arc::clone(&host),
+            use_source_of_project_reference: opts.use_source_of_project_reference,
+            single_threaded: opts.single_threaded,
+            create_checker_pool: opts.create_checker_pool,
+            typings_location: opts.typings_location,
+            project_name: opts.project_name,
+            tracing: program_tracing.clone(),
+            skip_module_resolution: opts.skip_module_resolution,
+        };
+
+        let program = Arc::new(Program {
             options,
+            files: source_files.clone(),
+            finished_processing: true,
             source_files,
             source_files_by_name: by_name,
             default_library_file_names: default_lib_names,
@@ -291,10 +589,109 @@ impl Program {
             host,
             config_file_name,
             symbol_map,
-        }
+            opts: program_opts.clone(),
+            resolver: Arc::new(resolver),
+            checker_pool: std::sync::OnceLock::new(),
+            compiler_checker_pool: std::sync::OnceLock::new(),
+            compare_paths_options,
+            files_by_path: HashMap::new(),
+            project_reference_file_mapper: Arc::new(
+                crate::mig::m4x_2::ProjectReferenceFileMapper {
+                    opts: program_opts.clone(),
+                    host: None,
+                    loader: None,
+                    config_to_project_reference: HashMap::new(),
+                    references_in_config_file: HashMap::new(),
+                    source_to_project_reference: HashMap::new(),
+                    output_dts_to_project_reference: HashMap::new(),
+                    realpath_dts_to_source: Default::default(),
+                },
+            ),
+            missing_files: Vec::new(),
+            resolved_modules: HashMap::new(),
+            type_resolutions_in_file: HashMap::new(),
+            source_file_meta_datas: HashMap::new(),
+            jsx_runtime_import_specifiers: HashMap::new(),
+            import_helpers_import_specifiers: HashMap::new(),
+            lib_files: HashMap::new(),
+            source_files_found_searching_node_modules: std::collections::HashSet::new(),
+            include_processor: None,
+            output_file_to_project_reference_source: HashMap::new(),
+            redirect_targets_map: HashMap::new(),
+            redirect_files_by_path: HashMap::new(),
+            content_mapper_diagnostics: Vec::new(),
+            program_diagnostics: Vec::new(),
+            content_mapper_option_diagnostics: Vec::new(),
+            has_emit_blocking_diagnostics: std::collections::HashSet::new(),
+            unresolved_imports: crate::mig::m4w_5::LazyValue::default(),
+            known_symlinks: crate::mig::m4w_5::LazyValue::default(),
+            package_names: crate::mig::m4w_5::LazyValue::default(),
+            has_ts_file_once: crate::mig::m4w_5::LazyValue::default(),
+            uses_uri_style_node_core_modules: Tristate::Unknown,
+            typings_location: program_opts.typings_location.clone(),
+            use_source_of_project_reference: program_opts.use_source_of_project_reference,
+            tracing: program_tracing,
+        });
+        program.init_checker_pool();
+        program
     }
 
     pub fn options(&self) -> &CompilerOptions {
         &self.options
+    }
+
+    pub fn block_emitting_of_file(&mut self, emit_file_name: &str, diag: Arc<Diagnostic>) {
+        self.has_emit_blocking_diagnostics
+            .insert(self.to_path(emit_file_name).0);
+        self.program_diagnostics.push(diag);
+    }
+}
+
+pub fn new_program(opts: ProgramOptions) -> Arc<Program> {
+    Program::new(opts)
+}
+
+
+fn apply_module_detection_force(
+    options: &CompilerOptions,
+    host: &dyn CompilerHost,
+    files: &[Arc<SourceFile>],
+) {
+    use tsox_core::core::compiler_options::ModuleDetectionKind;
+    let detection = options.get_emit_module_detection_kind();
+    if !matches!(
+        detection,
+        ModuleDetectionKind::Force | ModuleDetectionKind::Auto
+    ) {
+        return;
+    }
+    for file in files {
+        if file.external_module_indicator.is_some()
+            || file.is_declaration_file
+            || file.script_kind == ScriptKind::Json
+        {
+            continue;
+        }
+        let lower = file.file_name.to_ascii_lowercase();
+        let forced_by_extension = lower.ends_with(".cjs")
+            || lower.ends_with(".cts")
+            || lower.ends_with(".mjs")
+            || lower.ends_with(".mts");
+        let forced = match detection {
+            ModuleDetectionKind::Force => true,
+            _ => {
+                forced_by_extension
+                    || tsox_tsoptions::tsoptions::implied_node_format_of_file(
+                        &file.file_name,
+                        &|p| host.fs().read_file(p),
+                    ) == ModuleKind::ESNext
+            }
+        };
+        if forced {
+            let ptr = Arc::as_ptr(file) as *mut SourceFile;
+            unsafe {
+                (*ptr).external_module_indicator = Some(Arc::clone(&file.node));
+            }
+        }
     }
 }

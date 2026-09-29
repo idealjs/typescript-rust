@@ -16,6 +16,7 @@ pub mod lsproto_lsp;
 pub(crate) mod lsproto_lsp_basic;
 pub(crate) mod lsproto_lsp_messages;
 pub(crate) mod lsproto_lsp_protocol;
+pub(crate) mod lsproto_lsp_references;
 pub(crate) mod lsproto_lsp_traits;
 pub(crate) mod lsproto_lsp_uri;
 pub mod lsproto_util;

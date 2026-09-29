@@ -35,9 +35,9 @@ pub fn get_smart_selection_range(source_file: &Arc<SourceFile>, pos: usize) -> S
     let node = find_deepest_node(&source_file.node, pos);
 
     let mut current: Option<SelectionRange> = None;
-    let mut node_ref: Option<&Arc<Node>> = Some(&node);
+    let mut node_owned: Option<Arc<Node>> = Some(Arc::clone(&node));
 
-    while let Some(n) = node_ref {
+    while let Some(n) = node_owned.take() {
         let start = n.pos();
         let end = n.end();
 
@@ -55,7 +55,7 @@ pub fn get_smart_selection_range(source_file: &Arc<SourceFile>, pos: usize) -> S
             }
         }
 
-        node_ref = n.parent.as_ref();
+        node_owned = n.parent();
     }
 
     current.unwrap_or_else(|| SelectionRange {

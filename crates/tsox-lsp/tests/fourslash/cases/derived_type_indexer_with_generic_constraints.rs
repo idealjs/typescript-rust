@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn derived_type_indexer_with_generic_constraints() {
     let content = r#"// @strict: false
@@ -21,7 +22,7 @@ var result = r.x;
 a = new DbSet<Entity>();
 var r2 = a._itemsByKey['x'];
 var result2 = r2.x;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("derivedTypeIndexerWithGenericConstraints", content);
     fourslash::verify_quick_info_at(&mut s, "", "var r: CollectionItem", "");
-    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_no_errors(&mut s, );
 }

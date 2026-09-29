@@ -2,7 +2,6 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicI32;
 
 use tsox_checker::checker::Checker;
-use tsox_core::tspath;
 use tsox_frontend::ast::Node;
 use tsox_frontend::ast::SourceFile;
 use tsox_frontend::ast::Symbol;

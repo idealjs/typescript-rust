@@ -1,12 +1,12 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.GoToBOF"]
+
 #[test]
 fn format_empty_block() {
     let content = r#"{}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("GoToEOF"); // f.GoToEOF(t)
+    let mut s = Session::new_for_test("formatEmptyBlock", content);
+    fourslash::go_to_eof(&mut s, );
     fourslash::insert(&mut s, "\n");
-    fourslash::unsupported("GoToBOF"); // f.GoToBOF(t)
+    fourslash::go_to_bof(&mut s, );
     fourslash::verify_current_line_content(&mut s, r#"{ }"#);
 }

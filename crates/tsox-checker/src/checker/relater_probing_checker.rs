@@ -9,13 +9,6 @@ impl Checker {
             _ => return None,
         };
 
-        if let Some(rt) = ct.resolved_true_type.get() {
-            return Some(Arc::clone(rt));
-        }
-        if let Some(rt) = ct.resolved_false_type.get() {
-            return Some(Arc::clone(rt));
-        }
-
         let check_type = ct.check_type.clone()?;
         let _extends_type = ct.extends_type.clone()?;
 
@@ -41,13 +34,6 @@ impl Checker {
             }
             if let TypeData::Union(u) = &check_type.data {
                 let constituents = u.union_or_intersection.types.clone();
-                if std::env::var_os("TSOX_DEBUG_COND").is_some() {
-                    eprintln!(
-                        "[cond] distributing over {} constituent(s); tp={}",
-                        constituents.len(),
-                        tp_symbol.name
-                    );
-                }
                 let key = Arc::as_ptr(tp_symbol) as *const tsox_frontend::ast::Symbol;
                 let mut results: Vec<Arc<Type>> = Vec::with_capacity(constituents.len());
                 for constituent in constituents {
@@ -55,32 +41,23 @@ impl Checker {
                     mapping.insert(key, Arc::clone(&constituent));
                     self.type_argument_stack.push(mapping);
                     let r =
-                        self.resolve_conditional_type_with_check(t, Some(Arc::clone(&constituent)));
+                        self.resolve_conditional_type_with_check(t, Some(Arc::clone(&constituent)), None);
                     self.type_argument_stack.pop();
-                    if std::env::var_os("TSOX_DEBUG_COND").is_some() {
-                        eprintln!(
-                            "[cond]   constituent {} -> {:?}",
-                            self.type_to_string(&constituent),
-                            r.as_ref().map(|x| self.type_to_string(x))
-                        );
-                    }
                     results.push(r?);
                 }
                 let union = self.get_union_type(results);
-                if std::env::var_os("TSOX_DEBUG_COND").is_some() {
-                    eprintln!("[cond] result union = {}", self.type_to_string(&union));
-                }
                 return Some(union);
             }
         }
 
-        self.resolve_conditional_type_with_check(t, None)
+        self.resolve_conditional_type_with_check(t, None, None)
     }
 
     pub(crate) fn resolve_conditional_type_with_check(
         &mut self,
         t: &Arc<Type>,
         check_override: Option<Arc<Type>>,
+        extends_override: Option<Arc<Type>>,
     ) -> Option<Arc<Type>> {
         let ct = match &t.data {
             TypeData::Conditional(ct) => ct,
@@ -92,17 +69,19 @@ impl Checker {
             None => ct.check_type.clone()?,
         };
         let cond_node = ct.root.as_ref().and_then(|r| r.node.clone());
-        let extends_type = if check_override.is_some() {
-            let extends_node = match cond_node.as_ref().and_then(|n| match &n.data {
-                NodeData::ConditionalTypeNode(data) => Some(Arc::clone(&data.extends_type)),
-                _ => None,
-            }) {
-                Some(node) => node,
-                None => return None,
-            };
-            self.get_type_from_type_node(&extends_node)
+        let extends_type = if let Some(e) = extends_override {
+            e
         } else {
-            ct.extends_type.clone()?
+            let stored = ct.extends_type.clone()?;
+            match &check_override {
+                Some(over) if !Arc::ptr_eq(&stored, over) => match ct.check_type.clone() {
+                    Some(check) => {
+                        self.substitute_infer_type_parameters(&stored, &[check], &[Arc::clone(over)])
+                    }
+                    None => stored,
+                },
+                _ => stored,
+            }
         };
 
         if type_contains_type_parameter(&check_type) {
@@ -154,7 +133,10 @@ impl Checker {
         } else {
             let permissive_check = self.get_permissive_instantiation(&check_type);
             let permissive_extends = self.get_permissive_instantiation(&inferred_extends);
-            !self.is_type_assignable_to(&permissive_check, &permissive_extends)
+            let was_silent = self.silence_relation_chain();
+            let r = !self.is_type_assignable_to(&permissive_check, &permissive_extends);
+            self.restore_relation_chain(was_silent);
+            r
         };
         let take_true = if !definitely_false {
             let definitely_true = if extends_any_or_unknown {
@@ -162,16 +144,12 @@ impl Checker {
             } else {
                 let restrictive_check = self.get_restrictive_instantiation(&check_type);
                 let restrictive_extends = self.get_restrictive_instantiation(&inferred_extends);
-                self.is_type_assignable_to(&restrictive_check, &restrictive_extends)
+                let was_silent = self.silence_relation_chain();
+                let r = self.is_type_assignable_to(&restrictive_check, &restrictive_extends);
+                self.restore_relation_chain(was_silent);
+                r
             };
             if !definitely_true {
-                if std::env::var_os("TSOX_DEBUG_COND").is_some() {
-                    eprintln!(
-                        "[cond]     deferred (neither definite) check={} extends={}",
-                        self.type_to_string(&check_type),
-                        self.type_to_string(&inferred_extends)
-                    );
-                }
                 return None;
             }
             true
@@ -180,14 +158,6 @@ impl Checker {
         };
 
         let include_true_branch = take_true == false && check_is_any;
-        if std::env::var_os("TSOX_DEBUG_COND").is_some() {
-            eprintln!(
-                "[cond]     take_true={} check={} extends={}",
-                take_true,
-                self.type_to_string(&check_type),
-                self.type_to_string(&inferred_extends)
-            );
-        }
 
         let (cond_node, branch_node) = match ct
             .root

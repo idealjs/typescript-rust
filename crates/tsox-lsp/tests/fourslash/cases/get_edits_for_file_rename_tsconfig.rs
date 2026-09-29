@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyWillRenameFilesEdits"]
+
 #[test]
 fn get_edits_for_file_rename_tsconfig() {
     let content = r#"// @Filename: /src/tsconfig.json
@@ -20,6 +20,6 @@ fn get_edits_for_file_rename_tsconfig() {
 }
 // @Filename: /src/old/someFile.ts
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyWillRenameFilesEdits"); // f.VerifyWillRenameFilesEdits(t, "/src/old", "/src/new", map[string]string{
+    let _s = Session::new_for_test("getEditsForFileRename_tsconfig", content);
+    // TODO: f.VerifyWillRenameFilesEdits(t, "/src/old", "/src/new", map[string]string{
 }

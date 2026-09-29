@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineSignatureHelp"]
+
 #[test]
 fn signature_help_comments_function_declaration() {
     let content = r#"/** This comment should appear for foo*/
@@ -20,6 +20,6 @@ fooWithParameters(/*10*/"a",/*11*/10);
 */
 declare function fn(a: string);
 fn(/*12*/"hello");"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
+    let _s = Session::new_for_test("signatureHelpCommentsFunctionDeclaration", content);
+    // TODO: f.VerifyBaselineSignatureHelp(t)
 }

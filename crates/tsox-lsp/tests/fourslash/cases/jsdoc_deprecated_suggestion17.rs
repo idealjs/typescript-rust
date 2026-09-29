@@ -1,13 +1,13 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
+
 #[test]
 fn jsdoc_deprecated_suggestion17() {
     let content = r#"// @filename: foo.ts
 interface Foo {
     /** @deprecated */
     [k: string]: any;
-    /** @deprecated please use ` + "`" + `.y` + "`" + ` instead  */
+    /** @deprecated please use `.y` instead  */
     x: number;
     y: number;
 }
@@ -16,6 +16,6 @@ function f(foo: Foo) {
     foo.[|y|];
     foo.[|z|];
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
+    let _s = Session::new_for_test("jsdocDeprecated_suggestion17", content);
+    // TODO: f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

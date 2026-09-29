@@ -47,15 +47,94 @@ impl Checker {
                 | InKeyword
                 | InstanceOfKeyword => self.boolean_type(),
 
-                AmpersandAmpersandToken | BarBarToken | QuestionQuestionToken => {
-                    self.get_type_of_node(&data.left)
+                AmpersandAmpersandToken | AmpersandAmpersandEqualsToken => {
+                    // Go checkBinaryExpressionWorker：&& 结果 =
+                    // union(extractDefinitelyFalsy(left), right)，
+                    // 左操作数无真值事实时结果为左类型
+                    let left_type = self.get_type_of_node(&data.left);
+                    let right_type = self.get_type_of_node(&data.right);
+                    if self
+                        .constituent_types(&left_type)
+                        .iter()
+                        .any(|c| self.has_truthy_fact(c))
+                    {
+                        let falsy = self.extract_definitely_falsy_constituents(&left_type);
+                        self.get_union_type(vec![falsy, right_type])
+                    } else {
+                        left_type
+                    }
+                }
+
+                BarBarToken | BarBarEqualsToken => {
+                    // Go checkBinaryExpressionWorker：|| 结果 =
+                    // union(nonNullable(removeDefinitelyFalsy(left)), right)，
+                    // 左操作数无假值事实时结果为左类型
+                    let left_type = self.get_type_of_node(&data.left);
+                    let right_type = self.get_type_of_node(&data.right);
+                    if self
+                        .constituent_types(&left_type)
+                        .iter()
+                        .any(|c| self.has_falsy_fact(c))
+                    {
+                        let removed = self.remove_definitely_falsy_constituents(&left_type);
+                        let non_null = self.get_non_nullable_type_of(&removed);
+                        let reduced = self.remove_subtype_redundant_members(vec![
+                            non_null,
+                            Arc::clone(&right_type),
+                        ]);
+                        self.get_union_type(reduced)
+                    } else {
+                        left_type
+                    }
+                }
+
+                QuestionQuestionToken | QuestionQuestionEqualsToken => {
+                    // Go checkBinaryExpressionWorker：?? 结果 =
+                    // union(nonNullable(left), right)，左操作数不可空时为左类型
+                    let left_type = self.get_type_of_node(&data.left);
+                    let right_type = self.get_type_of_node(&data.right);
+                    let may_be_nullish = self.constituent_types(&left_type).iter().any(|c| {
+                        c.flags.intersects(
+                            TypeFlags::Undefined
+                                | TypeFlags::Null
+                                | TypeFlags::Any
+                                | TypeFlags::Unknown
+                                | TypeFlags::TypeParameter,
+                        )
+                    });
+                    if may_be_nullish {
+                        let non_null = self.get_non_nullable_type_of(&left_type);
+                        let reduced =
+                            self.remove_subtype_redundant_members(vec![non_null, right_type]);
+                        self.get_union_type(reduced)
+                    } else {
+                        left_type
+                    }
                 }
 
                 CommaToken => self.get_type_of_node(&data.right),
 
-                EqualsToken
-                | PlusEqualsToken
-                | MinusEqualsToken
+                EqualsToken => self.get_type_of_node(&data.right),
+
+                PlusEqualsToken => {
+                    let left_type = self.get_type_of_node(&data.left);
+                    let lt = self.get_base_type_of_literal_type(&left_type);
+                    let rt = self.get_type_of_node(&data.right);
+                    let string_like = |t: &Arc<Type>| {
+                        t.flags
+                            .intersects(TypeFlags::String | TypeFlags::StringLiteral)
+                    };
+                    if string_like(&lt) || string_like(&rt) {
+                        self.string_type()
+                    } else if lt.flags.contains(TypeFlags::Any) || rt.flags.contains(TypeFlags::Any)
+                    {
+                        self.get_any_type()
+                    } else {
+                        self.number_type()
+                    }
+                }
+
+                MinusEqualsToken
                 | AsteriskEqualsToken
                 | SlashEqualsToken
                 | PercentEqualsToken
@@ -65,10 +144,7 @@ impl Checker {
                 | GreaterThanGreaterThanGreaterThanEqualsToken
                 | AmpersandEqualsToken
                 | BarEqualsToken
-                | CaretEqualsToken
-                | BarBarEqualsToken
-                | AmpersandAmpersandEqualsToken
-                | QuestionQuestionEqualsToken => self.get_type_of_node(&data.right),
+                | CaretEqualsToken => self.number_type(),
                 _ => self.get_any_type(),
             }
         } else {
@@ -111,7 +187,14 @@ impl Checker {
                     for decl in &member.declarations {
                         match decl.kind {
                             SyntaxKind::FunctionDeclaration => {
-                                return self.get_type_of_function_like(decl);
+                                // Go getTypeOfSymbol 经匿名壳 +
+                                // resolveDeclaredMembers 聚合符号全部过载声明；
+                                // 多声明成员（lib.d.ts 的 namespace 重载组）须建
+                                // 过载集而非首个声明的单签名型
+                                return match self.build_overload_function_type(&member) {
+                                    Some(t) => t,
+                                    None => self.get_type_of_function_like(decl),
+                                };
                             }
                             SyntaxKind::ClassDeclaration => {
                                 return self.get_type_of_class_declaration(decl);
@@ -194,12 +277,28 @@ impl Checker {
                 let substituted = self.substituted_member_type_of(&obj_type, &sym);
                 return self.flow_type_of_access_expression(node, Some(&sym), substituted);
             }
-            let prop_type = self.get_type_of_symbol(&sym);
+            // 类实例型成员是急建合成符号（无注解方法返回 any 驻缓存）：
+            // 回源 binder 声明符号走惰性体推断（this 返回型等）
+            let prop_type = self.member_decl_symbol_type(&sym);
             return self.flow_type_of_access_expression(node, Some(&sym), prop_type);
         }
 
         if name_text == "length" && self.is_array_type(&obj_type) {
             return self.number_type();
+        }
+        // 无具名成员：适用的字符串索引签名值（tsc getApplicableIndexInfo）
+        if let Some(structured) = obj_type.as_structured() {
+            for info in &structured.index_infos {
+                let key_matches = info.key_type.as_ref().is_some_and(|k| {
+                    k.flags.contains(TypeFlags::String)
+                        || k.flags.contains(TypeFlags::Number)
+                });
+                if key_matches {
+                    if let Some(value) = &info.value_type {
+                        return self.flow_type_of_access_expression(node, None, Arc::clone(value));
+                    }
+                }
+            }
         }
         self.get_any_type()
     }
@@ -226,7 +325,7 @@ impl Checker {
     }
 
     pub(crate) fn is_definite_assignment_target(node: &Arc<Node>) -> bool {
-        let Some(parent) = &node.parent else {
+        let Some(parent) = &node.parent() else {
             return false;
         };
         match &parent.data {

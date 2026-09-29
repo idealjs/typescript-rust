@@ -117,6 +117,12 @@ impl Checker {
     }
 
     pub(crate) fn union_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
+        if t.alias.is_none()
+            && let TypeData::Union(u) = &t.data
+            && let Some(origin) = &u.origin
+        {
+            return self.type_to_type_node(origin);
+        }
         let types = t.types().unwrap_or(&[]);
         if types.is_empty() {
             return self.keyword_node(SyntaxKind::NeverKeyword);

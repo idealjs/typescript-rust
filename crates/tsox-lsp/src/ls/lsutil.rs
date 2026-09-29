@@ -6,6 +6,7 @@ pub use crate::ls::lsutil_format_code_options::IndentStyle;
 pub use crate::ls::lsutil_format_code_options::SemicolonPreference;
 pub use crate::ls::lsutil_format_code_options::from_ls_format_options;
 pub use crate::ls::lsutil_format_code_options::get_default_format_code_settings;
+pub use crate::ls::lsutil_format_code_options::set_format_code_setting;
 pub use crate::ls::lsutil_format_code_options::to_ls_format_options;
 pub use crate::ls::lsutil_user_preferences::CodeLensUserPreferences;
 pub use crate::ls::lsutil_user_preferences::IncludeInlayParameterNameHints;

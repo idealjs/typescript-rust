@@ -91,9 +91,6 @@ pub struct ReferenceEntry {
 }
 
 impl ReferenceEntry {
-    pub fn is_node_entry(&self) -> bool {
-        self.node.is_some()
-    }
 }
 
 pub struct SymbolAndEntries {

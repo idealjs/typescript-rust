@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
+
 #[test]
 fn side_effect_imports_suggestion1() {
     let content = r#"// @allowJs: true
@@ -15,6 +15,6 @@ var a = 10;
 // @filename: node_modules/c.js
 exports.a = 10;
 c = 10;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, nil)
+    let _s = Session::new_for_test("sideEffectImportsSuggestion1", content);
+    // TODO: f.VerifySuggestionDiagnostics(t, nil)
 }

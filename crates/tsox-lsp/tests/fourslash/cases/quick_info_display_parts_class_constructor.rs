@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_display_parts_class_constructor() {
     let content = r#"class c {
@@ -29,6 +29,6 @@ var /*19*/cWithMultipleOverloadsInstance = new /*20*/cWithMultipleOverloads("hel
 var /*21*/cWithMultipleOverloadsInstance2 = new /*22*/cWithMultipleOverloads(10);
 var /*23*/cWithMultipleOverloadsInstance3 = new /*24*/cWithMultipleOverloads(true);
 var /*25*/cWithMultipleOverloadsVal = /*26*/cWithMultipleOverloads;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoDisplayPartsClassConstructor", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

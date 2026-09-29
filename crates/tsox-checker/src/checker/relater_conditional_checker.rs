@@ -33,14 +33,28 @@ impl Checker {
         }
 
         let skip_true = match (ct.check_type.as_ref(), ct.extends_type.as_ref()) {
-            (Some(check), Some(extends)) => !self.is_type_assignable_to(check, extends),
+            (Some(check), Some(extends)) => {
+                let pc = self.get_permissive_instantiation(check);
+                let pe = self.get_permissive_instantiation(extends);
+                let was_silent = self.silence_relation_chain();
+                let r = !self.is_type_assignable_to(&pc, &pe);
+                self.restore_relation_chain(was_silent);
+                r
+            }
             _ => false,
         };
         let skip_false = if skip_true {
             false
         } else {
             match (ct.check_type.as_ref(), ct.extends_type.as_ref()) {
-                (Some(check), Some(extends)) => self.is_type_assignable_to(check, extends),
+                (Some(check), Some(extends)) => {
+                    let rc = self.get_restrictive_instantiation(check);
+                    let re = self.get_restrictive_instantiation(extends);
+                    let was_silent = self.silence_relation_chain();
+                    let r = self.is_type_assignable_to(&rc, &re);
+                    self.restore_relation_chain(was_silent);
+                    r
+                }
                 _ => false,
             }
         };
@@ -71,25 +85,29 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
     ) -> Option<Ternary> {
-        let sm = match &source.data {
-            TypeData::Mapped(m) => m,
+        match (&source.data, &target.data) {
+            (TypeData::Mapped(_), TypeData::Mapped(_)) => {}
             _ => return None,
-        };
-        let tm = match &target.data {
-            TypeData::Mapped(m) => m,
-            _ => return None,
-        };
-
-        if sm.name_type.is_some() || tm.name_type.is_some() {
-            return None;
         }
 
-        if relation == RelationKind::Identity {
-            return None;
+        let source_optionality = self.get_combined_mapped_type_optionality(source);
+        let modifiers_related = relation == RelationKind::Comparable
+            || (relation == RelationKind::Identity
+                && crate::checker::mig::wc2_2::get_mapped_type_modifiers(source)
+                    == crate::checker::mig::wc2_2::get_mapped_type_modifiers(target))
+            || (relation != RelationKind::Identity
+                && source_optionality <= self.get_combined_mapped_type_optionality(target));
+        if !modifiers_related {
+            return Some(Ternary::False);
         }
 
         let source_constraint = self.get_constraint_type_from_mapped_type(source)?;
         let target_constraint = self.get_constraint_type_from_mapped_type(target)?;
+        if source_optionality < 0 {
+            self.report_unmeasurable_markers(&source_constraint);
+        } else {
+            self.report_unreliable_markers(&source_constraint);
+        }
         let constraint_related = self.compare_types(
             Arc::clone(&target_constraint),
             Arc::clone(&source_constraint),
@@ -100,20 +118,51 @@ impl Checker {
             return Some(Ternary::False);
         }
 
+        let source_tp = self.get_type_parameter_from_mapped_type(source)?;
+        let target_tp = self.get_type_parameter_from_mapped_type(target)?;
+        let mapper = Arc::new(crate::checker::mapper::new_simple_type_mapper(
+            Arc::clone(&source_tp),
+            Arc::clone(&target_tp),
+        ));
+        let names_equal = match (
+            self.get_name_type_from_mapped_type(source),
+            self.get_name_type_from_mapped_type(target),
+        ) {
+            (None, None) => true,
+            (Some(s), Some(t)) => {
+                let s_mapped = self.instantiate_type(&s, Some(&mapper));
+                let t_mapped = self.instantiate_type(&t, Some(&mapper));
+                Arc::ptr_eq(&s_mapped, &t_mapped) || self.is_type_identical_to(&s_mapped, &t_mapped)
+            }
+            _ => false,
+        };
+        if !names_equal {
+            return Some(Ternary::False);
+        }
+
         let source_template = self.get_template_type_from_mapped_type(source)?;
         let target_template = self.get_template_type_from_mapped_type(target)?;
-        let template_related = self.compare_types(
-            Arc::clone(&source_template),
-            Arc::clone(&target_template),
-            relation,
-            false,
-        );
+        let source_template = self.instantiate_type(&source_template, Some(&mapper));
+        let template_related = self.compare_types(source_template, target_template, relation, false);
         Some(constraint_related.and(template_related))
     }
 
-    pub fn get_constraint_type_from_mapped_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_constraint_type_from_mapped_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
         if let TypeData::Mapped(m) = &t.data {
-            return m.constraint_type.clone();
+            if let Some(constraint) = &m.constraint_type {
+                return Some(Arc::clone(constraint));
+            }
+            let target = m.object.target.clone()?;
+            let mapper = m.object.mapper.clone();
+            // 壳链环守卫：同一壳的约束解析在途时按 Go instantiateType 深度上限
+            // 的等价出口收敛为 error 型，阻断 target 链自环造成的无限实例化
+            if !self.mapped_shell_resolving.insert(t.id) {
+                return Some(self.error_type());
+            }
+            let resolved = self.get_constraint_type_from_mapped_type(&target);
+            self.mapped_shell_resolving.remove(&t.id);
+            let source_constraint = resolved?;
+            return Some(self.instantiate_type(&source_constraint, mapper.as_ref()));
         }
         None
     }
@@ -204,12 +253,24 @@ impl Checker {
         if take_true {
             self.pop_scope();
         }
+        let branch = match ct.mapper.as_ref() {
+            Some(m) => m.map(&branch),
+            None => branch,
+        };
         if pushes_creation {
             self.type_argument_stack.pop();
         }
         if scopes_pushed > 0 {
             self.scope_stack
                 .truncate(self.scope_stack.len() - scopes_pushed);
+        }
+        if let TypeData::Conditional(ct_cell) = &t.data {
+            let cell = if take_true {
+                &ct_cell.resolved_true_type
+            } else {
+                &ct_cell.resolved_false_type
+            };
+            let _ = cell.set(Arc::clone(&branch));
         }
         Some(branch)
     }
@@ -218,17 +279,8 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
     ) -> Option<Arc<Type>> {
-        let root = match &t.data {
-            TypeData::Conditional(ct) => ct.root.as_ref()?,
-            _ => return None,
-        };
-        if !Self::conditional_distribution_independent(root) {
-            return None;
-        }
-        let (true_branch, false_branch) = (
-            self.get_forced_branch_type_of_conditional_type(t, true),
-            self.get_forced_branch_type_of_conditional_type(t, false),
-        );
+        let true_branch = self.get_inferred_true_type_of_conditional(t);
+        let false_branch = self.get_forced_branch_type_of_conditional_type(t, false);
         match (true_branch, false_branch) {
             (Some(tb), Some(fb)) => {
                 if tb.flags.contains(TypeFlags::Any) {
@@ -247,6 +299,9 @@ impl Checker {
         if !root.is_distributive {
             return true;
         }
+        // Go isDistributionDependent：check 型类型参数在任一结果分支中被
+        // 引用（isTypeParameterPossiblyReferenced 递归整棵子树，含嵌套位）
+        // 即分布依赖；符号缺失或声明不唯一时保守视为依赖
         let Some(param_sym) = root.check_type_parameter_symbol.as_ref() else {
             return false;
         };
@@ -254,30 +309,12 @@ impl Checker {
             Some(NodeData::ConditionalTypeNode(d)) => d,
             _ => return false,
         };
-        let is_top_level_reference = |node: &Arc<Node>| -> bool {
-            let mut queue: Vec<&Arc<Node>> = vec![node];
-            while let Some(current) = queue.pop() {
-                match &current.data {
-                    NodeData::UnionTypeNode(u) => {
-                        for member in u.types.iter() {
-                            queue.push(member);
-                        }
-                    }
-                    NodeData::ParenthesizedTypeNode(p) => queue.push(&p.type_node),
-                    NodeData::TypeReferenceNode(r) => {
-                        if r.type_name.kind == SyntaxKind::Identifier
-                            && r.type_name.text() == param_sym.name
-                        {
-                            return true;
-                        }
-                    }
-                    _ => {}
-                }
-            }
-            false
-        };
-        !is_top_level_reference(&cond_node.true_type)
-            && !is_top_level_reference(&cond_node.false_type)
+        if param_sym.declarations.len() != 1 {
+            return false;
+        }
+        let name = param_sym.name.clone();
+        !crate::checker::typenode_type_operators::type_node_references_names(&cond_node.true_type, &[name.clone()])
+            && !crate::checker::typenode_type_operators::type_node_references_names(&cond_node.false_type, &[name])
     }
 
     pub fn get_true_type_from_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
@@ -291,5 +328,14 @@ impl Checker {
             }
         }
         None
+    }
+
+    fn get_inferred_true_type_of_conditional(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        if let TypeData::Conditional(ct) = &t.data {
+            if let Some(rt) = ct.resolved_inferred_true_type.get() {
+                return Some(rt.clone());
+            }
+        }
+        self.get_forced_branch_type_of_conditional_type(t, true)
     }
 }

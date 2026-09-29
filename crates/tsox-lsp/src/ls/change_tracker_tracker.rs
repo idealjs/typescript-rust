@@ -4,11 +4,12 @@ use crate::ls::change_tracker::*;
 
 pub struct Tracker {
     pub(super) format_settings: FormatCodeSettings,
-    pub(super) new_line: String,
-    pub(super) converters: Option<Box<Converters>>,
+    pub(crate) new_line: String,
+    pub(crate) converters: Option<Box<Converters>>,
     pub(super) changes: HashMap<String, Vec<TrackerEdit>>,
     pub(super) deleted_nodes: Vec<DeletedNode>,
     pub(super) nodes_with_insertions_at_start: HashMap<u64, NodesInsertedAtStartState>,
+    pub(crate) unmappable_files: std::collections::HashSet<String>,
 }
 
 impl std::fmt::Debug for Tracker {
@@ -32,12 +33,24 @@ pub fn new_tracker(
         changes: HashMap::new(),
         deleted_nodes: Vec::new(),
         nodes_with_insertions_at_start: HashMap::new(),
+        unmappable_files: std::collections::HashSet::new(),
     }
 }
 
 impl Tracker {
     pub fn get_changes(&mut self) -> HashMap<String, Vec<TextEdit>> {
-        HashMap::new()
+        self.get_changes_with_unmappable().0
+    }
+
+    pub fn get_changes_with_unmappable(&mut self) -> (HashMap<String, Vec<TextEdit>>, Vec<String>) {
+        let mut changes = self.get_text_changes_from_changes();
+        let mut unmappable: Vec<String> =
+            self.unmappable_files.iter().cloned().collect();
+        unmappable.sort();
+        for file_name in &unmappable {
+            changes.remove(file_name);
+        }
+        (changes, unmappable)
     }
 
     pub fn replace_node(

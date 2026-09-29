@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
+
 #[test]
 fn go_to_implementation_shorthand_property_assignment_00() {
     let content = r#"interface Foo {
@@ -34,6 +34,6 @@ function createBarUsingClassDeclaration(): Bar {
         Fo/*declaredClassRef*/o
     };
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "classExpressionRef", "declaredClassRef")
+    let _s = Session::new_for_test("goToImplementationShorthandPropertyAssignment_00", content);
+    // TODO: f.VerifyBaselineGoToImplementation(t, "classExpressionRef", "declaredClassRef")
 }

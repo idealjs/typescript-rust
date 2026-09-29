@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn auto_import_package_json_filter_existing_import2() {
     let content = r#"// @lib: es5
@@ -12,12 +12,12 @@ export declare function useState(): void;
 {}
 // @Filename: /home/src/workspaces/project/index.ts
 useMemo/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportPackageJsonFilterExistingImport2", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{}, nil /*preferences*/)
-    fourslash::unsupported("GoToBOF"); // f.GoToBOF(t)
-    fourslash::unsupported("InsertLine"); // f.InsertLine(t, "import { useState } from \"react\";")
+    // TODO: f.VerifyImportFixAtPosition(t, []string{}, nil /*preferences*/)
+    fourslash::go_to_bof(&mut s, );
+    fourslash::insert_line(&mut s, "import { useState } from \"react\";");
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
+
 #[test]
 fn go_to_source_access_expression_property() {
     let content = r#"// @moduleResolution: bundler
@@ -14,11 +14,10 @@ export const /*targetObj*/obj = { /*targetGreet*/greet(name) { return name; }, /
 import { obj } from "pkg";
 obj./*propAccess*/greet("world");
 obj./*propAccess2*/count;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "propAccess", "propAccess2")
+    let _s = Session::new_for_test("goToSourceAccessExpressionProperty", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "propAccess", "propAccess2")
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
 #[test]
 fn go_to_source_property_of_alias() {
     let content = r#"// @moduleResolution: bundler
@@ -29,11 +28,10 @@ export declare const a: { a: string };
 // @Filename: /home/src/workspaces/project/b.ts
 import { a } from './a';
 a.[|a/*start*/|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "start")
+    let _s = Session::new_for_test("goToSourcePropertyOfAlias", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }
 
-#[ignore = "generator: // When accessing a property defined via index signature, ge"]
 #[test]
 fn go_to_source_index_signature_property() {
     // TODO: // When accessing a property defined via index signature, getDeclarationsFromLocation
@@ -48,11 +46,10 @@ export const config = { /*targetName*/name: "test" };
 // @Filename: /home/src/workspaces/project/index.ts
 import { config } from "pkg";
 config./*propAccess*/name;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "propAccess")
+    let _s = Session::new_for_test("goToSourceIndexSignatureProperty", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "propAccess")
 }
 
-#[ignore = "generator: // getDeclarationsFromLocation returns empty for a property "]
 #[test]
 fn go_to_source_mapped_type_property() {
     // TODO: // getDeclarationsFromLocation returns empty for a property that exists only
@@ -68,11 +65,10 @@ export const obj = { a: 1, /*target*/b: 2 };
 // @Filename: /home/src/workspaces/project/index.ts
 import { obj } from "pkg";
 obj./*propAccess*/b;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "propAccess")
+    let _s = Session::new_for_test("goToSourceMappedTypeProperty", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "propAccess")
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
 #[test]
 fn go_to_source_common_js_alias_prefers_declaration() {
     let content = r#"// @moduleResolution: bundler
@@ -99,6 +95,6 @@ var TargetPopulation;
 // @Filename: /home/src/workspaces/project/index.ts
 import * as tas from "pkg";
 tas./*start*/TargetPopulation.Public;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "start")
+    let _s = Session::new_for_test("goToSourceCommonJSAliasPrefersDeclaration", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }

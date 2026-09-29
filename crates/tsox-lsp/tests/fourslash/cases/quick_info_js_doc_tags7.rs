@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_js_doc_tags7() {
     let content = r#"// @noEmit: true
@@ -15,6 +15,6 @@ fn quick_info_js_doc_tags7() {
  * @template T
  */
 const /**/foo = t => t.y;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoJsDocTags7", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

@@ -147,11 +147,15 @@ bitflags::bitflags! {
         const IsDiscriminantComputed = 1 << 21;
         const IsDiscriminant         = 1 << 22;
         const IndexSymbol            = 1 << 23;
+        const ContainsWritePublic    = 1 << 24;
+        const ContainsWriteProtected = 1 << 25;
+        const ContainsWritePrivate   = 1 << 26;
     }
 }
 
 impl CheckFlags {
     pub const SYNTHETIC: Self = Self::SyntheticProperty.union(Self::SyntheticMethod);
+    pub const PARTIAL: Self = Self::ReadPartial.union(Self::WritePartial);
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]

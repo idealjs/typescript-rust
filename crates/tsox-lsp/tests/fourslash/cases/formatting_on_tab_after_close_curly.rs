@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn formatting_on_tab_after_close_curly() {
     let content = r#"namespace Tools {/*1*/
@@ -13,8 +13,8 @@ fn formatting_on_tab_after_close_curly() {
         Blah=1, Bleah=2/*7*/
     }/*8*/
 }/*9*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formattingOnTabAfterCloseCurly", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"namespace Tools {"#);
     fourslash::go_to_marker(&mut s, "2");

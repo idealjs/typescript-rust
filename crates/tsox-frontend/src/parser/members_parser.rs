@@ -4,17 +4,47 @@ use crate::parser::members::*;
 
 impl Parser {
     pub(crate) fn parse_template_expression(&mut self) -> Arc<Node> {
+        self.parse_template_expression_ex(false)
+    }
+
+    pub(crate) fn parse_template_expression_ex(&mut self, is_tagged: bool) -> Arc<Node> {
         let pos = self.token_pos();
-        let head = self.create_token_node();
+        // Go parseTemplateHead：非 tagged 且 token 带非法转义时重扫报告
+        if !is_tagged
+            && crate::scanner::token_flags_intersects(
+                self.scanner.token_flags(),
+                crate::scanner::TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE,
+            )
+        {
+            self.scanner.re_scan_template_head_token(false);
+            self.drain_scanner_errors();
+        }
+        let head = self.create_template_token_node();
         self.next_token();
         let mut spans = Vec::new();
         loop {
-            let expression = self.parse_expression();
+            let expression = self.allow_in(|p| p.parse_expression());
+            let mut is_middle = false;
             let literal = if self.token == SyntaxKind::CloseBraceToken {
-                self.next_template_token();
-                self.create_token_node()
+                self.next_template_token_ex(is_tagged);
+                let node = self.create_template_token_node();
+                is_middle = node.kind == SyntaxKind::TemplateMiddle;
+                self.next_token();
+                node
             } else {
-                break;
+                // Go parseLiteralOfTemplateSpan：'}' 缺失报 TS1005 并给
+                // 零宽 tail（不消费），模板链在此截断
+                self.parse_error_at_current_token(tsox_core::diagnostics::X_0_EXPECTED, &["}"]);
+                let p = self.node_pos();
+                Arc::new(Node::with_loc(
+                    SyntaxKind::TemplateTail,
+                    NodeData::TemplateTail(TemplateTailData {
+                        text: String::new(),
+                        raw_text: String::new(),
+                        template_flags: 0,
+                    }),
+                    TextRange::new(p, p),
+                ))
             };
             let span_pos = expression.pos();
             let span_end = literal.end();
@@ -26,15 +56,11 @@ impl Parser {
                 }),
                 TextRange::new(span_pos, span_end),
             )));
-            if self.token == SyntaxKind::NoSubstitutionTemplateLiteral
-                || self.token == SyntaxKind::TemplateTail
-            {
-                self.next_token();
+            if !is_middle {
                 break;
             }
-            self.next_token();
         }
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::TemplateExpression,
             NodeData::TemplateExpression(TemplateExpressionData {
@@ -67,7 +93,7 @@ impl Parser {
             );
         }
         self.expect(SyntaxKind::GreaterThanToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Some(Arc::new(NodeList {
             loc: TextRange::new(pos, end),
             nodes: params.nodes,
@@ -136,10 +162,17 @@ impl Parser {
 
     pub(crate) fn parse_parameter_list(&mut self) -> Arc<NodeList> {
         let pos = self.token_pos();
-        self.expect(SyntaxKind::OpenParenToken);
+        // Go parseParameters：'(' 缺失时参数为缺失列表，不解析（防止
+        // 后续语句被当参数吞掉）
+        if !self.expect_report(SyntaxKind::OpenParenToken) {
+            return Arc::new(NodeList {
+                loc: TextRange::new(pos, pos),
+                nodes: Vec::new(),
+            });
+        }
         let params = self.parse_delimited_list(ParsingContext::Parameters, Parser::parse_parameter);
         self.expect(SyntaxKind::CloseParenToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(NodeList {
             loc: TextRange::new(pos, end),
             nodes: params.nodes,
@@ -239,9 +272,21 @@ impl Parser {
 
         let dot_dot_dot_token = self.parse_optional_token(SyntaxKind::DotDotDotToken);
 
-        let name = self.parse_identifier_or_pattern_with_diagnostic(Some(
-            &tsox_core::diagnostics::PRIVATE_IDENTIFIERS_CANNOT_BE_USED_AS_PARAMETERS,
-        ));
+        // Go parseParameter：this 参数特判（ThisKeyword 可作参数名）
+        let name = if self.token == SyntaxKind::ThisKeyword {
+            let pos = self.token_pos();
+            let end = self.token_end();
+            self.next_token();
+            Arc::new(Node::with_loc(
+                SyntaxKind::ThisKeyword,
+                NodeData::Token,
+                TextRange::new(pos, end),
+            ))
+        } else {
+            self.parse_identifier_or_pattern_with_diagnostic(Some(
+                &tsox_core::diagnostics::PRIVATE_IDENTIFIERS_CANNOT_BE_USED_AS_PARAMETERS,
+            ))
+        };
         let question_token = self.parse_optional_token(SyntaxKind::QuestionToken);
         let type_node = self.parse_optional_type_annotation();
         let initializer = if self.token == SyntaxKind::EqualsToken {

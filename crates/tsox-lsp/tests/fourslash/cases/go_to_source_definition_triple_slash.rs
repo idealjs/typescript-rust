@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // /// <reference types='foo'/> resolves to @types/foo/index"]
+
 #[test]
 fn go_to_source_reference_types_to_js() {
     // TODO: // /// <reference types="foo"/> resolves to @types/foo/index.d.ts.
@@ -18,11 +18,10 @@ export function /*target*/bar() { return "hello"; }
 /// <reference types="[|foo/*refTypes*/|]" />
 import { bar } from "foo";
 bar();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "refTypes")
+    let _s = Session::new_for_test("goToSourceReferenceTypesToJS", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "refTypes")
 }
 
-#[ignore = "generator: // /// <reference path='./lib.d.ts'/> where a sibling .js fi"]
 #[test]
 fn go_to_source_reference_path_to_dts() {
     // TODO: // /// <reference path="./lib.d.ts"/> where a sibling .js file exists.
@@ -42,6 +41,6 @@ export function main() {}
 // @Filename: /home/src/workspaces/project/index.ts
 /// <reference path="./node_modules/pkg/[|lib.d.ts/*refPath*/|]" />
 declare function helper(): string;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "refPath")
+    let _s = Session::new_for_test("goToSourceReferencePathToDts", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "refPath")
 }

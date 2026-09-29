@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn this_predicate_function_quick_info() {
     let content = r#"class RoyalGuard {
@@ -59,37 +60,12 @@ function isLeaderGuard(g: RoyalGuard) {
    return g.isLeader();
 }
 let checked/*14*/LeaderStatus = isLeader/*15*/Guard(a);"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "1",
-        "(method) RoyalGuard.isLeader(): this is LeadGuard",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "3",
-        "(method) RoyalGuard.isFollower(): this is FollowerGuard",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "5",
-        "(method) GuardInterface.isLeader(): this is LeadGuard",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "7",
-        "(method) GuardInterface.isFollower(): this is FollowerGuard",
-        "",
-    );
+    let mut s = Session::new_for_test("thisPredicateFunctionQuickInfo", content);
+    fourslash::verify_quick_info_at(&mut s, "1", "(method) RoyalGuard.isLeader(): this is LeadGuard", "");
+    fourslash::verify_quick_info_at(&mut s, "3", "(method) RoyalGuard.isFollower(): this is FollowerGuard", "");
+    fourslash::verify_quick_info_at(&mut s, "5", "(method) GuardInterface.isLeader(): this is LeadGuard", "");
+    fourslash::verify_quick_info_at(&mut s, "7", "(method) GuardInterface.isFollower(): this is FollowerGuard", "");
     fourslash::verify_quick_info_at(&mut s, "13", "let leaderStatus: boolean", "");
     fourslash::verify_quick_info_at(&mut s, "14", "let checkedLeaderStatus: boolean", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "15",
-        "function isLeaderGuard(g: RoyalGuard): g is LeadGuard",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "15", "function isLeaderGuard(g: RoyalGuard): g is LeadGuard", "");
 }

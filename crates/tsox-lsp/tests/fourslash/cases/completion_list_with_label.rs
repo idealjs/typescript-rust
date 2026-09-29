@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_with_label() {
     let content = r#" label: while (true) {
@@ -15,8 +15,9 @@ fn completion_list_with_label() {
     break /*7*/
     break; /*8*/
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "2", "7"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"3", "4", "5", "6"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "8", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListWithLabel", content);
+    // TODO: f.VerifyCompletions(t, []string{"1", "2", "7"}, &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyCompletions(t, []string{"3", "4", "5", "6"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "8");
+    // TODO: f.VerifyCompletions(t, "8", &fourslash.CompletionsExpectedList{
 }

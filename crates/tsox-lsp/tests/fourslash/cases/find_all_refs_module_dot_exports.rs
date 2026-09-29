@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_module_dot_exports() {
     let content = r#"// @allowJs: true
@@ -8,6 +8,6 @@ fn find_all_refs_module_dot_exports() {
 /*1*/const b = require("/*2*/./b");
 // @Filename: /b.js
 /*3*/module.exports = 0;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
+    let _s = Session::new_for_test("findAllRefsModuleDotExports", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

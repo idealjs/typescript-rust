@@ -22,9 +22,17 @@ impl ExitStatus {
     }
 }
 
-#[derive(Debug)]
 pub struct CommandLineResult {
     pub status: ExitStatus,
+    pub watcher: Option<crate::mig::m5b_3::Watcher>,
+}
+
+impl std::fmt::Debug for CommandLineResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CommandLineResult")
+            .field("status", &self.status)
+            .finish()
+    }
 }
 
 pub trait System: Send + Sync {
@@ -118,7 +126,7 @@ pub fn command_line(sys: &dyn System, args: &[String]) -> CommandLineResult {
         let diag =
             compiler_diagnostic(OPTION_BUILD_MUST_BE_THE_FIRST_COMMAND_LINE_ARGUMENT, vec![]);
         let _ = writeln!(writer, "{}", format_diagnostic(&diag, false, None));
-        return CommandLineResult {
+        return CommandLineResult { watcher: None,
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
         };
     }
@@ -146,14 +154,14 @@ pub(crate) fn tsc_build_compilation(
         for e in &command_line.errors {
             let _ = writeln!(writer, "{}", format_diagnostic(e, pretty, locale.as_ref()));
         }
-        return CommandLineResult {
+        return CommandLineResult { watcher: None,
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
         };
     }
 
     if command_line.compiler_options.help.is_true() || command_line.compiler_options.all.is_true() {
         print_help(sys, command_line.compiler_options.all.is_true());
-        return CommandLineResult {
+        return CommandLineResult { watcher: None,
             status: ExitStatus::Success,
         };
     }
@@ -180,5 +188,5 @@ pub(crate) fn tsc_build_compilation(
         status = status.max(result.status);
     }
 
-    CommandLineResult { status }
+    CommandLineResult { watcher: None, status }
 }

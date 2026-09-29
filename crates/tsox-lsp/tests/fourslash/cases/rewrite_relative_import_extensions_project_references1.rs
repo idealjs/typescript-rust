@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn rewrite_relative_import_extensions_project_references1() {
     let content = r#"// @Filename: packages/common/tsconfig.json
@@ -46,8 +46,8 @@ export {};
 { "type": "module" }
 // @Filename: packages/main/src/index.ts
 import {} from "../../common/src/index.ts";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("rewriteRelativeImportExtensionsProjectReferences1", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_file(&mut s, "/packages/main/src/index.ts");
-    fourslash::unsupported("VerifyBaselineNonSuggestionDiagnostics"); // f.VerifyBaselineNonSuggestionDiagnostics(t)
+    // TODO: f.VerifyBaselineNonSuggestionDiagnostics(t)
 }

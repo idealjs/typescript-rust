@@ -14,14 +14,21 @@ impl Parser {
             ParsingContext::SwitchClauses => {
                 self.token == SyntaxKind::CaseKeyword || self.token == SyntaxKind::DefaultKeyword
             }
-            ParsingContext::TypeMembers => !self.is_list_terminator(context),
+            ParsingContext::TypeMembers => self.look_ahead_type_member_start(),
             ParsingContext::ClassMembers => {
                 self.look_ahead_class_member_start()
                     || (self.token == SyntaxKind::SemicolonToken && !in_error_recovery)
             }
-            ParsingContext::EnumMembers | ParsingContext::ObjectLiteralMembers => {
-                !self.is_list_terminator(context)
+            ParsingContext::EnumMembers => {
+                self.token == SyntaxKind::OpenBracketToken || self.is_literal_property_name()
             }
+            ParsingContext::ObjectLiteralMembers => match self.token {
+                SyntaxKind::OpenBracketToken
+                | SyntaxKind::AsteriskToken
+                | SyntaxKind::DotDotDotToken
+                | SyntaxKind::DotToken => true,
+                _ => self.is_literal_property_name(),
+            },
             ParsingContext::RestProperties => self.is_literal_property_name(),
             ParsingContext::ObjectBindingElements => {
                 self.token == SyntaxKind::OpenBracketToken
@@ -48,12 +55,30 @@ impl Parser {
                 }
                 self.token == SyntaxKind::DotDotDotToken || self.is_start_of_expression()
             }
-            ParsingContext::Parameters => self.is_start_of_parameter(),
-            ParsingContext::JSDocParameters => self.is_start_of_parameter(),
+            ParsingContext::Parameters => self.is_start_of_parameter(false),
+            ParsingContext::JSDocParameters => self.is_start_of_parameter(true),
             ParsingContext::TypeArguments | ParsingContext::TupleElementTypes => {
                 self.token == SyntaxKind::CommaToken || self.is_start_of_type()
             }
-            ParsingContext::HeritageClauseElement => self.is_start_of_left_hand_side_expression(),
+            ParsingContext::HeritageClauseElement => {
+                // Go isValidHeritageClauseObjectLiteral：'{}' 后跟 ,/{/extends/
+                // implements 才当 heritage 元素，否则 '{' 属于类体（列表终结）
+                if self.token == SyntaxKind::OpenBraceToken {
+                    let mut s = self.scanner.clone();
+                    if s.scan() == SyntaxKind::CloseBraceToken {
+                        let next = s.scan();
+                        return matches!(
+                            next,
+                            SyntaxKind::CommaToken
+                                | SyntaxKind::OpenBraceToken
+                                | SyntaxKind::ExtendsKeyword
+                                | SyntaxKind::ImplementsKeyword
+                        );
+                    }
+                    return true;
+                }
+                self.is_start_of_left_hand_side_expression()
+            }
             ParsingContext::HeritageClauses => {
                 self.token == SyntaxKind::ExtendsKeyword
                     || self.token == SyntaxKind::ImplementsKeyword
@@ -143,26 +168,40 @@ impl Parser {
             | SyntaxKind::TryKeyword
             | SyntaxKind::DebuggerKeyword
             | SyntaxKind::CatchKeyword
-            | SyntaxKind::FinallyKeyword
-            | SyntaxKind::ConstKeyword
-            | SyntaxKind::ExportKeyword
-            | SyntaxKind::ImportKeyword
+            | SyntaxKind::FinallyKeyword => true,
+            SyntaxKind::ImportKeyword => {
+                self.is_start_of_declaration()
+                    || self.is_next_token_open_paren_or_less_than_or_dot()
+            }
+            SyntaxKind::ConstKeyword | SyntaxKind::ExportKeyword => {
+                self.is_start_of_declaration()
+            }
+            SyntaxKind::AsyncKeyword
             | SyntaxKind::InterfaceKeyword
             | SyntaxKind::TypeKeyword
             | SyntaxKind::ModuleKeyword
             | SyntaxKind::NamespaceKeyword
             | SyntaxKind::DeclareKeyword
-            | SyntaxKind::AsyncKeyword
             | SyntaxKind::GlobalKeyword
-            | SyntaxKind::DeferKeyword
-            | SyntaxKind::AccessorKeyword
+            | SyntaxKind::DeferKeyword => true,
+            SyntaxKind::AccessorKeyword
             | SyntaxKind::PublicKeyword
             | SyntaxKind::PrivateKeyword
             | SyntaxKind::ProtectedKeyword
             | SyntaxKind::StaticKeyword
-            | SyntaxKind::ReadonlyKeyword => true,
+            | SyntaxKind::ReadonlyKeyword => {
+                self.is_start_of_declaration()
+                    || !self.next_token_is_identifier_or_keyword_on_same_line()
+            }
             _ => self.is_start_of_expression(),
         }
+    }
+
+    pub(crate) fn is_next_token_open_paren_or_less_than_or_dot(&self) -> bool {
+        matches!(
+            self.look_ahead_token(),
+            SyntaxKind::OpenParenToken | SyntaxKind::LessThanToken | SyntaxKind::DotToken
+        )
     }
 
     pub(crate) fn is_start_of_expression(&self) -> bool {
@@ -211,6 +250,7 @@ impl Parser {
                 | SyntaxKind::SlashEqualsToken
                 | SyntaxKind::Identifier
         ) || self.token == SyntaxKind::ImportKeyword
+        || self.is_identifier()
     }
 
     #[allow(dead_code)]
@@ -268,9 +308,12 @@ impl Parser {
             token: self.token,
             diagnostics: Vec::new(),
             language_variant: self.language_variant,
+            javascript_file: self.javascript_file,
             last_template_literal_was_middle: self.last_template_literal_was_middle,
             yield_context: self.yield_context,
             await_context: self.await_context,
+            decorator_context: self.decorator_context,
+            disallow_in_context: self.disallow_in_context,
             parsing_contexts: self.parsing_contexts,
         }
     }

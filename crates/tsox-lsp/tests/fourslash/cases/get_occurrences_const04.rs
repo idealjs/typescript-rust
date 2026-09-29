@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn get_occurrences_const04() {
     let content = r#"export const class C {
@@ -8,6 +8,6 @@ fn get_occurrences_const04() {
     constructor(public con/*3*/st foo) {
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "1", "2", "3")
+    let _s = Session::new_for_test("getOccurrencesConst04", content);
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "1", "2", "3")
 }

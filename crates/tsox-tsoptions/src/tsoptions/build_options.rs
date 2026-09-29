@@ -260,6 +260,34 @@ pub struct ParsedCommandLine {
     pub watch: bool,
 
     pub watch_options: WatchOptions,
+
+    pub config_file: Option<std::sync::Arc<crate::mig::m5j::TsConfigSourceFile>>,
+    pub type_acquisition: Option<tsox_core::core::mig::m3k::TypeAcquisition>,
+    pub content_mappers: Vec<crate::mig::m5h_3::ContentMapper>,
+    pub literal_file_names_len: usize,
+    pub compare_paths_options: tsox_core::tspath::ComparePathsOptions,
+
+    pub source_to_project_reference: tsox_core::collections::ordered_map::OrderedMap<
+        String,
+        crate::mig::m5h_3::SourceOutputAndProjectReference,
+    >,
+    pub output_dts_to_project_reference: tsox_core::collections::ordered_map::OrderedMap<
+        String,
+        crate::mig::m5h_3::SourceOutputAndProjectReference,
+    >,
+    pub source_and_output_maps_once: std::sync::OnceLock<()>,
+
+    pub common_source_directory: String,
+    pub common_source_directory_once: std::sync::OnceLock<()>,
+
+    pub resolved_project_reference_paths: Vec<String>,
+    pub resolved_project_reference_paths_once: std::sync::OnceLock<()>,
+
+    pub file_names_by_path: tsox_core::collections::ordered_map::OrderedMap<String, String>,
+    pub file_names_by_path_once: std::sync::OnceLock<()>,
+
+    pub locale: tsox_core::locale::Locale,
+    pub locale_once: std::sync::OnceLock<()>,
 }
 
 #[derive(Default)]

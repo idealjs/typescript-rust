@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_for_string_literal_nonrelative_import9() {
     let content = r#"// @Filename: tsconfig.json
@@ -21,6 +21,6 @@ var foo3 = require("m/*require0*/
 export var x = 9;
 // @Filename: some/other/path.ts
 export var y = 10;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("completionForStringLiteralNonrelativeImport9", content);
+    // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

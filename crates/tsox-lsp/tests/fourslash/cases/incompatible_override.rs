@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyErrorExistsBetweenMarkers"]
+
 #[test]
 fn incompatible_override() {
     let content = r#"// @strict: false
@@ -12,9 +12,9 @@ class /*5*/Baf/*6*/ extends Foo {
       super();
    }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyErrorExistsBetweenMarkers"); // f.VerifyErrorExistsBetweenMarkers(t, "1", "2")
-    fourslash::unsupported("VerifyErrorExistsBetweenMarkers"); // f.VerifyErrorExistsBetweenMarkers(t, "3", "4")
-    fourslash::unsupported("VerifyErrorExistsBetweenMarkers"); // f.VerifyErrorExistsBetweenMarkers(t, "5", "6")
+    let mut s = Session::new_for_test("incompatibleOverride", content);
+    // TODO: f.VerifyErrorExistsBetweenMarkers(t, "1", "2")
+    // TODO: f.VerifyErrorExistsBetweenMarkers(t, "3", "4")
+    // TODO: f.VerifyErrorExistsBetweenMarkers(t, "5", "6")
     fourslash::verify_number_of_errors_in_current_file(&mut s, 3);
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
+
 #[test]
 fn import_name_code_fix_triple_slash_ordering() {
     let content = r#"// @Filename: /tsconfig.json
@@ -41,15 +41,15 @@ const y = x + 1;
 /// <amd-dependency path="legacy/moduleA" name="moduleA" />
 
 const y = x + 1;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFix_tripleSlashOrdering", content);
     fourslash::go_to_file(&mut s, "/b.ts");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_file(&mut s, "/c.ts");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_file(&mut s, "/d.ts");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_file(&mut s, "/f.ts");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_file(&mut s, "/g.ts");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

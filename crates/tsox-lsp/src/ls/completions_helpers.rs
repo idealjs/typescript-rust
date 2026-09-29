@@ -104,6 +104,29 @@ pub(super) fn symbol_to_completion_item(symbol: &Arc<Symbol>) -> CompletionItem 
     }
 }
 
+/// Go createCompletionItem：成员补全中可选成员（声明名后紧跟 `?`）label 带 `?`
+pub(super) fn member_completion_label(symbol: &Arc<Symbol>, text: &str) -> String {
+    let optional = symbol.declarations.iter().any(|d| {
+        if !matches!(
+            d.kind,
+            tsox_frontend::ast::SyntaxKind::MethodSignature
+                | tsox_frontend::ast::SyntaxKind::PropertySignature
+                | tsox_frontend::ast::SyntaxKind::MethodDeclaration
+                | tsox_frontend::ast::SyntaxKind::PropertyDeclaration
+        ) {
+            return false;
+        }
+        d.name()
+            .and_then(|n| text.get(n.end()..n.end() + 1))
+            .is_some_and(|t| t == "?")
+    });
+    if optional {
+        format!("{}?", symbol.name)
+    } else {
+        symbol.name.clone()
+    }
+}
+
 pub(super) fn flags_to_detail(flags: &SymbolFlags) -> String {
     if flags.contains(SymbolFlags::Function) {
         "function".to_string()
@@ -199,15 +222,22 @@ pub(super) fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     loop {
         let current = Arc::clone(&deepest);
         let mut next: Option<Arc<Node>> = None;
+        let mut zero_width: Option<Arc<Node>> = None;
         for_each_child(&current, |child| {
-            if child.pos() <= offset && offset < child.end() {
+            let (s, e) = (child.pos(), child.end());
+            if s <= offset && offset < e {
                 next = Some(Arc::clone(child));
                 true
             } else {
+                // parser 缺失名等零宽节点（Go GetTokenAtPosition 端点含）：
+                // 无严格包含子节点时下沉
+                if s == offset && e == offset {
+                    zero_width = Some(Arc::clone(child));
+                }
                 false
             }
         });
-        match next {
+        match next.or(zero_width) {
             Some(child) => deepest = child,
             None => break,
         }
@@ -221,3 +251,4 @@ pub(super) fn lsp_position_to_offset(line_map: &LineMap, position: &Position) ->
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     line_start + character
 }
+

@@ -3,7 +3,97 @@
 use crate::checker::checker_imports_namespace::*;
 
 impl Checker {
+    // 裸说明符的程序内回退解析：node_modules / @types 约定路径（内存 FS 场景）
+    fn resolve_bare_specifier_in_program(&self, spec: &str) -> Option<String> {
+        let candidates = [
+            format!("/node_modules/@types/{spec}/index.d.ts"),
+            format!("/node_modules/{spec}/index.d.ts"),
+            format!("/node_modules/@types/{spec}.d.ts"),
+            format!("/node_modules/{spec}.d.ts"),
+        ];
+        for c in candidates {
+            if self.program.get_source_file(&c).is_some() {
+                return Some(c);
+            }
+        }
+        None
+    }
+
     pub(crate) fn type_of_imported_symbol(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+        // 环守卫：`export import B = A` 的 A 又解析回 B 时无限递归；
+        // Go 在 symbolLinks 里缓存解析中状态，这里以访问栈等价
+        let key = symbol.id();
+        if self.imported_type_resolution.contains(&key) {
+            return None;
+        }
+        self.imported_type_resolution.push(key);
+        let result = self.type_of_imported_symbol_inner(symbol);
+        self.imported_type_resolution.pop();
+        result
+    }
+
+    fn type_of_imported_symbol_inner(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+        // import * as X from "m"：X 的类型是模块命名空间类型（typeof import("m")）
+        if let Some(decl) = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::NamespaceImport)
+        {
+            let mut cur = decl.parent();
+            loop {
+                let Some(n) = cur else { break };
+                if let tsox_frontend::ast::NodeData::ImportDeclaration(id) = &n.data {
+                    let spec = id
+                        .module_specifier
+                        .text()
+                        .trim_matches(['"', '\'', '`'])
+                        .to_string();
+                    let module_sym = self
+                        .resolve_module_file_symbol(&spec)
+                        .or_else(|| {
+                            let file = self
+                                .display_enclosing_file
+                                .clone()
+                                .or_else(|| self.current_file.clone())?;
+                            let dir = match file.file_name.rfind('/') {
+                                Some(i) => file.file_name[..i].to_string(),
+                                None => String::new(),
+                            };
+                            self.resolve_module_file_symbol_in(&dir, &spec)
+                        })
+                        .or_else(|| {
+                            let file = self
+                                .display_enclosing_file
+                                .clone()
+                                .or_else(|| self.current_file.clone())?;
+                            let path = self.program.resolve_external_module_path(
+                                &spec,
+                                &file.file_name,
+                                tsox_core::core::compiler_options::ModuleKind::None,
+                            );
+                            let path = match path {
+                                Some(p) => p,
+                                // 内存 FS 下 @types 查找缺 package.json 时 Resolver 失败：
+                                // 直接按 node_modules 约定路径匹配程序内已加载文件
+                                None => self.resolve_bare_specifier_in_program(&spec)?,
+                            };
+                            let sf = self.program.get_source_file(&path)?;
+                            self.program.symbol_map().symbol_of(&sf.node).cloned()
+                        })?;
+                    // 记录显示用 specifier（模块类型显示 typeof import("name")，
+                    // Go 打印模块名去扩展，非原始 specifier）
+                    self.module_display_specifiers.insert(
+                        module_sym.id(),
+                        crate::checker::nodebuilder::module_specifier_of_name(
+                            &module_sym.name,
+                        ),
+                    );
+                    return Some(self.namespace_import_module_type(&module_sym));
+                }
+                cur = n.parent();
+            }
+            return None;
+        }
         if let Some(decl) = symbol
             .declarations
             .iter()
@@ -52,6 +142,20 @@ impl Checker {
                         .iter()
                         .find(|d| d.kind == SyntaxKind::ExportAssignment)
                         .cloned();
+                    let is_entity_expression = entity_decl.as_deref().is_some_and(|d| {
+                        let tsox_frontend::ast::NodeData::ExportAssignment(ea) = &d.data else {
+                            return false;
+                        };
+                        ea.is_export_equals
+                            && matches!(
+                                ea.expression.kind,
+                                SyntaxKind::Identifier | SyntaxKind::QualifiedName
+                            )
+                    });
+                    if !is_entity_expression {
+                        let eq = Arc::clone(eq);
+                        return Some(self.get_type_of_symbol(&eq));
+                    }
                     let scope_decl = module_sym
                         .declarations
                         .iter()
@@ -119,7 +223,17 @@ impl Checker {
                 return Some(self.resolve_namespace_type(&module_sym));
             }
 
+            // import v = M.V：实体名解析到符号取声明型（Go
+            // getTypeOfNode 的 QualifiedName → resolveEntityName）
             let target = &ied.module_reference;
+            match &target.data {
+                NodeData::Identifier(_) | NodeData::QualifiedName(_) => {
+                    if let Some(sym) = self.resolve_qualified_symbol(target) {
+                        return Some(self.get_type_of_symbol(&sym));
+                    }
+                }
+                _ => {}
+            }
             let t = self.get_type_of_node(target);
             if t.flags.contains(TypeFlags::Any)
                 && t.intrinsic_name() == Some("any")
@@ -141,12 +255,12 @@ impl Checker {
             _ => return None,
         };
 
-        let mut import_decl = decl.parent.as_ref()?;
+        let mut import_decl = decl.parent()?;
         while !matches!(
             import_decl.data,
             tsox_frontend::ast::NodeData::ImportDeclaration(_)
         ) {
-            import_decl = import_decl.parent.as_ref()?;
+            import_decl = import_decl.parent()?;
         }
         let module_spec = match &import_decl.data {
             tsox_frontend::ast::NodeData::ImportDeclaration(d) => {

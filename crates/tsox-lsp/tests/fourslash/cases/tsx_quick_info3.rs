@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn tsx_quick_info3() {
     let content = r#"//@Filename: file.tsx
@@ -19,7 +20,7 @@ const obj1: OptionProp = {
 let y1 = <O/*1*/pt pro/*2*/px={2} />;
 let y2 = <Opt {...ob/*3*/j1} />;
 let y2 = <Opt {...obj1} pr/*4*/opx />;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("tsxQuickInfo3", content);
     fourslash::verify_quick_info_at(&mut s, "1", "class Opt", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(property) propx: number", "");
     fourslash::verify_quick_info_at(&mut s, "3", "const obj1: OptionProp", "");

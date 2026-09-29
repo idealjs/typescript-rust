@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn auto_import_provider_wildcard_exports1() {
     let content = r#"// @Filename: /home/src/workspaces/project/node_modules/pkg/package.json
@@ -44,7 +44,8 @@ export const d1: number;
 }
 // @Filename: /home/src/workspaces/project/main.ts
 /**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportProvider_wildcardExports1", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

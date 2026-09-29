@@ -1,10 +1,11 @@
 #![allow(dead_code)]
 
-use std::collections::HashSet;
-use std::sync::Arc;
+use std::collections::{HashMap, HashSet};
+use std::sync::{Arc, OnceLock};
 use std::sync::atomic::{AtomicI32, Ordering};
 
 use crate::lsp::lsproto;
+use crate::ls::lsutil::{UserPreferences, new_default_user_preferences};
 use tsox_core::core::compiler_options::CompilerOptions;
 use tsox_core::tspath::Path;
 
@@ -27,6 +28,7 @@ pub enum UpdateReason {
     RequestedLoadProjectTree,
     RequestedLanguageServiceWithAutoImports,
     IdleCleanDiskCache,
+    DidChangeContentMapperContributions,
 }
 
 #[derive(Default, Clone)]
@@ -70,17 +72,28 @@ pub struct SnapshotChange {
     pub file_changes: FileChangeSummary,
     pub compiler_options_for_inferred_projects: Option<CompilerOptions>,
     pub clean_disk_cache: bool,
+    pub content_mapper_contributions: Option<super::mig::m5e::ContentMapperContributions>,
+    pub new_config: Option<UserPreferences>,
+    pub ata_changes: HashMap<Path, ATAStateChange>,
 }
 
 pub struct Snapshot {
     pub id: u64,
     pub parent_id: u64,
-    ref_count: AtomicI32,
+    pub(crate) ref_count: AtomicI32,
 
     pub fs: Option<Arc<super::snapshot_fs::SnapshotFS>>,
     pub project_collection: Option<Box<ProjectCollection>>,
     pub config_file_registry: Option<Box<ConfigFileRegistry>>,
     pub compiler_options_for_inferred_projects: Option<CompilerOptions>,
+    pub user_preferences: UserPreferences,
+    pub auto_imports: Option<Arc<crate::ls::autoimport_registry::Registry>>,
+    pub auto_imports_watch: Option<Arc<crate::project::watch::WatchedFiles<HashMap<Path, String>>>>,
+    pub converters: Option<crate::mig::m5u_conv::M5uConverters>,
+    pub content_mapper_watch_state_once: OnceLock<(Vec<String>, HashSet<Path>)>,
+    pub inferred_project_content_mappers: Vec<tsox_compile::mig::m3l_cm::Mapper>,
+    pub inferred_project_content_mapper_extensions: Vec<String>,
+    pub builder_logs: Option<Box<super::logging_log_tree::LogTree>>,
 }
 
 impl Snapshot {
@@ -93,6 +106,14 @@ impl Snapshot {
             project_collection: None,
             config_file_registry: None,
             compiler_options_for_inferred_projects: None,
+            user_preferences: new_default_user_preferences(),
+            auto_imports: None,
+            auto_imports_watch: None,
+            converters: None,
+            content_mapper_watch_state_once: OnceLock::new(),
+            inferred_project_content_mappers: Vec::new(),
+            inferred_project_content_mapper_extensions: Vec::new(),
+            builder_logs: None,
         };
         s.ref_count.store(1, Ordering::SeqCst);
         s
@@ -100,6 +121,12 @@ impl Snapshot {
 
     pub fn id(&self) -> u64 {
         self.id
+    }
+
+    pub fn builder_logs_string(&self) -> String {
+        self.builder_logs
+            .as_deref()
+            .map_or(String::new(), |l| l.to_string())
     }
 
     pub fn get_default_project(&self, _uri: &lsproto::DocumentUri) -> Option<&Project> {

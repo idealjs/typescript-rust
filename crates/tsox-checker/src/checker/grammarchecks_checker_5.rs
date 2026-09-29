@@ -17,6 +17,16 @@ impl Checker {
         if file.as_ref().is_some_and(|f| f.has_parse_diagnostics) {
             return false;
         }
+        // tsc 每节点 grammar 检查只跑一次；移植侧多入口重入时按 code+loc 去重
+        let already = self.diagnostics.get_all().iter().any(|d| {
+            d.code == message.code
+                && d.loc.pos() == node.loc.pos()
+                && d.file.as_ref().map(|f| f.file_name.as_str())
+                    == file.as_ref().map(|f| f.file_name.as_str())
+        });
+        if already {
+            return true;
+        }
         let diagnostic =
             tsox_frontend::ast::Diagnostic::new(file, node.loc, *message, args.to_vec());
         self.diagnostics.add(diagnostic);

@@ -84,13 +84,30 @@ impl InMemoryFS {
         if dirs.contains(path) {
             return Some(path.to_string());
         }
-        if self.case_sensitive {
-            return None;
+        if !self.case_sensitive {
+            let target = path.to_ascii_lowercase();
+            if dirs.iter().any(|d| d.to_ascii_lowercase() == target) {
+                return Some(path.to_string());
+            }
         }
-        let target = path.to_ascii_lowercase();
-        dirs.iter()
-            .find(|d| d.to_ascii_lowercase() == target)
-            .cloned()
+        drop(dirs);
+        // 隐式目录：有文件挂载其下即存在（含根 "/"，对齐 TS 虚拟 FS 语义）
+        let prefix = if path.ends_with('/') {
+            path.to_string()
+        } else {
+            format!("{}/", path)
+        };
+        let files = self.files.read().unwrap();
+        let hit = if self.case_sensitive {
+            files.keys().any(|k| k.starts_with(&prefix))
+        } else {
+            let prefix_lc = prefix.to_ascii_lowercase();
+            files.keys().any(|k| k.to_ascii_lowercase().starts_with(&prefix_lc))
+        };
+        if hit {
+            return Some(path.to_string());
+        }
+        None
     }
 
     pub fn create_symlink(&self, link: &str, target: &str) {

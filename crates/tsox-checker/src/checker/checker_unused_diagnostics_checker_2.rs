@@ -13,9 +13,10 @@ impl Checker {
                 .iter()
                 .all(|e| self.is_unreferenced_variable_declaration(e))
         {
+            let root = Self::binding_root_declaration(pattern);
             self.report_unused(
-                pattern,
-                false,
+                &root,
+                root.kind == SyntaxKind::Parameter,
                 pattern.loc,
                 &tsox_core::diagnostics::messages_generated::ALL_DESTRUCTURED_ELEMENTS_ARE_UNUSED,
                 vec![],
@@ -58,7 +59,7 @@ impl Checker {
         }
 
         if node.kind == SyntaxKind::BindingElement {
-            if let Some(parent) = node.parent.as_ref() {
+            if let Some(parent) = node.parent().as_ref() {
                 if parent.kind == SyntaxKind::ObjectBindingPattern {
                     let elements: Vec<Arc<Node>> = match &parent.data {
                         tsox_frontend::ast::NodeData::BindingPattern(d) => {
@@ -84,9 +85,9 @@ impl Checker {
             SyntaxKind::Parameter => true,
             SyntaxKind::VariableDeclaration => {
                 let mut in_for = false;
-                if let Some(parent) = node.parent.as_ref() {
+                if let Some(parent) = node.parent().as_ref() {
                     if parent.kind == SyntaxKind::VariableDeclarationList {
-                        if let Some(gp) = parent.parent.as_ref() {
+                        if let Some(gp) = parent.parent().as_ref() {
                             in_for = matches!(
                                 gp.kind,
                                 SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement
@@ -98,7 +99,7 @@ impl Checker {
             }
             SyntaxKind::BindingElement => {
                 let parent_is_object_pattern = node
-                    .parent
+                    .parent()
                     .as_ref()
                     .is_some_and(|p| p.kind == SyntaxKind::ObjectBindingPattern);
                 let has_property_name = matches!(&node.data,
@@ -156,7 +157,7 @@ impl Checker {
             }
         }
         if declaration_count > 1 && declaration_count == unused.len() {
-            let loc = clause.parent.as_ref().map(|p| p.loc).unwrap_or(clause.loc);
+            let loc = clause.parent().as_ref().map(|p| p.loc).unwrap_or(clause.loc);
             self.report_unused(
                 clause,
                 false,
@@ -167,9 +168,102 @@ impl Checker {
             );
         } else {
             for u in unused {
-                let name = u.text().to_string();
+                let name = self
+                    .program
+                    .symbol_map()
+                    .symbol_of(u)
+                    .map(|s| s.name.clone())
+                    .unwrap_or_else(|| u.text().to_string());
                 let is_type_decl = false;
                 self.report_unused_local(u, &name, is_type_decl);
+            }
+        }
+    }
+
+    pub(crate) fn is_self_type_access(
+        &self,
+        receiver: &Arc<Node>,
+        object_type: &Arc<crate::checker::types::Type>,
+    ) -> bool {
+        if receiver.kind == SyntaxKind::ThisKeyword {
+            return true;
+        }
+        let Some(parent) = object_type.symbol.as_ref() else {
+            return false;
+        };
+        let mut first = receiver;
+        loop {
+            match &first.data {
+                tsox_frontend::ast::NodeData::Identifier(_) => break,
+                tsox_frontend::ast::NodeData::PropertyAccessExpression(d) => {
+                    first = &d.expression;
+                }
+                _ => return false,
+            }
+        }
+        self.resolve_identifier(first)
+            .is_some_and(|sym| sym.id() == parent.id())
+    }
+
+    pub(crate) fn mark_property_as_referenced(&self, prop: &Arc<Symbol>, node: Option<&Arc<Node>>) {
+        self.mark_property_as_referenced_ex(prop, node, None);
+    }
+
+    pub(crate) fn mark_property_as_referenced_ex(
+        &self,
+        prop: &Arc<Symbol>,
+        node: Option<&Arc<Node>>,
+        self_type_access: Option<bool>,
+    ) {
+        let has_private_modifier = prop.declarations.iter().any(|d| {
+            d.has_syntactic_modifier(ModifierFlags::Private)
+        });
+        let has_private_identifier = prop
+            .declarations
+            .iter()
+            .any(|d| d.name().is_some_and(|n| n.kind == SyntaxKind::PrivateIdentifier));
+        if std::env::var_os("TSOX_DEBUG_UNUSED").is_some() {
+        }
+        if !has_private_modifier && !has_private_identifier {
+            return;
+        }
+        if let Some(n) = node {
+            if is_write_only_access(n) && !prop.flags.contains(SymbolFlags::SetAccessor) {
+                return;
+            }
+            let self_access = self_type_access.unwrap_or_else(|| {
+                matches!(
+                    &n.data,
+                    tsox_frontend::ast::NodeData::PropertyAccessExpression(d)
+                        if d.expression.kind == SyntaxKind::ThisKeyword
+                )
+            });
+            if self_access {
+                let mut prop_ids = std::collections::HashSet::new();
+                prop_ids.insert(prop.id());
+                for d in &prop.declarations {
+                    if let Some(ds) = self.program.symbol_map().symbol_of(d) {
+                        prop_ids.insert(ds.id());
+                    }
+                }
+                let mut ancestor = n.parent();
+                while let Some(a) = ancestor {
+                    if Self::function_like_has_body(&a)
+                        && let Some(sym) = self.program.symbol_map().symbol_of(&a)
+                        && prop_ids.contains(&sym.id())
+                    {
+                        return;
+                    }
+                    ancestor = a.parent();
+                }
+            }
+        }
+        self.record_symbol_reference(prop, SymbolFlags::all());
+        for d in &prop.declarations {
+            if let Some(decl_sym) = self.program.symbol_map().symbol_of(d)
+                && decl_sym.id() != prop.id()
+            {
+                self.record_symbol_reference(&decl_sym, SymbolFlags::all());
             }
         }
     }
@@ -220,13 +314,13 @@ impl Checker {
 
             let already = unsafe {
                 (*child_mut)
-                    .parent
+                    .parent()
                     .as_ref()
                     .map_or(false, |p| Arc::ptr_eq(p, &parent_clone))
             };
             if !already {
                 unsafe {
-                    (*child_mut).parent = Some(Arc::clone(&parent_clone));
+                    (*child_mut).set_parent(&parent_clone);
                 }
             }
             self.set_parent_pointers(child);

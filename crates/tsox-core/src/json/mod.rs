@@ -74,3 +74,6 @@ pub(crate) fn reindent(s: &str, indent: &str) -> String {
 
 #[cfg(test)]
 pub(crate) mod tests;
+
+// r 轮接线:迁移批次模块
+pub mod mig;

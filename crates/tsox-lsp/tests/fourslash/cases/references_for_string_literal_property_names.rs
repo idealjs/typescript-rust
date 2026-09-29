@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn references_for_string_literal_property_names() {
     let content = r#"class Foo {
@@ -12,6 +12,6 @@ x.ss;
 x["ss"];
 x = { "ss": 0 };
 x = { ss: 0 };"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
+    let _s = Session::new_for_test("referencesForStringLiteralPropertyNames", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

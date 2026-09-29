@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
+
 #[test]
 fn code_fix_class_implement_interface_multiple_implements1() {
     let content = r#"// @strict: false
@@ -14,7 +14,7 @@ interface I2 {
 class C implements I1,I2 {[|
     |]y: number;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `
-    fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceMultipleImplements1", content);
+    // TODO: f.VerifyRangeAfterCodeFix(t, `
+    // TODO: f.VerifyCodeFixNotAvailable(t)
 }

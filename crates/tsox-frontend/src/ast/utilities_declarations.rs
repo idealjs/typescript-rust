@@ -2,7 +2,7 @@ use crate::ast::*;
 
 pub fn is_declaration(node: &Node) -> bool {
     if node.kind == SyntaxKind::TypeParameter {
-        return node.parent.is_some();
+        return node.parent().is_some();
     }
     is_declaration_node(node)
 }

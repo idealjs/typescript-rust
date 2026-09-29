@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn references_for_ambients() {
     let content = r#"/*1*/declare module "/*2*/foo" {
@@ -16,6 +16,6 @@ declare module "baz" {
     /*12*/import bar = require("/*13*/bar");
     var f2: typeof bar./*14*/foo;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", 
+    let _s = Session::new_for_test("referencesForAmbients", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", 
 }

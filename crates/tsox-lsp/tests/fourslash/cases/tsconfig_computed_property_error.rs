@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn tsconfig_computed_property_error() {
     let content = r#"// @filename: tsconfig.json
@@ -12,7 +12,7 @@ fn tsconfig_computed_property_error() {
     ],
     "compileOnSave": true
 }"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("tsconfigComputedPropertyError", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyNonSuggestionDiagnostics"); // f.VerifyNonSuggestionDiagnostics(t, []*lsproto.Diagnostic{
+    // TODO: f.VerifyNonSuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

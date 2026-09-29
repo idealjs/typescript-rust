@@ -234,6 +234,33 @@ impl Checker {
             .clone()
     }
 
+    pub fn unresolved_type(&self) -> Arc<Type> {
+        self.unresolved_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Any,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "unresolved".to_string(),
+                    }),
+                ))
+            })
+            .clone()
+    }
+
+    pub fn global_regexp_type(&mut self) -> Arc<Type> {
+        if let Some(t) = self.global_reg_exp_type.get() {
+            return Arc::clone(t);
+        }
+        let t = match self
+            .get_global_symbol_by_name("RegExp", tsox_frontend::ast::SymbolFlags::Interface)
+        {
+            Some(sym) => self.resolve_interface_type(&sym, None),
+            None => self.get_any_type(),
+        };
+        let _ = self.global_reg_exp_type.set(Arc::clone(&t));
+        t
+    }
+
     pub fn get_string_literal_type(&mut self, value: &str) -> Arc<Type> {
         if let Some(t) = self.string_literal_types.get(value) {
             return Arc::clone(t);
@@ -248,6 +275,28 @@ impl Checker {
         ));
         self.string_literal_types
             .insert(value.to_string(), Arc::clone(&t));
+        t
+    }
+
+    pub fn typeof_type(&mut self) -> Arc<Type> {
+        if let Some(t) = self.typeof_type.get() {
+            return Arc::clone(t);
+        }
+        let literals: Vec<Arc<Type>> = [
+            "bigint",
+            "boolean",
+            "function",
+            "number",
+            "object",
+            "string",
+            "symbol",
+            "undefined",
+        ]
+        .iter()
+        .map(|s| self.get_string_literal_type(s))
+        .collect();
+        let t = self.get_union_type(literals);
+        let _ = self.typeof_type.set(Arc::clone(&t));
         t
     }
 

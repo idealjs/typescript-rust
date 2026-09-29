@@ -1,11 +1,13 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: '\n' +"]
+
 #[test]
 fn rename_quoted_single_character_property_name1() {
-    // TODO: const content = "" +
-    // TODO: "\n" +
-    // TODO: "const obj = {\n" +
-    let mut s = Session::new("");
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
+    let content = r#"
+const obj = {
+  "'"/**/: 1,
+}
+"#;
+    let _s = Session::new_for_test("renameQuotedSingleCharacterPropertyName1", content);
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

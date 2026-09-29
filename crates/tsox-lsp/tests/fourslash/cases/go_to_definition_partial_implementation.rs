@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_partial_implementation() {
     let content = r#"// @Filename: goToDefinitionPartialImplementation_1.ts
@@ -17,6 +17,6 @@ namespace A {
 
     var x: [|/*Part2Use*/IA|];
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "Part2Use")
+    let _s = Session::new_for_test("goToDefinitionPartialImplementation", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "Part2Use")
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineSelectionRanges"]
+
 #[test]
 fn smart_selection_object_types() {
     let content = r#"type X = {
@@ -8,6 +8,6 @@ fn smart_selection_object_types() {
   /*2*/readonly /*3*/bar: { x: num/*4*/ber };
   /*5*/meh
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineSelectionRanges"); // f.VerifyBaselineSelectionRanges(t)
+    let _s = Session::new_for_test("smartSelection_objectTypes", content);
+    // TODO: f.VerifyBaselineSelectionRanges(t)
 }

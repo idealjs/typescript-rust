@@ -1,5 +1,4 @@
 use crate::vfs::FS;
-use tsox_core::tspath;
 
 use crate::vfs::vfsmatch::*;
 

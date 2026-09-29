@@ -68,6 +68,7 @@ pub(super) fn wrap_in_jsdoc_namespace(
             modifiers,
             keyword: SyntaxKind::NamespaceKeyword,
             name: deep_clone(&name),
+            attributes: None,
             body: Some(block),
         }),
         loc,

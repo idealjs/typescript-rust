@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn hover_mixin_override_documentation() {
     let content = r#"
@@ -22,11 +23,6 @@ declare class Mixed extends Mix(BaseClass) {
 
 Mixed./*1*/method;
 "#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "1",
-        "(method) Mixed.method(): number",
-        "some documentation",
-    );
+    let mut s = Session::new_for_test("hoverMixinOverrideDocumentation", content);
+    fourslash::verify_quick_info_at(&mut s, "1", "(method) Mixed.method(): number", "some documentation");
 }

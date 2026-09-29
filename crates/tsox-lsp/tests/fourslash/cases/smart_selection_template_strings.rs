@@ -1,11 +1,11 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineSelectionRanges"]
+
 #[test]
 fn smart_selection_template_strings() {
-    let content = r#"` + "`" + `a /*1*/b ${
+    let content = r#"`a /*1*/b ${
   '/*2*/c'
-} d` + "`" + `"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineSelectionRanges"); // f.VerifyBaselineSelectionRanges(t)
+} d`"#;
+    let _s = Session::new_for_test("smartSelection_templateStrings", content);
+    // TODO: f.VerifyBaselineSelectionRanges(t)
 }

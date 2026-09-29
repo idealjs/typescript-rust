@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn auto_import_cross_project_symlinks_to_src() {
     let content = r#"// @Filename: /home/src/workspaces/project/packages/app/package.json
@@ -29,9 +29,9 @@ import "./sub/folder";
 // @Filename: /home/src/workspaces/project/packages/dep/src/sub/folder/index.ts
 export const dep = 0;
 // @link: /home/src/workspaces/project/packages/dep -> /home/src/workspaces/project/packages/app/node_modules/dep"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("Configure"); // f.Configure(t, lsutil.UserPreferences{AutoImportEntrypointDirectorySearch: core.TSTrue})
+    let mut s = Session::new_for_test("autoImportCrossProject_symlinks_toSrc", content);
+    // TODO: f.Configure(t, lsutil.UserPreferences{AutoImportEntrypointDirectorySearch: core.TSTrue})
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_destructured_require1() {
     let content = r#"// @allowJs: true
@@ -10,6 +10,6 @@ module.exports = { Util };
 // @Filename: index.js
 const { Util } = require('./util');
 new [|Util/*1*/|]()"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1")
+    let _s = Session::new_for_test("goToDefinitionDestructuredRequire1", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

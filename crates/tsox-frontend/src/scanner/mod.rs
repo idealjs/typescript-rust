@@ -27,6 +27,7 @@ pub(crate) mod impl_chunk_scanner_4;
 pub(crate) mod impl_chunk_scanner_5;
 pub(crate) mod impl_chunk_scanner_6;
 pub(crate) mod impl_chunk_scanner_7;
+pub(crate) mod impl_chunk_scanner_8;
 pub(crate) mod regexp;
 pub(crate) mod regexp_class_ranges;
 pub(crate) mod regexp_class_set;
@@ -38,6 +39,7 @@ pub(crate) mod regexp_escapes_reg_exp_parser_2;
 pub(crate) mod regexp_pattern;
 pub(crate) mod regexp_property_escape;
 pub(crate) mod regexp_reg_exp_flag_modifiers;
+pub(crate) mod scan_number_literal;
 #[cfg(test)]
 pub(crate) mod tests;
 pub(crate) mod unicode_properties;
@@ -47,3 +49,6 @@ pub(crate) mod unicode_properties_script_values;
 pub(crate) mod unicode_properties_script_values_code_and_name_half_a;
 pub(crate) mod unicode_properties_script_values_code_and_name_half_b;
 pub(crate) mod unicode_properties_script_values_script_values;
+
+// r 轮接线:迁移批次模块
+pub mod mig;

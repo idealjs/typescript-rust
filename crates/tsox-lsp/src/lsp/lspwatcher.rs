@@ -7,7 +7,6 @@ use std::time::Duration;
 use notify::{self};
 
 use crate::lsp::lsproto;
-use tsox_core::tspath;
 use tsox_tsoptions::vfs::FS;
 
 const THROTTLE_WINDOW: Duration = Duration::from_millis(75);

@@ -145,6 +145,7 @@ pub struct SourceFileLinks {
     pub local_jsx_factory: Option<Arc<Node>>,
     pub local_jsx_fragment_factory: Option<Arc<Node>>,
     pub jsx_fragment_type: Option<Arc<Type>>,
+    pub identifier_check_nodes: Vec<Arc<Node>>,
 }
 
 #[derive(Debug, Default)]
@@ -152,6 +153,13 @@ pub struct SignatureLinks {
     pub resolved_signature: Option<Arc<Signature>>,
     pub effects_signature: Option<Arc<Signature>>,
     pub decorator_signature: Option<Arc<Signature>>,
+    pub call_inference: Option<CallInference>,
+}
+
+#[derive(Debug, Clone)]
+pub struct CallInference {
+    pub signature: Arc<Signature>,
+    pub inferred_types: Vec<Arc<Type>>,
 }
 
 #[derive(Debug, Default)]

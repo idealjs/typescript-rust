@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: completions := f.GetCompletions(t, nil /*userPreferences*/)"]
+
 #[test]
 fn completion_resolve_after_edit() {
     let content = r#"
@@ -15,7 +15,7 @@ declare const u: I;
 // @filename: 1.ts
 /*b*/
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionResolveAfterEdit", content);
     fourslash::go_to_marker(&mut s, "a");
     // TODO: completions := f.GetCompletions(t, nil /*userPreferences*/)
     // TODO: if completions == nil || len(completions.Items) == 0 {
@@ -26,7 +26,6 @@ declare const u: I;
     // TODO: if resolved == nil {
 }
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
 #[test]
 fn resolve_import_statement_completion() {
     let content = r#"
@@ -36,6 +35,7 @@ export const u = 1;
 // @filename: 1.ts
 [|import u/*a*/|]
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("resolveImportStatementCompletion", content);
+    fourslash::go_to_marker(&mut s, "a");
+    // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
 }

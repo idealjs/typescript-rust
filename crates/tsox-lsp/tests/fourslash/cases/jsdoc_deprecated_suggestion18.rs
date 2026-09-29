@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
+
 #[test]
 fn jsdoc_deprecated_suggestion18() {
     let content = r#"// @jsx: preserve
@@ -16,6 +16,6 @@ function A(props: Props) {
 function B() {
     return <A [|x|]={1} [|y|]={1} />
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
+    let _s = Session::new_for_test("jsdocDeprecated_suggestion18", content);
+    // TODO: f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

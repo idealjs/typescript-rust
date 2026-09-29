@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_for_string_literal_relative_import4() {
     let content = r#"// @rootDirs: /sub/src1,/src2
@@ -34,7 +34,7 @@ export const x = 0;
 
 // @Filename: e2.js
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"import_as0", "import_equals0", "require0"}, &fourslash.CompletionsE
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "inner", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionForStringLiteralRelativeImport4", content);
+    // TODO: f.VerifyCompletions(t, []string{"import_as0", "import_equals0", "require0"}, &fourslash.CompletionsE
+    fourslash::verify_completions_unsorted_at(&mut s, Some("inner"), &["inner1"]);
 }

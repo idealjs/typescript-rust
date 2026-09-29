@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: {"]
+
 #[test]
 fn completions_object_literal_method1() {
     let content = r#"// @newline: LF
@@ -35,10 +35,13 @@ const p: Prop = {
     /*d*/
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "b", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "a");
+    // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "b");
+    // TODO: f.VerifyCompletions(t, "b", &fourslash.CompletionsExpectedList{
     // TODO: {
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "d", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "d");
+    // TODO: f.VerifyCompletions(t, "d", &fourslash.CompletionsExpectedList{
     // TODO: {
     // TODO: {
 }

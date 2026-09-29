@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_in_type_literal_in_type_parameter10() {
     let content = r#"interface Foo {
@@ -29,12 +29,12 @@ d<{/*3*/}, {/*4*/}>();
 d<Foo, { four: {/*5*/} }>();
 
 (<T extends Foo>() => {})<{/*6*/}>();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "0", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "6", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListInTypeLiteralInTypeParameter10", content);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("0"), &["one", "two"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("1"), &["one", "two"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("2"), &["one", "two", "three", "four"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("3"), &["one", "two"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("4"), &["three", "four"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("5"), &["five"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("6"), &["one", "two"]);
 }

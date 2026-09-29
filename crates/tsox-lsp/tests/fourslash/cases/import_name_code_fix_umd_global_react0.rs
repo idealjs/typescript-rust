@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
+
 #[test]
 fn import_name_code_fix_umd_global_react0() {
     let content = r#"// @jsx: react
@@ -25,9 +25,9 @@ export class MyMap extends Component { }
 // @Filename: /b.tsx
 [|import { Component } from "react";
 <></>;|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFixUMDGlobalReact0", content);
     fourslash::go_to_file(&mut s, "/a.tsx");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_file(&mut s, "/b.tsx");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // Using separate files for each example to avoid unclosed J"]
+
 #[test]
 fn auto_close_tags_with_trivia_and_complex_names() {
     // TODO: // Using separate files for each example to avoid unclosed JSX tags affecting other tests.
@@ -84,6 +84,6 @@ const x = <SomeComponent<number>>/*9*/
 // Tag name containing $ (must be snippet-escaped)
 const x = <$Foo>/*10*/
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineClosingTags"); // f.VerifyBaselineClosingTags(t)
+    let _s = Session::new_for_test("autoCloseTagsWithTriviaAndComplexNames", content);
+    // TODO: f.VerifyBaselineClosingTags(t)
 }

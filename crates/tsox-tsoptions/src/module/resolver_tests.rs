@@ -282,7 +282,7 @@ fn resolve_bare_specifier_node_modules() {
         .unwrap();
 
     let opts = CompilerOptions::default();
-    let state = make_state("foo", "/src", &opts, &fs);
+    let mut state = make_state("foo", "/src", &opts, &fs);
     let result = state.resolve_node_like();
     assert!(result.is_resolved());
     assert_eq!(result.resolved_file_name, "/src/node_modules/foo/index.ts");
@@ -309,7 +309,7 @@ fn resolve_bare_specifier_with_types() {
     .unwrap();
 
     let opts = CompilerOptions::default();
-    let state = make_state("foo", "/src", &opts, &fs);
+    let mut state = make_state("foo", "/src", &opts, &fs);
     let result = state.resolve_node_like();
     assert!(result.is_resolved());
     assert_eq!(
@@ -335,7 +335,7 @@ fn resolve_bare_specifier_with_main() {
         .unwrap();
 
     let opts = CompilerOptions::default();
-    let state = make_state("foo", "/src", &opts, &fs);
+    let mut state = make_state("foo", "/src", &opts, &fs);
     let result = state.resolve_node_like();
     assert!(result.is_resolved());
     assert_eq!(
@@ -356,7 +356,7 @@ fn resolve_bare_specifier_ancestor_node_modules() {
         .unwrap();
 
     let opts = CompilerOptions::default();
-    let state = make_state("foo", "/src/sub", &opts, &fs);
+    let mut state = make_state("foo", "/src/sub", &opts, &fs);
     let result = state.resolve_node_like();
     assert!(result.is_resolved());
     assert_eq!(result.resolved_file_name, "/node_modules/foo/index.ts");
@@ -370,7 +370,7 @@ fn resolve_bare_specifier_not_found() {
     fs.insert_dir("/src/node_modules");
 
     let opts = CompilerOptions::default();
-    let state = make_state("nonexistent", "/src", &opts, &fs);
+    let mut state = make_state("nonexistent", "/src", &opts, &fs);
     let result = state.resolve_node_like();
     assert!(!result.is_resolved());
     assert!(result.resolved_file_name.is_empty());
@@ -426,7 +426,7 @@ fn node16_exports_condition_by_file_format() {
         ModuleKind::CommonJS
     );
 
-    let esm = ResolutionState::new(
+    let mut esm = ResolutionState::new(
         "pkg",
         "/proj",
         false,
@@ -443,7 +443,7 @@ fn node16_exports_condition_by_file_format() {
         r.resolved_file_name
     );
 
-    let cjs = ResolutionState::new(
+    let mut cjs = ResolutionState::new(
         "pkg",
         "/proj/sub",
         false,
@@ -505,7 +505,7 @@ fn resolve_types_fallback() {
     .unwrap();
 
     let opts = CompilerOptions::default();
-    let state = make_state("foo", "/src", &opts, &fs);
+    let mut state = make_state("foo", "/src", &opts, &fs);
     let result = state.resolve_node_like();
     assert!(result.is_resolved());
     assert_eq!(
@@ -531,7 +531,7 @@ fn resolve_paths_exact_match() {
     });
     opts.paths_base_path = "/src".to_string();
 
-    let state = ResolutionState::new("foo", "/src", false, ModuleKind::None, &opts, &fs, "/src");
+    let mut state = ResolutionState::new("foo", "/src", false, ModuleKind::None, &opts, &fs, "/src");
     let result = state.resolve_node_like();
     assert!(result.is_resolved());
     assert_eq!(result.resolved_file_name, "/src/mapped/foo.ts");
@@ -554,7 +554,7 @@ fn resolve_paths_wildcard() {
     });
     opts.paths_base_path = "/src".to_string();
 
-    let state = ResolutionState::new(
+    let mut state = ResolutionState::new(
         "@mytypes/bar",
         "/src",
         false,
@@ -582,7 +582,7 @@ fn resolve_paths_no_match_falls_through() {
     });
     opts.paths_base_path = "/src".to_string();
 
-    let state = ResolutionState::new("bar", "/src", false, ModuleKind::None, &opts, &fs, "/src");
+    let mut state = ResolutionState::new("bar", "/src", false, ModuleKind::None, &opts, &fs, "/src");
     let result = state.resolve_node_like();
     assert!(!result.is_resolved());
 }
@@ -599,7 +599,7 @@ fn resolve_root_dirs() {
     let mut opts = CompilerOptions::default();
     opts.root_dirs = vec!["/src/generated".to_string(), "/src/manual".to_string()];
 
-    let state = ResolutionState::new(
+    let mut state = ResolutionState::new(
         "./shared",
         "/src/generated",
         false,
@@ -653,7 +653,7 @@ fn resolve_exports_string_main() {
     .unwrap();
 
     let opts = CompilerOptions::default();
-    let state = ResolutionState::new("mypkg", "/src", false, ModuleKind::None, &opts, &fs, "/src");
+    let mut state = ResolutionState::new("mypkg", "/src", false, ModuleKind::None, &opts, &fs, "/src");
     let result = state.resolve_node_like();
     assert!(
         result.is_resolved(),
@@ -691,7 +691,7 @@ fn resolve_exports_conditional_types() {
     .unwrap();
 
     let opts = CompilerOptions::default();
-    let state = ResolutionState::new("mypkg", "/src", false, ModuleKind::None, &opts, &fs, "/src");
+    let mut state = ResolutionState::new("mypkg", "/src", false, ModuleKind::None, &opts, &fs, "/src");
     let result = state.resolve_node_like();
 
     assert!(
@@ -725,7 +725,7 @@ fn resolve_exports_subpath() {
     .unwrap();
 
     let opts = CompilerOptions::default();
-    let state = ResolutionState::new(
+    let mut state = ResolutionState::new(
         "mypkg/feature",
         "/src",
         false,
@@ -761,7 +761,7 @@ fn resolve_package_imports_exact() {
         .unwrap();
 
     let opts = CompilerOptions::default();
-    let state = ResolutionState::new(
+    let mut state = ResolutionState::new(
         "#utils",
         "/src",
         false,
@@ -794,7 +794,7 @@ fn resolve_package_imports_pattern() {
         .unwrap();
 
     let opts = CompilerOptions::default();
-    let state = ResolutionState::new(
+    let mut state = ResolutionState::new(
         "#components/Button",
         "/src",
         false,
@@ -824,7 +824,7 @@ fn resolve_package_imports_lone_hash_unresolved() {
     .unwrap();
 
     let opts = CompilerOptions::default();
-    let state = ResolutionState::new("#", "/src", false, ModuleKind::None, &opts, &fs, "/src");
+    let mut state = ResolutionState::new("#", "/src", false, ModuleKind::None, &opts, &fs, "/src");
     let result = state.resolve_node_like();
     assert!(
         !result.is_resolved(),
@@ -850,7 +850,7 @@ fn resolve_package_imports_walks_to_parent_scope() {
 
     let opts = CompilerOptions::default();
 
-    let state = ResolutionState::new(
+    let mut state = ResolutionState::new(
         "#utils",
         "/src/sub",
         false,
@@ -888,7 +888,7 @@ fn resolve_types_versions_redirect() {
         .unwrap();
 
     let opts = CompilerOptions::default();
-    let state = ResolutionState::new("foo", "/src", false, ModuleKind::None, &opts, &fs, "/src");
+    let mut state = ResolutionState::new("foo", "/src", false, ModuleKind::None, &opts, &fs, "/src");
     let result = state.resolve_node_like();
     assert!(
         result.is_resolved(),
@@ -919,7 +919,7 @@ fn resolve_types_versions_falls_back_when_no_match() {
         .unwrap();
 
     let opts = CompilerOptions::default();
-    let state = ResolutionState::new("foo", "/src", false, ModuleKind::None, &opts, &fs, "/src");
+    let mut state = ResolutionState::new("foo", "/src", false, ModuleKind::None, &opts, &fs, "/src");
     let result = state.resolve_node_like();
     assert!(
         result.is_resolved(),

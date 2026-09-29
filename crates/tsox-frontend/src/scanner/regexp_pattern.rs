@@ -8,7 +8,6 @@ use crate::scanner::regexp::is_digit;
 use crate::scanner::regexp::is_word_character;
 use std::collections::HashSet;
 use tsox_core::core::compiler_options::ScriptTarget;
-use tsox_core::diagnostics;
 
 impl<'a> RegExpParser<'a> {
     pub(super) fn scan_disjunction(&mut self, is_in_group: bool) {
@@ -124,10 +123,11 @@ impl<'a> RegExpParser<'a> {
                                     0,
                                 );
                             } else {
-                                self.error(
+                                self.error_arg(
                                     tsox_core::diagnostics::UNEXPECTED_0_DID_YOU_MEAN_TO_ESCAPE_IT_WITH_BACKSLASH,
                                     start,
                                     1,
+                                    '{',
                                 );
                                 is_previous_term_quantifiable = true;
                                 continue;
@@ -145,10 +145,11 @@ impl<'a> RegExpParser<'a> {
                         }
                     } else if min_str.is_empty() {
                         if self.any_unicode_mode_or_non_annex_b {
-                            self.error(
+                            self.error_arg(
                                 tsox_core::diagnostics::UNEXPECTED_0_DID_YOU_MEAN_TO_ESCAPE_IT_WITH_BACKSLASH,
                                 start,
                                 1,
+                                '{',
                             );
                         }
                         is_previous_term_quantifiable = true;
@@ -211,10 +212,11 @@ impl<'a> RegExpParser<'a> {
                     }
 
                     if self.any_unicode_mode_or_non_annex_b || ch == ')' {
-                        self.error(
+                        self.error_arg(
                             tsox_core::diagnostics::UNEXPECTED_0_DID_YOU_MEAN_TO_ESCAPE_IT_WITH_BACKSLASH,
                             self.pos,
                             1,
+                            ')',
                         );
                     }
                     self.inc_pos(1);
@@ -222,10 +224,11 @@ impl<'a> RegExpParser<'a> {
                 }
                 ']' | '}' => {
                     if self.any_unicode_mode_or_non_annex_b || ch == ')' {
-                        self.error(
+                        self.error_arg(
                             tsox_core::diagnostics::UNEXPECTED_0_DID_YOU_MEAN_TO_ESCAPE_IT_WITH_BACKSLASH,
                             self.pos,
                             1,
+                            ch,
                         );
                     }
                     self.inc_pos(1);

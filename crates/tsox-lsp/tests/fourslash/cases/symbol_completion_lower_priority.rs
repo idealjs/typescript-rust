@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn symbol_completion_lower_priority() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"declare const Symbol: (s: string) => symbol;
 const mySymbol = Symbol("test");
 interface TestInterface { 
@@ -12,6 +12,7 @@ interface TestInterface {
 }
 const obj: TestInterface = {} as any;
 obj./*completions*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "completions", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("symbolCompletionLowerPriority", content);
+    fourslash::go_to_marker(&mut s, "completions");
+    // TODO: f.VerifyCompletions(t, "completions", &fourslash.CompletionsExpectedList{
 }

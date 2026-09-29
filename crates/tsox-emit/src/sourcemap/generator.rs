@@ -1,7 +1,6 @@
 use super::mapping::{NameIndex, RawSourceMap, SourceIndex};
 use std::collections::HashMap;
 
-use tsox_core::tspath;
 use tsox_core::tspath::ComparePathsOptions;
 
 pub struct Generator {

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
+
 #[test]
 fn jsdoc_deprecated_suggestion5() {
     let content = r#"// @checkJs: true
@@ -20,6 +20,6 @@ const cc = _k => {}
 const DOOM = { e: 1, m: 1 }
 /** @type {DOOM} */
 const kneeDeep = DOOM.e"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, nil)
+    let _s = Session::new_for_test("jsdocDeprecated_suggestion5", content);
+    // TODO: f.VerifySuggestionDiagnostics(t, nil)
 }

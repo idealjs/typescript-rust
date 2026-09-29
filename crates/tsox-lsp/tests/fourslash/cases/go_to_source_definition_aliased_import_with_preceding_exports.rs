@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // When importing { original as alias }, the module specifie"]
+
 #[test]
 fn go_to_source_aliased_import_with_preceding_exports() {
     // TODO: // When importing { original as alias }, the module specifier path resolves
@@ -19,11 +19,10 @@ export function /*target*/original() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { original as /*aliasedImport*/renamed } from "pkg";
 renamed();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "aliasedImport")
+    let _s = Session::new_for_test("goToSourceAliasedImportWithPrecedingExports", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "aliasedImport")
 }
 
-#[ignore = "generator: // Re-export with alias: export { original as alias } from '"]
 #[test]
 fn go_to_source_re_export_alias_with_preceding_exports() {
     // TODO: // Re-export with alias: export { original as alias } from "pkg"
@@ -39,6 +38,6 @@ export function unrelated() {}
 export function /*target*/original() { return "ok"; }
 // @Filename: /home/src/workspaces/project/reexport.ts
 export { original as /*reExportAlias*/renamed } from "pkg";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "reExportAlias")
+    let _s = Session::new_for_test("goToSourceReExportAliasWithPrecedingExports", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "reExportAlias")
 }

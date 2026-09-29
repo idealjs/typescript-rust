@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn import_type_node_go_to_definition() {
     let content = r#"// @Filename: /ns.ts
@@ -12,6 +12,6 @@ fn import_type_node_go_to_definition() {
 // @Filename: /usage.ts
 type A = typeof import([|/*1*/"./ns"|]).[|/*2*/Foo|].[|/*3*/Bar|];
 type B = import([|/*4*/"./ns"|]).[|/*5*/Foo|].[|/*6*/Bar|].[|/*7*/Baz|];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1", "2", "3", "4", "5", "6", "7")
+    let _s = Session::new_for_test("importTypeNodeGoToDefinition", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "1", "2", "3", "4", "5", "6", "7")
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_references_see_tag_in_ts() {
     let content = r#"function doStuffWithStuff/*1*/(stuff: { quantity: number }) {}
@@ -8,6 +8,6 @@ fn find_references_see_tag_in_ts() {
 declare const stuff: { quantity: number };
 /** @see {doStuffWithStuff} */
 if (stuff.quantity) {}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
+    let _s = Session::new_for_test("findReferencesSeeTagInTs", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

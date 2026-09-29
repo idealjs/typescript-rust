@@ -1,17 +1,7 @@
 #[allow(unused_imports)]
 use std::sync::Arc;
 use tsox_checker::checker::Checker;
-use tsox_checker::checker::NodeLinks;
-use tsox_checker::checker::Ternary;
-use tsox_checker::checker::Tracer;
-use tsox_checker::checker::checker::*;
 use tsox_core::core::compiler_options::CompilerOptions;
-use tsox_core::core::compiler_options::ModuleKind;
-use tsox_core::core::compiler_options::ModuleResolutionKind;
-use tsox_frontend::ast::Node;
-use tsox_frontend::ast::NodeData;
-use tsox_frontend::ast::Symbol;
-use tsox_frontend::ast::SyntaxKind;
 
 use tsox_frontend::diagnosticwriter::format_diagnostic_compact;
 
@@ -234,8 +224,14 @@ fn node10_program_reports_deprecation_and_alternate_result() {
     ));
     let program = Arc::new(Program::new(ProgramOptions {
         config: parsed,
-        host,
-    }));
+        host,        use_source_of_project_reference: false,
+        single_threaded: Default::default(),
+        create_checker_pool: None,
+        typings_location: String::new(),
+        project_name: String::new(),
+        tracing: None,
+        skip_module_resolution: false,
+}));
 
     let global_codes: Vec<i32> = program
         .diagnostics()

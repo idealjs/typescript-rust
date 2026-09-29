@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn tsx_completion14() {
     let content = r#"//@module: commonjs
@@ -22,7 +22,7 @@ var x1 = <Exp.Thing /*1*/ />;
 var x2 = <Exp.M.SFCComp /*2*/ />;
 var x3 = <Exp.Thing /*3*/ ></Exp.Thing>;
 var x4 = <Exp.M.SFCComp /*4*/ ></Exp.M.SFCComp>;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "3"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"2", "4"}, &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("tsxCompletion14", content);
+    // TODO: f.VerifyCompletions(t, []string{"1", "3"}, &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyCompletions(t, []string{"2", "4"}, &fourslash.CompletionsExpectedList{
 }

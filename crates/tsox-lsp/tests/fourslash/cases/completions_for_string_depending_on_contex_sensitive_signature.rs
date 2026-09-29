@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_for_string_depending_on_contex_sensitive_signature() {
     let content = r#"// @strict: true
@@ -40,7 +40,8 @@ createMachine<{
 }>({
   entry: sendTo((ctx) => ctx.child, { type: "/*2*/" }),
 });"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsForStringDependingOnContexSensitiveSignature", content);
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, Some("2"), &["EVENT"]);
 }

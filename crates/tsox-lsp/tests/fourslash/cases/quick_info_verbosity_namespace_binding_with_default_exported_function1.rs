@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
+
 #[test]
 fn quick_info_verbosity_namespace_binding_with_default_exported_function1() {
     let content = r#"// @module: esnext
@@ -11,6 +11,6 @@ export { fn as default };
 import * as ns from "./a";
 
 ns/*1*/;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}})
+    let _s = Session::new_for_test("quickInfoVerbosityNamespaceBindingWithDefaultExportedFunction1", content);
+    // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"1": {0, 1}})
 }

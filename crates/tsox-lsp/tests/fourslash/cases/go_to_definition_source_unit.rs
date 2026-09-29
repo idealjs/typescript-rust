@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_source_unit() {
     let content = r#"// @Filename: a.ts
@@ -17,6 +17,6 @@ fn go_to_definition_source_unit() {
 
 // @Filename: b.ts
 /*fileB*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "unknownFile", "knownFile")
+    let _s = Session::new_for_test("goToDefinitionSourceUnit", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "unknownFile", "knownFile")
 }

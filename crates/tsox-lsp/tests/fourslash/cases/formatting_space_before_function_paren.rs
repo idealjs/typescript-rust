@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: opts333 := f.GetOptions()"]
+
 #[test]
 fn formatting_space_before_function_paren() {
     let content = r#"/*1*/function foo() { }
@@ -10,14 +10,12 @@ fn formatting_space_before_function_paren() {
 /*5*/function tmpl <T> () { }
 /*6*/var f = function*() { };
 /*7*/function* g () { }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingSpaceBeforeFunctionParen", content);
     // TODO: opts333 := f.GetOptions()
-    // TODO: opts333.FormatCodeSettings.InsertSpaceBeforeFunctionParenthesis = core.TSTrue
-    fourslash::unsupported("Configure"); // f.Configure(t, opts333)
+    fourslash::configure_format_settings(&mut s, &[("insert_space_before_function_parenthesis", "true")]);
     // TODO: opts414 := f.GetOptions()
-    // TODO: opts414.FormatCodeSettings.InsertSpaceAfterFunctionKeywordForAnonymousFunctions = core.TSFalse
-    fourslash::unsupported("Configure"); // f.Configure(t, opts414)
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    fourslash::configure_format_settings(&mut s, &[("insert_space_after_function_keyword_for_anonymous_functions", "false")]);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"function foo () { }"#);
     fourslash::go_to_marker(&mut s, "2");

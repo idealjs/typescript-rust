@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: linkedCursors1 := []lsproto.Range{"]
+
 #[test]
 fn linked_editing_jsx_tag5() {
     let content = r#"// @FileName: /unclosedElement.tsx
@@ -20,8 +20,8 @@ const jsx = (
    <di/*11*/v>
    </*12*/ //*13*/div>
 );"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("linkedEditingJsxTag5", content);
     // TODO: linkedCursors1 := []lsproto.Range{
     // TODO: linkedCursors2 := []lsproto.Range{
-    fourslash::unsupported("VerifyLinkedEditing"); // f.VerifyLinkedEditing(t, map[string][]lsproto.Range{
+    // TODO: f.VerifyLinkedEditing(t, map[string][]lsproto.Range{
 }

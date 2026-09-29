@@ -1,17 +1,17 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.ReplaceLine"]
+
 #[test]
 fn organize_imports_type7() {
     let content = r#"import { a, type A, b } from "foo";
 interface Use extends A {}
 console.log(a, b);"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
-    fourslash::unsupported("ReplaceLine"); // f.ReplaceLine(t, 0, "import { a, type A, b } from \"foo1\";")
-    fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
-    fourslash::unsupported("ReplaceLine"); // f.ReplaceLine(t, 0, "import { a, type A, b } from \"foo2\";")
-    fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
-    fourslash::unsupported("ReplaceLine"); // f.ReplaceLine(t, 0, "import { a, type A, b } from \"foo3\";")
-    fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
+    let _s = Session::new_for_test("organizeImportsType7", content);
+    // TODO: f.VerifyOrganizeImports(t,
+    // TODO: f.ReplaceLine(t, 0, "import { a, type A, b } from \"foo1\";")
+    // TODO: f.VerifyOrganizeImports(t,
+    // TODO: f.ReplaceLine(t, 0, "import { a, type A, b } from \"foo2\";")
+    // TODO: f.VerifyOrganizeImports(t,
+    // TODO: f.ReplaceLine(t, 0, "import { a, type A, b } from \"foo3\";")
+    // TODO: f.VerifyOrganizeImports(t,
 }

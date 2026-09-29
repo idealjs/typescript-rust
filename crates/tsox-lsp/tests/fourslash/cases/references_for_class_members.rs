@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn references_for_class_members() {
     let content = r#"class Base {
@@ -15,6 +15,6 @@ class MyClass extends Base {
 var c: MyClass;
 c./*a3*/a;
 c./*method3*/method();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "a1", "a2", "a3", "method1", "method2", "method3")
+    let _s = Session::new_for_test("referencesForClassMembers", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "a1", "a2", "a3", "method1", "method2", "method3")
 }

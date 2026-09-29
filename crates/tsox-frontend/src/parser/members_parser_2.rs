@@ -4,35 +4,37 @@ use crate::parser::members::*;
 
 impl Parser {
     pub(crate) fn parse_heritage_clauses(&mut self) -> Option<Arc<NodeList>> {
+        self.parse_heritage_clauses_is_interface(false)
+    }
+
+    /// Go parseHeritageClauses(isInterface)：interface 的 extends 元素经
+    /// parseTypeHeritageClauseElement 产出 TypeReferenceNode（`string` 等
+    /// 关键字类型名合法，语义层 TS2312 报「只能扩展对象类型」），class 的
+    /// extends / implements 走表达式形态
+    pub(crate) fn parse_heritage_clauses_is_interface(
+        &mut self,
+        is_interface: bool,
+    ) -> Option<Arc<NodeList>> {
         let mut clauses = Vec::new();
-        let mut pos = self.token_pos();
-        if self.parse_optional(SyntaxKind::ExtendsKeyword) {
-            let types = self.parse_delimited_list(
-                ParsingContext::HeritageClauseElement,
-                Parser::parse_heritage_clause_element,
-            );
-            let end = self.token_pos();
-            clauses.push(Arc::new(Node::with_loc(
-                SyntaxKind::HeritageClause,
-                NodeData::HeritageClause(HeritageClauseData {
-                    token: SyntaxKind::ExtendsKeyword,
-                    types: Arc::new(types),
-                }),
-                TextRange::new(pos, end),
-            )));
-        }
-        if self.token == SyntaxKind::ImplementsKeyword {
-            pos = self.token_pos();
+        while matches!(
+            self.token,
+            SyntaxKind::ExtendsKeyword | SyntaxKind::ImplementsKeyword
+        ) {
+            let pos = self.token_pos();
+            let kind = self.token;
             self.next_token();
-            let types = self.parse_delimited_list(
-                ParsingContext::HeritageClauseElement,
-                Parser::parse_heritage_clause_element,
-            );
-            let end = self.token_pos();
+            let element = if is_interface && kind == SyntaxKind::ExtendsKeyword {
+                Parser::parse_type_heritage_clause_element
+            } else {
+                Parser::parse_heritage_clause_element
+            };
+            let types =
+                self.parse_delimited_list(ParsingContext::HeritageClauseElement, element);
+            let end = self.node_pos();
             clauses.push(Arc::new(Node::with_loc(
                 SyntaxKind::HeritageClause,
                 NodeData::HeritageClause(HeritageClauseData {
-                    token: SyntaxKind::ImplementsKeyword,
+                    token: kind,
                     types: Arc::new(types),
                 }),
                 TextRange::new(pos, end),
@@ -47,6 +49,34 @@ impl Parser {
                 nodes: clauses,
             }))
         }
+    }
+
+    /// Go parseTypeHeritageClauseElement：表达式形态的实体名转类型引用
+    ///（KeywordType 亦可成名），无实参时直接产出 TypeReferenceNode；
+    /// 非实体名表达式（`(typeof A)` 等）按 Go isValidHeritageTypeReferenceExpression
+    /// 保持 ExpressionWithTypeArguments 原样返回，由检查器报 TS2499
+    pub(crate) fn parse_type_heritage_clause_element(&mut self) -> Arc<Node> {
+        let element = self.parse_heritage_clause_element();
+        let (expression, type_arguments) = match &element.data {
+            NodeData::ExpressionWithTypeArguments(d) => {
+                (Arc::clone(&d.expression), d.type_arguments.clone())
+            }
+            _ => return element,
+        };
+        if !is_valid_heritage_type_reference_expression(&expression) {
+            return element;
+        }
+        let type_name = convert_entity_name_expression_to_entity_name(&expression);
+        let pos = element.pos();
+        let end = element.end();
+        Arc::new(Node::with_loc(
+            SyntaxKind::TypeReference,
+            NodeData::TypeReferenceNode(TypeReferenceNodeData {
+                type_name,
+                type_arguments,
+            }),
+            TextRange::new(pos, end),
+        ))
     }
 
     pub(crate) fn parse_heritage_clause_element(&mut self) -> Arc<Node> {
@@ -101,7 +131,7 @@ impl Parser {
             let parameters = self.parse_parameter_list();
             let type_node = self.parse_optional_return_type();
             self.parse_type_member_semicolon();
-            let end = self.token_pos();
+            let end = self.node_pos();
             return Arc::new(Node::with_loc(
                 SyntaxKind::MethodSignature,
                 NodeData::MethodSignatureDeclaration(MethodSignatureDeclarationData {
@@ -125,7 +155,7 @@ impl Parser {
             self.missing_node(self.token_pos())
         };
         self.parse_type_member_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::PropertySignature,
             NodeData::PropertySignatureDeclaration(PropertySignatureDeclarationData {
@@ -149,6 +179,8 @@ impl Parser {
                 | SyntaxKind::PublicKeyword
                 | SyntaxKind::PrivateKeyword
                 | SyntaxKind::ProtectedKeyword
+                | SyntaxKind::AbstractKeyword
+                | SyntaxKind::OverrideKeyword
         ) {
             let mut s = self.scanner.clone();
             s.scan();
@@ -227,6 +259,58 @@ impl Parser {
         )
     }
 
+    /// Go scanTypeMemberStart：类型成员起始前瞻（isListElement 的
+    /// TypeMembers 判定）。非成员 token（`{`、`=>`、jsdoc 杂文等）返回
+    /// false，交给 abortParsingListOrMoveToNextToken 强制进展，否则
+    /// parse_type_member 对不可成名 token 无消费循环
+    pub(crate) fn look_ahead_type_member_start(&self) -> bool {
+        if matches!(
+            self.token,
+            SyntaxKind::OpenParenToken
+                | SyntaxKind::LessThanToken
+                | SyntaxKind::GetKeyword
+                | SyntaxKind::SetKeyword
+        ) {
+            return true;
+        }
+        let mut s = self.scanner.clone();
+        let mut t = self.token;
+        let mut id_token = false;
+        while is_modifier_kind(t) {
+            id_token = true;
+            t = s.scan();
+        }
+        if t == SyntaxKind::OpenBracketToken {
+            return true;
+        }
+        if is_identifier_or_keyword(t)
+            || matches!(
+                t,
+                SyntaxKind::StringLiteral
+                    | SyntaxKind::NumericLiteral
+                    | SyntaxKind::BigIntLiteral
+                    | SyntaxKind::PrivateIdentifier
+            )
+        {
+            id_token = true;
+            t = s.scan();
+        }
+        if id_token {
+            return matches!(
+                t,
+                SyntaxKind::OpenParenToken
+                    | SyntaxKind::LessThanToken
+                    | SyntaxKind::QuestionToken
+                    | SyntaxKind::ColonToken
+                    | SyntaxKind::CommaToken
+                    | SyntaxKind::SemicolonToken
+                    | SyntaxKind::CloseBraceToken
+                    | SyntaxKind::EndOfFile
+            ) || s.has_preceding_line_break();
+        }
+        false
+    }
+
     pub(crate) fn look_ahead_class_member_start(&self) -> bool {
         if self.token == SyntaxKind::AtToken {
             return true;
@@ -285,4 +369,38 @@ impl Parser {
         }
         false
     }
+}
+
+/// Go convertEntityNameExpressionToEntityName：表达式形态实体名（Identifier/
+/// PropertyAccessExpression）转限定名（QualifiedName）
+pub(crate) fn convert_entity_name_expression_to_entity_name(node: &Arc<Node>) -> Arc<Node> {
+    if node.kind == SyntaxKind::Identifier {
+        return Arc::clone(node);
+    }
+    if let NodeData::PropertyAccessExpression(pa) = &node.data {
+        let left = convert_entity_name_expression_to_entity_name(&pa.expression);
+        let end = node.end();
+        return Arc::new(Node::with_loc(
+            SyntaxKind::QualifiedName,
+            NodeData::QualifiedName(QualifiedNameData {
+                left,
+                right: Arc::clone(&pa.name),
+            }),
+            TextRange::new(node.pos(), end),
+        ));
+    }
+    Arc::clone(node)
+}
+
+/// Go isValidHeritageTypeReferenceExpression：仅 Identifier 与非可选链
+/// PropertyAccessExpression 链可转类型引用
+fn is_valid_heritage_type_reference_expression(node: &Arc<Node>) -> bool {
+    if node.kind == SyntaxKind::Identifier {
+        return true;
+    }
+    if let NodeData::PropertyAccessExpression(pa) = &node.data {
+        return !crate::ast::is_optional_chain(node)
+            && is_valid_heritage_type_reference_expression(&pa.expression);
+    }
+    false
 }

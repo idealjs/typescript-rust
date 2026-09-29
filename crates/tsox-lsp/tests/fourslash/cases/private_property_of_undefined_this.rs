@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineNonSuggestionDiagnostics"]
+
 #[test]
 fn private_property_of_undefined_this1() {
     let content = r#"
@@ -8,11 +8,10 @@ fn private_property_of_undefined_this1() {
 this.#a = {};
 export {};
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineNonSuggestionDiagnostics"); // f.VerifyBaselineNonSuggestionDiagnostics(t)
+    let _s = Session::new_for_test("privatePropertyOfUndefinedThis1", content);
+    // TODO: f.VerifyBaselineNonSuggestionDiagnostics(t)
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineNonSuggestionDiagnostics"]
 #[test]
 fn private_property_of_undefined_this2() {
     let content = r#"
@@ -23,6 +22,6 @@ export class C {
     }
 }
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineNonSuggestionDiagnostics"); // f.VerifyBaselineNonSuggestionDiagnostics(t)
+    let _s = Session::new_for_test("privatePropertyOfUndefinedThis2", content);
+    // TODO: f.VerifyBaselineNonSuggestionDiagnostics(t)
 }

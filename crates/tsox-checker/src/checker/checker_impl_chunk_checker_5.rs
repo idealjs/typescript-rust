@@ -17,23 +17,32 @@ impl Checker {
         if lit.regular_type.get().is_some() {
             return Arc::clone(t);
         }
+        if let Some(fresh) = lit.fresh_type.get() {
+            return Arc::clone(fresh);
+        }
 
         let value = lit.value.clone();
         let flags = t.flags;
+        let symbol = t.symbol.clone();
         let regular = Arc::clone(t);
-        let fresh = lit.fresh_type.get_or_init(move || {
-            Arc::new(Type::new(
-                flags,
-                TypeData::Literal(LiteralTypeData {
-                    value,
+        let mut fresh = Arc::new(Type::new(
+            flags,
+            TypeData::Literal(LiteralTypeData {
+                value,
 
-                    fresh_type: OnceLock::new(),
+                fresh_type: OnceLock::new(),
 
-                    regular_type: OnceLock::from(regular),
-                }),
-            ))
-        });
-        Arc::clone(fresh)
+                regular_type: OnceLock::from(regular),
+            }),
+        ));
+        if let Some(f) = Arc::get_mut(&mut fresh) {
+            f.symbol = symbol;
+        }
+        if let TypeData::Literal(fresh_lit) = &fresh.data {
+            let _ = fresh_lit.fresh_type.set(Arc::clone(&fresh));
+        }
+        let _ = lit.fresh_type.set(Arc::clone(&fresh));
+        fresh
     }
 
     pub fn is_literal_of_contextual_type(
@@ -55,7 +64,14 @@ impl Checker {
             return false;
         }
         if contextual.flags.intersects(TypeFlags::TypeParameter) {
-            if let Some(constraint) = self.get_base_constraint_of_type(contextual) {
+            // base 约束缓存惰性填充，推断期可能未算：回落到声明约束
+            //（Go getBaseConstraintOfType 对带约束 tp 即返回约束）
+            // base 约束缓存惰性填充，推断期可能未算：回落到声明约束
+            //（Go getBaseConstraintOfType 对带约束 tp 即返回约束）
+            if let Some(constraint) = self
+                .get_base_constraint_of_type(contextual)
+                .or_else(|| self.get_constraint_of_type_parameter(contextual))
+            {
                 return (constraint.flags.intersects(TypeFlags::String)
                     && candidate.flags.intersects(TypeFlags::StringLiteral))
                     || (constraint.flags.intersects(TypeFlags::Number)
@@ -86,7 +102,7 @@ impl Checker {
             if t.flags.intersects(TYPE_FLAGS_ENUM_LIKE) {
                 if let Some(sym) = &t.symbol
                     && sym.flags.contains(SymbolFlags::EnumMember)
-                    && let Some(parent) = &sym.parent
+                    && let Some(parent) = &sym.parent()
                     && let Some(cached) = self
                         .type_alias_links
                         .get(parent)
@@ -181,13 +197,13 @@ impl Checker {
 
     pub fn get_combined_node_flags(&mut self, node: &Arc<Node>) -> NodeFlags {
         let mut flags = node.flags;
-        let mut parent = node.parent.clone();
+        let mut parent = node.parent();
         while let Some(p) = parent {
             if p.kind == SyntaxKind::SourceFile {
                 break;
             }
             flags |= p.flags;
-            parent = p.parent.clone();
+            parent = p.parent();
         }
         flags
     }
@@ -207,12 +223,12 @@ impl Checker {
     pub fn get_root_declaration(node: &Arc<Node>) -> Arc<Node> {
         let mut current = Arc::clone(node);
         while current.kind == SyntaxKind::BindingElement {
-            let parent = match &current.parent {
-                Some(p) => Arc::clone(p),
+            let parent = match current.parent() {
+                Some(p) => Arc::clone(&p),
                 None => break,
             };
-            let grandparent = match &parent.parent {
-                Some(gp) => Arc::clone(gp),
+            let grandparent = match parent.parent() {
+                Some(gp) => gp,
                 None => break,
             };
             current = grandparent;
@@ -237,10 +253,10 @@ impl Checker {
         let mut current = Some(root);
         while let Some(n) = current {
             if skip(n.kind) {
-                current = n.parent.clone();
+                current = n.parent();
                 continue;
             }
-            return n.parent.clone();
+            return n.parent();
         }
         None
     }

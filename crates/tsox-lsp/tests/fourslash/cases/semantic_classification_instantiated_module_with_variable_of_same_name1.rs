@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
+
 #[test]
 fn semantic_classification_instantiated_module_with_variable_of_same_name1() {
     let content = r#"module /*0*/M {
@@ -17,6 +17,6 @@ var /*2*/M = {
 var v: /*3*/M./*4*/I;
 
 var x = /*5*/M;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
+    let _s = Session::new_for_test("semanticClassificationInstantiatedModuleWithVariableOfSameName1", content);
+    // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

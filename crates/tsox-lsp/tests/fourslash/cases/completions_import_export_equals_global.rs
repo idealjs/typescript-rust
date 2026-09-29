@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_import_export_equals_global() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @lib: es5
 // @module: es6
 // @Filename: /console.d.ts
@@ -20,6 +20,7 @@ fn completions_import_export_equals_global() {
  }
 // @Filename: /a.ts
 conso/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsImport_exportEquals_global", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

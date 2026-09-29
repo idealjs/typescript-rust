@@ -5,10 +5,7 @@ use crate::parser::expressions::*;
 impl Parser {
     pub(crate) fn try_parse_generic_arrow_function(&mut self) -> Option<Arc<Node>> {
         let starts_with_async = self.token == SyntaxKind::AsyncKeyword;
-        if !starts_with_async
-            && (self.token != SyntaxKind::LessThanToken
-                || self.language_variant == LanguageVariant::Jsx)
-        {
+        if !starts_with_async && self.token != SyntaxKind::LessThanToken {
             return None;
         }
 
@@ -27,6 +24,25 @@ impl Parser {
             {
                 return None;
             }
+            // Go nextIsParenthesizedArrowFunctionExpression 的 JSX 消歧：
+            // `<T extends X`（X 非 =/>//）、`<T,`、`<T=` 视为泛型箭头，其余归 JSX
+            if self.language_variant == LanguageVariant::Jsx {
+                let t2 = s.scan();
+                let is_arrow = if t2 == SyntaxKind::ExtendsKeyword {
+                    let t3 = s.scan();
+                    !matches!(
+                        t3,
+                        SyntaxKind::EqualsToken
+                            | SyntaxKind::GreaterThanToken
+                            | SyntaxKind::SlashToken
+                    )
+                } else {
+                    t2 == SyntaxKind::CommaToken || t2 == SyntaxKind::EqualsToken
+                };
+                if !is_arrow {
+                    return None;
+                }
+            }
         }
 
         let saved_scanner = self.scanner.clone();
@@ -34,9 +50,13 @@ impl Parser {
         let diag_len = self.diagnostics.len();
         let pos = self.token_pos();
 
-        if starts_with_async {
+        let async_modifier = if starts_with_async {
+            let token_node = self.create_token_node();
             self.next_token();
-        }
+            Some(token_node)
+        } else {
+            None
+        };
 
         let type_parameters = self.parse_optional_type_parameters();
 
@@ -61,16 +81,23 @@ impl Parser {
 
         let equals_greater_than_token = self.create_token_node();
         self.next_token();
+        let saved_yield = self.yield_context;
+        let saved_await = self.await_context;
+        self.yield_context = false;
+        self.await_context = starts_with_async;
         let body = if self.token == SyntaxKind::OpenBraceToken {
-            self.parse_block()
+            self.parse_block_ex(true)
         } else {
             self.parse_assignment_expression()
         };
+        self.yield_context = saved_yield;
+        self.await_context = saved_await;
         let end = body.end();
+        let modifiers = async_modifier.and_then(|m| self.make_async_modifier_list(m));
         Some(Arc::new(Node::with_loc(
             SyntaxKind::ArrowFunction,
             NodeData::ArrowFunction(ArrowFunctionData {
-                modifiers: None,
+                modifiers,
                 type_parameters,
                 parameters,
                 type_node,
@@ -108,13 +135,16 @@ impl Parser {
         let equals_greater_than_token = self.create_token_node();
         self.expect(SyntaxKind::EqualsGreaterThanToken);
         let saved_await = self.await_context;
+        let saved_yield = self.yield_context;
         self.await_context = true;
+        self.yield_context = false;
         let body = if self.token == SyntaxKind::OpenBraceToken {
-            self.parse_block()
+            self.parse_block_ex(true)
         } else {
             self.parse_assignment_expression()
         };
         self.await_context = saved_await;
+        self.yield_context = saved_yield;
         let end = body.end();
         Arc::new(Node::with_loc(
             SyntaxKind::ArrowFunction,
@@ -135,13 +165,28 @@ impl Parser {
         let pos = self.token_pos();
         let parameters = self.parse_parameter_list();
         let type_node = self.parse_optional_return_type();
+        let last_token = self.token;
         let equals_greater_than_token = self.create_token_node();
         self.expect(SyntaxKind::EqualsGreaterThanToken);
-        let body = if self.token == SyntaxKind::OpenBraceToken {
-            self.parse_block()
+        let saved_yield = self.yield_context;
+        let saved_await = self.await_context;
+        self.yield_context = false;
+        self.await_context = false;
+        // Go parseParenthesizedArrowFunctionExpression：'=>' 缺失且当前非
+        // '{' 时 body 取单个标识符（不走赋值表达式，避免 '.' 等被当成员访问）
+        let body = if last_token == SyntaxKind::EqualsGreaterThanToken
+            || last_token == SyntaxKind::OpenBraceToken
+        {
+            if self.token == SyntaxKind::OpenBraceToken {
+                self.parse_block_ex(true)
+            } else {
+                self.parse_assignment_expression()
+            }
         } else {
-            self.parse_assignment_expression()
+            self.parse_identifier()
         };
+        self.yield_context = saved_yield;
+        self.await_context = saved_await;
         let end = body.end();
         Arc::new(Node::with_loc(
             SyntaxKind::ArrowFunction,
@@ -160,6 +205,10 @@ impl Parser {
 
     pub(crate) fn parse_simple_arrow_function(&mut self, identifier: Arc<Node>) -> Arc<Node> {
         let pos = identifier.pos();
+        let outer_yield = self.yield_context;
+        let outer_await = self.await_context;
+        self.yield_context = false;
+        self.await_context = false;
         let parameter = Arc::new(Node::with_loc(
             SyntaxKind::Parameter,
             NodeData::ParameterDeclaration(ParameterDeclarationData {
@@ -179,10 +228,12 @@ impl Parser {
         let equals_greater_than_token = self.create_token_node();
         self.expect(SyntaxKind::EqualsGreaterThanToken);
         let body = if self.token == SyntaxKind::OpenBraceToken {
-            self.parse_block()
+            self.parse_block_ex(true)
         } else {
             self.parse_assignment_expression()
         };
+        self.yield_context = outer_yield;
+        self.await_context = outer_await;
         let end = body.end();
         Arc::new(Node::with_loc(
             SyntaxKind::ArrowFunction,
@@ -203,6 +254,9 @@ impl Parser {
         let mut left = self.parse_unary_expression();
 
         loop {
+            if self.token == SyntaxKind::InKeyword && self.disallow_in_context {
+                break;
+            }
             let precedence = binary_precedence(self.token);
             if precedence == 0 || precedence < min_precedence {
                 break;

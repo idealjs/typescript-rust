@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn diagnostics_default_import_merged_with_js_doc_type_alias1() {
     let content = r#"// @allowJs: true
@@ -33,7 +34,7 @@ const createStatsCollector = (runner) => runner && Runner;
 
 export { createStatsCollector };
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("diagnosticsDefaultImportMergedWithJSDocTypeAlias1", content);
     fourslash::go_to_file(&mut s, "/lib/stats-collector.mjs");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 2);
 }

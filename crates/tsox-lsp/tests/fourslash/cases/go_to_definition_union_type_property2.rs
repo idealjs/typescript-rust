@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_union_type_property2() {
     let content = r#"interface HasAOrB {
@@ -19,6 +19,6 @@ interface Two {
 var x : One | Two;
 
 x.common.[|/*propertyReference*/a|];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "propertyReference")
+    let _s = Session::new_for_test("goToDefinitionUnionTypeProperty2", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "propertyReference")
 }

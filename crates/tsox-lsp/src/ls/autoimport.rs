@@ -3,7 +3,6 @@
 pub(crate) use std::collections::HashMap;
 
 pub(crate) use tsox_core::collections::set::Set;
-pub(crate) use tsox_core::tspath;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum AutoImportFixKind {
@@ -105,6 +104,15 @@ pub struct DirtyMapBuilder<K: std::hash::Hash + Eq + Clone, V: Clone, B: Clone> 
     _builder: std::marker::PhantomData<B>,
 }
 
+impl<K: std::hash::Hash + Eq + Clone, V: Clone, B: Clone> DirtyMapBuilder<K, V, B> {
+    pub fn new(entries: HashMap<K, V>) -> Self {
+        DirtyMapBuilder {
+            entries,
+            _builder: std::marker::PhantomData,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default)]
 pub struct LogTree;
 
@@ -151,6 +159,10 @@ pub trait RegistryCloneHost: Send + Sync {
         file_name: &str,
         path: &tsox_core::tspath::Path,
     ) -> Option<std::sync::Arc<tsox_frontend::ast::SourceFile>>;
+    fn get_package_json(
+        &self,
+        file_name: &str,
+    ) -> Option<crate::project::auto_import::PackageJsonInfoCacheEntry>;
     fn dispose(&self);
 }
 

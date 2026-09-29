@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn import_fixes_ambient_circular_default_crash() {
     let content = r#"// @Filename: /home/src/workspaces/project/tsconfig.json
@@ -17,7 +17,7 @@ declare module "mymod" {
 }
 // @Filename: /home/src/workspaces/project/index.ts
 my/**/"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("importFixes_ambientCircularDefaultCrash", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{}, nil /*preferences*/)
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{}, nil /*preferences*/)
 }

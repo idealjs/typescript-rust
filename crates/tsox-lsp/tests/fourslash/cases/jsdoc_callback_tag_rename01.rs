@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn jsdoc_callback_tag_rename01() {
     let content = r#"// @lib: es5
@@ -14,7 +14,7 @@ fn jsdoc_callback_tag_rename01() {
 
 /** @type {/*1*/[|FooCallback|]} */
 var t;"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("jsdocCallbackTagRename01", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1])
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1])
 }

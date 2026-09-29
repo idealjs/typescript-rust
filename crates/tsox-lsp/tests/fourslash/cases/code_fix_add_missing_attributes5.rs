@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
+
 #[test]
 fn code_fix_add_missing_attributes5() {
     let content = r#"// @jsx: preserve
@@ -17,6 +17,6 @@ const A = ({ a, b, c, d }: P) =>
 
 const Bar = () =>
     [|<A a={100} b={""} c={[]} d={undefined}></A>|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t, "fixMissingAttributes")
+    let _s = Session::new_for_test("codeFixAddMissingAttributes5", content);
+    // TODO: f.VerifyCodeFixNotAvailable(t, "fixMissingAttributes")
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn auto_import_provider6() {
     let content = r#"// @Filename: /home/src/workspaces/project/tsconfig.json
@@ -13,8 +13,9 @@ export declare function Component(): void;
 import "react";
 // @Filename: /home/src/workspaces/project/index.ts
 Component/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportProvider6", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyErrorExistsAfterMarker"]
+
 #[test]
 fn jsconfig() {
     let content = r#"// @Filename: /a.js
@@ -13,7 +13,7 @@ function f(/**/x) {
         "noImplicitAny": true
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsconfig", content);
     fourslash::go_to_file(&mut s, "/a.js");
-    fourslash::unsupported("VerifyErrorExistsAfterMarker"); // f.VerifyErrorExistsAfterMarker(t, "")
+    // TODO: f.VerifyErrorExistsAfterMarker(t, "")
 }

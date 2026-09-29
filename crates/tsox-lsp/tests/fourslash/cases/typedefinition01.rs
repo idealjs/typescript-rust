@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn typedefinition01() {
     let content = r#"// @lib: es5
@@ -9,7 +9,7 @@ import n = require('./a');
 var x/*1*/ = new n.Foo();
 // @Filename: a.ts
 export class /*2*/Foo {}"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("typedefinition01", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "1")
+    // TODO: f.VerifyBaselineGoToTypeDefinition(t, "1")
 }

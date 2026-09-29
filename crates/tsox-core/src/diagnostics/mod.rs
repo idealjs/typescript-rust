@@ -173,3 +173,6 @@ pub fn format_message(text: &str, args: &[&str]) -> String {
 
 #[cfg(test)]
 pub(crate) mod tests;
+
+// r 轮接线:迁移批次模块
+pub mod mig;

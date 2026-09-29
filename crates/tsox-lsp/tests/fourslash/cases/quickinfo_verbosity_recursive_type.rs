@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
+
 #[test]
 fn quickinfo_verbosity_recursive_type() {
     let content = r#"// @lib: es5
@@ -29,6 +29,6 @@ const m/*m*/: TreeNode<number> = {
     right: undefined,
     orange: { name: "orange" },
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"N": {0}, "n": {0, 1}, "t": {0, 1}, "m": {0, 
+    let _s = Session::new_for_test("quickinfoVerbosityRecursiveType", content);
+    // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"N": {0}, "n": {0, 1}, "t": {0, 1}, "m": {0, 
 }

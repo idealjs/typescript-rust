@@ -34,12 +34,7 @@ impl Checker {
 
             let s = &sources[i];
             let t = &targets[i];
-            let related = if variance_flags.intersects(VARIANCE_FLAGS_ALLOWS_STRUCTURAL_FALLBACK)
-                && !variance_flags
-                    .intersects(VarianceFlags::Unmeasurable | VarianceFlags::Unreliable)
-            {
-                self.compare_types(Arc::clone(s), Arc::clone(t), relation, false)
-            } else if variance_flags.intersects(VarianceFlags::Unmeasurable) {
+            let related = if variance_flags.intersects(VarianceFlags::Unmeasurable) {
                 if relation == RelationKind::Identity {
                     if self.is_type_related_to(s, t, relation) {
                         Ternary::True
@@ -52,6 +47,9 @@ impl Checker {
                     Ternary::False
                 }
             } else {
+                if variance_flags.intersects(VarianceFlags::Unreliable) {
+                    self.report_unreliable_markers(s);
+                }
                 match variance {
                     VarianceFlags::Covariant => {
                         self.compare_types(Arc::clone(s), Arc::clone(t), relation, false)
@@ -63,9 +61,11 @@ impl Checker {
                     _ => {
                         let is_bivariant = variance_flags.intersects(VARIANCE_FLAGS_BIVARIANT)
                             && variance != VarianceFlags::None;
-                        let contra =
-                            self.compare_types(Arc::clone(t), Arc::clone(s), relation, false);
                         if is_bivariant {
+                            let was_silent = self.silence_relation_chain();
+                            let contra =
+                                self.compare_types(Arc::clone(t), Arc::clone(s), relation, false);
+                            self.restore_relation_chain(was_silent);
                             if !contra.is_false() {
                                 contra
                             } else {
@@ -77,7 +77,12 @@ impl Checker {
                             if co.is_false() {
                                 Ternary::False
                             } else {
-                                co.and(contra)
+                                co.and(self.compare_types(
+                                    Arc::clone(t),
+                                    Arc::clone(s),
+                                    relation,
+                                    false,
+                                ))
                             }
                         }
                     }
@@ -126,23 +131,33 @@ impl Checker {
         if !source.flags.contains(TypeFlags::Object) || !target.flags.contains(TypeFlags::Object) {
             return None;
         }
-        if !source.object_flags.contains(ObjectFlags::Reference)
-            || !target.object_flags.contains(ObjectFlags::Reference)
-        {
-            return None;
-        }
 
         if is_tuple_type(source) || is_tuple_type(target) {
             return None;
         }
-        let source_target = source.target()?;
-        let target_target = target.target()?;
-        let same_target = Arc::ptr_eq(source_target, target_target)
-            || match (&source_target.symbol, &target_target.symbol) {
-                (Some(ss), Some(ts)) => ss.id() == ts.id(),
+        let same_generic_origin = 'origin: {
+            if let (Some(st), Some(tt)) = (source.target(), target.target()) {
+                if Arc::ptr_eq(&st, &tt) {
+                    break 'origin true;
+                }
+                if let (Some(ss), Some(ts)) = (&st.symbol, &tt.symbol) {
+                    if ss.id() == ts.id() {
+                        break 'origin true;
+                    }
+                }
+            }
+            match (&source.symbol, &target.symbol) {
+                (Some(ss), Some(ts)) => {
+                    ss.id() == ts.id()
+                        && ss.flags.intersects(
+                            tsox_frontend::ast::SymbolFlags::Interface
+                                | tsox_frontend::ast::SymbolFlags::Class,
+                        )
+                }
                 _ => false,
-            };
-        if !same_target {
+            }
+        };
+        if !same_generic_origin {
             return None;
         }
 
@@ -154,39 +169,189 @@ impl Checker {
             return Some(Ternary::True);
         }
 
-        let variances = self.get_variances(source_target);
-        if variances.is_empty() {
-            return Some(Ternary::Maybe);
-        }
         let source_args = self.get_type_arguments(source);
+        let source_args = if source_args.is_empty() {
+            self.bare_generic_type_parameters(source)
+        } else {
+            source_args
+        };
         let target_args = self.get_type_arguments(target);
-        Some(self.type_arguments_related_to(&source_args, &target_args, &variances, relation))
-    }
-
-    pub fn get_variances(&self, _target: &Arc<Type>) -> Vec<VarianceFlags> {
-        match &_target.data {
-            TypeData::Object(o) => {
-                if let Some(t) = o.target.as_ref() {
-                    if let TypeData::Interface(i) = &t.data {
-                        let n = i.all_type_parameters.len();
-                        return vec![VarianceFlags::Covariant; n];
-                    }
-                }
-                Vec::new()
-            }
-            TypeData::Interface(i) => {
-                let n = i.all_type_parameters.len();
-                vec![VarianceFlags::Covariant; n]
-            }
-            _ => Vec::new(),
+        let target_args = if target_args.is_empty() {
+            self.bare_generic_type_parameters(target)
+        } else {
+            target_args
+        };
+        if source_args.is_empty() && target_args.is_empty() {
+            return Some(Ternary::True);
         }
+        if source_args.len() != target_args.len() {
+            return None;
+        }
+        let variances = match source.target() {
+            Some(t) => {
+                let v = self.get_variances(&t);
+                if v.is_empty() {
+                    return Some(Ternary::Unknown);
+                }
+                v
+            }
+            None => match self.measure_variances_from_symbol(source) {
+                Some(v) if v.is_empty() => return Some(Ternary::Unknown),
+                Some(v) => v,
+                None => vec![VarianceFlags::Covariant; source_args.len()],
+            },
+        };
+        let chain_len = self.relater_error_chain.len();
+        if self
+            .type_arguments_related_to(&source_args, &target_args, &variances, relation)
+            .is_false()
+        {
+            if variances
+                .iter()
+                .any(|v| v.intersects(VARIANCE_FLAGS_ALLOWS_STRUCTURAL_FALLBACK))
+            {
+                self.relater_error_chain.truncate(chain_len);
+                return None;
+            }
+            if !self.has_covariant_void_argument(&target_args, &variances) {
+                let has_invariant = variances
+                    .iter()
+                    .any(|v| (*v & VARIANCE_FLAGS_VARIANCE_MASK) == VARIANCE_FLAGS_INVARIANT);
+                if !(self.relater_chain_active && has_invariant) {
+                    return Some(Ternary::False);
+                }
+                let (variance_chain, prefix_kept) = self.take_variance_chain(chain_len);
+                let saved_primitive = std::mem::take(&mut self.relater_pending_primitive_source);
+                let structural =
+                    self.is_object_type_related_to(source, target, relation, saved_primitive);
+                self.relater_pending_primitive_source = saved_primitive;
+                if structural {
+                    self.restore_variance_chain(chain_len, variance_chain, prefix_kept);
+                }
+                return Some(Ternary::False);
+            }
+            return None;
+        }
+        Some(Ternary::True)
     }
 
-    pub fn is_marker_type(&self, _t: &Arc<Type>) -> bool {
-        false
+    pub fn bare_generic_type_parameters(&mut self, t: &Arc<Type>) -> Vec<Arc<Type>> {
+        let Some(symbol) = t.symbol.as_ref() else {
+            return Vec::new();
+        };
+        if !symbol.flags.intersects(
+            tsox_frontend::ast::SymbolFlags::Interface
+                | tsox_frontend::ast::SymbolFlags::Class,
+        ) {
+            return Vec::new();
+        }
+        self.declared_type_parameter_types(symbol)
+    }
+
+    pub fn get_variances(&mut self, target: &Arc<Type>) -> Vec<VarianceFlags> {
+        let Some(symbol) = target.symbol.clone() else {
+            return Vec::new();
+        };
+        let type_parameters = self.declared_type_parameter_types(&symbol);
+        self.get_variances_worker(&symbol, &type_parameters)
+    }
+
+    pub fn measure_variances_from_symbol(&mut self, t: &Arc<Type>) -> Option<Vec<VarianceFlags>> {
+        let symbol = t.symbol.as_ref()?;
+        if !symbol.flags.intersects(
+            tsox_frontend::ast::SymbolFlags::Interface
+                | tsox_frontend::ast::SymbolFlags::Class,
+        ) {
+            return None;
+        }
+        let type_parameters = self.declared_type_parameter_types(symbol);
+        if type_parameters.is_empty() {
+            return None;
+        }
+        Some(self.get_variances_worker(symbol, &type_parameters))
+    }
+
+    pub fn is_marker_type(&self, t: &Arc<Type>) -> bool {
+        self.marker_types.contains(&t.id)
+    }
+
+    /// Go isGenericMappedType（checker.go:25259）：mapped 且惰性约束解析后
+    /// 是泛型索引（nameType/as 子句路径不在本域）。实例化壳经
+    /// target+mapper 链取约束
+    pub fn is_generic_mapped_type_relater(&mut self, t: &Arc<Type>) -> bool {
+        t.object_flags.contains(ObjectFlags::Mapped)
+            && self
+                .get_constraint_type_from_mapped_type(t)
+                .is_some_and(|c| self.is_generic_index_type(&c))
+    }
+
+    pub fn relate_alias_variances(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        sources: &[Arc<Type>],
+        targets: &[Arc<Type>],
+        variances: &[VarianceFlags],
+        relation: RelationKind,
+    ) -> Option<bool> {
+        let chain_len = self.relater_error_chain.len();
+        if !self
+            .type_arguments_related_to(sources, targets, variances, relation)
+            .is_false()
+        {
+            return Some(true);
+        }
+        if variances
+            .iter()
+            .any(|v| v.intersects(VARIANCE_FLAGS_ALLOWS_STRUCTURAL_FALLBACK))
+        {
+            self.relater_error_chain.truncate(chain_len);
+            return None;
+        }
+        if !variances.is_empty() && !self.has_covariant_void_argument(targets, variances) {
+            if self.relater_chain_active
+                && variances
+                    .iter()
+                    .any(|v| (*v & VARIANCE_FLAGS_VARIANCE_MASK) == VARIANCE_FLAGS_INVARIANT)
+            {
+                let (variance_chain, prefix_kept) = self.take_variance_chain(chain_len);
+                let saved_primitive = std::mem::take(&mut self.relater_pending_primitive_source);
+                let structural =
+                    self.is_object_type_related_to(source, target, relation, saved_primitive);
+                self.relater_pending_primitive_source = saved_primitive;
+                if structural {
+                    self.restore_variance_chain(chain_len, variance_chain, prefix_kept);
+                }
+            }
+            return Some(false);
+        }
+        None
     }
 
     pub fn is_empty_array_literal_type(&self, t: &Arc<Type>) -> bool {
         t.object_flags.contains(ObjectFlags::FreshLiteral) && self.is_array_type(t)
+    }
+
+    fn take_variance_chain(&mut self, chain_len: usize) -> (Vec<RelaterChainEntry>, bool) {
+        if self.relater_error_chain.len() >= chain_len {
+            (self.relater_error_chain.split_off(chain_len), true)
+        } else {
+            (std::mem::take(&mut self.relater_error_chain), false)
+        }
+    }
+
+    fn restore_variance_chain(
+        &mut self,
+        chain_len: usize,
+        variance_chain: Vec<RelaterChainEntry>,
+        prefix_kept: bool,
+    ) {
+        if prefix_kept {
+            let keep = chain_len.min(self.relater_error_chain.len());
+            self.relater_error_chain.truncate(keep);
+        } else {
+            self.relater_error_chain.clear();
+        }
+        self.relater_error_chain.extend(variance_chain);
     }
 }

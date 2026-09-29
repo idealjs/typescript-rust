@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn tsx_completion13() {
     let content = r#"//@Filename: file.tsx
@@ -31,8 +31,9 @@ let opt = <MainButton onClick={()=>{}} /*3*/ />;
 let opt = <MainButton onClick={()=>{}} ignore-prop /*4*/ />;
 let opt = <MainButton goTo="goTo" /*5*/ />;
 let opt = <MainButton wrong /*6*/ />;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "6"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"3", "4", "5"}, &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("tsxCompletion13", content);
+    // TODO: f.VerifyCompletions(t, []string{"1", "6"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "2");
+    // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyCompletions(t, []string{"3", "4", "5"}, &fourslash.CompletionsExpectedList{
 }

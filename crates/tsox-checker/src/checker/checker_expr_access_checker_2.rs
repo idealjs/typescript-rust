@@ -55,11 +55,16 @@ impl Checker {
             arg.kind,
             SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression
         );
+        // Go chooseOverload 的 SkipContextSensitive：泛型 callee 的上下文敏感实参
+        // 不做预先检查，待推断固定类型参数后重定型（否则参数以未固定 T 定型污染节点缓存）
+        if is_function_arg
+            && self.is_context_sensitive(arg)
+            && self.callee_has_generic_signature(callee_expr)
+        {
+            return;
+        }
         if is_function_arg {
             let ctx = self.contextual_param_count_for_arg(callee_expr, arg_index);
-            if std::env::var_os("TSOX_DEBUG_SYMBOL").is_some() {
-                eprintln!("[ctx-arg] pushed ctx={ctx}");
-            }
             self.call_arg_arrow_context.push(ctx);
         }
         self.check_expression(arg);
@@ -68,18 +73,18 @@ impl Checker {
         }
     }
 
+    fn callee_has_generic_signature(&mut self, callee_expr: &Arc<Node>) -> bool {
+        let callee_type = self.get_type_of_node(callee_expr);
+        self.get_signatures_of_type(&callee_type, crate::checker::SignatureKind::Call)
+            .first()
+            .is_some_and(|sig| !sig.type_parameters.is_empty())
+    }
+
     pub(crate) fn contextual_signature_of_arrow(
         &mut self,
         node: &Arc<Node>,
     ) -> Option<Arc<Signature>> {
-        if std::env::var_os("TSOX_DEBUG_SYMBOL").is_some() {
-            eprintln!(
-                "[arrow-ctx] entered parent={:?}",
-                node.parent.as_ref().map(|p| p.kind)
-            );
-        }
         let t = self.get_contextual_type(node, ContextFlags::None)?;
-        if std::env::var_os("TSOX_DEBUG_SYMBOL").is_some() {}
         if let TypeData::IndexedAccess(ia) = &t.data
             && let (Some(o), Some(i)) = (&ia.object_type, &ia.index_type)
             && o.flags.contains(TypeFlags::TypeParameter)
@@ -117,17 +122,6 @@ impl Checker {
         arg_index: usize,
     ) -> usize {
         let t = self.get_type_of_node(callee_expr);
-        if std::env::var_os("TSOX_DEBUG_SYMBOL").is_some() {
-            eprintln!(
-                "[ctx-arg] callee={:?} intr={:?} union={} structured={}",
-                callee_expr.kind,
-                t.intrinsic_name(),
-                matches!(&t.data, TypeData::Union(_)),
-                t.as_structured()
-                    .map(|s| s.call_signatures().len())
-                    .unwrap_or(usize::MAX),
-            );
-        }
         if t.flags.contains(TypeFlags::Any) {
             if let tsox_frontend::ast::NodeData::PropertyAccessExpression(data) = &callee_expr.data
             {
@@ -246,9 +240,9 @@ impl Checker {
                         decl.kind,
                         SyntaxKind::PropertyDeclaration | SyntaxKind::MethodDeclaration
                     ) {
-                        if let Some(parent) = &decl.parent {
+                        if let Some(parent) = decl.parent() {
                             if parent.kind == SyntaxKind::ClassDeclaration {
-                                return Some(Arc::clone(parent));
+                                return Some(Arc::clone(&parent));
                             }
                         }
                     }
@@ -269,12 +263,12 @@ impl Checker {
                     | SyntaxKind::GetAccessor
                     | SyntaxKind::SetAccessor
             ) {
-                if let Some(parent) = &decl.parent {
+                if let Some(parent) = decl.parent() {
                     if matches!(
                         parent.kind,
                         SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
                     ) {
-                        return Some(Arc::clone(parent));
+                        return Some(Arc::clone(&parent));
                     }
                 }
             }

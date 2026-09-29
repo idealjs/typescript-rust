@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn get_java_script_completions15() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @allowNonTsExtensions: true
 // @Filename: refFile1.ts
 export var V = 1;
@@ -19,9 +19,10 @@ ref2.V./*2*/;
 var v = { x: require("./refFile3") };
 v.x./*3*/;
 v.x.V./*4*/;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("getJavaScriptCompletions15", content);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("1"), &["toExponential"], &[]);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("2"), &["toLowerCase"], &[]);
+    fourslash::go_to_marker(&mut s, "3");
+    // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("4"), &["toLowerCase"], &[]);
 }

@@ -4,13 +4,13 @@ use serde::{Deserialize, Serialize};
 pub const CODE_ACTION_KIND_SOURCE_REMOVE_UNUSED_IMPORTS: &str = "source.removeUnusedImports";
 pub const CODE_ACTION_KIND_SOURCE_SORT_IMPORTS: &str = "source.sortImports";
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Position {
     pub line: u32,
     pub character: u32,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Range {
     pub start: Position,
     pub end: Position,

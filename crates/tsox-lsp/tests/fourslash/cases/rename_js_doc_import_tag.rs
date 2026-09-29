@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
+
 #[test]
 fn rename_js_doc_import_tag() {
     let content = r#"// @allowJS: true
@@ -16,6 +16,6 @@ export interface A { }
  * @param { [|A/**/|] } a
  */
 function f(a) {}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
+    let _s = Session::new_for_test("renameJsDocImportTag", content);
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

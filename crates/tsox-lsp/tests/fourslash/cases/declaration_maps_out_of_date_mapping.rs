@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn declaration_maps_out_of_date_mapping() {
     let content = r#"// @lib: es5
@@ -25,8 +25,8 @@ export class /*2*/Foo {
 }
 // @Filename: /home/src/workspaces/project/index.ts
 import { Foo/*1*/ } from "a";"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("declarationMapsOutOfDateMapping", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_file(&mut s, "/home/src/workspaces/project/index.ts");
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "1")
+    // TODO: f.VerifyBaselineGoToDefinition(t, false, "1")
 }

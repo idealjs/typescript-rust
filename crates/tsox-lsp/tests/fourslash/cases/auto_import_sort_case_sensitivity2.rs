@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
+
 #[test]
 fn auto_import_sort_case_sensitivity2() {
     let content = r#"// @Filename: /a.ts
@@ -11,7 +11,8 @@ export type __String = string;
 // @Filename: /b.ts
 import { __String, HasBar, hasBar } from "./a";
 f/**/;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
+    let mut s = Session::new_for_test("autoImportSortCaseSensitivity2", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

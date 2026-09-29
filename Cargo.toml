@@ -20,6 +20,8 @@ edition = "2024"
 license = "Apache-2.0"
 
 [workspace.dependencies]
+unicode-normalization = "0.1"
+unicode-general-category = "0.6"
 tsox-compile = { path = "crates/tsox-compile" }
 tsox-emit = { path = "crates/tsox-emit" }
 tsox-checker = { path = "crates/tsox-checker" }

@@ -142,49 +142,102 @@ impl Checker {
         Some(Arc::clone(t))
     }
 
-    pub(crate) fn constraint_of_conditional_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
-        let ct = match &t.data {
-            TypeData::Conditional(ct) => ct,
+    pub(crate) fn indexed_access_constraint_for_chain(
+        &mut self,
+        t: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        let ia = match &t.data {
+            TypeData::IndexedAccess(ia) => ia,
             _ => return None,
         };
-
-        if let Some(rt) = ct.resolved_true_type.get() {
-            return Some(Arc::clone(rt));
+        let object = ia.object_type.as_ref()?;
+        let index = ia.index_type.as_ref()?;
+        if let Some(substituted) = self.substitute_generic_mapped_indexed_access(object, index) {
+            return Some(substituted);
         }
-        if let Some(rt) = ct.resolved_false_type.get() {
-            return Some(Arc::clone(rt));
-        }
-        let check_type = ct.check_type.clone()?;
-        let tp_symbol = ct
-            .root
-            .as_ref()
-            .filter(|r| r.is_distributive)
-            .and_then(|r| r.check_type_parameter_symbol.clone())?;
-
-        let constituents: Vec<Arc<Type>> = if check_type.flags.contains(TypeFlags::Union) {
-            check_type.types()?.to_vec()
-        } else if check_type.flags.contains(TypeFlags::IndexedAccess)
-            || matches!(&check_type.data, TypeData::IndexedAccess(_))
-        {
-            let reduced = self.constraint_of_indexed_access(&check_type)?;
-            if reduced.flags.contains(TypeFlags::Union) {
-                reduced.types()?.to_vec()
-            } else {
-                vec![reduced]
+        if let Some(ic) = self.chain_simplified_or_constraint(index) {
+            if !Arc::ptr_eq(&ic, index) {
+                if let Some(access) = self.chain_indexed_access(object, &ic) {
+                    return Some(access);
+                }
             }
-        } else {
-            return None;
-        };
-        let key = Arc::as_ptr(&tp_symbol);
-        let mut results: Vec<Arc<Type>> = Vec::with_capacity(constituents.len());
-        for constituent in constituents {
-            let mut mapping = std::collections::HashMap::new();
-            mapping.insert(key, Arc::clone(&constituent));
-            self.type_argument_stack.push(mapping);
-            let r = self.resolve_conditional_type_with_check(t, Some(constituent));
-            self.type_argument_stack.pop();
-            results.push(r?);
         }
-        Some(self.get_union_type(results))
+        if let Some(oc) = self.chain_simplified_or_constraint(object) {
+            if !Arc::ptr_eq(&oc, object) {
+                if let Some(access) = self.chain_indexed_access(&oc, index) {
+                    return Some(access);
+                }
+            }
+        }
+        None
+    }
+
+    fn chain_simplified_or_constraint(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        if t.flags.contains(TypeFlags::Index) || matches!(&t.data, TypeData::Index(_)) {
+            let parts = vec![
+                self.string_type(),
+                self.number_type(),
+                self.es_symbol_type(),
+            ];
+            return Some(self.get_union_type(parts));
+        }
+        if t.flags.contains(TypeFlags::TypeParameter) {
+            return self.get_constraint_of_type_parameter(t);
+        }
+        if t.flags.contains(TypeFlags::IndexedAccess)
+            || matches!(&t.data, TypeData::IndexedAccess(_))
+        {
+            return self.indexed_access_constraint_for_chain(t);
+        }
+        None
+    }
+
+    fn chain_indexed_access(
+        &mut self,
+        object: &Arc<Type>,
+        index: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        if object.flags.intersects(TypeFlags::Any | TypeFlags::Unknown) {
+            return Some(Arc::clone(object));
+        }
+        if index.flags.contains(TypeFlags::Union) {
+            let members = index.types()?.to_vec();
+            let mut parts = Vec::with_capacity(members.len());
+            for m in &members {
+                parts.push(self.chain_indexed_access(object, m)?);
+            }
+            return Some(self.get_union_type(parts));
+        }
+        if object.is_union() {
+            let members = object.types()?.to_vec();
+            let mut parts = Vec::with_capacity(members.len());
+            for m in &members {
+                parts.push(self.chain_indexed_access(m, index)?);
+            }
+            return Some(self.get_union_type(parts));
+        }
+        if self.chain_is_generic_type(object) {
+            return Some(self.deferred_indexed_access(object, index));
+        }
+        self.try_get_indexed_access_type(object, index, AccessFlags::None)
+    }
+
+    fn chain_is_generic_type(&self, t: &Arc<Type>) -> bool {
+        if t.flags
+            .intersects(TypeFlags::TypeParameter | TypeFlags::Index | TypeFlags::IndexedAccess)
+        {
+            return true;
+        }
+        if let TypeData::IndexedAccess(ia) = &t.data {
+            return ia
+                .object_type
+                .as_ref()
+                .is_some_and(|o| self.chain_is_generic_type(o))
+                || ia
+                    .index_type
+                    .as_ref()
+                    .is_some_and(|i| self.chain_is_generic_type(i));
+        }
+        false
     }
 }

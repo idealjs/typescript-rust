@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_of_interface_and_var() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @lib: es5
 interface AnalyserNode {
 }
@@ -12,6 +12,7 @@ declare var AnalyserNode: {
     new(): AnalyserNode;
 };
 /**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionOfInterfaceAndVar", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

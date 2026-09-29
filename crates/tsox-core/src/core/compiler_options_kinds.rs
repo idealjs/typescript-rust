@@ -1,4 +1,4 @@
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize)]
 #[repr(i32)]
 pub enum ScriptTarget {
     #[default]
@@ -24,7 +24,7 @@ impl ScriptTarget {
     pub const LATEST_STANDARD: ScriptTarget = ScriptTarget::ES2025;
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize)]
 #[repr(i32)]
 pub enum ModuleKind {
     #[default]
@@ -56,7 +56,29 @@ impl ModuleKind {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+impl std::fmt::Display for ModuleKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let name = match self {
+            ModuleKind::None => "None",
+            ModuleKind::CommonJS => "CommonJS",
+            ModuleKind::AMD => "AMD",
+            ModuleKind::UMD => "UMD",
+            ModuleKind::System => "System",
+            ModuleKind::ES2015 => "ES2015",
+            ModuleKind::ES2020 => "ES2020",
+            ModuleKind::ES2022 => "ES2022",
+            ModuleKind::ESNext => "ESNext",
+            ModuleKind::Node16 => "Node16",
+            ModuleKind::Node18 => "Node18",
+            ModuleKind::Node20 => "Node20",
+            ModuleKind::NodeNext => "NodeNext",
+            ModuleKind::Preserve => "Preserve",
+        };
+        f.write_str(name)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 #[repr(i32)]
 pub enum ModuleResolutionKind {
     #[default]
@@ -83,7 +105,7 @@ impl std::fmt::Display for ModuleResolutionKind {
 
 pub type ResolutionMode = ModuleKind;
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 #[repr(i32)]
 pub enum ModuleDetectionKind {
     #[default]
@@ -93,7 +115,7 @@ pub enum ModuleDetectionKind {
     Force = 3,
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 #[repr(i32)]
 pub enum JsxEmit {
     #[default]
@@ -118,7 +140,7 @@ impl std::fmt::Display for JsxEmit {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 #[repr(i32)]
 pub enum NewLineKind {
     #[default]
@@ -140,6 +162,96 @@ impl NewLineKind {
         match self {
             NewLineKind::CRLF => "\r\n",
             _ => "\n",
+        }
+    }
+}
+
+impl From<i64> for ScriptTarget {
+    fn from(v: i64) -> Self {
+        match v {
+            1 => ScriptTarget::ES5,
+            2 => ScriptTarget::ES2015,
+            3 => ScriptTarget::ES2016,
+            4 => ScriptTarget::ES2017,
+            5 => ScriptTarget::ES2018,
+            6 => ScriptTarget::ES2019,
+            7 => ScriptTarget::ES2020,
+            8 => ScriptTarget::ES2021,
+            9 => ScriptTarget::ES2022,
+            10 => ScriptTarget::ES2023,
+            11 => ScriptTarget::ES2024,
+            12 => ScriptTarget::ES2025,
+            99 => ScriptTarget::ESNext,
+            100 => ScriptTarget::JSON,
+            _ => ScriptTarget::None,
+        }
+    }
+}
+
+impl From<i64> for ModuleKind {
+    fn from(v: i64) -> Self {
+        match v {
+            1 => ModuleKind::CommonJS,
+            2 => ModuleKind::AMD,
+            3 => ModuleKind::UMD,
+            4 => ModuleKind::System,
+            5 => ModuleKind::ES2015,
+            6 => ModuleKind::ES2020,
+            7 => ModuleKind::ES2022,
+            99 => ModuleKind::ESNext,
+            100 => ModuleKind::Node16,
+            101 => ModuleKind::Node18,
+            102 => ModuleKind::Node20,
+            199 => ModuleKind::NodeNext,
+            200 => ModuleKind::Preserve,
+            _ => ModuleKind::None,
+        }
+    }
+}
+
+impl From<i64> for ModuleResolutionKind {
+    fn from(v: i64) -> Self {
+        match v {
+            1 => ModuleResolutionKind::Classic,
+            2 => ModuleResolutionKind::Node10,
+            3 => ModuleResolutionKind::Node16,
+            99 => ModuleResolutionKind::NodeNext,
+            100 => ModuleResolutionKind::Bundler,
+            _ => ModuleResolutionKind::Unknown,
+        }
+    }
+}
+
+impl From<i64> for ModuleDetectionKind {
+    fn from(v: i64) -> Self {
+        match v {
+            1 => ModuleDetectionKind::Auto,
+            2 => ModuleDetectionKind::Legacy,
+            3 => ModuleDetectionKind::Force,
+            _ => ModuleDetectionKind::None,
+        }
+    }
+}
+
+impl From<i64> for JsxEmit {
+    fn from(v: i64) -> Self {
+        match v {
+            1 => JsxEmit::Preserve,
+            2 => JsxEmit::ReactNative,
+            3 => JsxEmit::React,
+            4 => JsxEmit::ReactJSX,
+            5 => JsxEmit::ReactJSXDev,
+            _ => JsxEmit::None,
+        }
+    }
+}
+
+impl From<i64> for NewLineKind {
+    fn from(v: i64) -> Self {
+        match v {
+            1 => NewLineKind::CRLF,
+            2 => NewLineKind::LF,
+            _ => NewLineKind::None,
         }
     }
 }

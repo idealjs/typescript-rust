@@ -7,9 +7,7 @@ use crate::ls::lsconv_converters::Converters;
 use crate::ls::lsutil::{FormatCodeSettings, UserPreferences};
 use crate::lsp::lsproto_lsp::DocumentUri;
 use crate::lsp::lsproto_lsp::Location;
-use tsox_compile::compiler;
 use tsox_core::core::text::TextRange;
-use tsox_core::tspath;
 use tsox_frontend::ast::SourceFile;
 
 use super::host::{AutoImportRegistry, EcmaLineInfo, Host};

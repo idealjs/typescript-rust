@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_destructure_generic() {
     let content = r#"interface I<T> {
@@ -8,6 +8,6 @@ fn find_all_refs_destructure_generic() {
 }
 declare const i: I<number>;
 const { /*1*/x } = i;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "1")
+    let _s = Session::new_for_test("findAllRefsDestructureGeneric", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1")
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // Scoped packages (@scope/pkg) exercise UnmangleScopedPacka"]
+
 #[test]
 fn go_to_source_scoped_package() {
     // TODO: // Scoped packages (@scope/pkg) exercise UnmangleScopedPackageName
@@ -15,11 +15,10 @@ export function /*target*/scopedHelper() { return "scoped"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importName*/scopedHelper } from "@myscope/mylib";
 scopedHelper/*usage*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importName", "usage")
+    let _s = Session::new_for_test("goToSourceScopedPackage", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName", "usage")
 }
 
-#[ignore = "generator: // @types/@scope/pkg should map to @scope/pkg implementation"]
 #[test]
 fn go_to_source_scoped_at_types_package() {
     // TODO: // @types/@scope/pkg should map to @scope/pkg implementation.
@@ -35,6 +34,6 @@ export function /*target*/nsHelper() { return 42; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { nsHelper } from "@myns/mylib";
 nsHelper/*usage*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
+    let _s = Session::new_for_test("goToSourceScopedAtTypesPackage", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }

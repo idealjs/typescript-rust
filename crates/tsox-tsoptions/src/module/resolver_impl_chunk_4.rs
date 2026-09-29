@@ -23,6 +23,34 @@ impl Resolver {
         self.host.as_ref()
     }
 
+    pub fn get_package_scope_for_path(
+        &self,
+        directory: &str,
+    ) -> Option<crate::packagejson::mig::x12::InfoCacheEntry> {
+        let fs = self.host.fs();
+        let mut dir = directory.to_string();
+        loop {
+            let pkg_json_path = tsox_core::tspath::combine_paths(&dir, &["package.json"]);
+            if fs.file_exists(&pkg_json_path) {
+                if let Some(content) = fs.read_file(&pkg_json_path) {
+                    if let Ok(fields) = crate::packagejson::parse(&content) {
+                        return Some(crate::packagejson::mig::x12::InfoCacheEntry {
+                            package_directory: dir,
+                            directory_exists: true,
+                            contents: Some(fields),
+                        });
+                    }
+                }
+            }
+            let parent = tsox_core::tspath::get_directory_path(&dir);
+            if parent == dir {
+                break;
+            }
+            dir = parent;
+        }
+        None
+    }
+
     pub fn compiler_options(&self) -> &CompilerOptions {
         &self.compiler_options
     }
@@ -45,7 +73,8 @@ impl Resolver {
         let trace = self.compiler_options.trace_resolution.is_true();
         if !trace {
             if let Some(cached) = self.module_cache.get(&cache_key) {
-                return (Some((*cached).clone()), Vec::new());
+                let diags = cached.resolution_diagnostics.clone();
+                return (Some((*cached).clone()), diags);
             }
         }
 
@@ -55,7 +84,7 @@ impl Resolver {
             containing_file,
             self.host.fs(),
         );
-        let state = ResolutionState::new(
+        let mut state = ResolutionState::new(
             module_name,
             &containing_directory,
             false,
@@ -64,10 +93,12 @@ impl Resolver {
             self.host.fs(),
             self.host.get_current_directory(),
         );
-        let result = state.resolve_node_like();
+        let mut result = state.resolve_node_like();
+        let diagnostics = std::mem::take(&mut state.resolution_diagnostics);
+        result.resolution_diagnostics = diagnostics.clone();
         let result_arc = Arc::new(result.clone());
         self.module_cache.set(cache_key, result_arc);
-        (Some(result), Vec::new())
+        (Some(result), diagnostics)
     }
 
     pub fn resolve_type_reference_directive(
@@ -109,11 +140,12 @@ impl Resolver {
             fs,
             current_dir,
         );
-        let result = state.resolve_type_reference_directive(
+        let mut result = state.resolve_type_reference_directive(
             &type_roots,
             from_config,
             from_inferred_types_containing_file,
         );
+        result.resolution_diagnostics = std::mem::take(&mut state.resolution_diagnostics);
 
         let result_arc = Arc::new(result.clone());
         self.type_ref_cache.set(cache_key, result_arc);
@@ -166,6 +198,71 @@ pub fn get_effective_type_roots(
     (type_roots, false)
 }
 
+pub(crate) fn compute_package_id(fs: &dyn FS, resolved_file_name: &str) -> Option<PackageId> {
+    if !resolved_file_name.contains("/node_modules/") {
+        return None;
+    }
+    let package_directory = crate::module::parse_node_module_from_path(resolved_file_name, false);
+    if package_directory.is_empty() {
+        return None;
+    }
+    let pkg_json_path = tsox_core::tspath::combine_paths(&package_directory, &["package.json"]);
+    let content = fs.read_file(&pkg_json_path)?;
+    let fields = packagejson::parse(&content).ok()?;
+    let name = fields.header_fields.name.get_value()?.clone();
+    let version = fields.header_fields.version.get_value()?.clone();
+    let sub_module_name = if resolved_file_name.len() > package_directory.len() {
+        resolved_file_name[package_directory.len() + 1..].to_string()
+    } else {
+        String::new()
+    };
+    let peer_dependencies = read_peer_dependencies(fs, &fields, &package_directory);
+    Some(PackageId {
+        name,
+        sub_module_name,
+        version,
+        peer_dependencies,
+    })
+}
+
+fn read_peer_dependencies(
+    fs: &dyn FS,
+    fields: &packagejson::Fields,
+    package_directory: &str,
+) -> String {
+    let Some(peers) = fields
+        .dependency_fields
+        .peer_dependencies
+        .get_value()
+        .filter(|p| !p.is_empty())
+    else {
+        return String::new();
+    };
+    let Some(idx) = package_directory.rfind("/node_modules") else {
+        return String::new();
+    };
+    let node_modules = &package_directory[..idx + "/node_modules".len()];
+    let mut names: Vec<&String> = peers.keys().collect();
+    names.sort();
+    let mut out = String::new();
+    for name in names {
+        let found = fs
+            .read_file(&tsox_core::tspath::combine_paths(
+                node_modules,
+                &[name, "package.json"],
+            ))
+            .and_then(|c| packagejson::parse(&c).ok())
+            .and_then(|f| f.header_fields.version.get_value().cloned());
+        if let Some(version) = found {
+            out.push('+');
+            out.push_str(name);
+            out.push('@');
+            out.push_str(&version);
+        }
+    }
+    out
+}
+
 pub(crate) struct ResolutionState<'a> {
     pub(crate) name: String,
     pub(crate) containing_directory: String,
@@ -183,4 +280,10 @@ pub(crate) struct ResolutionState<'a> {
     pub(crate) candidate_ending_is_from_config: bool,
 
     pub(crate) export_target_depth: u32,
+
+    pub(crate) resolution_diagnostics: Vec<DiagAndArgs>,
+
+    /// Go unresolved() 终止语义：exports/imports 目标反查已判定终止，
+    /// 不再尝试后续条件/策略
+    pub(crate) unresolved_terminal: bool,
 }

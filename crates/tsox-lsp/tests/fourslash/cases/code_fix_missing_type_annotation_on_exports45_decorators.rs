@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFixAll"]
+
 #[test]
 fn code_fix_missing_type_annotation_on_exports45_decorators() {
     let content = r#"// @isolatedDeclarations: true
@@ -33,6 +33,6 @@ export class A {
 
   @fieldDecorator classProp = foo();
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFixAll"); // f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports45_decorators", content);
+    // TODO: f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

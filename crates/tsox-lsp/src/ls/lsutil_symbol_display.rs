@@ -1,10 +1,9 @@
 use std::sync::Arc;
 
+use tsox_checker::checker::Checker;
 use tsox_core::collections::set::Set;
 use tsox_frontend::ast::Node;
 use tsox_frontend::ast::Symbol;
-
-type Checker = ();
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[repr(i32)]

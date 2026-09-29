@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_for_string_literal11() {
     let content = r#"// @stableTypeOrdering: true
@@ -9,6 +9,6 @@ let a: As;
 switch (a) {
     case '[|/**/|]
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionForStringLiteral11", content);
+    fourslash::verify_completions_exact_at(&mut s, Some(""), &["abacus", "abaddon", "arf"]);
 }

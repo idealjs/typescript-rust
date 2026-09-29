@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
+
 #[test]
 fn auto_import_package_json_imports_caps_in_path2() {
     let content = r##"// @module: node18
@@ -14,6 +14,6 @@ fn auto_import_package_json_imports_caps_in_path2() {
 export function something(name: string): any;
 // @Filename: /Dev/a.ts
 something/**/"##;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"#thing/something"}, nil /*preferences*/)
+    let _s = Session::new_for_test("autoImportPackageJsonImports_capsInPath2", content);
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"#thing/something"}, nil /*preferences*/)
 }

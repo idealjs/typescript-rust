@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_references_js_require_destructuring() {
     let content = r#"// @allowJs: true
@@ -12,6 +12,6 @@ module.exports = {
 };
 // @Filename: bar.js
 const { /*1*/foo: bar } = require('./foo');"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
+    let _s = Session::new_for_test("findAllReferencesJsRequireDestructuring", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

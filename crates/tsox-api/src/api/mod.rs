@@ -129,3 +129,6 @@ pub fn run_api() -> i32 {
     let mut server = ApiServer::new();
     server.run()
 }
+
+// r 轮接线:迁移批次模块
+pub mod mig;

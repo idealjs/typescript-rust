@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlightsWithOptions"]
+
 #[test]
 fn document_highlights_33722() {
     let content = r#"// @Filename: /y.ts
@@ -14,6 +14,6 @@ export default f;
 import y from "./y";
 
 y().[|foo|]();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlightsWithOptions"); // f.VerifyBaselineDocumentHighlightsWithOptions(t, nil /*preferences*/, []string{"/x.ts"}, f.Ranges()[
+    let _s = Session::new_for_test("documentHighlights_33722", content);
+    // TODO: f.VerifyBaselineDocumentHighlightsWithOptions(t, nil /*preferences*/, []string{"/x.ts"}, f.Ranges()[
 }

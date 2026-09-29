@@ -22,5 +22,4 @@ pub use crate::parser::jsdoc_tokens::*;
 pub(crate) use crate::scanner::token_to_string;
 pub(crate) use std::sync::Arc;
 pub(crate) use tsox_core::core::text::TextRange;
-pub(crate) use tsox_core::diagnostics;
 pub(crate) use tsox_core::diagnostics::Message;

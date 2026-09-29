@@ -60,6 +60,8 @@ pub struct Project {
 
     pub potential_project_references: Option<HashSet<Path>>,
     pub typings_files: Vec<String>,
+
+    pub content_mapper_watched_files: Option<HashSet<Path>>,
 }
 
 impl Project {
@@ -83,6 +85,7 @@ impl Project {
 
             potential_project_references: None,
             typings_files: Vec::new(),
+            content_mapper_watched_files: None,
         }
     }
 
@@ -121,18 +124,6 @@ impl Project {
         self.program.as_ref()
     }
 
-    pub fn has_file(&self, _file_name: &str) -> bool {
-        todo!("Project::has_file requires program integration")
-    }
-
-    pub fn contains_file(&self, _path: &Path) -> bool {
-        self.program.is_some()
-    }
-
-    pub fn is_source_from_project_reference(&self, _path: &Path) -> bool {
-        false
-    }
-
     pub fn clone_shallow(&self) -> Project {
         Project {
             kind: self.kind,
@@ -149,6 +140,7 @@ impl Project {
             program_last_update: self.program_last_update,
             potential_project_references: self.potential_project_references.clone(),
             typings_files: self.typings_files.clone(),
+            content_mapper_watched_files: self.content_mapper_watched_files.clone(),
         }
     }
 

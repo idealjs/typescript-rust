@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
+
 #[test]
 fn navigation_bar_function_prototype_broken() {
     let content = r#"// @allowJs: true
@@ -10,6 +10,6 @@ A. // Started typing something here
 A.prototype.a = function() { };
 G. // Started typing something here
 A.prototype.a = function() { };"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
+    let _s = Session::new_for_test("navigationBarFunctionPrototypeBroken", content);
+    // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

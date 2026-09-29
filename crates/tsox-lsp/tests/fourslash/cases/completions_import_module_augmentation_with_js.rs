@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
+
 #[test]
 fn completions_import_module_augmentation_with_js() {
     let content = r#"// @allowJs: true
@@ -21,6 +21,6 @@ declare module "./test" {
 }
 
 Abcde/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
+    let _s = Session::new_for_test("completionsImportModuleAugmentationWithJS", content);
+    // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

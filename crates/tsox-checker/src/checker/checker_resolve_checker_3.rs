@@ -84,7 +84,7 @@ impl Checker {
                 .declarations
                 .extend(source.declarations.iter().cloned());
 
-            merged.parent = effective_target.parent.clone();
+merged.set_parent(&effective_target);
 
             merged.members = SymbolTable {
                 entries: effective_target.members.entries.clone(),
@@ -98,7 +98,7 @@ impl Checker {
             let mut result_mut = Symbol::new(result.flags, &result.name);
             result_mut.value_declaration = result.value_declaration.clone();
             result_mut.declarations = result.declarations.clone();
-            result_mut.parent = result.parent.clone();
+result_mut.set_parent(&result);
             result_mut.members = SymbolTable {
                 entries: result.members.entries.clone(),
             };
@@ -163,40 +163,75 @@ impl Checker {
             tsox_core::diagnostics::messages_generated::DUPLICATE_IDENTIFIER_0
         };
         let name = source.name.clone();
-        let mut locs: Vec<tsox_core::core::text::TextRange> = Vec::new();
-        for sym in [target, source] {
-            for d in &sym.declarations {
-                let name_node = tsox_frontend::ast::utilities::get_name_of_declaration(d)
-                    .unwrap_or_else(|| Arc::clone(d));
-                locs.push(name_node.loc);
+        for (err_sym, rel_sym) in [(source, target), (target, source)] {
+            for decl in &err_sym.declarations {
+                let error_node = tsox_frontend::ast::utilities::get_name_of_declaration(decl)
+                    .unwrap_or_else(|| Arc::clone(decl));
+                let file = self.get_source_file_of_node(&error_node);
+                let mut diag = tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    error_node.loc,
+                    message,
+                    vec![name.clone()],
+                );
+                for rel_decl in &rel_sym.declarations {
+                    let rel_node = tsox_frontend::ast::utilities::get_name_of_declaration(rel_decl)
+                        .unwrap_or_else(|| Arc::clone(rel_decl));
+                    if Arc::ptr_eq(&rel_node, &error_node) || diag.related_information.len() >= 5 {
+                        continue;
+                    }
+                    let rel_file = self.get_source_file_of_node(&rel_node);
+                    if diag.related_information.iter().any(|d| {
+                        d.loc == rel_node.loc
+                            && d.file.as_ref().map(|f| f.file_name.as_str())
+                                == rel_file.as_ref().map(|f| f.file_name.as_str())
+                    }) {
+                        continue;
+                    }
+                    let (rel_msg, args) = if diag.related_information.is_empty() {
+                        (
+                            tsox_core::diagnostics::messages_generated::X_0_WAS_ALSO_DECLARED_HERE,
+                            vec![name.clone()],
+                        )
+                    } else {
+                        (
+                            tsox_core::diagnostics::messages_generated::X_AND_HERE,
+                            Vec::new(),
+                        )
+                    };
+                    diag.related_information
+                        .push(tsox_frontend::ast::Diagnostic::new(
+                            rel_file,
+                            rel_node.loc,
+                            rel_msg,
+                            args,
+                        ));
+                }
+                self.diagnostics.add_or_append_related(diag);
             }
-        }
-        for loc in locs {
-            if self
-                .diagnostics
-                .get_all()
-                .iter()
-                .any(|d| d.loc == loc && d.code == message.code)
-            {
-                continue;
-            }
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                self.current_file.clone(),
-                loc,
-                message,
-                vec![name.clone()],
-            ));
         }
     }
 
     pub fn record_merged_symbol(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) {
         self.merged_symbols.insert(source.id(), target.id());
+        self.merged_symbol_targets
+            .insert(target.id(), Arc::clone(target));
+    }
+
+    pub fn merged_symbol_by_id(&self, id: u64) -> Option<Arc<Symbol>> {
+        self.merged_symbol_targets.get(&id).cloned()
+    }
+
+    pub(crate) fn record_merged_symbol_if_absent(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) {
+        if !self.merged_symbols.contains_key(&source.id()) {
+            self.record_merged_symbol(target, source);
+        }
     }
 
     pub fn clone_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
         let mut cloned = Symbol::new(symbol.flags | SymbolFlags::Transient, &symbol.name);
         cloned.declarations = symbol.declarations.clone();
-        cloned.parent = symbol.parent.clone();
+cloned.set_parent(&symbol);
         cloned.value_declaration = symbol.value_declaration.clone();
         cloned.members = SymbolTable {
             entries: symbol.members.entries.clone(),
@@ -222,12 +257,12 @@ impl Checker {
         }
 
         if node.kind == tsox_frontend::ast::SyntaxKind::Identifier {
-            let mut current = node.parent.as_ref();
+            let mut current = node.parent();
             while let Some(parent) = current {
-                if let Some(sym) = self.program.symbol_map().symbol_of(parent) {
+                if let Some(sym) = self.program.symbol_map().symbol_of(&parent) {
                     return Some(Arc::clone(sym));
                 }
-                current = parent.parent.as_ref();
+                current = parent.parent();
             }
         }
 

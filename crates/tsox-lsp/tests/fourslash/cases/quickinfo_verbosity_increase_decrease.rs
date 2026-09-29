@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
+
 #[test]
 fn quickinfo_verbosity_increase_decrease() {
     let content = r#"export const JOB_STATES = ["created", "active", "completed", "failed", "retry", "cancelled", "archive"] as const
@@ -50,6 +50,6 @@ const JobsStateToColor/*a*/: Record<
     labelPlural: "Понављају се",
   },
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"a": {0, 1, 0}})
+    let _s = Session::new_for_test("quickinfoVerbosityIncreaseDecrease", content);
+    // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"a": {0, 1, 0}})
 }

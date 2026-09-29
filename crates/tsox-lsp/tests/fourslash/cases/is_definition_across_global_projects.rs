@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn is_definition_across_global_projects() {
     let content = r#"// @Filename: /home/src/workspaces/project/a/index.ts
@@ -87,7 +87,7 @@ const ic: I = { FC() {} };
         "lib": ["es5"],
     }
 }"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("isDefinitionAcrossGlobalProjects", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9")
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9")
 }

@@ -17,6 +17,13 @@ pub struct ExportsOrImports {
 }
 
 impl ExportsOrImports {
+    pub fn from_json_value(json_value: JsonValue) -> Self {
+        ExportsOrImports {
+            json_value,
+            object_kind: ObjectKind::Unknown,
+        }
+    }
+
     pub fn is_subpaths(&self) -> bool {
         self.compute_object_kind() == ObjectKind::Subpaths
     }

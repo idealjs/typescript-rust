@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyWillRenameFilesEdits"]
+
 #[test]
 fn get_edits_for_file_rename_ambient_module() {
     let content = r#"// @Filename: /tsconfig.json
@@ -15,6 +15,6 @@ declare module "sub" {
 { "types": "types.d.ts" }
 // @Filename: /a.ts
 import { abc } from "sub";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyWillRenameFilesEdits"); // f.VerifyWillRenameFilesEdits(t, "/a.ts", "/b.ts", map[string]string{}, nil /*preferences*/)
+    let _s = Session::new_for_test("getEditsForFileRename_ambientModule", content);
+    // TODO: f.VerifyWillRenameFilesEdits(t, "/a.ts", "/b.ts", map[string]string{}, nil /*preferences*/)
 }

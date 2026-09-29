@@ -9,7 +9,7 @@ pub struct SemaphoreGuard<'a> {
 }
 
 impl<'a> SemaphoreGuard<'a> {
-    fn new(release: impl FnOnce() + 'a) -> Self {
+    pub(crate) fn new(release: impl FnOnce() + 'a) -> Self {
         Self {
             release: Some(Box::new(release)),
         }
@@ -37,8 +37,8 @@ pub(crate) struct Inner {
 }
 
 pub struct LimitedSemaphore {
-    inner: Mutex<Inner>,
-    cvar: Condvar,
+    pub(crate) inner: Mutex<Inner>,
+    pub(crate) cvar: Condvar,
 }
 
 impl LimitedSemaphore {
@@ -66,5 +66,27 @@ impl Semaphore for LimitedSemaphore {
             guard.available += 1;
             this.cvar.notify_one();
         })
+    }
+}
+
+impl UnlimitedSemaphore {
+    pub fn try_acquire(&self) -> Option<SemaphoreGuard<'_>> {
+        Some(SemaphoreGuard::new(|| {}))
+    }
+}
+
+impl LimitedSemaphore {
+    pub fn try_acquire(&self) -> Option<SemaphoreGuard<'_>> {
+        let mut guard = self.inner.lock().unwrap();
+        if guard.available == 0 {
+            return None;
+        }
+        guard.available -= 1;
+        Some(SemaphoreGuard::new(move || {
+            let this = unsafe { &*(self as *const Self) };
+            let mut guard = self.inner.lock().unwrap();
+            guard.available += 1;
+            self.cvar.notify_one();
+        }))
     }
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn code_fix_spelling_js6() {
     let content = r#"// @allowjs: true
@@ -53,6 +54,6 @@ var other = {
 }
 window.argle
 self.blargle"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
+    let mut s = Session::new_for_test("codeFixSpellingJs6", content);
+    fourslash::verify_no_errors(&mut s, );
 }

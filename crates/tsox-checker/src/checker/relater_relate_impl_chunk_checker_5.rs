@@ -18,6 +18,28 @@ impl Checker {
             _ => return false,
         };
 
+        // Go propertiesRelatedTo 元组目标分支：目标可变而源 readonly（元组或
+        // 数组）时直接拒绝，错误链走 TS4104
+        if !target_tuple.readonly {
+            let source_ro = source_tuple.readonly
+                || (self.is_array_type(source)
+                    && source
+                        .object_flags
+                        .contains(crate::checker::types::ObjectFlags::IsReadonlyArray));
+            if source_ro {
+                if self.relater_chain_active {
+                    let source_str = self.type_to_string(source);
+                    let target_str = self.type_to_string(target);
+                    self.relater_report_error(
+                        tsox_core::diagnostics::messages_generated::
+                            THE_TYPE_0_IS_READONLY_AND_CANNOT_BE_ASSIGNED_TO_THE_MUTABLE_TYPE_1,
+                        vec![source_str, target_str],
+                    );
+                }
+                return false;
+            }
+        }
+
         let min_len = source_tuple
             .element_infos
             .len()
@@ -101,11 +123,37 @@ impl Checker {
         }
 
         if t.contains(TypeFlags::Union) {
+            if s == TypeFlags::Boolean
+                && target
+                    .as_union_or_intersection()
+                    .is_some_and(|ui| {
+                        ui.types.iter().any(|m| m.flags.contains(TypeFlags::BooleanLiteral))
+                    })
+            {
+                let false_t = self.false_type();
+                let true_t = self.true_type();
+                let saved_chain_active = self.relater_chain_active;
+                self.relater_chain_active = false;
+                let distributed = self.is_type_related_to(&false_t, target, relation)
+                    && self.is_type_related_to(&true_t, target, relation);
+                self.relater_chain_active = saved_chain_active;
+                if distributed {
+                    return true;
+                }
+            }
             return self.type_related_to_some_type(source, target, relation);
         }
 
         if t.contains(TypeFlags::Intersection) {
-            return self.type_related_to_each_type(source, target, relation);
+            let outer_depth = self.relater_intersection_target_depth;
+            let related = self.type_related_to_each_type(source, target, relation);
+            if related
+                && outer_depth == 0
+                && s.intersects(TypeFlags::Object | TypeFlags::Intersection)
+            {
+                return self.extra_intersection_properties_check(source, target, relation);
+            }
+            return related;
         }
 
         if s.contains(TypeFlags::Intersection) {
@@ -121,11 +169,20 @@ impl Checker {
             }
             self.relater_error_chain.truncate(save_len);
             if immediately_related {
+                if self.source_intersection_needs_extra_check(source, target) {
+                    return self.source_intersection_extra_optionals_check(source, target, relation);
+                }
                 return true;
             }
 
             if t.contains(TypeFlags::Object) {
-                return self.intersection_source_structurally_related(source, target, relation);
+                let related =
+                    self.intersection_source_structurally_related(source, target, relation);
+                if related && self.source_intersection_needs_extra_check(source, target) {
+                    return self
+                        .source_intersection_extra_optionals_check(source, target, relation);
+                }
+                return related;
             }
             if t.contains(TypeFlags::TypeParameter) {
                 if let Some(constraint) = self.get_constraint_of_type_parameter(target) {
@@ -136,6 +193,126 @@ impl Checker {
         }
 
         false
+    }
+
+    // Go isSourceIntersectionNeedingExtraCheck:source 为交集、apparent 为
+    // 结构型,且无成分等于目标或为 NonInferrableType
+    fn source_intersection_needs_extra_check(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) -> bool {
+        if !target.flags.contains(TypeFlags::Object)
+            || crate::checker::utilities_is_optional_symbol::is_array_or_tuple_type(target)
+            || self.is_generic_mapped_type(target)
+        {
+            return false;
+        }
+        let apparent = self.get_apparent_type(source);
+        if !apparent
+            .flags
+            .intersects(crate::checker::types_type_id::TYPE_FLAGS_STRUCTURED_TYPE)
+        {
+            return false;
+        }
+        !source.types().is_some_and(|types| {
+            types.iter().any(|t| {
+                t.id == target.id || t.object_flags.contains(ObjectFlags::NonInferrableType)
+            })
+        })
+    }
+
+    // Go structuredTypeRelatedTo 后置检查:source 交集相关成功后,对 target
+    // 可选属性逐一比较(propertiesRelatedTo optionalsOnly)
+    fn source_intersection_extra_optionals_check(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        let target_props = self.get_properties_of_type(target);
+        for target_prop in target_props {
+            if target_prop.flags.contains(SymbolFlags::Prototype)
+                || !target_prop.flags.contains(SymbolFlags::Optional)
+            {
+                continue;
+            }
+            let Some(source_prop) = self.get_property_of_type(source, &target_prop.name) else {
+                continue;
+            };
+            let source_type = self.substituted_member_type_of(source, &source_prop);
+            let target_type = self.substituted_member_type_of(target, &target_prop);
+            if !self.is_type_related_to(&source_type, &target_type, relation) {
+                self.relater_report_error(
+                    tsox_core::diagnostics::messages_generated::
+                        TYPES_OF_PROPERTY_0_ARE_INCOMPATIBLE,
+                    vec![self.chain_property_arg_name(&target_prop)],
+                );
+                return false;
+            }
+        }
+        true
+    }
+
+    pub(crate) fn extra_intersection_properties_check(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        let saved_depth = self.relater_intersection_target_depth;
+        self.relater_intersection_target_depth = 0;
+        let ok = self
+            .extra_intersection_properties_check_inner(source, target, relation);
+        self.relater_intersection_target_depth = saved_depth;
+        ok
+    }
+
+    fn extra_intersection_properties_check_inner(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        let source_props = self.get_properties_of_type(source);
+        if !source_props.is_empty()
+            && relation != RelationKind::Comparable
+            && self.is_weak_type(target)
+            && !self.has_common_properties(source, target, source.object_flags.contains(crate::checker::types::ObjectFlags::JsxAttributes))
+        {
+            if self.relater_chain_active {
+                self.relater_no_common_self_reports += 1;
+            }
+            let source_str = self.type_to_string(source);
+            let target_str = self.type_to_string(target);
+            self.relater_report_error(
+                tsox_core::diagnostics::messages_generated::TYPE_0_HAS_NO_PROPERTIES_IN_COMMON_WITH_TYPE_1,
+                vec![source_str, target_str],
+            );
+            return false;
+        }
+        let target_props = self.get_properties_of_type(target);
+        for target_prop in target_props {
+            let Some(source_prop) = self.get_property_of_type(source, &target_prop.name) else {
+                continue;
+            };
+            let source_type = self.substituted_member_type_of(source, &source_prop);
+            let target_type = self.substituted_member_type_of(target, &target_prop);
+            if !self.is_type_related_to(&source_type, &target_type, relation) {
+                self.relater_report_error(
+                    tsox_core::diagnostics::messages_generated::TYPES_OF_PROPERTY_0_ARE_INCOMPATIBLE,
+                    vec![self.chain_property_arg_name(&target_prop)],
+                );
+                return false;
+            }
+        }
+        if crate::checker::is_object_literal_type(source)
+            && source.object_flags.contains(crate::checker::types::ObjectFlags::FreshLiteral)
+            && !self.is_index_signatures_related_to(source, target, relation, false)
+        {
+            return false;
+        }
+        true
     }
 
     pub(crate) fn intersection_source_structurally_related(
@@ -151,6 +328,7 @@ impl Checker {
             return false;
         };
         let mut missing_props: Vec<String> = Vec::new();
+        let mut missing_prop_syms: Vec<Option<Arc<tsox_frontend::ast::Symbol>>> = Vec::new();
         for target_prop in &target_struct.properties {
             let found =
                 self.intersection_lookup_property(&ui.types, &target_prop.name, &mut Vec::new());
@@ -159,17 +337,12 @@ impl Checker {
                     continue;
                 }
                 missing_props.push(target_prop.name.clone());
+                missing_prop_syms.push(Some(Arc::clone(target_prop)));
                 continue;
             };
             let source_type = self.get_type_of_symbol(&source_prop);
             let target_type = self.substituted_member_type_of(target, target_prop);
             if !self.is_type_related_to(&source_type, &target_type, relation) {
-                let prop_source_str = self.type_to_string(&source_type);
-                let prop_target_str = self.type_to_string(&target_type);
-                self.relater_report_error(
-                    tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                    vec![prop_source_str, prop_target_str],
-                );
                 self.relater_report_error(
                     tsox_core::diagnostics::messages_generated::TYPES_OF_PROPERTY_0_ARE_INCOMPATIBLE,
                     vec![self.chain_property_arg_name(target_prop)],
@@ -181,19 +354,34 @@ impl Checker {
             if !self.should_report_unmatched_property_error(source, target) {
                 return false;
             }
-            let source_str = self.type_to_string(source);
-            let target_str = self.type_to_string(target);
+            let (source_str, target_str) = self.get_type_names_for_error_display(source, target);
             if missing_props.len() == 1 {
-                self.relater_report_error(
+                let display = crate::checker::property_name_for_display(&missing_props[0]);
+                self.relater_report_error_with_related(
                     tsox_core::diagnostics::messages_generated::
                         PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
-                    vec![missing_props[0].clone(), source_str, target_str],
+                    vec![display.clone(), source_str, target_str],
+                    missing_prop_syms[0].as_ref().and_then(|sym| {
+                        sym.declarations.first().map(|d| {
+                            crate::checker::relater_relation::ChainRelated {
+                                file: self.get_source_file_of_node(d),
+                                loc: d.loc,
+                                message: tsox_core::diagnostics::messages_generated::
+                                    X_0_IS_DECLARED_HERE,
+                                args: vec![display],
+                            }
+                        })
+                    }),
                 );
             } else if missing_props.len() <= 5 {
                 self.relater_report_error(
                     tsox_core::diagnostics::messages_generated::
                         TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
-                    vec![source_str, target_str, missing_props.join(", ")],
+                    vec![
+                        source_str,
+                        target_str,
+                        crate::checker::property_names_for_display(&missing_props),
+                    ],
                 );
             } else {
                 self.relater_report_error(
@@ -202,7 +390,7 @@ impl Checker {
                     vec![
                         source_str,
                         target_str,
-                        missing_props[..4].join(", "),
+                        crate::checker::property_names_for_display(&missing_props[..4]),
                         (missing_props.len() - 4).to_string(),
                     ],
                 );

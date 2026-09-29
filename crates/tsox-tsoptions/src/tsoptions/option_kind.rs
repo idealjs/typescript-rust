@@ -8,6 +8,7 @@ pub enum OptionKind {
     String,
     Number,
     List,
+    ListOrElement,
     Enum,
 }
 

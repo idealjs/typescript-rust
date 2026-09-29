@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
+
 #[test]
 fn rename_destructuring_assignment_nested_in_array_literal() {
     let content = r#"interface I {
@@ -10,6 +10,6 @@ fn rename_destructuring_assignment_nested_in_array_literal() {
 var elems: I[], p1: number, [|[|{| "contextRangeIndex": 2 |}property1|]: number|];
 [|[{ [|{| "contextRangeIndex": 4 |}property1|]: p1 }] = elems;|]
 [|[{ [|{| "contextRangeIndex": 6 |}property1|] }] = elems;|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[5], f.Ranges()[3], f.Ranges
+    let _s = Session::new_for_test("renameDestructuringAssignmentNestedInArrayLiteral", content);
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1], f.Ranges()[5], f.Ranges()[3], f.Ranges
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn get_declaration_diagnostics() {
     let content = r#"// @strict: false
@@ -15,7 +16,7 @@ namespace m {
 } /*1*/
 // @Filename: input2.ts
 var x = "hello world"; /*2*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("getDeclarationDiagnostics", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 1);
     fourslash::go_to_marker(&mut s, "2");

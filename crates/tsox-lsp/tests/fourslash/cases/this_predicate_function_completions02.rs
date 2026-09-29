@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn this_predicate_function_completions02() {
     let content = r#"interface Sundries {
@@ -33,8 +33,8 @@ if (crate.isSupplies()) {
         crate./*5*/;
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1", "3", "5"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("thisPredicateFunctionCompletions02", content);
+    // TODO: f.VerifyCompletions(t, []string{"1", "3", "5"}, &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, Some("2"), &["broken"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("4"), &["spoiled"]);
 }

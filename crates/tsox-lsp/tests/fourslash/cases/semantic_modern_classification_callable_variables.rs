@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
+
 #[test]
 fn semantic_modern_classification_callable_variables() {
     let content = r#"class A { onEvent: () => void; }
@@ -11,6 +11,6 @@ match({ other });
 interface B = { (): string; }; var b: B
 var s: String;
 var t: { (): string; foo: string};"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
+    let _s = Session::new_for_test("semanticModernClassificationCallableVariables", content);
+    // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

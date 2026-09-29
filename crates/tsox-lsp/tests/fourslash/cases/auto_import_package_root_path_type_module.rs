@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip()"]
+
+#[ignore = "go: t.Skip()"]
 #[test]
 fn auto_import_package_root_path_type_module() {
-    // TODO: t.Skip()
     let content = r#"// @allowJs: true
 // @Filename: /node_modules/pkg/package.json
 {
@@ -22,6 +22,6 @@ export function foo() {};
  }
 // @Filename: /index.ts
 foo/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"pkg"}, nil /*preferences*/)
+    let _s = Session::new_for_test("autoImportPackageRootPathTypeModule", content);
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"pkg"}, nil /*preferences*/)
 }

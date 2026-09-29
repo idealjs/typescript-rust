@@ -3,6 +3,73 @@
 use crate::checker::checker_calls::*;
 
 impl Checker {
+    /// Go resolveCallExpression（tagged template）：实参 = 模板 + 各 span 表达式，
+    /// 超出形参数报 TS2554，错误位取首个多余实参到末实参
+    /// 返回 true 表示已报元数错误（Go chooseOverload 在 hasCorrectArity
+    /// 失败后不进入实参适用性检查，调用方据此跳过解析）
+    pub(crate) fn check_tagged_template_arity(&mut self, node: &Arc<Node>) -> bool {
+        let tsox_frontend::ast::NodeData::TaggedTemplateExpression(data) = &node.data else {
+            return false;
+        };
+        let spans = match &data.template.data {
+            tsox_frontend::ast::NodeData::TemplateExpression(t) => &t.template_spans,
+            _ => return false,
+        };
+        let arg_count = 1 + spans.nodes.len();
+        let tag = Arc::clone(&data.tag);
+        let tag_type = self.get_type_of_node(&tag);
+        let Some(structured) = tag_type.as_structured() else {
+            return false;
+        };
+        let Some(sig) = structured.call_signatures().first().cloned() else {
+            return false;
+        };
+        let min_count = self.get_min_argument_count(&sig);
+        let max_count = self.get_parameter_count(&sig);
+        let has_rest = self.has_effective_rest_parameter(&sig);
+        if has_rest || arg_count <= max_count {
+            return false;
+        }
+        let parameter_range = if min_count >= max_count {
+            max_count.to_string()
+        } else {
+            format!("{min_count}-{max_count}")
+        };
+        let span_expr_loc = |idx: usize| -> Option<tsox_core::core::text::TextRange> {
+            spans.nodes.get(idx).and_then(|s| match &s.data {
+                tsox_frontend::ast::NodeData::TemplateSpan(sd) => Some(sd.expression.loc),
+                _ => None,
+            })
+        };
+        // Go getArgumentArityError：pos=首个多余实参（SkipTrivia 后），零宽时 end+1
+        let raw_start = span_expr_loc(max_count.saturating_sub(1))
+            .map(|l| l.pos())
+            .unwrap_or_else(|| node.loc.pos());
+        let end = spans
+            .nodes
+            .last()
+            .and_then(|s| match &s.data {
+                tsox_frontend::ast::NodeData::TemplateSpan(sd) => Some(sd.expression.loc.end()),
+                _ => None,
+            })
+            .unwrap_or_else(|| node.loc.end());
+        let end = if end == raw_start { end + 1 } else { end };
+        let start = self
+            .current_file
+            .as_ref()
+            .map(|f| skip_trivia_call_range(&f.text, raw_start))
+            .unwrap_or(raw_start);
+        let end = if end < start { start } else { end };
+        let file = self.current_file.clone();
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            file,
+            tsox_core::core::text::TextRange::new(start, end),
+            EXPECTED_0_ARGUMENTS_BUT_GOT_1,
+            vec![parameter_range, arg_count.to_string()],
+        ));
+        true
+    }
+
     pub(crate) fn report_get_accessor_call(&mut self, callee_expr: &Arc<Node>) -> bool {
         let tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) = &callee_expr.data else {
             return false;
@@ -67,6 +134,12 @@ impl Checker {
         let min_count = self.get_min_argument_count(sig);
         let max_count = self.get_parameter_count(sig);
         let has_rest = self.has_effective_rest_parameter(sig);
+        // Go getArgumentArityError：min<max 且无 rest 时参数计数展示为区间
+        let parameter_range = if has_rest || min_count >= max_count {
+            min_count.to_string()
+        } else {
+            format!("{min_count}-{max_count}")
+        };
 
         if !has_rest && arg_count > max_count {
             let file = self.current_file.clone();
@@ -75,7 +148,7 @@ impl Checker {
                 file,
                 loc,
                 EXPECTED_0_ARGUMENTS_BUT_GOT_1,
-                vec![min_count.to_string(), arg_count.to_string()],
+                vec![parameter_range, arg_count.to_string()],
             ));
             return false;
         }
@@ -92,16 +165,16 @@ impl Checker {
             } else {
                 callee_expr.loc
             };
-            let message = if has_rest {
-                EXPECTED_AT_LEAST_0_ARGUMENTS_BUT_GOT_1
+            let (message, count_arg) = if has_rest {
+                (EXPECTED_AT_LEAST_0_ARGUMENTS_BUT_GOT_1, min_count.to_string())
             } else {
-                EXPECTED_0_ARGUMENTS_BUT_GOT_1
+                (EXPECTED_0_ARGUMENTS_BUT_GOT_1, parameter_range)
             };
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                 file,
                 error_loc,
                 message,
-                vec![min_count.to_string(), arg_count.to_string()],
+                vec![count_arg, arg_count.to_string()],
             ));
             return false;
         }
@@ -139,6 +212,21 @@ impl Checker {
             return false;
         }
 
+        let explicit_types: Option<Vec<Arc<Type>>> = match &node.data {
+            tsox_frontend::ast::NodeData::CallExpression(d) => d
+                .type_arguments
+                .as_ref()
+                .map(|ta| ta.iter().map(|t| self.get_type_from_type_node(t)).collect()),
+            tsox_frontend::ast::NodeData::NewExpression(d) => d
+                .type_arguments
+                .as_ref()
+                .map(|ta| ta.iter().map(|t| self.get_type_from_type_node(t)).collect()),
+            _ => None,
+        };
+        let explicit_match = explicit_types.filter(|ex| ex.len() == sig.type_parameters.len());
+        if explicit_match.is_some() && self.explicit_type_args_violate_constraints(node, sig) {
+            return false;
+        }
         let inferred_types = if sig.type_parameters.is_empty() {
             Vec::new()
         } else {
@@ -185,10 +273,32 @@ impl Checker {
             if param_type.flags.contains(TypeFlags::Any) {
                 continue;
             }
-            let arg_type = self.get_type_of_node(arg);
-            if !self.is_type_assignable_to(&arg_type, &param_type) {
+            // Go chooseOverload 候选检查按上下文定型实参：上下文敏感函数
+            // 表达式以参数型为上下文重定型（返回位参与判定，`return "hello"`
+            // 否决 (value:T)=>IPromise<U> 过载），裸 get_type_of_node 会以
+            // any 放行全部过载
+            let arg_type = if self.is_context_sensitive(arg) {
+                self.type_of_context_sensitive_arg(arg, &param_type)
+            } else {
+                // Go isSignatureApplicable(checker.go:9446)：定型后签名对每个
+                // 非 CS 实参 checkExpressionWithContextualType(paramType, nil)
+                // 重检，元组/Iterable 等上下文在适用性判定现场成立
+                self.clear_node_type_cache_under(arg);
+                self.active_inferential_contextual = Some((arg.id(), Arc::clone(&param_type)));
+                let t = self.get_type_of_node(arg);
+                self.active_inferential_contextual = None;
+                t
+            };
+            let verdict = self.is_type_assignable_to(&arg_type, &param_type);
+            if !verdict {
                 return false;
             }
+        }
+        if self
+            .non_array_rest_spread_parts(node, sig, arguments, &inferred_types)
+            .is_some()
+        {
+            return false;
         }
         true
     }
@@ -199,26 +309,53 @@ impl Checker {
         signatures: &[Arc<Signature>],
         arguments: &Arc<NodeList>,
     ) -> usize {
+        self.find_matching_signature_opt(node, signatures, arguments)
+            .unwrap_or(0)
+    }
+
+    /// Some=命中重载；None=全部不可适用（Go resolveCall 失败态，供联合
+    /// 签名与最长候选兜底）
+    pub(crate) fn find_matching_signature_opt(
+        &mut self,
+        node: &Arc<Node>,
+        signatures: &[Arc<Signature>],
+        arguments: &Arc<NodeList>,
+    ) -> Option<usize> {
         self.speculation_depth += 1;
         let result = (|| {
             for (idx, sig) in signatures.iter().enumerate() {
-                if self.signature_accepts_arguments(node, sig, arguments) {
-                    return idx;
+                // Go chooseOverload 逐候选独立推测：relater_overflow 是深层
+                // 递归护栏的粘滞放行标志，外层关系一旦触发会让后续全部
+                // 候选被放行（首候选胜出）。逐候选隔离，检查自身溢出仍
+                // 保守放行（护栏语义不变），只不外泄、不内渗
+                let saved_overflow = self.relater_overflow;
+                self.relater_overflow = false;
+                let accepts = self.signature_accepts_arguments(node, sig, arguments);
+                self.relater_overflow |= saved_overflow;
+                if accepts {
+                    return Some(idx);
                 }
             }
 
-            let arg_count = arguments.len();
-            for (idx, sig) in signatures.iter().enumerate() {
-                let max_params = if sig.has_rest_parameter() {
-                    usize::MAX
-                } else {
-                    sig.parameters.len()
-                };
-                if arg_count <= max_params && arg_count >= sig.min_argument_count.max(0) as usize {
-                    return idx;
+            // Go pickLongestCandidateSignature 语义：元数兜底仅在单签名或含
+            // 泛型重载时启用；无泛型的多重载全败走联合签名（None）
+            let has_generic = signatures.iter().any(|s| !s.type_parameters.is_empty());
+            if signatures.len() == 1 || has_generic {
+                let arg_count = arguments.len();
+                for (idx, sig) in signatures.iter().enumerate() {
+                    let max_params = if sig.has_rest_parameter() {
+                        usize::MAX
+                    } else {
+                        sig.parameters.len()
+                    };
+                    if arg_count <= max_params
+                        && arg_count >= sig.min_argument_count.max(0) as usize
+                    {
+                        return Some(idx);
+                    }
                 }
             }
-            0
+            None
         })();
         self.speculation_depth -= 1;
         result
@@ -243,15 +380,49 @@ impl Checker {
         }
         let callee_type = self.get_type_of_node(callee_expr);
 
+        let mut callee_type = callee_type;
         if !is_new {
             let optional_call = matches!(
                 &node.data,
                 tsox_frontend::ast::NodeData::CallExpression(d) if d.question_dot_token.is_some()
             );
-            if !optional_call {
-                self.report_possibly_null_or_undefined(callee_expr, &callee_type, true);
+            if !optional_call
+                && self.report_possibly_null_or_undefined(callee_expr, &callee_type, true)
+            {
+                let non_nullable = self.remove_nullable_from_union(&callee_type);
+                if non_nullable
+                    .flags
+                    .intersects(TypeFlags::Null | TypeFlags::Undefined | TypeFlags::Never)
+                {
+                    return;
+                }
+                callee_type = non_nullable;
             }
         }
         self.check_call_arguments_against(node, &callee_type, &arguments, callee_expr, is_new);
     }
+}
+
+fn skip_trivia_call_range(text: &str, pos: usize) -> usize {
+    let bytes = text.as_bytes();
+    let mut i = pos.min(bytes.len());
+    while i < bytes.len() {
+        match bytes[i] {
+            b' ' | b'\t' | b'\x0b' | b'\x0c' | b'\r' | b'\n' => i += 1,
+            b'/' if i + 1 < bytes.len() && bytes[i + 1] == b'/' => {
+                while i < bytes.len() && bytes[i] != b'\n' {
+                    i += 1;
+                }
+            }
+            b'/' if i + 1 < bytes.len() && bytes[i + 1] == b'*' => {
+                i += 2;
+                while i + 1 < bytes.len() && !(bytes[i] == b'*' && bytes[i + 1] == b'/') {
+                    i += 1;
+                }
+                i = (i + 2).min(bytes.len());
+            }
+            _ => break,
+        }
+    }
+    i
 }

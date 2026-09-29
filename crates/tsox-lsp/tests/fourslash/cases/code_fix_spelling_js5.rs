@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn code_fix_spelling_js5() {
     let content = r#"// @allowjs: true
@@ -21,6 +22,6 @@ const atoc = setIntegral(() => console.log('ok'), 500)
 AudioBuffin // etc
 Jimmy
 Jon"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
+    let mut s = Session::new_for_test("codeFixSpellingJs5", content);
+    fourslash::verify_no_errors(&mut s, );
 }

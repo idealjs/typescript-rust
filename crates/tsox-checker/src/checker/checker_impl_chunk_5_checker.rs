@@ -2,6 +2,55 @@
 
 use crate::checker::checker_impl_chunk_5::*;
 
+fn intersection_properties(checker: &Checker, t: &Arc<Type>) -> Vec<Arc<Symbol>> {
+    let Some(members) = t.types() else {
+        return Vec::new();
+    };
+    let mut order: Vec<String> = Vec::new();
+    let mut by_name: std::collections::HashMap<String, Vec<Arc<Symbol>>> =
+        std::collections::HashMap::new();
+    for m in members {
+        for p in checker.get_properties_of_type(m) {
+            let entry = by_name.entry(p.name.clone()).or_default();
+            if entry.is_empty() {
+                order.push(p.name.clone());
+            }
+            if !entry.iter().any(|x| Arc::ptr_eq(x, &p)) {
+                entry.push(Arc::clone(&p));
+            }
+        }
+    }
+    order
+        .into_iter()
+        .filter_map(|name| {
+            let syms = by_name.get(&name)?;
+            match syms.len() {
+                1 => Some(Arc::clone(&syms[0])),
+                _ => Some(merged_intersection_property(syms)),
+            }
+        })
+        .collect()
+}
+
+fn merged_intersection_property(syms: &[Arc<Symbol>]) -> Arc<Symbol> {
+    let first = &syms[0];
+    let mut merged = Symbol::new(first.flags, first.name.clone());
+    merged.check_flags = first.check_flags;
+    merged.value_declaration = first.value_declaration.clone();
+    let mut seen: std::collections::HashSet<*const Node> = std::collections::HashSet::new();
+    for s in syms {
+        for d in &s.declarations {
+            if seen.insert(Arc::as_ptr(d)) {
+                merged.declarations.push(Arc::clone(d));
+            }
+        }
+    }
+    if let Some(parent) = first.parent() {
+        merged.set_parent(&parent);
+    }
+    Arc::new(merged)
+}
+
 impl Checker {
     pub fn get_string_type(&self) -> Arc<Type> {
         self.string_type()
@@ -51,7 +100,80 @@ impl Checker {
     }
 
     pub fn get_properties_of_type(&self, t: &Arc<Type>) -> Vec<Arc<Symbol>> {
+        let mut current = Arc::clone(t);
+        for _ in 0..16 {
+            let crate::checker::types::TypeData::TypeParameter(tp) = &current.data else {
+                break;
+            };
+            let Some(constraint) = tp.constraint.clone() else {
+                break;
+            };
+            if Arc::ptr_eq(&constraint, &current) {
+                return Vec::new();
+            }
+            current = constraint;
+        }
+        let t: &Arc<Type> = &current;
+        // Go getPropertiesOfUnionOrIntersectionType：联合=各成员共有属性
+        // （never 不参与，`never | {x}` 出 x）
+        if t.is_union()
+            && let Some(members) = t.types()
+        {
+            let relevant: Vec<&Arc<Type>> = members
+                .iter()
+                .filter(|m| !m.flags.contains(TypeFlags::Never))
+                .collect();
+            if relevant.is_empty() {
+                return Vec::new();
+            }
+            let mut props = self.get_properties_of_type(relevant[0]);
+            for m in &relevant[1..] {
+                if props.is_empty() {
+                    break;
+                }
+                let others = self.get_properties_of_type(m);
+                props.retain(|p| others.iter().any(|o| o.name == p.name));
+            }
+            return props;
+        }
+        // Go getPropertiesOfType → createUnionOrIntersectionProperty：交集
+        // 同名属性出现在多个成分时合成携带声明并集的符号（服务层按声明
+        // 判「自身以外声明」），单一成分原样返回；结果驻交集缓存
+        if t.is_intersection()
+            && let TypeData::Intersection(idata) = &t.data
+        {
+            return match idata.resolved_properties.get() {
+                Some(cached) => cached.clone(),
+                None => {
+                    let computed = intersection_properties(self, t);
+                    let _ = idata.resolved_properties.set(computed.clone());
+                    computed
+                }
+            };
+        }
         if let Some(structured) = t.as_structured() {
+            if !structured.properties.is_empty() && !t.object_flags.contains(ObjectFlags::Reference) {
+                return structured.properties.clone();
+            }
+            // 空壳再水化：递归接口构建窗口内嵌出的 shell 无成员，经符号的
+            // 完整声明型回取（Go deferred 引用的查询期等价）；引用型
+            //（attach 快照）成员少于声明型时同样回取——填充窗口内的
+            // 中途快照成员残缺
+            if let Some(sym) = &t.symbol
+                && sym.flags.intersects(
+                    SymbolFlags::Interface | SymbolFlags::Class | SymbolFlags::TypeLiteral,
+                )
+                && let Some(declared) = self
+                    .type_alias_links
+                    .get(sym)
+                    .and_then(|l| l.declared_type.clone())
+                && !Arc::ptr_eq(&declared, t)
+                && !crate::checker::utilities::is_type_error(&declared)
+                && let Some(ds) = declared.as_structured()
+                && ds.properties.len() > structured.properties.len()
+            {
+                return ds.properties.clone();
+            }
             return structured.properties.clone();
         }
         Vec::new()
@@ -62,6 +184,21 @@ impl Checker {
         t: &Arc<Type>,
         kind: SignatureKind,
     ) -> Vec<Arc<Signature>> {
+        if let crate::checker::types::TypeData::TypeParameter(tp) = &t.data
+            && let Some(constraint) = &tp.constraint
+        {
+            return self.get_signatures_of_type(constraint, kind);
+        }
+        // Go resolveStructuredTypeMembers：交集的签名 = 各成分签名拼接
+        if t.is_intersection()
+            && let Some(types) = t.types()
+        {
+            let mut all = Vec::new();
+            for m in types {
+                all.extend(self.get_signatures_of_type(m, kind));
+            }
+            return all;
+        }
         if let Some(structured) = t.as_structured() {
             return match kind {
                 SignatureKind::Call => structured.call_signatures().to_vec(),
@@ -99,7 +236,13 @@ impl Checker {
     }
 
     pub fn is_array_type(&self, t: &Arc<Type>) -> bool {
-        t.flags.contains(TypeFlags::Object) && t.object_flags.contains(ObjectFlags::Reference)
+        t.flags.contains(TypeFlags::Object)
+            && t.object_flags.contains(ObjectFlags::Reference)
+            && self
+                .globals
+                .get("Array")
+                .zip(t.symbol.as_ref())
+                .is_some_and(|(array_sym, sym)| Arc::ptr_eq(array_sym, sym))
     }
 
     pub fn is_tuple_type(&self, t: &Arc<Type>) -> bool {
@@ -110,7 +253,7 @@ impl Checker {
         if t.flags.contains(TypeFlags::EnumLiteral) {
             if let Some(sym) = &t.symbol
                 && sym.flags.contains(SymbolFlags::EnumMember)
-                && let Some(parent) = &sym.parent
+                && let Some(parent) = &sym.parent()
                 && let Some(cached) = self
                     .type_alias_links
                     .get(parent)
@@ -177,7 +320,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn get_widened_type(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_widened_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
         if t.flags.intersects(TYPE_FLAGS_NULLABLE)
             && t.object_flags
                 .intersects(crate::checker::types::OBJECT_FLAGS_REQUIRES_WIDENING)
@@ -196,8 +339,19 @@ impl Checker {
             return Arc::clone(t);
         }
 
-        if t.flags.contains(TypeFlags::UniqueESSymbol) {
-            return self.es_symbol_type();
+        // Go getWidenedTypeWithContext：对象字面量含 fresh literal / nullable 属性时逐属性 widen
+        // （如作为函数返回类型的 { myProp: "test" } → { myProp: string }）
+        if t.flags.contains(TypeFlags::Object)
+            && t.object_flags.contains(ObjectFlags::ObjectLiteral)
+        {
+            if let Some(widened) = self.widen_object_literal_properties(t) {
+                return widened;
+            }
+            if t.object_flags.contains(ObjectFlags::FreshLiteral) {
+                if let Some(regular) = self.regular_object_literal_type(t) {
+                    return regular;
+                }
+            }
         }
 
         if let TypeData::Union(union_data) = &t.data {
@@ -218,7 +372,223 @@ impl Checker {
 
             return self.build_union_from_types(widened);
         }
+
+        // Go getWidenedTypeWithContext：数组/元组逐类型实参 widen（"s"[] → string[]）
+        if t.object_flags.contains(ObjectFlags::Reference)
+            && let Some(obj) = t.as_object()
+            && !obj.type_arguments.is_empty()
+        {
+            let widened: Vec<Arc<Type>> = obj
+                .type_arguments
+                .iter()
+                .map(|a| self.get_widened_type(a))
+                .collect();
+            let unchanged = widened
+                .iter()
+                .zip(obj.type_arguments.iter())
+                .all(|(w, o)| Arc::ptr_eq(w, o));
+            if !unchanged {
+                return crate::checker::checker_attach_explicit_type_arguments::attach_explicit_type_arguments(t, widened);
+            }
+        }
         Arc::clone(t)
+    }
+
+    // 逐属性 widen 对象字面量；无可 widen 属性时返回 None（保持原类型）
+    pub(crate) fn widen_object_literal_properties(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        let obj = match &t.data {
+            TypeData::Object(o) => o,
+            _ => return None,
+        };
+        let needs_widen = |ty: &Arc<Type>| {
+            crate::checker::is_fresh_literal_type(ty)
+                || ty.flags.intersects(
+                    TypeFlags::Null | TypeFlags::Undefined | crate::checker::types::TYPE_FLAGS_NULLABLE,
+                )
+        };
+        let mut changed = false;
+        let mut members = SymbolTable::new();
+        let mut props: Vec<Arc<Symbol>> = Vec::with_capacity(obj.structured.properties.len());
+        for prop in &obj.structured.properties {
+            let old_type = match self.value_symbol_links.get(prop).and_then(|l| l.resolved_type.clone()) {
+                Some(ty) => ty,
+                None => {
+                    members.insert(prop.name.clone(), Arc::clone(prop));
+                    props.push(Arc::clone(prop));
+                    continue;
+                }
+            };
+            let new_type = match &old_type.data {
+                TypeData::Union(u) => {
+                    let parts: Vec<Arc<Type>> = u
+                        .union_or_intersection
+                        .types
+                        .iter()
+                        .map(|c| {
+                            if needs_widen(c) {
+                                if c.flags.intersects(TYPE_FLAGS_NULLABLE)
+                                    && !crate::checker::is_fresh_literal_type(c)
+                                {
+                                    self.get_any_type()
+                                } else {
+                                    self.get_widened_type(c)
+                                }
+                            } else {
+                                Arc::clone(c)
+                            }
+                        })
+                        .collect();
+                    let u2 = self.build_union_from_types(parts);
+                    if self.type_to_string(&u2) != self.type_to_string(&old_type) {
+                        changed = true;
+                    }
+                    u2
+                }
+                _ if needs_widen(&old_type) => {
+                    changed = true;
+                    if old_type.flags.intersects(TYPE_FLAGS_NULLABLE)
+                        && !crate::checker::is_fresh_literal_type(&old_type)
+                    {
+                        self.get_any_type()
+                    } else {
+                        self.get_widened_type(&old_type)
+                    }
+                }
+                _ => Arc::clone(&old_type),
+            };
+            let new_prop = Arc::new(Symbol::new(prop.flags, prop.name.clone()));
+            {
+                let np = Arc::as_ptr(&new_prop) as *mut Symbol;
+                unsafe {
+                    (*np).check_flags = prop.check_flags;
+                    (*np).declarations = prop.declarations.clone();
+                    (*np).value_declaration = prop.value_declaration.clone();
+                }
+            }
+            self.value_symbol_links.insert(
+                &new_prop,
+                crate::checker::types::ValueSymbolLinks {
+                    resolved_type: Some(new_type),
+                    ..Default::default()
+                },
+            );
+            members.insert(new_prop.name.clone(), Arc::clone(&new_prop));
+            props.push(new_prop);
+        }
+        if !changed {
+            return None;
+        }
+        Some(Arc::new(Type {
+            flags: t.flags,
+            object_flags: crate::checker::types::regular_literal_object_flags(t.object_flags),
+            id: crate::checker::types::next_type_id(),
+            symbol: t.symbol.clone(),
+            alias: None,
+            data: TypeData::Object(ObjectTypeData { node: None,
+                structured: StructuredTypeData {
+                    members,
+                    properties: props,
+                    index_infos: obj.structured.index_infos.clone(),
+                    ..Default::default()
+                },
+                target: None,
+                mapper: None,
+                type_arguments: Vec::new(),
+            }),
+        }))
+    }
+
+    pub(crate) fn regular_object_literal_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        let obj = match &t.data {
+            TypeData::Object(o) => o,
+            _ => return None,
+        };
+        let mut members = SymbolTable::new();
+        for prop in &obj.structured.properties {
+            members.insert(prop.name.clone(), Arc::clone(prop));
+        }
+        Some(Arc::new(Type {
+            flags: t.flags,
+            object_flags: crate::checker::types::regular_literal_object_flags(t.object_flags),
+            id: crate::checker::types::next_type_id(),
+            symbol: t.symbol.clone(),
+            alias: None,
+            data: TypeData::Object(ObjectTypeData { node: None,
+                structured: StructuredTypeData {
+                    members,
+                    properties: obj.structured.properties.clone(),
+                    index_infos: obj.structured.index_infos.clone(),
+                    ..Default::default()
+                },
+                target: None,
+                mapper: None,
+                type_arguments: Vec::new(),
+            }),
+        }))
+    }
+
+    pub fn get_regular_type_of_object_literal(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        if !(crate::checker::is_object_literal_type(t)
+            && t.object_flags.contains(ObjectFlags::FreshLiteral))
+        {
+            return Arc::clone(t);
+        }
+        let key = crate::checker::types_cached_type_kind::CachedTypeKey {
+            kind: crate::checker::types_cached_type_kind::CachedTypeKind::RegularObjectLiteral,
+            type_id: t.id,
+        };
+        if let Some(cached) = self.cached_types.get(&key) {
+            return Arc::clone(cached);
+        }
+        let obj = match &t.data {
+            TypeData::Object(o) => o.clone(),
+            _ => return Arc::clone(t),
+        };
+        let mut members = SymbolTable::new();
+        let mut props: Vec<Arc<Symbol>> = Vec::with_capacity(obj.structured.properties.len());
+        for prop in &obj.structured.properties {
+            let original = self.get_type_of_symbol(prop);
+            let updated = self.get_regular_type_of_object_literal(&original);
+            if Arc::ptr_eq(&original, &updated) {
+                members.insert(prop.name.clone(), Arc::clone(prop));
+                props.push(Arc::clone(prop));
+                continue;
+            }
+            let mut new_sym = Symbol::new(prop.flags, prop.name.clone());
+            new_sym.declarations = prop.declarations.clone();
+            new_sym.value_declaration = prop.value_declaration.clone();
+            new_sym.check_flags = prop.check_flags;
+            let new_sym = Arc::new(new_sym);
+            self.value_symbol_links.insert(
+                &new_sym,
+                ValueSymbolLinks {
+                    resolved_type: Some(updated),
+                    ..Default::default()
+                },
+            );
+            members.insert(new_sym.name.clone(), Arc::clone(&new_sym));
+            props.push(new_sym);
+        }
+        let regular = Arc::new(Type {
+            flags: t.flags,
+            object_flags: ObjectFlags::Anonymous | (t.object_flags - ObjectFlags::FreshLiteral),
+            id: crate::checker::types::next_type_id(),
+            symbol: t.symbol.clone(),
+            alias: None,
+            data: TypeData::Object(ObjectTypeData { node: None,
+                structured: StructuredTypeData {
+                    members,
+                    properties: props,
+                    index_infos: obj.structured.index_infos.clone(),
+                    ..Default::default()
+                },
+                target: None,
+                mapper: None,
+                type_arguments: Vec::new(),
+            }),
+        });
+        self.cached_types.insert(key, Arc::clone(&regular));
+        regular
     }
 
     pub fn widen_initializer_type(&mut self, t: &Arc<Type>) -> Arc<Type> {

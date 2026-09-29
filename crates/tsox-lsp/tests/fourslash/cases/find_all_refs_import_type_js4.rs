@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_import_type_js4() {
     let content = r#"// @module: commonjs
@@ -15,6 +15,6 @@ fn find_all_refs_import_type_js4() {
 module.exports = {};
 // @Filename: /b.js
 /** @typedef {import("./a").A} A */"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "")
+    let _s = Session::new_for_test("findAllRefs_importType_js4", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "")
 }

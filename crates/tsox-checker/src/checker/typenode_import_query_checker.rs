@@ -12,43 +12,185 @@ impl Checker {
         result
     }
 
+    fn module_specifier_of_external_ref(&self, module_reference: &Arc<Node>) -> Option<String> {
+        let tsox_frontend::ast::NodeData::ExternalModuleReference(emr) = &module_reference.data
+        else {
+            return None;
+        };
+        let tsox_frontend::ast::NodeData::StringLiteral(s) = &emr.expression.data else {
+            return None;
+        };
+        Some(s.text.trim_matches(['"', '\'', '`']).to_string())
+    }
+
+    fn resolve_module_file_symbol_relative(&self, spec: &str) -> Option<Arc<Symbol>> {
+        // Go moduleSpecifierIsRelative：目录级文件解析只对相对说明符，
+        // 裸说明符仅走 ambient/node_modules（否则同目录文件按基名误命中）
+        if !(spec.starts_with("./") || spec.starts_with("../")) {
+            return None;
+        }
+        let file = self.display_enclosing_file.clone().or_else(|| self.current_file.clone())?;
+        let dir = match file.file_name.rfind('/') {
+            Some(i) => file.file_name[..i].to_string(),
+            None => String::new(),
+        };
+        self.resolve_module_file_symbol_in(&dir, spec)
+    }
+
     pub(crate) fn resolve_import_alias_target_symbol(
         &mut self,
         alias: &Arc<Symbol>,
     ) -> Option<Arc<Symbol>> {
-        let (member_name, import_decl): (String, Arc<Node>) = {
+        // import X = require("./m") 形式：目标 = 模块的 export= 符号
+        if let Some(decl) = alias
+            .declarations
+            .iter()
+            .find(|d| matches!(d.data, NodeData::ImportEqualsDeclaration(_)))
+        {
+            if let tsox_frontend::ast::NodeData::ImportEqualsDeclaration(data) = &decl.data {
+                let spec = self.module_specifier_of_external_ref(&data.module_reference)?;
+                let spec_loc = match &data.module_reference.data {
+                    NodeData::ExternalModuleReference(ext) => ext.expression.loc,
+                    _ => data.module_reference.loc,
+                };
+                let decl_file = self
+                    .get_source_file_of_node(decl)
+                    .or_else(|| self.current_file.clone());
+                let module_sym = match if spec.starts_with("./") || spec.starts_with("../") {
+                    match decl_file.as_ref() {
+                        Some(f) => {
+                            let dir = match f.file_name.rfind('/') {
+                                Some(i) => f.file_name[..i].to_string(),
+                                None => String::new(),
+                            };
+                            self.resolve_module_file_symbol_in(&dir, &spec)
+                        }
+                        None => self.resolve_module_file_symbol_relative(&spec),
+                    }
+                } else {
+                    self.resolve_module_file_symbol(&spec)
+                } {
+                    Some(sym) => {
+                        // Go resolveExternalModule：目标文件无模块指示（脚本）
+                        // 报 TS2306，参数为解析后文件名
+                        let not_module_file = self
+                            .program
+                            .source_files()
+                            .iter()
+                            .find(|f| {
+                                f.external_module_indicator.is_none()
+                                    && f.common_js_module_indicator.is_none()
+                                    && sym
+                                        .declarations
+                                        .iter()
+                                        .any(|d| Arc::ptr_eq(d, &f.node))
+                            })
+                            .map(|f| f.file_name.clone());
+                        if let Some(file_name) = not_module_file
+                            && !self
+                                .diagnostics
+                                .get_all()
+                                .iter()
+                                .any(|d| d.code == 2306 && d.loc == spec_loc)
+                        {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                decl_file.clone(),
+                                spec_loc,
+                                tsox_core::diagnostics::messages_generated::FILE_0_IS_NOT_A_MODULE,
+                                vec![file_name],
+                            ));
+                        }
+                        sym
+                    }
+                    None => {
+                        // Go resolveExternalModuleName：import= require 别名
+                        // 解析失败在说明符处报模块解析错误（2307 系）
+                        let trimmed = spec.trim_matches(['"', '\'', '`']).to_string();
+                        let (message, args) =
+                            tsox_frontend::parser::cannot_resolve_module_error(
+                                &self.compiler_options,
+                                &trimmed,
+                            );
+                        let disk_resolved = decl_file.as_ref().and_then(|f| {
+                            self.program.resolve_external_module_path(
+                                &trimmed,
+                                &f.file_name,
+                                tsox_core::core::compiler_options::ModuleKind::None,
+                            )
+                        });
+                        if disk_resolved.is_none()
+                            && !self.diagnostics.get_all().iter().any(|d| {
+                                d.code == message.code && d.loc == spec_loc
+                            })
+                        {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                decl_file.clone(),
+                                spec_loc,
+                                message.clone(),
+                                args,
+                            ));
+                        }
+                        return None;
+                    }
+                };
+                return self.resolve_import_alias_target_of_module(&module_sym);
+            }
+        }
+        let (member_name, import_decl): (Option<String>, Arc<Node>) = {
             let decl = alias
                 .declarations
                 .iter()
                 .find(|d| {
                     matches!(
                         d.kind,
-                        SyntaxKind::ImportClause | SyntaxKind::ImportSpecifier
+                        SyntaxKind::ImportClause
+                            | SyntaxKind::ImportSpecifier
+                            | SyntaxKind::NamespaceImport
                     )
                 })?
                 .clone();
             match &decl.data {
-                NodeData::ImportClause(_) => ("default".to_string(), decl),
+                NodeData::ImportClause(_) => (Some("default".to_string()), decl),
                 NodeData::ImportSpecifier(d) => (
-                    d.property_name
-                        .as_ref()
-                        .map_or_else(|| d.name.text().to_string(), |p| p.text().to_string()),
+                    Some(
+                        d.property_name
+                            .as_ref()
+                            .map_or_else(|| d.name.text().to_string(), |p| p.text().to_string()),
+                    ),
                     decl,
                 ),
+                // import * as N：目标 = 模块符号整体（无成员名）
+                NodeData::NamespaceImport(_) => (None, decl),
                 _ => return None,
             }
         };
-        let mut import_decl = import_decl.parent.as_ref()?;
+        let mut import_decl = import_decl.parent()?;
         while !matches!(import_decl.data, NodeData::ImportDeclaration(_)) {
-            import_decl = import_decl.parent.as_ref()?;
+            import_decl = import_decl.parent()?;
         }
-        let module_spec = match &import_decl.data {
-            NodeData::ImportDeclaration(d) => d.module_specifier.text().to_string(),
+        let module_spec_node = match &import_decl.data {
+            NodeData::ImportDeclaration(d) => Arc::clone(&d.module_specifier),
             _ => return None,
         };
-        let module_sym = self.resolve_module_file_symbol(&module_spec).or_else(|| {
+        let module_spec = module_spec_node.text().to_string();
+        let decl_file = self
+            .get_source_file_of_node(&import_decl)
+            .or_else(|| self.current_file.clone());
+        let module_sym = if module_spec.starts_with("./") || module_spec.starts_with("../") {
+            let dir = decl_file.as_ref().map(|f| match f.file_name.rfind('/') {
+                Some(i) => f.file_name[..i].to_string(),
+                None => String::new(),
+            });
+            match dir {
+                Some(dir) => self.resolve_module_file_symbol_in(&dir, &module_spec),
+                None => self.resolve_module_file_symbol(&module_spec),
+            }
+        } else {
+            self.resolve_module_file_symbol(&module_spec)
+        }
+        .or_else(|| {
             let trimmed = module_spec.trim_matches(['"', '\'', '`']).to_string();
-            let cur = self.current_file.clone()?;
+            let cur = decl_file.clone()?;
             let path = self.program.resolve_external_module_path(
                 &trimmed,
                 &cur.file_name,
@@ -56,7 +198,50 @@ impl Checker {
             )?;
             let sf = self.program.get_source_file(&path)?;
             self.program.symbol_map().symbol_of(&sf.node).cloned()
-        })?;
+        });
+        let module_sym = match module_sym {
+            Some(sym) => sym,
+            // Go getTargetOfNamespaceImport → resolveExternalModuleName：
+            // 模块解析失败在说明符处报 2307 系
+            None => {
+                let trimmed = module_spec.trim_matches(['"', '\'', '`']).to_string();
+                let (message, args) =
+                    tsox_frontend::parser::cannot_resolve_module_error(&self.compiler_options, &trimmed);
+                let disk_resolved = decl_file.as_ref().and_then(|f| {
+                    self.program.resolve_external_module_path(
+                        &trimmed,
+                        &f.file_name,
+                        tsox_core::core::compiler_options::ModuleKind::None,
+                    )
+                });
+                let pattern_ambient = tsox_frontend::ast::pattern_ambient_module_with_attributes_exists(
+                    self.program.source_files(),
+                    &trimmed,
+                    tsox_frontend::ast::import_attributes_of_declaration(&import_decl).as_ref(),
+                );
+                if disk_resolved.is_none()
+                    && !pattern_ambient
+                    && !self
+                        .diagnostics
+                        .get_all()
+                        .iter()
+                        .any(|d| d.code == message.code && d.loc == module_spec_node.loc)
+                {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        decl_file.clone(),
+                        module_spec_node.loc,
+                        message.clone(),
+                        args,
+                    ));
+                }
+                return None;
+            }
+        };
+        // import * as N：别名目标即模块符号
+        if member_name.is_none() {
+            return Some(module_sym);
+        }
+        let member_name = member_name.unwrap_or_default();
         let resolved = self
             .resolve_module_member_symbol(&module_sym, &member_name, 8)
             .or_else(|| self.file_module_exported_member(&module_sym, &member_name));
@@ -76,31 +261,11 @@ impl Checker {
                         break;
                     }
 
-                    let next = cur
-                        .declarations
-                        .iter()
-                        .find(|d| d.kind == SyntaxKind::ExportAssignment)
-                        .and_then(|d| match &d.data {
-                            NodeData::ExportAssignment(ea)
-                                if matches!(
-                                    ea.expression.kind,
-                                    SyntaxKind::Identifier | SyntaxKind::QualifiedName
-                                ) =>
-                            {
-                                Some(ea.expression.text().to_string())
-                            }
-                            _ => None,
-                        })
-                        .and_then(|n| {
-                            module_sym
-                                .members
-                                .get(&n)
-                                .cloned()
-                                .or_else(|| module_sym.exports.get(&n).cloned())
-                        });
-                    match next {
-                        Some(n) => cur = n,
-                        None => break,
+                    // Go getTargetOfAliasDeclaration（ExportAssignment 臂）：
+                    // 实体名在模块作用域解析（含 file locals），非仅 members/exports
+                    match self.resolve_export_assignment_target(&cur) {
+                        Some(n) if !Arc::ptr_eq(&n, &cur) => cur = n,
+                        _ => break,
                     }
                 }
                 let has_type_meaning = cur.flags.intersects(
@@ -110,10 +275,42 @@ impl Checker {
                         | tsox_frontend::ast::SymbolFlags::ENUM
                         | tsox_frontend::ast::SymbolFlags::TypeParameter,
                 );
-                if has_type_meaning { Some(cur) } else { Some(t) }
+                // Go getTargetOfAliasDeclaration（ExportAssignment 臂）：目标实体
+                // 直接返回（含值意义符号），别名本身不再回落
+                if has_type_meaning || cur.flags.intersects(tsox_frontend::ast::SymbolFlags::VALUE)
+                {
+                    Some(cur)
+                } else {
+                    Some(t)
+                }
             }
             other => other,
         };
+        // Go resolveAlias 全链语义：`export { A }` 再导出的 import 别名是
+        // 中间纯 alias，继续递归跟到最终非 alias 目标（环由跳数上限截断）
+        let mut resolved = resolved;
+        for _ in 0..4 {
+            let Some(t) = resolved.clone() else { break };
+            // Go resolveAlias：Alias 位仍在即继续（import 别名与 const 合并的
+            // 双意义符号也须跟到 import 目标定类型意义）
+            if !t.flags.contains(tsox_frontend::ast::SymbolFlags::Alias)
+                || Arc::ptr_eq(&t, alias)
+                || !t.declarations.iter().any(|d| {
+                    matches!(
+                        d.kind,
+                        SyntaxKind::ImportClause
+                            | SyntaxKind::ImportSpecifier
+                            | SyntaxKind::NamespaceImport
+                    )
+                })
+            {
+                break;
+            }
+            match self.resolve_import_alias_target_symbol(&t) {
+                Some(next) if !Arc::ptr_eq(&next, &t) => resolved = Some(next),
+                _ => break,
+            }
+        }
         resolved
     }
 
@@ -176,5 +373,57 @@ impl Checker {
             false
         });
         found
+    }
+}
+
+impl Checker {
+    /// Go resolveExternalModuleSymbol：模块带 export= 时目标为导出实体
+    ///（export=X 的 X 符号），否则为模块符号本身
+    pub(crate) fn resolve_import_alias_target_of_module(
+        &mut self,
+        module_sym: &Arc<Symbol>,
+    ) -> Option<Arc<Symbol>> {
+        let export_equals = module_sym
+            .exports
+            .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
+            .cloned();
+        if let Some(ee) = export_equals {
+            if let Some(d) = ee
+                .declarations
+                .iter()
+                .find(|d| matches!(d.data, NodeData::ExportAssignment(_)))
+                && let NodeData::ExportAssignment(ea) = &d.data
+            {
+                if matches!(
+                    ea.expression.kind,
+                    SyntaxKind::Identifier
+                        | SyntaxKind::QualifiedName
+                        | SyntaxKind::PropertyAccessExpression
+                ) && let Some(sf) = d.parent()
+                {
+                    // export = Foo.Member：限定名/属性访问在所在文件作用域解析
+                    self.push_scope(&sf);
+                    let target = self.resolve_qualified_symbol(&ea.expression);
+                    self.pop_scope();
+                    if let Some(target) = target {
+                        return Some(target);
+                    }
+                }
+                let expr_name = ea.expression.text().to_string();
+                let sym_map = self.program.symbol_map();
+                let file_locals = d
+                    .parent()
+                    .as_ref()
+                    .and_then(|sf| sym_map.locals.get(&sf.id()));
+                if let Some(cs) = file_locals.and_then(|l| l.get(&expr_name).cloned()) {
+                    return Some(cs);
+                }
+                if let Some(cs) = module_sym.members.get(&expr_name).cloned() {
+                    return Some(cs);
+                }
+            }
+            return Some(ee);
+        }
+        Some(Arc::clone(module_sym))
     }
 }

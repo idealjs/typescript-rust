@@ -1,0 +1,11 @@
+// 迁移批次模块接线(r 轮生成,构建修复阶段维护)
+pub mod context;
+pub mod m3j;
+pub mod m3j_2;
+pub mod m3j_3;
+pub mod m3k;
+pub mod w12;
+pub mod w9a;
+pub mod x11a;
+pub mod x12;
+pub mod x8core;

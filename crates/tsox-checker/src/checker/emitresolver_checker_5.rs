@@ -78,10 +78,6 @@ impl Checker {
         }
     }
 
-    pub fn get_effective_declaration_flags(&self, node: &Arc<Node>) -> u32 {
-        node.syntactic_modifier_flags().bits()
-    }
-
     pub fn get_symbol_of_declaration(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
         self.program.symbol_map().symbol_of(node).cloned()
     }

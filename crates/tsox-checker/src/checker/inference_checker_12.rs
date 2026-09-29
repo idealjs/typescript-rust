@@ -8,6 +8,17 @@ impl Checker {
         call_node: &Arc<tsox_frontend::ast::Node>,
         arg_node: &Arc<tsox_frontend::ast::Node>,
     ) -> Option<Arc<Type>> {
+        self.get_contextual_type_for_argument_ex(call_node, arg_node, ContextFlags::None)
+    }
+
+    // Go runWithInferenceBlockedFromSourceNode：IgnoreNodeInferences 把当前节点
+    // （到包含调用为止）从推断源剔除，completionsType 回落到未代入的参数型
+    pub(crate) fn get_contextual_type_for_argument_ex(
+        &mut self,
+        call_node: &Arc<tsox_frontend::ast::Node>,
+        arg_node: &Arc<tsox_frontend::ast::Node>,
+        context_flags: ContextFlags,
+    ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
 
         let args = match &call_node.data {
@@ -16,7 +27,9 @@ impl Checker {
             _ => None,
         }?;
 
+
         let arg_index = args.iter().position(|a| Arc::ptr_eq(a, arg_node))?;
+
 
         let is_new = matches!(&call_node.data, NodeData::NewExpression(_));
         let expression_type = match &call_node.data {
@@ -29,44 +42,121 @@ impl Checker {
         } else {
             SignatureKind::Call
         };
-        let signatures = self.get_signatures_of_type(&expression_type, kind);
+        // Go getUnionSignatures 的上下文取用近似：联合 callee 的调用签名取
+        // 首个含签名的成分（成分序即声明序，RegExpMatchArray | [] 的 map 取前者）
+        let signatures = if expression_type.is_union() {
+            let mut sigs: Vec<Arc<Signature>> = Vec::new();
+            if let Some(constituents) = expression_type.types().map(|ts| ts.to_vec()) {
+                for c in constituents {
+                    if c.flags.intersects(TypeFlags::Undefined | TypeFlags::Null) {
+                        continue;
+                    }
+                    sigs = self.get_signatures_of_type(&c, kind);
+                    if !sigs.is_empty() {
+                        break;
+                    }
+                }
+            }
+            sigs
+        } else {
+            self.get_signatures_of_type(&expression_type, kind)
+        };
 
-        let sig = signatures
-            .iter()
-            .find(|s| s.parameters.len() > arg_index)
-            .or_else(|| signatures.first())?
-            .clone();
+        // 全重载不可适用时用联合签名（参数位=各重载并集，Go
+        // getCandidateForOverloadFailure → createUnionOfSignaturesForOverloadFailure）；
+        // 重载判定会回查实参类型（自递归，见 resolving_contextual_calls）
+        let resolved: Option<Arc<Signature>> = {
+            let key = call_node.id();
+            if self.resolving_contextual_calls.insert(key) {
+                let found = self.find_matching_signature_opt(call_node, &signatures, args);
+                let combined = match found {
+                    Some(idx) => Some(Arc::clone(&signatures[idx])),
+                    None => self.candidate_for_overload_failure(call_node, &signatures, args),
+                };
+                self.resolving_contextual_calls.remove(&key);
+                combined
+            } else {
+                None
+            }
+        };
+        let sig = match resolved {
+            Some(s) => s,
+            None => signatures
+                .iter()
+                .find(|s| s.parameters.len() > arg_index)
+                .or_else(|| signatures.first())?
+                .clone(),
+        };
 
-        if arg_index >= sig.parameters.len() {
+        if arg_index >= sig.parameters.len() && !sig.has_rest_parameter() {
             return None;
         }
 
-        let base_param_type = self
-            .signature_instantiated_param_type(&sig, arg_index)
-            .unwrap_or_else(|| self.get_type_of_symbol(&sig.parameters[arg_index]));
+        // Go getContextualTypeForArgumentAtIndex：rest 实参位的上下文型是
+        // rest 参数型[argIndex-restIndex] 索引访问;泛型调用须先代入推断
+        // 实参再取索引(未代入的延迟别名/条件型上取元素型会塌成 any)
+        let rest_raw: Option<Arc<Type>> = if sig.has_rest_parameter() && arg_index >= sig.parameters.len() - 1 {
+            sig.parameters.last().map(|p| self.get_type_of_symbol(p))
+        } else {
+            None
+        };
 
+        let base_param_type = self
+            .try_get_type_at_position(&sig, arg_index)
+            .or_else(|| {
+                // rest 位（含联合签名的合成 rest 数组）给元素类型
+                if sig.has_rest_parameter() && arg_index >= sig.parameters.len() - 1 {
+                    let rest = self.get_type_of_symbol(sig.parameters.last()?);
+                    Some(self.get_array_element_type_of(&rest).unwrap_or(rest))
+                } else {
+                    None
+                }
+            })
+            .or_else(|| {
+                sig.parameters
+                    .get(arg_index)
+                    .map(|p| self.get_type_of_symbol(p))
+            })
+            .unwrap_or_else(|| self.any_type());
         if !sig.type_parameters.is_empty() {
             let key = call_node.id();
             if self.resolving_contextual_calls.insert(key) {
+                let ignore_node = context_flags
+                    .contains(ContextFlags::IgnoreNodeInferences);
+                // 调用位显式类型实参优先（Go inferSignature：显式实参直接
+                // 固定映射，不从实参推断；错误实参落 error 型）
+                let explicit: Option<Vec<Arc<Type>>> = match &call_node.data {
+                    NodeData::CallExpression(d) => d.type_arguments.as_ref().map(|ta| {
+                        ta.iter().map(|t| self.get_type_from_type_node(t)).collect()
+                    }),
+                    NodeData::NewExpression(d) => d.type_arguments.as_ref().map(|ta| {
+                        ta.iter().map(|t| self.get_type_from_type_node(t)).collect()
+                    }),
+                    _ => None,
+                };
                 let sibling_args: Vec<Arc<tsox_frontend::ast::Node>> = args
                     .iter()
                     .enumerate()
-                    .filter(|(_, a)| {
-                        !matches!(
-                            a.kind,
-                            SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression
-                        )
-                    })
+                    .filter(|(_, a)| !(ignore_node && Arc::ptr_eq(a, arg_node)))
                     .map(|(_, a)| Arc::clone(a))
                     .collect();
-                let inferred = self.infer_call_type_arguments(call_node, &sig, &sibling_args);
-                self.resolving_contextual_calls.remove(&key);
+                let inferred = match &explicit {
+                    Some(ex) if ex.len() == sig.type_parameters.len() => ex.clone(),
+                    _ => self.infer_call_type_arguments(call_node, &sig, &sibling_args),
+                };                self.resolving_contextual_calls.remove(&key);
                 if !inferred.is_empty() {
-                    return Some(self.substitute_infer_type_parameters(
-                        &base_param_type,
+                    let subst_base = rest_raw.as_ref().unwrap_or(&base_param_type);
+                    let substed = self.substitute_infer_type_parameters(
+                        subst_base,
                         &sig.type_parameters,
                         &inferred,
-                    ));
+                    );
+                    if rest_raw.is_some() {
+                        let lit = self.get_number_literal_type(tsox_core::jsnum::Number(
+                            (arg_index - (sig.parameters.len() - 1)) as f64,
+                        ));
+                        return Some(self.get_indexed_access_type(&substed, &lit));
+                    }                    return Some(substed);
                 }
             }
         }
@@ -80,7 +170,7 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
 
-        let parent = node.parent.as_ref()?;
+        let parent = node.parent()?;
         let binary = match &parent.data {
             NodeData::BinaryExpression(data) => data,
             _ => return None,
@@ -94,9 +184,9 @@ impl Checker {
             SyntaxKind::EqualsToken
             | SyntaxKind::AmpersandAmpersandEqualsToken
             | SyntaxKind::BarBarEqualsToken
-            | SyntaxKind::QuestionQuestionEqualsToken => self
-                .assignment_target_type(&binary.left)
-                .or_else(|| Some(self.get_type_of_node(&binary.left))),
+            | SyntaxKind::QuestionQuestionEqualsToken => {
+                self.get_contextual_type_for_assignment_expression(&parent)
+            }
             SyntaxKind::BarBarToken | SyntaxKind::QuestionQuestionToken => {
                 let binary_ctx = self.get_contextual_type(&parent, _context_flags);
                 if Arc::ptr_eq(node, &binary.right) && binary_ctx.is_none() {
@@ -111,27 +201,147 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_contextual_type_for_object_literal_element(
+    fn assignment_fallback_target_type(&mut self, left: &Arc<Node>) -> Option<Arc<Type>> {
+        self.assignment_target_type(left)
+            .or_else(|| Some(self.get_type_of_node(left)))
+    }
+
+    fn binary_declares_assignment_target(
+        &self,
+        bin_node: &Arc<Node>,
+        left: &Arc<Node>,
+    ) -> bool {
+        use tsox_frontend::ast::NodeData;
+
+        let (base, member): (&Arc<Node>, Option<&str>) = match &left.data {
+            NodeData::PropertyAccessExpression(pa) => (&pa.expression, Some(pa.name.text())),
+            NodeData::ElementAccessExpression(ea) => {
+                let name = match &ea.argument_expression.data {
+                    NodeData::StringLiteral(s) => Some(s.text.as_str()),
+                    NodeData::NumericLiteral(n) => Some(n.text.as_str()),
+                    NodeData::NoSubstitutionTemplateLiteral(t) => Some(t.text.as_str()),
+                    _ => None,
+                };
+                (&ea.expression, name)
+            }
+            _ => return false,
+        };
+        if !matches!(&base.data, NodeData::Identifier(_)) {
+            return false;
+        }
+        let Some(sym) = self.resolve_identifier(base) else {
+            return false;
+        };
+        let entry = match member {
+            Some(name) => sym.exports.get(name),
+            None => sym.exports.get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_ASSIGNMENT),
+        };
+        entry.is_some_and(|s| s.declarations.iter().any(|d| Arc::ptr_eq(d, bin_node)))
+    }
+
+    pub(crate) fn get_contextual_type_for_assignment_expression(
+        &mut self,
+        binary_node: &Arc<Node>,
+    ) -> Option<Arc<Type>> {
+        use tsox_frontend::ast::NodeData;
+
+        let NodeData::BinaryExpression(bin) = &binary_node.data else {
+            return self.assignment_fallback_target_type(&binary_node);
+        };
+        let left = &bin.left;
+
+        let (base, member_node): (&Arc<Node>, Option<&Arc<Node>>) = match &left.data {
+            NodeData::PropertyAccessExpression(pa) => (&pa.expression, Some(&pa.name)),
+            NodeData::ElementAccessExpression(ea) => (&ea.expression, Some(&ea.argument_expression)),
+            _ => return self.assignment_fallback_target_type(left),
+        };
+
+        if let NodeData::Identifier(_) = &base.data {
+            let Some(resolved) = self.resolve_identifier(base) else {
+                return self.assignment_fallback_target_type(left);
+            };
+            let sym = self.get_export_symbol_of_value_symbol_if_exported(&resolved);
+            if sym.flags.contains(SymbolFlags::ModuleExports) {
+                return None;
+            }
+            if self.binary_declares_assignment_target(binary_node, left) {
+                if let Some(vd) = sym.value_declaration.as_ref() {
+                    if let NodeData::VariableDeclaration(vdd) = &vd.data {
+                        if let Some(type_node) = vdd.type_node.as_ref() {
+                            let annotated = self.get_type_from_type_node(type_node);
+                            return match (&left.data, member_node) {
+                                (NodeData::PropertyAccessExpression(pa), _) => self
+                                    .get_type_of_property_of_contextual_type(
+                                        &annotated,
+                                        pa.name.text(),
+                                    ),
+                                (NodeData::ElementAccessExpression(_), Some(arg)) => {
+                                    let name_type = self.get_type_of_node(arg);
+                                    if crate::checker::utilities_token_is_identifier_or_keyword::is_type_usable_as_property_name(&name_type) {
+                                        let name = crate::checker::utilities_token_is_identifier_or_keyword::get_property_name_from_type(&name_type);
+                                        self.get_type_of_property_of_contextual_type(&annotated, &name)
+                                    } else {
+                                        Some(self.get_type_of_node(left))
+                                    }
+                                }
+                                _ => None,
+                            };
+                        }
+                    }
+                }
+                return None;
+            }
+            return self.assignment_fallback_target_type(left);
+        }
+
+        if matches!(
+            &base.data,
+            NodeData::PropertyAccessExpression(_) | NodeData::ElementAccessExpression(_)
+        ) && self.binary_declares_assignment_target(binary_node, left)
+        {
+            return None;
+        }
+
+        self.assignment_fallback_target_type(left)
+    }
+
+    pub fn get_contextual_type_for_object_literal_element(
         &mut self,
         node: &Arc<tsox_frontend::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
 
-        let object_literal = node.parent.as_ref()?;
+        let object_literal = node.parent()?;
 
-        let contextual_type = self.get_contextual_type(object_literal, _context_flags)?;
+        let contextual_type = self.get_contextual_type(&object_literal, _context_flags)?;
+
+        // Go getContextualTypeForObjectLiteralElement 经
+        // getApparentTypeOfContextualType：对象字面量的联合上下文型先经
+        // 判别式成员筛选（discriminateContextualTypeByObjectMembers）
+        let contextual_type = if contextual_type.is_union() {
+            self.discriminate_contextual_type_by_object_members(&object_literal, &contextual_type)
+        } else {
+            contextual_type
+        };
 
         let name = match &node.data {
-            NodeData::PropertyAssignment(data) => match &data.name.data {
-                NodeData::Identifier(id) => Some(id.text.clone()),
-                NodeData::StringLiteral(s) => Some(s.text.clone()),
-                _ => None,
-            },
-            NodeData::ShorthandPropertyAssignment(data) => match &data.name.data {
-                NodeData::Identifier(id) => Some(id.text.clone()),
-                _ => None,
-            },
+            // Go getContextualTypeForObjectLiteralElement：统一走
+            // getLiteralTypeFromPropertyName（well-known `Symbol.x` 计算名映射
+            // 为内部名 `__@x`，与 binder 成员键一致）
+            NodeData::PropertyAssignment(data) => {
+                let name = self.get_property_name_from_node(&data.name);
+                (!name.is_empty()).then_some(name)
+            }
+            NodeData::ShorthandPropertyAssignment(data) => {
+                let name = self.get_property_name_from_node(&data.name);
+                (!name.is_empty()).then_some(name)
+            }
+            // 方法成员 `m(n) { }` 的上下文型 = 字面量上下文的同名属性
+            NodeData::MethodDeclaration(data) => {
+                let name = self.get_property_name_from_node(&data.name);
+                (!name.is_empty()).then_some(name)
+            }
             _ => None,
         }?;
 
@@ -140,25 +350,120 @@ impl Checker {
 
     pub(crate) fn get_contextual_type_for_array_literal_element(
         &mut self,
-        _node: &tsox_frontend::ast::Node,
+        node: &tsox_frontend::ast::Node,
         parent: &Arc<tsox_frontend::ast::Node>,
         _context_flags: ContextFlags,
     ) -> Option<Arc<Type>> {
         let contextual_type = self.get_contextual_type(parent, _context_flags)?;
 
-        let type_args = self.get_type_arguments(&contextual_type);
-        if !type_args.is_empty() {
-            return Some(Arc::clone(&type_args[0]));
-        }
+        let elements = match &parent.data {
+            tsox_frontend::ast::NodeData::ArrayLiteralExpression(data) => &data.elements,
+            _ => return None,
+        };
+        let index = elements.iter().position(|e| e.id() == node.id())?;
+        let length = elements.len() as i64;
+        let first_spread = elements
+            .iter()
+            .position(|e| e.kind == tsox_frontend::ast::SyntaxKind::SpreadElement)
+            .map(|i| i as i64)
+            .unwrap_or(-1);
+        let last_spread = elements
+            .iter()
+            .rposition(|e| e.kind == tsox_frontend::ast::SyntaxKind::SpreadElement)
+            .map(|i| i as i64)
+            .unwrap_or(-1);
 
-        if let Some(structured) = contextual_type.as_structured() {
-            for index_info in &structured.index_infos {
-                if let Some(ref value_type) = index_info.value_type {
-                    return Some(Arc::clone(value_type));
-                }
+        let constituents: Vec<Arc<Type>> = match &contextual_type.data {
+            TypeData::Union(u) => u
+                .union_or_intersection
+                .types
+                .iter()
+                .filter(|c| {
+                    !c.flags.intersects(crate::checker::types::TypeFlags::Null | crate::checker::types::TypeFlags::Undefined)
+                })
+                .cloned()
+                .collect(),
+            _ => vec![Arc::clone(&contextual_type)],
+        };
+
+        let mut results: Vec<Arc<Type>> = Vec::new();
+        for c in constituents {
+            if let Some(rt) =
+                self.contextual_element_of_constituent(&c, index, length, first_spread, last_spread)
+            {
+                results.push(rt);
             }
         }
+        match results.len() {
+            0 => None,
+            1 => Some(results.into_iter().next().unwrap()),
+            _ => Some(self.get_union_type(results)),
+        }
+    }
 
+    fn contextual_element_of_constituent(
+        &mut self,
+        t: &Arc<Type>,
+        index: usize,
+        length: i64,
+        first_spread: i64,
+        last_spread: i64,
+    ) -> Option<Arc<Type>> {
+        if crate::checker::utilities::is_tuple_type(t) {
+            let element_types = Self::tuple_type_arguments(t);
+            let (fixed_length, combined_flags) = match &t.data {
+                TypeData::Tuple(tuple) => (tuple.fixed_length, tuple.combined_flags),
+                _ => return None,
+            };
+            let idx = index as i64;
+            if (first_spread < 0 || idx < first_spread) && idx < fixed_length as i64 {
+                return element_types.get(index).cloned();
+            }
+            let mut offset = 0;
+            if length >= 0 && (last_spread < 0 || idx > last_spread) {
+                offset = length - idx;
+            }
+            let mut fixed_end_length = 0;
+            if offset > 0 && combined_flags.intersects(crate::checker::types::ELEMENT_FLAGS_VARIABLE)
+            {
+                fixed_end_length = Self::end_fixed_element_count(t) as i64;
+            }
+            if offset > 0 && offset <= fixed_end_length {
+                return element_types
+                    .get(element_types.len() - offset as usize)
+                    .cloned();
+            }
+            let mut tuple_index = fixed_length as i64;
+            if first_spread >= 0 {
+                tuple_index = tuple_index.min(first_spread);
+            }
+            let mut end_skip_count = fixed_end_length;
+            if length >= 0 && last_spread >= 0 {
+                end_skip_count = end_skip_count.min(length - last_spread);
+            }
+            let start = (tuple_index.max(0) as usize).min(element_types.len());
+            let end = ((element_types.len() as i64 - end_skip_count.max(0)).max(0) as usize)
+                .min(element_types.len());
+            if start < end {
+                let middle: Vec<Arc<Type>> = element_types[start..end].to_vec();
+                return Some(self.get_union_type(middle));
+            }
+            return None;
+        }
+        let idx = index as i64;
+        if first_spread < 0 || idx < first_spread {
+            if let Some(prop) =
+                self.get_type_of_property_of_contextual_type(t, &index.to_string())
+            {
+                return Some(prop);
+            }
+        }
+        if let Some(elem) = self.get_type_arguments(t).into_iter().next() {
+            return Some(elem);
+        }
+        if self.is_array_type(t) {
+            return Some(self.get_array_element_type(t));
+        }
         None
     }
 
@@ -171,6 +476,20 @@ impl Checker {
             return None;
         }
         let candidates = self.union_object_and_array_literal_candidates(&inference.candidates);
+        // Go convertAutoToAny/widen：widening 标记候选（auto、undefinedWidening 等
+        // 内部标记型）按 any 参与联合（_.all([], ...) → T=any）
+        let candidates: Vec<Arc<Type>> = candidates
+            .into_iter()
+            .map(|t| {
+                if t.object_flags
+                    .contains(crate::checker::types::ObjectFlags::ContainsWideningType)
+                {
+                    self.get_any_type()
+                } else {
+                    t
+                }
+            })
+            .collect();
         let primitive_constraint = self.has_primitive_constraint(&inference.type_parameter)
             || self.is_const_type_variable(&inference.type_parameter, 0);
         let widen_literal_types = !primitive_constraint
@@ -197,10 +516,17 @@ impl Checker {
             .priority
             .contains(InferencePriority::PriorityImpliesCombination)
         {
-            self.get_union_type(base_candidates)
+            self.get_union_type_ex(
+                base_candidates,
+                crate::checker::exports_union_reduction::UnionReduction::Subtype,
+            )
         } else {
             self.get_common_supertype(&base_candidates)
         };
+        // Go getWidenedType 不拓宽顶层字面量类型；推断结果保留字面量（f<2>(a: 2)）
+        if unwidened_type.flags.intersects(crate::checker::types::TYPE_FLAGS_LITERAL) {
+            return Some(unwidened_type);
+        }
         Some(self.get_widened_type(&unwidened_type))
     }
 
@@ -222,7 +548,7 @@ impl Checker {
     }
 
     pub(crate) fn union_object_and_array_literal_candidates(
-        &self,
+        &mut self,
         candidates: &[Arc<Type>],
     ) -> Vec<Arc<Type>> {
         if candidates.len() > 1 {
@@ -232,7 +558,10 @@ impl Checker {
                 .cloned()
                 .collect();
             if !object_literals.is_empty() {
-                let literals_type = self.create_union_type(object_literals);
+                let literals_type = self.get_union_type_ex(
+                    object_literals,
+                    crate::checker::exports_union_reduction::UnionReduction::Subtype,
+                );
                 let non_literal_types: Vec<Arc<Type>> = candidates
                     .iter()
                     .filter(|t| !self.is_object_or_array_literal_type(t))

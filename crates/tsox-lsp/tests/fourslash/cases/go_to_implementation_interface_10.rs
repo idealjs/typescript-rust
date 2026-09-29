@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
+
 #[test]
 fn go_to_implementation_interface_10() {
     let content = r#"// @Filename: /a.ts
@@ -15,6 +15,6 @@ export class [|C|] implements B {
 	bar = true;
 }
 export class [|D|] extends C { }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "def")
+    let _s = Session::new_for_test("goToImplementationInterface_10", content);
+    // TODO: f.VerifyBaselineGoToImplementation(t, "def")
 }

@@ -12,7 +12,7 @@ use super::language_service::LanguageService;
 
 pub type CallHierarchyDeclaration = Arc<Node>;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct CallHierarchyIncomingCall {
     pub from: Location,
     pub from_ranges: Vec<Range>,

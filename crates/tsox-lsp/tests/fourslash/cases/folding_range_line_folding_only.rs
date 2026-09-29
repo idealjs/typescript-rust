@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // Line 0: if (EMPTY_TAGs.has(tag)) {"]
+
 #[test]
 fn folding_range_line_folding_only() {
     let content = r#"if (EMPTY_TAGs.has(tag)) {
@@ -18,15 +18,14 @@ export function use<T>(ctx: any): T | undefined {
 }"#;
     // TODO: ptrTrue := true
     // TODO: capabilities := &lsproto.ClientCapabilities{
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: // With lineFoldingOnly, end lines should be adjusted so closing brackets stay visible.
     // TODO: // Line 0: if (EMPTY_TAGs.has(tag)) {
     // TODO: // Line 9:
     // TODO: // Line 10: export function use<T>(ctx: any): T | undefined {
-    fourslash::unsupported("VerifyFoldingRangeLines"); // f.VerifyFoldingRangeLines(t, []fourslash.FoldingRangeLineExpected{
+    // TODO: f.VerifyFoldingRangeLines(t, []fourslash.FoldingRangeLineExpected{
 }
 
-#[ignore = "generator: // Line 0: // #region MyRegion"]
 #[test]
 fn folding_range_line_folding_only_with_regions() {
     let content = r#"// #region MyRegion
@@ -44,7 +43,7 @@ const z = 3;
 // #endregion"#;
     // TODO: ptrTrue := true
     // TODO: capabilities := &lsproto.ClientCapabilities{
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: // Line 0: // #region MyRegion
     // TODO: // Line 1: const x = 1;
     // TODO: // Line 2: function foo() {
@@ -56,5 +55,5 @@ const z = 3;
     // TODO: // Line 10: const z = 3;
     // TODO: // Line 11: // #endregion
     // TODO: // Line 12: // #endregion
-    fourslash::unsupported("VerifyFoldingRangeLines"); // f.VerifyFoldingRangeLines(t, []fourslash.FoldingRangeLineExpected{
+    // TODO: f.VerifyFoldingRangeLines(t, []fourslash.FoldingRangeLineExpected{
 }

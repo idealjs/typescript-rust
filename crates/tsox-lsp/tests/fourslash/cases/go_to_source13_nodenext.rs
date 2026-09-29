@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn go_to_source13_nodenext() {
     let content = r#"// @Filename: /home/src/workspaces/project/node_modules/left-pad/package.json
@@ -31,7 +31,7 @@ function /*end*/leftPad(str, len, ch) {}
 // @Filename: /home/src/workspaces/project/index.mts
 import leftPad = require("left-pad");
 /*start*/leftPad("", 4);"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("goToSource13_nodenext", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "start")
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }

@@ -4,6 +4,45 @@ use crate::binder::bind_walk::*;
 
 impl Binder {
     pub(crate) fn bind_module_declaration(&mut self, node: &Arc<Node>) {
+        self.set_export_context_flag(node);
+        self.bind_module_declaration_inner(node)
+    }
+
+    /// Go setExportContextFlag：ambient 模块且无 export 声明时是隐式导出语境
+    /// （declare namespace 内未加 export 的声明自动入 exports）
+    pub fn set_export_context_flag(&mut self, node: &Arc<Node>) {
+        let is_ambient = node.has_syntactic_modifier(ModifierFlags::Ambient)
+            || node.flags.contains(NodeFlags::Ambient)
+            || self.in_ambient_context(node);
+        if is_ambient && !Self::has_export_declarations(node) {
+            let ptr = Arc::as_ptr(node) as *mut tsox_frontend::ast::Node;
+            unsafe {
+                (*ptr).flags |= NodeFlags::ExportContext;
+            }
+        }
+    }
+
+    /// Go parser 的 NodeFlagsAmbient 由解析器上下文注入（d.ts 整文件、declare
+    /// 声明子树），Rust parser 未承载该位，此处按容器链等价重建
+    fn in_ambient_context(&self, node: &Arc<Node>) -> bool {
+        if self
+            .current_source_file
+            .as_ref()
+            .is_some_and(|f| f.is_declaration_file)
+        {
+            return true;
+        }
+        let mut parent = node.parent();
+        while let Some(p) = parent {
+            if p.has_syntactic_modifier(ModifierFlags::Ambient) {
+                return true;
+            }
+            parent = p.parent();
+        }
+        false
+    }
+
+    fn bind_module_declaration_inner(&mut self, node: &Arc<Node>) {
         let dotted_name = match &node.data {
             tsox_frontend::ast::NodeData::ModuleDeclaration(md) => match md.name.kind {
                 SyntaxKind::Identifier => md.name.text().to_string(),
@@ -87,7 +126,8 @@ impl Binder {
             }
 
             let last = parts[parts.len() - 1];
-            let symbol = Arc::new(Symbol::new(SymbolFlags::ValueModule, last.to_string()));
+            let (includes, _excludes) = Self::module_symbol_flags(node);
+            let symbol = Arc::new(Symbol::new(includes, last.to_string()));
             {
                 let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
                 unsafe {
@@ -122,7 +162,48 @@ impl Binder {
             }
             self.symbol_map.set_symbol(node, Arc::clone(&symbol));
         } else {
-            self.declare_symbol(node, SymbolFlags::ValueModule, SymbolFlags::MODULE);
+            let name_is_string_literal = match &node.data {
+                tsox_frontend::ast::NodeData::ModuleDeclaration(md) => {
+                    md.name.kind == SyntaxKind::StringLiteral
+                }
+                _ => false,
+            };
+            if name_is_string_literal {
+                // Go bindModuleDeclaration ambient 分支：字符串名 ambient 模块恒 ValueModule
+                self.declare_symbol(node, SymbolFlags::ValueModule, SymbolFlags::ValueModuleExcludes);
+            } else {
+                // Go declareModuleSymbol：按模块实例化状态取 ValueModule/NamespaceModule
+                let state = get_module_instance_state(node);
+                let (includes, excludes) = Self::module_symbol_flags(node);
+                let symbol = self.declare_symbol(node, includes, excludes);
+                if state != ModuleInstanceState::NonInstantiated {
+                    let const_enum_only = !symbol
+                        .flags
+                        .intersects(SymbolFlags::Function | SymbolFlags::Class | SymbolFlags::RegularEnum)
+                        && state == ModuleInstanceState::ConstEnumOnly
+                        && !self.not_const_enum_only_modules.contains(&symbol.id());
+                    let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+                    unsafe {
+                        if const_enum_only {
+                            (*symbol_mut).flags |= SymbolFlags::ConstEnumOnlyModule;
+                        } else {
+                            (*symbol_mut).flags &= !SymbolFlags::ConstEnumOnlyModule;
+                        }
+                    }
+                    if !const_enum_only {
+                        self.not_const_enum_only_modules.insert(symbol.id());
+                    }
+                }
+            }
+        }
+    }
+
+    fn module_symbol_flags(node: &Arc<Node>) -> (SymbolFlags, SymbolFlags) {
+        let state = get_module_instance_state(node);
+        if state != ModuleInstanceState::NonInstantiated {
+            (SymbolFlags::ValueModule, SymbolFlags::ValueModuleExcludes)
+        } else {
+            (SymbolFlags::NamespaceModule, SymbolFlags::NamespaceModuleExcludes)
         }
     }
 }

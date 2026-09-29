@@ -72,8 +72,18 @@ pub fn exclude_properties(
         .collect()
 }
 
-pub fn should_check_as_excess_property(_prop: &Symbol, _container: &Symbol) -> bool {
-    false
+pub fn should_check_as_excess_property(prop: &Symbol, container: &Symbol) -> bool {
+    let prop_decl = prop.value_declaration.clone().or_else(|| prop.declarations.first().cloned());
+    let container_decl = container
+        .value_declaration
+        .clone()
+        .or_else(|| container.declarations.first().cloned());
+    match (prop_decl, container_decl) {
+        (Some(p), Some(c)) => p
+            .parent()
+            .is_some_and(|pp| Arc::ptr_eq(&pp, &c)),
+        _ => false,
+    }
 }
 
 pub fn is_ignored_jsx_property(_source: &Type, _source_prop: &Symbol) -> bool {

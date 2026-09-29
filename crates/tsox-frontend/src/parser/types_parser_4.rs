@@ -60,4 +60,34 @@ impl Parser {
             TextRange::new(pos, end),
         ))
     }
+
+    pub(crate) fn parse_function_or_constructor_type_to_error(
+        &mut self,
+        is_union_type: bool,
+        parse_constituent: fn(&mut Self) -> Arc<Node>,
+    ) -> Arc<Node> {
+        if !self.is_start_of_function_type_or_constructor_type() {
+            return parse_constituent(self);
+        }
+        let type_node = match self.token {
+            SyntaxKind::NewKeyword | SyntaxKind::AbstractKeyword => self.parse_constructor_type(),
+            _ => self.parse_function_type(),
+        };
+        let message = match (type_node.kind, is_union_type) {
+            (SyntaxKind::FunctionType, true) => {
+                tsox_core::diagnostics::messages_generated::FUNCTION_TYPE_NOTATION_MUST_BE_PARENTHESIZED_WHEN_USED_IN_A_UNION_TYPE
+            }
+            (SyntaxKind::FunctionType, false) => {
+                tsox_core::diagnostics::messages_generated::FUNCTION_TYPE_NOTATION_MUST_BE_PARENTHESIZED_WHEN_USED_IN_AN_INTERSECTION_TYPE
+            }
+            (_, true) => {
+                tsox_core::diagnostics::messages_generated::CONSTRUCTOR_TYPE_NOTATION_MUST_BE_PARENTHESIZED_WHEN_USED_IN_A_UNION_TYPE
+            }
+            (_, false) => {
+                tsox_core::diagnostics::messages_generated::CONSTRUCTOR_TYPE_NOTATION_MUST_BE_PARENTHESIZED_WHEN_USED_IN_AN_INTERSECTION_TYPE
+            }
+        };
+        self.parse_error_at_range(type_node.loc, message, &[]);
+        type_node
+    }
 }

@@ -3,6 +3,7 @@ pub(crate) use super::types::*;
 #[allow(unused_imports)]
 pub use crate::checker::utilities_get_assignment_target::*;
 #[allow(unused_imports)]
+pub use crate::checker::utilities_get_assignment_target::is_const_type_reference;
 pub use crate::checker::utilities_has_only_expression_initialization::*;
 #[allow(unused_imports)]
 pub use crate::checker::utilities_is_optional_symbol::*;
@@ -10,6 +11,9 @@ pub use crate::checker::utilities_is_optional_symbol::*;
 pub use crate::checker::utilities_is_private_within_ambient::*;
 #[allow(unused_imports)]
 pub use crate::checker::utilities_token_is_identifier_or_keyword::*;
+pub use crate::checker::exports_union_reduction::{
+    get_declaration_modifier_flags_from_symbol, get_declaration_modifier_flags_from_symbol_ex,
+};
 pub(crate) use std::sync::Arc;
 pub(crate) use tsox_frontend::ast::ModifierFlags;
 pub(crate) use tsox_frontend::ast::Node;

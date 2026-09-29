@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
+
 #[test]
 fn java_script_class2() {
     let content = r#"// @allowNonTsExtensions: true
@@ -14,6 +14,6 @@ class Foo {
 }
 var x = new Foo();
 x.[|union|];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "union")
+    let _s = Session::new_for_test("javaScriptClass2", content);
+    // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "union")
 }

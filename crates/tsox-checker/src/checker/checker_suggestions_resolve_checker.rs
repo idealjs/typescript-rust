@@ -119,7 +119,7 @@ impl Checker {
     }
 
     pub(crate) fn inside_function_body(node: &Arc<Node>) -> bool {
-        let mut anc = node.parent.as_ref();
+        let mut anc = node.parent();
         while let Some(a) = anc {
             match a.kind {
                 SyntaxKind::FunctionDeclaration
@@ -134,24 +134,33 @@ impl Checker {
                 | SyntaxKind::ModuleDeclaration => return false,
                 _ => {}
             }
-            anc = a.parent.as_ref();
+            anc = a.parent();
         }
         false
     }
 
     pub(crate) fn check_class_heritage_members(&mut self, node: &Arc<Node>) {
-        let tsox_frontend::ast::NodeData::ClassDeclaration(data) = &node.data else {
-            return;
+        let (name, type_parameters, members, is_class_expression) = match &node.data {
+            tsox_frontend::ast::NodeData::ClassDeclaration(d) => {
+                (&d.name, d.type_parameters.as_ref(), &d.members, false)
+            }
+            tsox_frontend::ast::NodeData::ClassExpression(d) => {
+                (&d.name, d.type_parameters.as_ref(), &d.members, true)
+            }
+            _ => return,
         };
         let Some((base_node, _base_sym)) = self.extends_base_of(node) else {
             return;
         };
-        let class_name = data
-            .name
+        let class_name = name
             .as_ref()
             .map(|n| n.text().to_string())
             .unwrap_or_default();
-        let base_name = Self::class_name_text(&base_node);
+        let class_name = self.generic_display_name(&class_name, type_parameters);
+        let base_name = self
+            .extends_heritage_expr_of(node)
+            .and_then(|e| self.node_source_text(&e))
+            .unwrap_or_else(|| Self::class_name_text(&base_node));
 
         if !node.has_syntactic_modifier(ModifierFlags::Abstract) {
             let mut missing: Vec<String> = Vec::new();
@@ -159,59 +168,146 @@ impl Checker {
             missing.dedup();
             if !missing.is_empty() {
                 let file = self.current_file.clone();
-                let name_loc = data.name.as_ref().map(|n| n.loc).unwrap_or(node.loc);
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    file,
-                    name_loc,
-                    tsox_core::diagnostics::messages_generated::
-                        NON_ABSTRACT_CLASS_0_IS_MISSING_IMPLEMENTATIONS_FOR_THE_FOLLOWING_MEMBERS_OF_1_COLON_2,
-                    vec![
-                        class_name.clone(),
-                        base_name.clone(),
-                        missing
+                if is_class_expression {
+                    let quoted = missing
+                        .iter()
+                        .map(|m| format!("'{m}'"))
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    let (message, args) = if missing.len() == 1 {
+                        (
+                            tsox_core::diagnostics::messages_generated::
+                                NON_ABSTRACT_CLASS_EXPRESSION_DOES_NOT_IMPLEMENT_INHERITED_ABSTRACT_MEMBER_0_FROM_CLASS_1,
+                            vec![missing[0].clone(), base_name.clone()],
+                        )
+                    } else if missing.len() > 5 {
+                        let first4 = missing[..4]
                             .iter()
                             .map(|m| format!("'{m}'"))
                             .collect::<Vec<_>>()
-                            .join(", "),
-                    ],
-                ));
+                            .join(", ");
+                        (
+                            tsox_core::diagnostics::messages_generated::
+                                NON_ABSTRACT_CLASS_EXPRESSION_IS_MISSING_IMPLEMENTATIONS_FOR_THE_FOLLOWING_MEMBERS_OF_0_COLON_1_AND_2_MORE,
+                            vec![
+                                base_name.clone(),
+                                first4,
+                                (missing.len() - 4).to_string(),
+                            ],
+                        )
+                    } else {
+                        (
+                            tsox_core::diagnostics::messages_generated::
+                                NON_ABSTRACT_CLASS_EXPRESSION_IS_MISSING_IMPLEMENTATIONS_FOR_THE_FOLLOWING_MEMBERS_OF_0_COLON_1,
+                            vec![base_name.clone(), quoted],
+                        )
+                    };
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file, node.loc, message, args,
+                    ));
+                } else {
+                    let name_loc = name.as_ref().map(|n| n.loc).unwrap_or(node.loc);
+                    if missing.len() == 1 {
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            file,
+                            name_loc,
+                            tsox_core::diagnostics::messages_generated::
+                                NON_ABSTRACT_CLASS_0_DOES_NOT_IMPLEMENT_INHERITED_ABSTRACT_MEMBER_1_FROM_CLASS_2,
+                            vec![class_name.clone(), missing[0].clone(), base_name.clone()],
+                        ));
+                    } else {
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            file,
+                            name_loc,
+                            tsox_core::diagnostics::messages_generated::
+                                NON_ABSTRACT_CLASS_0_IS_MISSING_IMPLEMENTATIONS_FOR_THE_FOLLOWING_MEMBERS_OF_1_COLON_2,
+                            vec![
+                                class_name.clone(),
+                                base_name.clone(),
+                                missing
+                                    .iter()
+                                    .map(|m| format!("'{m}'"))
+                                    .collect::<Vec<_>>()
+                                    .join(", "),
+                            ],
+                        ));
+                    }
+                }
             }
         }
 
-        for member in data.members.iter() {
-            let (name_node, own_type): (&Arc<Node>, Option<Arc<Type>>) = match &member.data {
+        for member in members.iter() {
+            // 候选成员名/类型：直接属性成员 + 构造器参数属性
+            //（constructor(public xyz: number)，带可访问性修饰的形参即类成员）
+            let mut candidates: Vec<(&Arc<Node>, Option<Arc<Type>>)> = Vec::new();
+            match &member.data {
                 tsox_frontend::ast::NodeData::PropertyDeclaration(pd) => {
-                    if pd.name.kind != SyntaxKind::Identifier {
-                        continue;
+                    if pd.name.kind == SyntaxKind::Identifier {
+                        let t = if let Some(tn) = &pd.type_node {
+                            Some(self.get_type_from_type_node(tn))
+                        } else {
+                            pd.initializer
+                                .as_ref()
+                                .map(|init| self.get_type_of_node(init))
+                        };
+                        candidates.push((&pd.name, t));
                     }
-                    let t = if let Some(tn) = &pd.type_node {
-                        Some(self.get_type_from_type_node(tn))
-                    } else {
-                        pd.initializer
-                            .as_ref()
-                            .map(|init| self.get_type_of_node(init))
-                    };
-                    (&pd.name, t)
                 }
                 tsox_frontend::ast::NodeData::GetAccessorDeclaration(gd) => {
-                    if gd.name.kind != SyntaxKind::Identifier {
-                        continue;
+                    if gd.name.kind == SyntaxKind::Identifier {
+                        let t = if let Some(tn) = &gd.type_node {
+                            Some(self.get_type_from_type_node(tn))
+                        } else {
+                            Self::first_return_expression(gd.body.as_ref())
+                                .map(|e| self.get_type_of_node(&e))
+                        };
+                        candidates.push((&gd.name, t));
                     }
-
-                    let t = if let Some(tn) = &gd.type_node {
-                        Some(self.get_type_from_type_node(tn))
-                    } else {
-                        Self::first_return_expression(gd.body.as_ref())
-                            .map(|e| self.get_type_of_node(&e))
-                    };
-                    (&gd.name, t)
                 }
-                _ => continue,
-            };
-            let Some(own_type) = own_type else { continue };
+                tsox_frontend::ast::NodeData::ConstructorDeclaration(cd) => {
+                    for p in cd.parameters.iter() {
+                        if let tsox_frontend::ast::NodeData::ParameterDeclaration(pdd) = &p.data
+                            && pdd.name.kind == SyntaxKind::Identifier
+                            && pdd
+                                .modifiers
+                                .as_ref()
+                                .is_some_and(|m| !m.list.nodes.is_empty())
+                        {
+                            let t = pdd
+                                .type_node
+                                .as_ref()
+                                .map(|tn| self.get_type_from_type_node(tn));
+                            candidates.push((&pdd.name, t));
+                        }
+                    }
+                }
+                _ => {}
+            }
+            for (name_node, own_type) in candidates {
+                self.check_member_override_compatibility(
+                    name_node,
+                    own_type,
+                    &base_node,
+                    &class_name,
+                    &base_name,
+                );
+            }
+        }
+    }
+
+    fn check_member_override_compatibility(
+        &mut self,
+        name_node: &Arc<Node>,
+        own_type: Option<Arc<Type>>,
+        base_node: &Arc<Node>,
+        _class_name: &str,
+        _base_name: &str,
+    ) {
+        let Some(own_type) = own_type else { return };
+        {
             let prop_name = name_node.text().to_string();
             let Some(base_member) = Self::find_class_member_by_name(&base_node, &prop_name) else {
-                continue;
+                return;
             };
             let base_tn = match &base_member.data {
                 tsox_frontend::ast::NodeData::PropertyDeclaration(pd) => pd.type_node.clone(),
@@ -228,24 +324,14 @@ impl Checker {
                 _ => None,
             };
             let Some(base_tn) = base_tn else {
-                continue;
+                return;
             };
             let base_type = self.get_type_from_type_node(&base_tn);
+            // TS2416 由 check_heritage_clause 的 Go 对齐实现（含错误链）发射，
+            // 此遗留路径不再重复报
             if !own_type.flags.contains(TypeFlags::Any)
                 && !self.is_type_assignable_to(&own_type, &base_type)
             {
-                let file = self.current_file.clone();
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    file,
-                    name_node.loc,
-                    tsox_core::diagnostics::messages_generated::
-                        PROPERTY_0_IN_TYPE_1_IS_NOT_ASSIGNABLE_TO_THE_SAME_PROPERTY_IN_BASE_TYPE_2,
-                    vec![
-                        prop_name,
-                        class_name.clone(),
-                        base_name.clone(),
-                    ],
-                ));
             }
         }
     }

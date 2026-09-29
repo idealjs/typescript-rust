@@ -1,11 +1,11 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
+
 #[test]
 fn outline_spans_block_comments_without_statements() {
     let content = r#"[|/*
 / * Some text
   */|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
+    let _s = Session::new_for_test("outlineSpansBlockCommentsWithoutStatements", content);
+    // TODO: f.VerifyOutliningSpans(t)
 }

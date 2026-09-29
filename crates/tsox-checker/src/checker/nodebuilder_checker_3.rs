@@ -21,6 +21,7 @@ impl Checker {
                     let param_type = self
                         .signature_instantiated_param_type(sig, i)
                         .unwrap_or_else(|| self.get_type_of_symbol(param));
+                    let param_type = self.strip_param_optionality_undefined(param, &param_type);
                     let type_str = self.type_to_string_ex(&param_type, flags);
                     if param.flags.contains(tsox_frontend::ast::SymbolFlags::Optional) {
                         format!("{}?: {}", name, type_str)
@@ -66,17 +67,70 @@ impl Checker {
         }
 
         for prop in &structured.properties {
-            let name = prop.name.clone();
-
-            let name = if prop.declarations.iter().any(|d| {
-                d.name()
-                    .is_some_and(|n| n.kind == SyntaxKind::StringLiteral)
-            }) {
-                format!("\"{name}\"")
+            // Go symbolToString：well-known symbol 内部名 __@x 渲染为 [Symbol.x]
+            let name = if let Some(stripped) = prop.name.strip_prefix("__@") {
+                format!("[Symbol.{stripped}]")
             } else {
+                prop.name.clone()
+            };
+
+            // Go nodebuilder：成员名按 isIdentifierText 决定是否加引号
+            //（default 等关键字仍可作属性名裸打印）
+            let name = if crate::checker::checker_get_excluded_symbol_flags::is_valid_identifier_text(&name)
+            {
                 name
+            } else {
+                format!("\"{name}\"")
             };
             let prop_type = self.get_type_of_symbol(prop);
+
+            // Go writer：optional 函数属性渲染为方法语法 `name?(): ret`
+            if prop.flags.contains(SymbolFlags::Optional) {
+                let structured = prop_type.as_structured();
+                let is_function = structured.is_some_and(|s| {
+                    s.call_signature_count == 1
+                        && s.construct_signatures().is_empty()
+                        && s.properties.is_empty()
+                });
+                if is_function {
+                    let sig = structured
+                        .and_then(|s| s.call_signatures().first())
+                        .expect("checked single call signature above");
+                    let params: Vec<String> = sig
+                        .parameters
+                        .iter()
+                        .enumerate()
+                        .map(|(i, param)| {
+                            let param_type = self
+                                .signature_instantiated_param_type(sig, i)
+                                .unwrap_or_else(|| self.get_type_of_symbol(param));
+                            let q = if param.flags.contains(SymbolFlags::Optional) {
+                                "?"
+                            } else {
+                                ""
+                            };
+                            format!(
+                                "{}{q}: {}",
+                                param.name,
+                                self.type_to_string_ex(&param_type, flags)
+                            )
+                        })
+                        .collect();
+                    let ret_type = sig
+                        .resolved_return_type
+                        .get()
+                        .cloned()
+                        .unwrap_or_else(|| self.any_type());
+                    let ret_str = self.type_to_string_ex(&ret_type, flags);
+                    let tp = self.signature_type_param_prefix(sig);
+                    parts.push(format!(
+                        "{name}?{tp}({}): {ret_str}",
+                        params.join(", ")
+                    ));
+                    continue;
+                }
+            }
+
             let type_str = self.type_to_string_ex(&prop_type, flags);
             let readonly = prop.check_flags.contains(tsox_frontend::ast::CheckFlags::Readonly);
             if prop.flags.contains(SymbolFlags::Optional) {
@@ -147,9 +201,27 @@ impl Checker {
         };
 
         if let Some(obj) = obj_data {
-            if !obj.type_arguments.is_empty() {
-                let args: Vec<String> = obj
-                    .type_arguments
+            let mut arg_count = obj.type_arguments.len();
+            // Go nodebuilder：Iterable/IterableIterator/AsyncIterable/
+            // AsyncIterableIterator 的尾随默认实参在显示中省略
+            if matches!(
+                sym.name.as_str(),
+                "Iterable" | "IterableIterator" | "AsyncIterable" | "AsyncIterableIterator"
+            ) {
+                let defaults = self.interface_default_type_arguments(&Arc::clone(sym));
+                if defaults.len() == arg_count {
+                    while arg_count > 0 {
+                        let arg_str = self.type_to_string_ex(&obj.type_arguments[arg_count - 1], flags);
+                        let default_str = self.type_to_string_ex(&defaults[arg_count - 1], flags);
+                        if arg_str != default_str {
+                            break;
+                        }
+                        arg_count -= 1;
+                    }
+                }
+            }
+            if arg_count > 0 {
+                let args: Vec<String> = obj.type_arguments[..arg_count]
                     .iter()
                     .map(|ty| self.type_to_string_ex(ty, flags))
                     .collect();
@@ -163,6 +235,9 @@ impl Checker {
                     return format!("typeof {}", sym.name);
                 }
             }
+            // 类实例（含与命名空间合并的类）：typeof 前缀只给静态侧（构造签名
+            // 所在），实例侧按符号名显示（Go typeToString 同）
+            return sym.name.clone();
         }
 
         if sym.flags.contains(SymbolFlags::ValueModule) {
@@ -209,8 +284,12 @@ impl Checker {
         self.needs_parens_in_union(t)
     }
 
-    pub(crate) fn maybe_parenthesize_array_element(&mut self, elem: &Arc<Type>) -> String {
-        let s = self.type_to_string_ex(elem, TypeFormatFlags::NONE);
+    pub(crate) fn maybe_parenthesize_array_element_ex(
+        &mut self,
+        elem: &Arc<Type>,
+        flags: TypeFormatFlags,
+    ) -> String {
+        let s = self.type_to_string_ex(elem, flags);
         if self.needs_parens_as_array_element(elem) {
             format!("({})", s)
         } else {

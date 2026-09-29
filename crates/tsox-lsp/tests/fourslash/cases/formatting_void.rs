@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn formatting_void() {
     let content = r#"/*1*/  var x: () =>           void    ;
@@ -10,8 +10,8 @@ fn formatting_void() {
 /*5*/  void    a    ;
 /*6*/  void        (0);
 /*7*/  b=void(c=1,d=2);"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formattingVoid", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"var x: () => void;"#);
     fourslash::go_to_marker(&mut s, "2");

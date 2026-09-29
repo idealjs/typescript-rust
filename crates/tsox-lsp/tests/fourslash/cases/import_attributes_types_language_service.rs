@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_pattern_ambient_module_with_import_attributes() {
     let content = r#"// @Filename: /tsconfig.json
@@ -26,14 +26,17 @@ import * as css from "./style.asset" with { type: "css" };
 import * as text from "./copy.asset" with { type: "text" };
 css./*css*/cssOnly;
 text./*text*/textOnly;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "attributeName", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "attributeValue", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "css", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "text", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsPatternAmbientModuleWithImportAttributes", content);
+    fourslash::go_to_marker(&mut s, "attributeName");
+    // TODO: f.VerifyCompletions(t, "attributeName", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "attributeValue");
+    // TODO: f.VerifyCompletions(t, "attributeValue", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "css");
+    // TODO: f.VerifyCompletions(t, "css", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "text");
+    // TODO: f.VerifyCompletions(t, "text", &fourslash.CompletionsExpectedList{
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
 #[test]
 fn pattern_ambient_module_with_import_attributes_language_service() {
     let content = r#"// @Filename: /tsconfig.json
@@ -54,12 +57,12 @@ import * as css from /*cssModule*/"./style.asset" with { type: "css" };
 import * as text from /*textModule*/"./copy.asset" with { type: "text" };
 css./*cssUse*/shared;
 text./*textUse*/shared;"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "cssModule", "textModule", "cssUse", "textUse")
-    fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "cssUse", "textUse")
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "cssUse", "textUse")
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "cssUse", "textUse")
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "cssUse", "textUse")
+    let mut s = Session::new_for_test("patternAmbientModuleWithImportAttributesLanguageService", content);
+    fourslash::verify_no_errors(&mut s, );
+    // TODO: f.VerifyBaselineHover(t)
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "cssModule", "textModule", "cssUse", "textUse")
+    // TODO: f.VerifyBaselineGoToTypeDefinition(t, "cssUse", "textUse")
+    // TODO: f.VerifyBaselineFindAllReferences(t, "cssUse", "textUse")
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "cssUse", "textUse")
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "cssUse", "textUse")
 }

@@ -5,7 +5,6 @@ use tsox_core::collections::syncmap::SyncMap;
 use tsox_core::core::compiler_options::CompilerOptions;
 use tsox_core::core::compiler_options::ModuleKind;
 use tsox_core::core::compiler_options::ResolutionMode;
-use tsox_core::tspath;
 use tsox_frontend::ast::SourceFile;
 use tsox_tsoptions::module::ResolvedModule;
 use tsox_tsoptions::module::Resolver;

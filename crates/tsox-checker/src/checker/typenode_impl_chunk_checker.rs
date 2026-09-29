@@ -6,12 +6,29 @@ impl Checker {
     pub fn get_type_from_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let key = (node.id() as usize, self.type_argument_stack_hash());
         if let Some(t) = self.type_node_subst_cache.get(&key) {
-            return Arc::clone(t);
+            let stale_shell = self
+                .pending_interface_shells
+                .values()
+                .any(|s| Arc::ptr_eq(s, t));
+            if stale_shell {
+                self.type_node_subst_cache.remove(&key);
+            } else {
+                return Arc::clone(t);
+            }
         }
 
         let degraded_epoch = self.heritage_degraded_events;
 
-        if !self.type_node_resolving.insert(key) {
+        // Go 无节点级重入守卫：typeof/数组/型参引用的递归重入在 Go 中经
+        // getTypeOfSymbol 的 pushTypeResolution 环检测终止并报 TS2502；静默
+        // error 会吞掉该报告（var d: Array<typeof d>）。重入层经深度护栏
+        // 防失控，缓存与 resolving key 清理仍归外层
+        let go_reentrant_resolves = matches!(
+            node.kind,
+            SyntaxKind::TypeQuery | SyntaxKind::ArrayType | SyntaxKind::TypeReference
+        );
+        let reentrant = !self.type_node_resolving.insert(key);
+        if reentrant && !go_reentrant_resolves {
             return self.error_type();
         }
         self.type_node_query_epochs.push(degraded_epoch);
@@ -44,9 +61,17 @@ impl Checker {
             self.type_resolution_depth -= 1;
             r
         };
+        if reentrant {
+            self.type_node_query_epochs.pop();
+            return result;
+        }
         self.type_node_resolving.remove(&key);
         self.type_node_query_epochs.pop();
-        if self.heritage_degraded_events == degraded_epoch {
+        let result_pending_shell = self
+            .pending_interface_shells
+            .values()
+            .any(|s| Arc::ptr_eq(s, &result));
+        if self.heritage_degraded_events == degraded_epoch && !result_pending_shell {
             if self.type_node_subst_cache.len() >= self.type_node_subst_cache_limit {
                 self.type_node_subst_cache.clear();
             }
@@ -126,6 +151,23 @@ impl Checker {
             SyntaxKind::ObjectKeyword => self.non_primitive_type(),
 
             SyntaxKind::ConstKeyword => self.any_type(),
+            // Go getTypeFromTypeAlias(checker.go:24208)：BuiltinIteratorReturn
+            // 的 intrinsic 体按 strictBuiltinIteratorReturn 代入 any/undefined
+            SyntaxKind::IntrinsicKeyword => {
+                let in_builtin_iterator_return_alias = node
+                    .parent()
+                    .is_some_and(|p| {
+                        matches!(
+                            &p.data,
+                            NodeData::TypeAliasDeclaration(ta) if ta.name.text() == "BuiltinIteratorReturn"
+                        )
+                    });
+                if in_builtin_iterator_return_alias {
+                    self.builtin_iterator_return_type()
+                } else {
+                    self.intrinsic_marker_type()
+                }
+            }
             SyntaxKind::ThisType | SyntaxKind::ThisKeyword => {
                 self.get_type_from_this_type_node(node)
             }
@@ -190,5 +232,32 @@ impl Checker {
             return;
         }
         self.type_node_links.get_or_default(node).resolved_type = Some(t);
+    }
+
+    /// 环断路器补写：预缓存 error 后解析途中 shell 让位会 bump
+    /// heritage_degraded_events，常规 cache_type 的 epoch 守卫会跳过最终
+    /// 写回，error 永驻；最终结果非 error 时强制落盘
+    pub(crate) fn cache_type_overwrite_error(&mut self, node: &Arc<Node>, t: Arc<Type>) {
+        if !self.type_argument_stack.is_empty() {
+            return;
+        }
+        let is_error_new = crate::checker::utilities::is_type_error(&t);
+        let existing_is_error = self
+            .type_node_links
+            .get(node)
+            .and_then(|l| l.resolved_type.as_ref())
+            .is_some_and(|t| crate::checker::utilities::is_type_error(t));
+        if is_error_new && !existing_is_error {
+            return;
+        }
+        self.type_node_links.get_or_default(node).resolved_type = Some(t);
+    }
+
+    /// 环断路窗口内预缓存的 error 会永久掩盖窗口外的正确重解析；
+    /// 别名/接口解析层发现 error 结果时清节点缓存放行后续重算
+    pub(crate) fn uncache_type_node(&mut self, node: &Arc<Node>) {
+        if let Some(links) = self.type_node_links.get_mut(node) {
+            links.resolved_type = None;
+        }
     }
 }

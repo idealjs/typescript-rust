@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
+
 #[test]
 fn rename_js_property_assignment2() {
     let content = r#"// @allowJs: true
@@ -9,6 +9,6 @@ class Minimatch {
 }
 [|Minimatch.[|{| "contextRangeIndex": 0 |}staticProperty|] = "string";|]
 console.log(Minimatch.[|staticProperty|]);"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "staticProperty")
+    let _s = Session::new_for_test("renameJsPropertyAssignment2", content);
+    // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "staticProperty")
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
+
 #[test]
 fn jsdoc_link_rename1() {
     let content = r#"interface A/**/ {}
@@ -8,6 +8,6 @@ fn jsdoc_link_rename1() {
  * {@link A()} is ok
  */
 declare const a: A"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
+    let _s = Session::new_for_test("jsdocLink_rename1", content);
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

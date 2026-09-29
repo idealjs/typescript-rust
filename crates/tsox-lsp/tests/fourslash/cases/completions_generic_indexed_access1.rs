@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_generic_indexed_access1() {
     let content = r#"interface Sample {
@@ -9,6 +9,7 @@ fn completions_generic_indexed_access1() {
 
 export declare function testIt<T>(method: T[keyof T]): any
 testIt<Sample>({ /**/ });"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsGenericIndexedAccess1", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

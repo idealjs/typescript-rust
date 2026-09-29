@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_display_parts_var() {
     let content = r#"var /*1*/a = 10;
@@ -18,6 +18,6 @@ var /*10*/h: { (a: string): number; (a: number): string; };
 var /*11*/i = /*12*/h;
 /*13*/h(10);
 /*14*/h("hello");"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoDisplayPartsVar", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

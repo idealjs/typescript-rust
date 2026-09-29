@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: }"]
+
 #[test]
 fn tsx_find_all_references4() {
     let content = r#"//@Filename: file.tsx
@@ -18,7 +18,7 @@ declare namespace JSX {
 
 
 var x = /*3*/</*4*/MyClass name='hello'><//*5*/MyClass>;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5")
+    let _s = Session::new_for_test("tsxFindAllReferences4", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5")
     // TODO: }
 }

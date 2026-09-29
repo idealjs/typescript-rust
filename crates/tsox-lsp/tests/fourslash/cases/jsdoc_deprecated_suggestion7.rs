@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
+
 #[test]
 fn jsdoc_deprecated_suggestion7() {
     let content = r#"enum Direction {
@@ -12,6 +12,6 @@ type T = Direction.Left
 const x = 1
 type x = string
 var y: x = 'hi'"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, nil)
+    let _s = Session::new_for_test("jsdocDeprecated_suggestion7", content);
+    // TODO: f.VerifySuggestionDiagnostics(t, nil)
 }

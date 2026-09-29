@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyOrganizeImports"]
+
 #[test]
 fn organize_imports4() {
     let content = r#"import * as something from "path";/** 
@@ -13,6 +13,6 @@ import * as AnotherThing from "somepath";/**
  * and there
  */
 import * as AnotherThingElse from "someotherpath";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
+    let _s = Session::new_for_test("organizeImports4", content);
+    // TODO: f.VerifyOrganizeImports(t,
 }

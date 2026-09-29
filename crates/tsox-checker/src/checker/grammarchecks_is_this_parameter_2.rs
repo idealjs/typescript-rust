@@ -19,59 +19,27 @@ pub(crate) fn is_variable_statement(node: &Arc<Node>) -> bool {
 }
 
 pub(crate) fn is_parent_module_block_or_source_file(node: &Arc<Node>) -> bool {
-    match &node.parent {
-        Some(parent) => is_module_block(parent) || is_source_file(parent),
+    match node.parent() {
+        Some(parent) => is_module_block(&parent) || is_source_file(&parent),
         None => false,
     }
 }
 
 pub(crate) fn is_parent_class_like(node: &Arc<Node>) -> bool {
-    match &node.parent {
-        Some(parent) => is_class_declaration(parent) || is_class_expression(parent),
+    match node.parent() {
+        Some(parent) => is_class_declaration(&parent) || is_class_expression(&parent),
         None => false,
     }
 }
 
-pub(crate) fn is_iteration_statement(node: &Arc<Node>, look_in_labeled: bool) -> bool {
-    match node.kind {
-        SyntaxKind::ForStatement
-        | SyntaxKind::ForInStatement
-        | SyntaxKind::ForOfStatement
-        | SyntaxKind::WhileStatement
-        | SyntaxKind::DoStatement => true,
-        SyntaxKind::LabeledStatement if look_in_labeled => {
-            if let NodeData::LabeledStatement(data) = &node.data {
-                is_iteration_statement(&data.statement, false)
-            } else {
-                false
-            }
-        }
-        _ => false,
-    }
-}
 
-pub(crate) fn is_function_like_or_class_static_block(node: &Arc<Node>) -> bool {
-    matches!(
-        node.kind,
-        SyntaxKind::FunctionDeclaration
-            | SyntaxKind::FunctionExpression
-            | SyntaxKind::ArrowFunction
-            | SyntaxKind::MethodDeclaration
-            | SyntaxKind::Constructor
-            | SyntaxKind::GetAccessor
-            | SyntaxKind::SetAccessor
-            | SyntaxKind::ClassStaticBlockDeclaration
-    )
-}
 
 pub(crate) fn is_optional_declaration(node: &Arc<Node>) -> bool {
     if node.kind != SyntaxKind::Parameter {
         return false;
     }
     match &node.data {
-        NodeData::ParameterDeclaration(data) => {
-            data.question_token.is_some() || data.initializer.is_some()
-        }
+        NodeData::ParameterDeclaration(data) => data.question_token.is_some(),
         _ => false,
     }
 }

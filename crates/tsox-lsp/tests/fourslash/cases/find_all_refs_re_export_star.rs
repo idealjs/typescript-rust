@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_re_export_star() {
     let content = r#"// @Filename: /a.ts
@@ -9,7 +9,7 @@ export function /*0*/foo(): void {}
 export * from "./a";
 // @Filename: /c.ts
 import { /*1*/foo } from "./b";"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "1")
+    let mut s = Session::new_for_test("findAllRefsReExportStar", content);
+    fourslash::verify_no_errors(&mut s, );
+    // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1")
 }

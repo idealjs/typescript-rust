@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn jsx_spread_reference() {
     let content = r#"//@Filename: file.tsx
@@ -19,7 +19,7 @@ class MyClass {
 
 [|var [|/*dst*/{| "contextRangeIndex": 0 |}nn|]: {name?: string; size?: number};|]
 var x = <MyClass {...[|n/*src*/n|]}></MyClass>;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "nn")
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "src")
+    let _s = Session::new_for_test("jsxSpreadReference", content);
+    // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "nn")
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "src")
 }

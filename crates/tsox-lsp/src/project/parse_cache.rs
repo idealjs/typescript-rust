@@ -57,6 +57,10 @@ impl ParseCache {
         self.inner.has(key)
     }
 
+    pub fn len(&self) -> usize {
+        self.inner.len()
+    }
+
     pub fn r#ref(&self, key: &ParseCacheKey) {
         self.inner.r#ref(key);
     }

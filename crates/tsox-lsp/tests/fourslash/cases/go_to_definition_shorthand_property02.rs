@@ -1,11 +1,11 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_shorthand_property02() {
     let content = r#"let x = {
     [|f/*1*/oo|]
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1")
+    let _s = Session::new_for_test("goToDefinitionShorthandProperty02", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

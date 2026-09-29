@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker_expressions::*;
+use crate::checker::utilities_is_optional_symbol::is_literal_expression_of_object;
 
 impl Checker {
     pub fn check_binary_expression(&mut self, node: &Arc<Node>) {
@@ -33,8 +34,39 @@ impl Checker {
                 data.operator_token.kind,
                 tsox_frontend::ast::SyntaxKind::AmpersandAmpersandToken
                     | tsox_frontend::ast::SyntaxKind::BarBarToken
+                    | tsox_frontend::ast::SyntaxKind::QuestionQuestionToken
             ) {
                 self.check_truthiness_of_type(&data.left);
+                let mut parent = node.parent();
+                while parent.as_ref().is_some_and(|p| {
+                    matches!(&p.data, tsox_frontend::ast::NodeData::ParenthesizedExpression(_))
+                        || matches!(&p.data, tsox_frontend::ast::NodeData::BinaryExpression(pb)
+                            if matches!(
+                                pb.operator_token.kind,
+                                tsox_frontend::ast::SyntaxKind::AmpersandAmpersandToken
+                                    | tsox_frontend::ast::SyntaxKind::BarBarToken
+                                    | tsox_frontend::ast::SyntaxKind::QuestionQuestionToken
+                            ))
+                }) {
+                    parent = parent.unwrap().parent();
+                }
+                let parent_is_if = parent
+                    .as_ref()
+                    .is_some_and(|p| p.kind == tsox_frontend::ast::SyntaxKind::IfStatement);
+                if data.operator_token.kind == tsox_frontend::ast::SyntaxKind::AmpersandAmpersandToken
+                    || parent_is_if
+                {
+                    let body = parent.and_then(|p| match &p.data {
+                        tsox_frontend::ast::NodeData::IfStatement(d) => Some(Arc::clone(&d.then_statement)),
+                        _ => None,
+                    });
+                    let left_type = self.get_type_of_node(&data.left);
+                    self.check_testing_known_truthy_callable_or_awaitable(
+                        &data.left,
+                        &left_type,
+                        body.as_ref(),
+                    );
+                }
             }
 
             let rhs_frame = {
@@ -70,8 +102,13 @@ impl Checker {
                 None => self.check_expression(&data.right),
             }
             self.check_binary_plus_operator_error(node, data);
+            self.check_binary_relational_operator_error(node, data);
+            if data.operator_token.kind == InKeyword {
+                self.check_in_expression(data);
+            }
             use tsox_frontend::ast::SyntaxKind::*;
 
+            let mut readonly_index_reported = false;
             if data.operator_token.kind == EqualsToken
                 && data.left.kind == SyntaxKind::PropertyAccessExpression
             {
@@ -79,7 +116,7 @@ impl Checker {
                 {
                     let obj_type = self.get_type_of_node(&pa.expression);
                     let name_text = pa.name.text();
-                    if self.is_property_readonly(&obj_type, name_text) {
+                    if self.is_readonly_property_write(&data.left, &obj_type, name_text) {
                         let file = self.current_file.clone();
                         self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                             file,
@@ -87,6 +124,53 @@ impl Checker {
                             CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_READ_ONLY_PROPERTY,
                             vec![name_text.to_string()],
                         ));
+                    } else if self.is_readonly_index_write(&obj_type, name_text) {
+                        // Go errorIfWritingToReadonlyIndex（点访问落 string 索引）：
+                        // 只报 2542，写类型检查照 Go checkReferenceExpression 阻断
+                        let type_name = self.type_to_string(&obj_type);
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            file,
+                            data.left.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                INDEX_SIGNATURE_IN_TYPE_0_ONLY_PERMITS_READING,
+                            vec![type_name],
+                        ));
+                        readonly_index_reported = true;
+                    }
+                }
+            }
+            if Self::is_assignment_operator(data.operator_token.kind)
+                && data.left.kind == SyntaxKind::ElementAccessExpression
+            {
+                if let tsox_frontend::ast::NodeData::ElementAccessExpression(ea) = &data.left.data
+                {
+                    let obj_type = self.get_type_of_node(&ea.expression);
+                    let (arg_name, key_flags) = match &ea.argument_expression.data {
+                        tsox_frontend::ast::NodeData::StringLiteral(sl) => {
+                            (Some(sl.text.clone()), TypeFlags::String)
+                        }
+                        tsox_frontend::ast::NodeData::Identifier(id) => {
+                            (Some(id.text.clone()), TypeFlags::String)
+                        }
+                        tsox_frontend::ast::NodeData::NumericLiteral(nl) => {
+                            (Some(nl.text.clone()), TypeFlags::Number)
+                        }
+                        _ => (None, TypeFlags::String),
+                    };
+                    if let Some(arg_name) = arg_name
+                        && self.is_readonly_index_write_kind(&obj_type, &arg_name, key_flags)
+                    {
+                        let type_name = self.type_to_string(&obj_type);
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            file,
+                            data.left.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                INDEX_SIGNATURE_IN_TYPE_0_ONLY_PERMITS_READING,
+                            vec![type_name],
+                        ));
+                        readonly_index_reported = true;
                     }
                 }
             }
@@ -113,11 +197,29 @@ impl Checker {
                 assigned_target_blocks_type_check = true;
             }
 
-            if Self::is_assignment_operator(data.operator_token.kind)
-                && data.left.kind == SyntaxKind::Identifier
-            {
-                let name_text = data.left.text().to_string();
-                if let Some(sym) = self.resolve_identifier(&data.left)
+            if Self::is_assignment_operator(data.operator_token.kind) && {
+                let mut target: &Arc<Node> = &data.left;
+                while target.kind == SyntaxKind::ParenthesizedExpression {
+                    target = match &target.data {
+                        tsox_frontend::ast::NodeData::ParenthesizedExpression(p) => {
+                            &p.expression
+                        }
+                        _ => break,
+                    };
+                }
+                target.kind == SyntaxKind::Identifier
+            } {
+                let mut ident_node: &Arc<Node> = &data.left;
+                while ident_node.kind == SyntaxKind::ParenthesizedExpression {
+                    ident_node = match &ident_node.data {
+                        tsox_frontend::ast::NodeData::ParenthesizedExpression(p) => {
+                            &p.expression
+                        }
+                        _ => break,
+                    };
+                }
+                let name_text = ident_node.text().to_string();
+                if let Some(sym) = self.resolve_identifier(ident_node)
                     && let base = self.resolve_alias_base(sym)
                 {
                     let msg = if base.flags.contains(SymbolFlags::Class) {
@@ -126,6 +228,9 @@ impl Checker {
                     } else if base.flags.intersects(SymbolFlags::ENUM) {
                         Some(tsox_core::diagnostics::messages_generated::
                                 CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_AN_ENUM)
+                    } else if base.flags.intersects(SymbolFlags::MODULE) {
+                        Some(tsox_core::diagnostics::messages_generated::
+                                CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_NAMESPACE)
                     } else if base.flags.contains(SymbolFlags::Function) {
                         Some(tsox_core::diagnostics::messages_generated::
                                 CANNOT_ASSIGN_TO_0_BECAUSE_IT_IS_A_FUNCTION)
@@ -136,7 +241,7 @@ impl Checker {
                         let file = self.current_file.clone();
                         self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                             file,
-                            data.left.loc,
+                            ident_node.loc,
                             msg,
                             vec![name_text],
                         ));
@@ -144,6 +249,18 @@ impl Checker {
                         assigned_target_blocks_type_check = true;
                     }
                 }
+            }
+
+            if data.operator_token.kind == EqualsToken
+                && matches!(
+                    data.left.kind,
+                    SyntaxKind::ArrayLiteralExpression | SyntaxKind::ObjectLiteralExpression
+                )
+            {
+                let rhs_type = self.get_type_of_node(&data.right);
+                let right_is_this = data.right.kind == SyntaxKind::ThisKeyword;
+                self.check_destructuring_assignment_ex(&data.left, &rhs_type, right_is_this);
+                assigned_target_blocks_type_check = true;
             }
 
             if Self::is_assignment_operator(data.operator_token.kind)
@@ -166,8 +283,7 @@ impl Checker {
                 if let Some(target) = self.declared_annotation_type_of(&data.left) {
                     if matches!(
                         data.right.kind,
-                        SyntaxKind::ObjectLiteralExpression
-                            | SyntaxKind::ArrayLiteralExpression
+                        SyntaxKind::ArrayLiteralExpression
                             | SyntaxKind::TypeAssertionExpression
                             | SyntaxKind::AsExpression
                     ) {
@@ -187,6 +303,7 @@ impl Checker {
 
             if Self::is_assignment_operator(data.operator_token.kind)
                 && !assigned_target_blocks_type_check
+                && !readonly_index_reported
             {
                 self.check_assignment_compat(node, data);
             }
@@ -199,6 +316,36 @@ impl Checker {
                     | ExclamationEqualsEqualsToken
             );
             if is_equality_op {
+                let in_js = self
+                    .current_file
+                    .as_ref()
+                    .is_some_and(|f| f.file_name.ends_with(".js") || f.file_name.ends_with(".jsx"));
+                if !in_js
+                    || matches!(
+                        data.operator_token.kind,
+                        EqualsEqualsEqualsToken | ExclamationEqualsEqualsToken
+                    )
+                {
+                    let object_literal_operand = is_literal_expression_of_object(&data.left)
+                        || is_literal_expression_of_object(&data.right);
+                    if object_literal_operand {
+                        let result = if matches!(
+                            data.operator_token.kind,
+                            EqualsEqualsToken | EqualsEqualsEqualsToken
+                        ) {
+                            "false"
+                        } else {
+                            "true"
+                        };
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            node.loc,
+                            THIS_CONDITION_WILL_ALWAYS_RETURN_0_SINCE_JAVASCRIPT_COMPARES_OBJECTS_BY_REFERENCE_NOT_VALUE,
+                            vec![result.to_string()],
+                        ));
+                    }
+                }
+
                 let left_type = self.get_type_of_node(&data.left);
                 let right_type = self.get_type_of_node(&data.right);
 
@@ -211,8 +358,9 @@ impl Checker {
                     && !right_type.flags.intersects(skip_flags)
                     && !self.are_types_comparable(&left_type, &right_type)
                 {
-                    let left_str = self.type_to_string(&left_type);
-                    let right_str = self.type_to_string(&right_type);
+                    // Go：同名不同型时用全限定名消歧
+                    let (left_str, right_str) =
+                        self.get_type_names_for_error_display(&left_type, &right_type);
                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                             self.current_file.clone(),
                             node.loc,

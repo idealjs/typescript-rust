@@ -179,7 +179,7 @@ impl Parser {
         context: ParsingContext,
         parse_element: fn(&mut Self) -> Arc<Node>,
     ) -> NodeList {
-        let pos = self.token_pos();
+        let pos = self.node_pos();
 
         let save_contexts = self.parsing_contexts;
         self.parsing_contexts |= 1 << (context as u32);
@@ -193,7 +193,7 @@ impl Parser {
             }
         }
         self.parsing_contexts = save_contexts;
-        let end = self.token_pos();
+        let end = self.node_pos();
         NodeList {
             loc: TextRange::new(pos, end),
             nodes,
@@ -205,7 +205,7 @@ impl Parser {
         context: ParsingContext,
         parse_element: fn(&mut Self) -> Arc<Node>,
     ) -> NodeList {
-        let pos = self.token_pos();
+        let pos = self.node_pos();
         let save_contexts = self.parsing_contexts;
         self.parsing_contexts |= 1 << (context as u32);
         let mut nodes = Vec::new();
@@ -221,7 +221,25 @@ impl Parser {
                     break;
                 }
 
-                self.expect(SyntaxKind::CommaToken);
+                // Go parseDelimitedList：枚举成员分隔符缺失用 TS1357 专用消息
+                if context == ParsingContext::EnumMembers {
+                    self.parse_error_at_current_token(
+                        tsox_core::diagnostics::AN_ENUM_MEMBER_NAME_MUST_BE_FOLLOWED_BY_A_OR,
+                        &[],
+                    );
+                } else {
+                    self.expect(SyntaxKind::CommaToken);
+                }
+
+                // Go：对象字面量/导入属性以 ';' 分隔时（expect 已报错），
+                // 消费 ';' 继续，避免成员列表中断带出连锁误报
+                if (context == ParsingContext::ObjectLiteralMembers
+                    || context == ParsingContext::ImportAttributes)
+                    && self.token == SyntaxKind::SemicolonToken
+                    && !self.has_preceding_line_break()
+                {
+                    self.next_token();
+                }
 
                 if element_start == self.token_pos() {
                     self.next_token();
@@ -237,7 +255,7 @@ impl Parser {
             }
         }
         self.parsing_contexts = save_contexts;
-        let end = self.token_pos();
+        let end = self.node_pos();
         NodeList {
             loc: TextRange::new(pos, end),
             nodes,

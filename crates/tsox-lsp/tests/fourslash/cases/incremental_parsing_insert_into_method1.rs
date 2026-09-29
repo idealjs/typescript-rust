@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn incremental_parsing_insert_into_method1() {
     let content = r#"class C {
@@ -9,7 +10,7 @@ fn incremental_parsing_insert_into_method1() {
     }
     public foo3() { }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("incrementalParsingInsertIntoMethod1", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::insert(&mut s, " + 1");
 }

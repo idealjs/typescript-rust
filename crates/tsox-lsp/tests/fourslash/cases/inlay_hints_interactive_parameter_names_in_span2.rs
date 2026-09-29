@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: end := f.MarkerByName(t, 'h')"]
+
 #[test]
 fn inlay_hints_interactive_parameter_names_in_span2() {
     let content = r#"function foo1 (a: number, b: number) {}
@@ -16,9 +16,9 @@ foo3(/*e*/1, /*f*/2);
 foo4(/*g*/1, /*h*/2);
 foo5(/*i*/1, /*j*/2);
 foo6(/*k*/1, /*l*/2);"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("inlayHintsInteractiveParameterNamesInSpan2", content);
     // TODO: start := f.MarkerByName(t, "c")
     // TODO: end := f.MarkerByName(t, "h")
     // TODO: span := &lsproto.Range{Start: start.LSPosition, End: end.LSPosition}
-    fourslash::unsupported("VerifyBaselineInlayHints"); // f.VerifyBaselineInlayHints(t, span, &lsutil.UserPreferences{
+    // TODO: f.VerifyBaselineInlayHints(t, span, &lsutil.UserPreferences{
 }

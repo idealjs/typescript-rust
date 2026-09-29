@@ -3,6 +3,33 @@
 use crate::checker::checker_suggestions_resolve::*;
 
 impl Checker {
+    // Go globalThisSymbol.Exports 即 globals 表（引用共享）；单表架构下以
+    // 符号同一性判定后直接查 globals
+    pub(crate) fn global_this_export(
+        &self,
+        symbol: &Arc<Symbol>,
+        name: &str,
+    ) -> Option<Arc<Symbol>> {
+        if self
+            .global_this_symbol
+            .as_ref()
+            .is_some_and(|gt| Arc::ptr_eq(gt, symbol))
+        {
+            self.globals.get(name).cloned()
+        } else {
+            None
+        }
+    }
+
+    pub(crate) fn global_this_export_of_type(
+        &self,
+        t: &Arc<crate::checker::types::Type>,
+        name: &str,
+    ) -> Option<Arc<Symbol>> {
+        let symbol = t.symbol.as_ref()?;
+        self.global_this_export(symbol, name)
+    }
+
     pub(crate) fn ambient_namespace_locals_visible(&self, ns: &Arc<Symbol>) -> bool {
         if std::env::var_os("TSOX_NO_AMBIENT").is_some() {
             return false;
@@ -39,19 +66,197 @@ impl Checker {
             })
     }
 
-    pub(crate) fn resolve_alias_base(&mut self, symbol: Arc<Symbol>) -> Arc<Symbol> {
+    pub(crate) fn resolve_alias_target(&mut self, symbol: Arc<Symbol>) -> Option<Arc<Symbol>> {
         if !symbol.flags.intersects(SymbolFlags::Alias) {
-            return symbol;
+            return Some(symbol);
+        }
+
+        // binder 对 export/import specifier 已设 export_symbol 直连目标
+        //（`export { foo }` → 文件 locals 的绑定）
+        if let Some(target) = symbol.export_symbol.as_ref() {
+            if !std::ptr::eq(
+                std::sync::Arc::as_ptr(target) as *const u8,
+                std::sync::Arc::as_ptr(&symbol) as *const u8,
+            ) {
+                return Some(Arc::clone(target));
+            }
         }
 
         if symbol.declarations.iter().any(|d| {
             matches!(
                 d.kind,
-                SyntaxKind::NamespaceImport | SyntaxKind::NamespaceExport
+                SyntaxKind::NamespaceImport
+                    | SyntaxKind::NamespaceExport
+                    | SyntaxKind::ImportSpecifier
+                    | SyntaxKind::ExportSpecifier
             )
-        }) && let Some(module_sym) = self.resolve_import_alias_module(&symbol)
+        }) {
+            if let Some(module_sym) = self.resolve_import_alias_module(&symbol) {
+                // Go resolveEntityName：named import 的 alias 目标 = 模块内同名
+                // 导出（namespace import 才是模块符号本身）
+                if symbol.declarations.iter().any(|d| {
+                    matches!(d.kind, SyntaxKind::ImportSpecifier | SyntaxKind::ExportSpecifier)
+                }) {
+                    // import { P as Q } / export { x as y } from "m"：模块侧名是
+                    // property_name，不是本地绑定/导出名
+                    let import_name = symbol
+                        .declarations
+                        .iter()
+                        .find_map(|d| match &d.data {
+                            NodeData::ImportSpecifier(is) => Some(
+                                is.property_name
+                                    .as_ref()
+                                    .unwrap_or(&is.name)
+                                    .text()
+                                    .to_string(),
+                            ),
+                            NodeData::ExportSpecifier(es) => Some(
+                                es.property_name
+                                    .as_ref()
+                                    .unwrap_or(&es.name)
+                                    .text()
+                                    .to_string(),
+                            ),
+                            _ => None,
+                        })
+                        .unwrap_or_else(|| symbol.name.clone());
+                    if let Some(named) = module_sym
+                        .exports
+                        .get(&import_name)
+                        .cloned()
+                        .or_else(|| module_sym.members.get(&import_name).cloned())
+                    {
+                        return Some(named);
+                    }
+                }
+                // Go getTargetOfNamespaceImport → resolveESModuleSymbol：
+                // namespace import 的目标经 export= 解到赋值目标符号
+                if symbol
+                    .declarations
+                    .iter()
+                    .any(|d| d.kind == SyntaxKind::NamespaceImport)
+                    && let Some(ee) =
+                        module_sym.exports.get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
+                {
+                    let ee = Arc::clone(ee);
+                    let resolved = self.resolve_alias_base(Arc::clone(&ee));
+                    if !Arc::ptr_eq(&resolved, &ee)
+                        && !self.alias_circular_reported.contains(&ee.id())
+                    {
+                        return Some(resolved);
+                    }
+                }
+                return Some(module_sym);
+            }
+        }
+        // `export { foo }`（无 from）：目标 = 所在文件符号的局部绑定
+        //（index.ts 的 import * as foo 的 NamespaceImport alias）
+        // 默认导入绑定（Go getTargetOfImportClause）：目标 = 模块 default 导出
+        if let Some(decl) = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::ImportClause)
         {
-            return module_sym;
+            if let NodeData::ImportClause(ic) = &decl.data
+                && ic.name.as_ref().is_some_and(|n| n.text() == symbol.name)
+                && let Some((module, _)) = self.import_declaration_context(decl)
+            {
+                if let Some(target) = self.resolve_default_export_target(&module) {
+                    return Some(target);
+                }
+                return Some(
+                    self.unknown_symbol
+                        .clone()
+                        .unwrap_or_else(|| Arc::clone(&symbol)),
+                );
+            }
+        }
+        if let Some(decl) = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::ExportSpecifier)
+        {
+            let no_from = decl.parent().is_some_and(|clause| {
+                clause.parent().is_some_and(|export_decl| {
+                    !matches!(
+                        &export_decl.data,
+                        NodeData::ExportDeclaration(d) if d.module_specifier.is_some()
+                    )
+                })
+            });
+            let target_name = if no_from {
+                match &decl.data {
+                    NodeData::ExportSpecifier(es) => es
+                        .property_name
+                        .as_ref()
+                        .unwrap_or(&es.name)
+                        .text()
+                        .trim_matches(['"', '\'', '`'])
+                        .to_string(),
+                    _ => symbol.name.clone(),
+                }
+            } else {
+                symbol.name.clone()
+            };
+            let mut cur = Arc::clone(decl);
+            for _ in 0..6 {
+                let Some(parent) = cur.parent() else { break };
+                if parent.kind == SyntaxKind::SourceFile {
+                    if let Some(locals) = self.program.symbol_map().locals.get(&parent.id())
+                        && let Some(target) = locals.get(&target_name).cloned()
+                    {
+                        return Some(target);
+                    }
+                    if let Some(sf_sym) = self.program.symbol_map().symbol_of(&parent)
+                        && let Some(target) = sf_sym.exports.get(&target_name).cloned()
+                        && !(no_from && Arc::ptr_eq(&target, &symbol))
+                    {
+                        return Some(target);
+                    }
+                    if no_from
+                        && let Some(sf_sym) = self.program.symbol_map().symbol_of(&parent)
+                        && let Some(target) = sf_sym.members.get(&target_name).cloned()
+                    {
+                        return Some(target);
+                    }
+                    break;
+                }
+                cur = parent;
+            }
+        }
+        // Go getTargetOfExportAssignment：export default X / export = X 的
+        // 别名目标 = 表达式在所在模块作用域解析出的符号
+        //（含 Foo.Member 属性访问形态，Go getTargetOfAccessExpression）
+        if let Some(decl) = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::ExportAssignment)
+            && let tsox_frontend::ast::NodeData::ExportAssignment(ea) = &decl.data
+            && matches!(
+                ea.expression.kind,
+                SyntaxKind::Identifier
+                    | SyntaxKind::QualifiedName
+                    | SyntaxKind::PropertyAccessExpression
+            )
+            && let Some(scope) = decl
+                .parent()
+                .filter(|p| p.kind == SyntaxKind::SourceFile)
+                .or_else(|| {
+                    decl.parent().and_then(|p| {
+                        if p.kind == SyntaxKind::ModuleBlock {
+                            p.parent()
+                        } else {
+                            None
+                        }
+                    })
+                })
+        {
+            self.push_scope(&scope);
+            let target = self.resolve_qualified_symbol(&ea.expression);
+            self.pop_scope();
+            if let Some(target) = target {
+                return Some(target);
+            }
         }
         if let Some(decl) = symbol
             .declarations
@@ -65,38 +270,24 @@ impl Checker {
                     && let Some(module_sym) =
                         self.resolve_module_file_symbol(&ext.expression.text())
                 {
+                    // Go getTargetOfImportEqualsDeclaration（外部模块引用）：
+                    // 目标 = 模块 export= 别名符号（dontResolveAlias），别名侧
+                    // 递归由 resolve_alias_base 承担（环检测对齐 Go resolveAlias）
                     if let Some(export_eq) = module_sym
                         .exports
                         .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
                     {
-                        let entity_decl = export_eq
-                            .declarations
-                            .iter()
-                            .find(|d| d.kind == SyntaxKind::ExportAssignment)
-                            .cloned();
-                        let scope_decl = module_sym
-                            .declarations
-                            .iter()
-                            .find(|d| d.kind == SyntaxKind::ModuleDeclaration)
-                            .cloned();
-                        if let (Some(export_decl), Some(scope)) = (entity_decl, scope_decl)
-                            && let tsox_frontend::ast::NodeData::ExportAssignment(ea) =
-                                &export_decl.data
-                            && ea.is_export_equals
-                            && matches!(
-                                ea.expression.kind,
-                                SyntaxKind::Identifier | SyntaxKind::QualifiedName
-                            )
-                        {
-                            self.push_scope(&scope);
-                            let target = self.resolve_qualified_symbol(&ea.expression);
-                            self.pop_scope();
-                            if let Some(target) = target {
-                                return target;
-                            }
+                        let export_eq = Arc::clone(export_eq);
+                        let resolved = self.resolve_alias_base(Arc::clone(&export_eq));
+                        if self.alias_circular_reported.contains(&export_eq.id()) {
+                            return None;
                         }
+                        if Arc::ptr_eq(&resolved, &export_eq) {
+                            return Some(module_sym);
+                        }
+                        return Some(resolved);
                     }
-                    return module_sym;
+                    return Some(module_sym);
                 }
 
                 if matches!(
@@ -128,18 +319,19 @@ impl Checker {
                             None => break,
                         }
                         if !current.flags.intersects(SymbolFlags::Alias) {
-                            return current;
+                            return Some(current);
                         }
                     }
-                    return current;
+                    return Some(current);
                 }
             }
         }
-        symbol
+        Some(symbol)
     }
 
     pub(crate) fn resolve_module_file_symbol(&self, specifier: &str) -> Option<Arc<Symbol>> {
-        if !specifier.starts_with('.') {
+        // 同 isExternalModuleNameRelative 语义：`.prisma/client` 是包名，不是相对路径
+        if !specifier.starts_with("./") && !specifier.starts_with("../") {
             for file in self.program.source_files() {
                 if file.external_module_indicator.is_some() {
                     continue;
@@ -154,6 +346,45 @@ impl Checker {
                         }
                     }
                 }
+            }
+            // node_modules 向上查找（Go loadModuleFromFile 的 node 解析）：
+            // <dir>/node_modules/<pkg>/index.{d.ts,ts,...}
+            let file = self.display_enclosing_file.clone().or_else(|| self.current_file.clone())?;
+            let mut dir = match file.file_name.rfind('/') {
+                Some(i) => file.file_name[..i].to_string(),
+                None => return None,
+            };
+            loop {
+                let pkg_dir = format!("{dir}/node_modules/{specifier}");
+                for index in ["./index.d.ts", "./index.ts", "./index.tsx"] {
+                    if let Some(sym) = self.resolve_module_file_symbol_in(&pkg_dir, index) {
+                        return Some(sym);
+                    }
+                }
+                // Go loadModuleFromImmediateNodeModulesDirectory：实现包未命中
+                // 时回退 @types 包（declaration-only；@scope/name → scope__name）
+                let mangled = if let Some(rest) = specifier.strip_prefix('@') {
+                    rest.split_once('/')
+                        .map(|(scope, pkg)| format!("{scope}__{pkg}"))
+                        .unwrap_or_else(|| rest.to_string())
+                } else {
+                    specifier.to_string()
+                };
+                let types_dir = format!("{dir}/node_modules/@types/{mangled}");
+                for index in ["./index.d.ts", "./index.ts", "./index.tsx"] {
+                    if let Some(sym) = self.resolve_module_file_symbol_in(&types_dir, index) {
+                        return Some(sym);
+                    }
+                }
+                let parent = match dir.rfind('/') {
+                    Some(0) => "/".to_string(),
+                    Some(i) => dir[..i].to_string(),
+                    None => break,
+                };
+                if parent == dir {
+                    break;
+                }
+                dir = parent;
             }
             return None;
         }
@@ -170,29 +401,51 @@ impl Checker {
         dir: &str,
         specifier: &str,
     ) -> Option<Arc<Symbol>> {
-        let stem = specifier.strip_prefix("./").unwrap_or(specifier);
+        let raw = specifier.strip_prefix("./").unwrap_or(specifier);
 
-        let stem = stem
+        let stripped = raw
             .strip_suffix(".js")
-            .or_else(|| stem.strip_suffix(".jsx"))
-            .unwrap_or(stem);
+            .or_else(|| raw.strip_suffix(".jsx"))
+            .unwrap_or(raw);
+        let stripped = stripped
+            .strip_suffix(".mjs")
+            .or_else(|| stripped.strip_suffix(".cjs"))
+            .unwrap_or(stripped);
+
+        // 候选顺序对齐 tsc loadModuleFromFile：精确命中（含 .d.ts/.js 原样）、
+        // .js 说明符回退到同名 .ts/.tsx/.d.ts、目录 index
+        let candidates = [
+            format!("{dir}/{raw}"),
+            format!("{dir}/{stripped}.ts"),
+            format!("{dir}/{stripped}.tsx"),
+            format!("{dir}/{stripped}.d.ts"),
+            format!("{dir}/{stripped}.js"),
+            format!("{dir}/{stripped}.jsx"),
+            format!("{dir}/{stripped}/index.ts"),
+            format!("{dir}/{stripped}/index.d.ts"),
+        ];
         let symbol_map = self.program.symbol_map();
-        for cand in [
-            format!("{dir}/{stem}.ts"),
-            format!("{dir}/{stem}.tsx"),
-            format!("{dir}/{stem}.d.ts"),
-            format!("{dir}/{stem}/index.ts"),
-            format!("{dir}/{stem}/index.d.ts"),
-        ] {
-            if let Some(sf) = self
+        for cand in candidates {
+            let sf = self
                 .program
                 .source_files()
                 .iter()
                 .find(|f| f.file_name == cand)
-            {
-                if let Some(sym) = symbol_map.symbol_of(&sf.node) {
-                    return Some(Arc::clone(sym));
-                }
+                .cloned()
+                .or_else(|| {
+                    let real = self.program.canonicalize_path(&cand);
+                    if real != cand {
+                        self.program
+                            .source_files()
+                            .iter()
+                            .find(|f| f.file_name == real)
+                            .cloned()
+                    } else {
+                        None
+                    }
+                });
+            if let Some(sym) = sf.and_then(|sf| symbol_map.symbol_of(&sf.node).cloned()) {
+                return Some(sym);
             }
         }
         None
@@ -240,6 +493,50 @@ impl Checker {
                 .unwrap_or_default(),
             _ => String::new(),
         }
+    }
+
+    pub(crate) fn generic_display_name(
+        &self,
+        name: &str,
+        type_parameters: Option<&Arc<tsox_frontend::ast::NodeList>>,
+    ) -> String {
+        let Some(tps) = type_parameters else {
+            return name.to_string();
+        };
+        let names: Vec<&str> = tps
+            .nodes
+            .iter()
+            .filter_map(|tp| match &tp.data {
+                tsox_frontend::ast::NodeData::TypeParameterDeclaration(d) => {
+                    Some(d.name.text())
+                }
+                _ => None,
+            })
+            .collect();
+        if names.is_empty() {
+            name.to_string()
+        } else {
+            format!("{name}<{}>", names.join(", "))
+        }
+    }
+
+    pub(crate) fn extends_heritage_expr_of(
+        &self,
+        class_node: &Arc<Node>,
+    ) -> Option<Arc<Node>> {
+        let heritage = match &class_node.data {
+            tsox_frontend::ast::NodeData::ClassDeclaration(data) => data.heritage_clauses.clone(),
+            tsox_frontend::ast::NodeData::ClassExpression(data) => data.heritage_clauses.clone(),
+            _ => return None,
+        };
+        heritage?.iter().find_map(|clause| {
+            if let tsox_frontend::ast::NodeData::HeritageClause(hc) = &clause.data
+                && hc.token == SyntaxKind::ExtendsKeyword
+            {
+                return hc.types.iter().next().cloned();
+            }
+            None
+        })
     }
 
     pub(crate) fn class_member_static_by_name(

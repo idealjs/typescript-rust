@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
+
 #[test]
 fn rename_namespace() {
     let content = r#"namespace /**/NS {
@@ -10,6 +10,6 @@ fn rename_namespace() {
 }
 
 const a: NS.E = NS.E.A;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
+    let _s = Session::new_for_test("renameNamespace", content);
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

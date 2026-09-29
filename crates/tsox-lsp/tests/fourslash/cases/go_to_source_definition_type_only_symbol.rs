@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // .d.ts declaration rather than jumping to the first line o"]
+
 #[test]
 fn go_to_source_definition_type_only_import_falls_back_to_declaration() {
     // TODO: // When source definition is invoked on a type-only symbol (e.g. an
@@ -21,11 +21,10 @@ export function create(config) { return config; }
 import { /*importConfig*/Config, create } from "pkg";
 const c: Config = { name: "test", value: 1 };
 create(c);"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importConfig")
+    let _s = Session::new_for_test("goToSourceDefinitionTypeOnlyImportFallsBackToDeclaration", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importConfig")
 }
 
-#[ignore = "generator: // When source definition is invoked at a usage site of a ty"]
 #[test]
 fn go_to_source_definition_type_only_usage_falls_back_to_declaration() {
     // TODO: // When source definition is invoked at a usage site of a type-only symbol,
@@ -46,11 +45,10 @@ export function create(config) { return config; }
 import { Config, create } from "pkg";
 const c: /*usageSite*/Config = { name: "test" };
 create(c);"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usageSite")
+    let _s = Session::new_for_test("goToSourceDefinitionTypeOnlyUsageFallsBackToDeclaration", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usageSite")
 }
 
-#[ignore = "generator: // Value imports (functions, classes, variables) should stil"]
 #[test]
 fn go_to_source_definition_value_import_still_works() {
     // TODO: // Value imports (functions, classes, variables) should still navigate
@@ -65,6 +63,6 @@ export function /*targetCreate*/create() {}
 // @Filename: /home/src/workspaces/project/index.ts
 import { /*importCreate*/create } from "pkg";
 create();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importCreate")
+    let _s = Session::new_for_test("goToSourceDefinitionValueImportStillWorks", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importCreate")
 }

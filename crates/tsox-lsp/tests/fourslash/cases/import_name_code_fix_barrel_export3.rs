@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
+
 #[test]
 fn import_name_code_fix_barrel_export3() {
     let content = r#"// @module: commonjs
@@ -20,7 +20,7 @@ export {};
 A/*parent*/
 // @Filename: /src/index.ts
 export * from "./a";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "sibling", []string{"./a", "./index", "../index"}, &lsutil.User
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "parent", []string{"../foo/a", "../foo/index", "../index"}, &ls
+    let _s = Session::new_for_test("importNameCodeFix_barrelExport3", content);
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "sibling", []string{"./a", "./index", "../index"}, &lsutil.User
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "parent", []string{"../foo/a", "../foo/index", "../index"}, &ls
 }

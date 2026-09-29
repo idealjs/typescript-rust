@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_no_destructure_non_object_literal() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @lib: es5
 // @target: es2015
 // @strict: true
@@ -27,6 +27,6 @@ export = $;
 module.exports = {};
 // @Filename: /index.ts
 filter/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"./object-literal", "./jquery"}, nil /*preferences
+    let _s = Session::new_for_test("importNameCodeFix_noDestructureNonObjectLiteral", content);
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"./object-literal", "./jquery"}, nil /*preferences
 }

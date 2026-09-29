@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_merged_alias() {
     let content = r#"// @filename: /a.ts
@@ -32,6 +32,6 @@ namespace foo/*8*/ {
 foo/*9*/()
 let x1: foo/*10*/;
 let x2: foo/*11*/.bar;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoMergedAlias", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

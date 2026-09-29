@@ -9,39 +9,45 @@ impl Checker {
             NodeData::ContinueStatement(data) => data.label.as_ref(),
             _ => None,
         };
-        let target_label_text = target_label.map(|l| l.text().to_string());
         let is_break = node.kind == SyntaxKind::BreakStatement;
 
-        for ctx in self.break_continue_context_stack.iter().rev() {
-            match ctx.kind {
-                crate::checker::BreakContinueContextKind::Function => {
-                    return self
-                        .grammar_error_on_node(node, &JUMP_TARGET_CANNOT_CROSS_FUNCTION_BOUNDARY);
-                }
-                crate::checker::BreakContinueContextKind::Labeled => {
-                    if let Some(label_text) = &target_label_text {
-                        if ctx.label.as_deref() == Some(label_text.as_str()) {
-                            if !is_break && !ctx.is_iteration {
-                                return self.grammar_error_on_node(
-                                    node,
-                                    &A_CONTINUE_STATEMENT_CAN_ONLY_JUMP_TO_A_LABEL_OF_AN_ENCLOSING_ITERATION_STATEMENT,
-                                );
-                            }
-                            return false;
+        let mut current = Some(Arc::clone(node));
+        while let Some(cur) = current {
+            if tsox_frontend::ast::is_function_like_or_class_static_block_declaration(&cur) {
+                return self
+                    .grammar_error_on_node(node, &JUMP_TARGET_CANNOT_CROSS_FUNCTION_BOUNDARY);
+            }
+            match cur.kind {
+                SyntaxKind::LabeledStatement => {
+                    if let Some(label) = target_label
+                        && let NodeData::LabeledStatement(data) = &cur.data
+                        && data.label.text() == label.text()
+                    {
+                        let misplaced_continue = !is_break
+                            && !tsox_frontend::ast::is_iteration_statement(&data.statement, true);
+                        if misplaced_continue {
+                            return self.grammar_error_on_node(
+                                node,
+                                &A_CONTINUE_STATEMENT_CAN_ONLY_JUMP_TO_A_LABEL_OF_AN_ENCLOSING_ITERATION_STATEMENT,
+                            );
                         }
-                    }
-                }
-                crate::checker::BreakContinueContextKind::Loop => {
-                    if target_label.is_none() {
                         return false;
                     }
                 }
-                crate::checker::BreakContinueContextKind::Switch => {
+                SyntaxKind::SwitchStatement => {
                     if is_break && target_label.is_none() {
                         return false;
                     }
                 }
+                _ => {
+                    if target_label.is_none()
+                        && tsox_frontend::ast::is_iteration_statement(&cur, false)
+                    {
+                        return false;
+                    }
+                }
             }
+            current = cur.parent();
         }
 
         let message = if target_label.is_some() {
@@ -76,7 +82,7 @@ impl Checker {
 
         let block_scope_flags = node.flags & NodeFlags::BlockScoped;
         if block_scope_flags == NodeFlags::Using || block_scope_flags == NodeFlags::AwaitUsing {
-            if let Some(parent) = &node.parent {
+            if let Some(parent) = node.parent() {
                 if parent.kind == SyntaxKind::ForInStatement {
                     let message = if block_scope_flags == NodeFlags::Using {
                         &THE_LEFT_HAND_SIDE_OF_A_FOR_IN_STATEMENT_CANNOT_BE_A_USING_DECLARATION
@@ -112,7 +118,7 @@ impl Checker {
             _ => return false,
         };
 
-        let node_flags = node.flags;
+        let node_flags = tsox_frontend::ast::utilities::get_combined_node_flags(node);
         let block_scope_kind = node_flags & NodeFlags::BlockScoped;
 
         if is_binding_pattern(&data.name) {
@@ -136,9 +142,9 @@ impl Checker {
         }
 
         let in_for_in_or_of = node
-            .parent
+            .parent()
             .as_ref()
-            .and_then(|p| p.parent.clone())
+            .and_then(|p| p.parent())
             .map(|grandparent| {
                 grandparent.kind == SyntaxKind::ForInStatement
                     || grandparent.kind == SyntaxKind::ForOfStatement
@@ -146,18 +152,49 @@ impl Checker {
             .unwrap_or(false);
 
         if !in_for_in_or_of {
-            if data.initializer.is_none() {
+            let mut anc_ambient = false;
+            let mut anc = node.parent();
+            while let Some(a) = anc {
+                if a.has_syntactic_modifier(ModifierFlags::Ambient) {
+                    anc_ambient = true;
+                    break;
+                }
+                if matches!(
+                    a.kind,
+                    SyntaxKind::SourceFile
+                        | SyntaxKind::Block
+                        | SyntaxKind::ClassDeclaration
+                        | SyntaxKind::FunctionDeclaration
+                ) {
+                    break;
+                }
+                anc = a.parent();
+            }
+            let in_dts = self
+                .current_file
+                .as_ref()
+                .is_some_and(|f| f.is_declaration_file);
+            if node_flags.contains(NodeFlags::Ambient) || anc_ambient || in_dts {
+                self.check_ambient_initializer(node);
+            } else if data.initializer.is_none() {
                 if is_binding_pattern(&data.name) {
                     let parent_is_binding_pattern = node
-                        .parent
+                        .parent()
                         .as_ref()
                         .map(|p| is_binding_pattern(p))
                         .unwrap_or(false);
                     if !parent_is_binding_pattern {
-                        return self.grammar_error_on_node(
+                        let reported = self.grammar_error_on_node(
                             node,
                             &A_DESTRUCTURING_DECLARATION_MUST_HAVE_AN_INITIALIZER,
                         );
+                        if data.type_node.is_none() {
+                            // Go getTypeForBindingElement：无初始化式且无注解的
+                            // 解构声明，各绑定元素经 widenTypeForVariableLikeDeclaration
+                            // 报 TS7031（按位置序在 TS1182 之后）
+                            self.report_implicit_any_binding_elements(&data.name);
+                        }
+                        return reported;
                     }
                 }
 
@@ -190,9 +227,9 @@ impl Checker {
 
         if let Some(excl_token) = &data.exclamation_token {
             let parent_kind = node
-                .parent
+                .parent()
                 .as_ref()
-                .and_then(|p| p.parent.as_ref())
+                .and_then(|p| p.parent())
                 .map(|gp| gp.kind);
             let in_variable_statement = parent_kind == Some(SyntaxKind::VariableStatement);
             let has_type = data.type_node.is_some();
@@ -209,6 +246,10 @@ impl Checker {
                 };
                 return self.grammar_error_on_node(excl_token, message);
             }
+        }
+
+        if !block_scope_kind.is_empty() {
+            return self.check_grammar_name_in_let_or_const_declarations(&data.name);
         }
 
         false

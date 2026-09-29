@@ -81,9 +81,8 @@ pub fn is_question_token(node: Option<&Node>) -> bool {
 }
 
 pub fn is_jsx_tag_name(node: &Arc<Node>) -> bool {
-    let parent = match &node.parent {
-        Some(p) => p,
-        None => return false,
+    let Some(parent) = node.parent() else {
+        return false;
     };
     match parent.kind {
         SyntaxKind::JsxOpeningElement

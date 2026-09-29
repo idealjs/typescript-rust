@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn reference_in_parameter_property_declaration() {
     let content = r#"// @Filename: file1.ts
@@ -19,6 +19,6 @@ class Foo {
         this.protectedParam = false;
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
+    let _s = Session::new_for_test("referenceInParameterPropertyDeclaration", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

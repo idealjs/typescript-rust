@@ -95,12 +95,22 @@ impl Checker {
         source: &Arc<Signature>,
         target: &Arc<Signature>,
     ) {
-        let param_count = source.parameters.len().min(target.parameters.len());
+        // Go applyToParameterTypes：非 rest 参数成对（源无 rest 时按源参数数截断），
+        // 目标带 rest 时用源在 rest 起点的展开类型对位（...t: T vs ...rest: infer R
+        // 推出 R = T[number][]）
+        let source_count = self.get_parameter_count(source);
+        let target_count = self.get_parameter_count(target);
+        let source_rest = self.get_effective_rest_type(source);
+        let target_rest = self.get_effective_rest_type(target);
+        let target_non_rest = target_count - usize::from(target_rest.is_some());
+        let param_count = if source_rest.is_some() {
+            target_non_rest
+        } else {
+            source_count.min(target_non_rest)
+        };
         for i in 0..param_count {
-            let source_param = &source.parameters[i];
-            let target_param = &target.parameters[i];
-            let st = self.get_type_of_symbol(source_param);
-            let tt = self.get_type_of_symbol(target_param);
+            let st = self.get_type_at_position(source, i);
+            let tt = self.get_type_at_position(target, i);
             let save_contra = state.contravariant;
             let save_biv = state.bivariant;
             state.contravariant = true;
@@ -109,24 +119,21 @@ impl Checker {
             state.contravariant = save_contra;
             state.bivariant = save_biv;
         }
+        if let Some(target_rest_type) = target_rest {
+            let source_rest_at = self.source_rest_type_at(source, param_count);
+            let save_contra = state.contravariant;
+            let save_biv = state.bivariant;
+            state.contravariant = true;
+            state.bivariant = false;
+            self.infer_from_types(state, &target_rest_type, &source_rest_at);
+            state.contravariant = save_contra;
+            state.bivariant = save_biv;
+        }
 
         let st = self.get_return_type_of_signature(source);
         let tt = self.get_return_type_of_signature(target);
         if let (Some(st), Some(tt)) = (st, tt) {
-            if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
-                eprintln!(
-                    "[infer-sig] ret {} -> {}",
-                    self.type_to_string(&st),
-                    self.type_to_string(&tt)
-                );
-            }
             self.infer_from_types(state, &st, &tt);
-        } else if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
-            eprintln!(
-                "[infer-sig] ret MISSING src={} tgt={}",
-                source.resolved_return_type.get().is_some(),
-                target.resolved_return_type.get().is_some()
-            );
         }
     }
 
@@ -136,23 +143,55 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
     ) {
-        let source_struct = source.as_structured();
-        let target_struct = target.as_structured();
-        if let (Some(source_s), Some(target_s)) = (source_struct, target_struct) {
-            for target_index in &target_s.index_infos {
-                for source_index in &source_s.index_infos {
-                    let key_match = match (&target_index.key_type, &source_index.key_type) {
-                        (Some(tk), Some(sk)) => self.is_type_identical_to(sk, tk),
-                        _ => true,
-                    };
-                    if key_match {
-                        if let (Some(tv), Some(sv)) =
-                            (&target_index.value_type, &source_index.value_type)
-                        {
-                            self.infer_from_types(state, sv, tv);
-                        }
+        let mut priority = InferencePriority::None;
+        if source.object_flags.intersects(ObjectFlags::Mapped)
+            && target.object_flags.intersects(ObjectFlags::Mapped)
+        {
+            priority = InferencePriority::HomomorphicMappedType;
+        }
+        let target_infos = self.get_index_infos_of_type(target);
+        if self.is_object_type_with_inferable_index(source) {
+            for target_info in &target_infos {
+                let Some(target_key) = target_info.key_type.clone() else {
+                    continue;
+                };
+                let mut prop_types: Vec<Arc<Type>> = Vec::new();
+                for prop in self.get_properties_of_type(source) {
+                    let literal_key = self.get_literal_type_from_property(&prop);
+                    if self.is_applicable_index_type(&literal_key, &target_key) {
+                        let prop_type = self.get_type_of_symbol(&prop);
+                        let prop_type = if prop.flags.contains(SymbolFlags::Optional) {
+                            self.remove_missing_or_undefined_type(&prop_type)
+                        } else {
+                            prop_type
+                        };
+                        prop_types.push(prop_type);
                     }
                 }
+                for info in self.get_index_infos_of_type(source) {
+                    if let Some(src_key) = &info.key_type
+                        && self.is_applicable_index_type(src_key, &target_key)
+                        && let Some(v) = &info.value_type
+                    {
+                        prop_types.push(Arc::clone(v));
+                    }
+                }
+                if !prop_types.is_empty()
+                    && let Some(tv) = &target_info.value_type
+                {
+                    let union = self.get_union_type(prop_types);
+                    self.infer_with_priority(state, &union, tv, priority);
+                }
+            }
+        }
+        for target_info in &target_infos {
+            let Some(target_key) = target_info.key_type.clone() else {
+                continue;
+            };
+            if let Some(source_info) = self.get_applicable_index_info(source, &target_key)
+                && let (Some(sv), Some(tv)) = (&source_info.value_type, &target_info.value_type)
+            {
+                self.infer_with_priority(state, sv, tv, priority);
             }
         }
     }
@@ -288,3 +327,4 @@ impl Checker {
     }
 
 }
+

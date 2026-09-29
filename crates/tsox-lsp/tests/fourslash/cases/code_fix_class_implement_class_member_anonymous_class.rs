@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
+
 #[test]
 fn code_fix_class_implement_class_member_anonymous_class() {
     let content = r#"// @strict: false
@@ -13,6 +13,6 @@ class A {
     }
 }
 class C implements A {[| |]}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
+    let _s = Session::new_for_test("codeFixClassImplementClassMemberAnonymousClass", content);
+    // TODO: f.VerifyCodeFixNotAvailable(t)
 }

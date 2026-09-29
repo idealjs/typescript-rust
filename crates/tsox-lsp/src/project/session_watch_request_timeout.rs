@@ -14,6 +14,11 @@ pub struct SessionInit {
     pub client: Option<Arc<dyn Client>>,
     pub parse_cache: Option<Arc<ParseCache>>,
     pub logger: Option<Arc<dyn Logger>>,
+    pub spawner: Option<Arc<dyn tsox_compile::mig::m3l_cm_2::Spawner>>,
+    pub content_mapper_logger: Option<tsox_compile::mig::m3l_cm_2::Logger>,
+    pub content_mapped_parse_cache: Option<Arc<ParseCache>>,
+    pub background_ctx: tsox_core::core::mig::context::Context,
+    pub npm_executor: Option<Arc<dyn crate::project::ata_ata::NpmExecutor>>,
 }
 
 pub struct Session {
@@ -25,9 +30,12 @@ pub struct Session {
 
     pub fs: Option<Arc<OverlayFS>>,
     pub parse_cache: Option<Arc<ParseCache>>,
+    pub content_mapped_parse_cache: Option<Arc<ParseCache>>,
     pub extended_config_cache: Option<Arc<ExtendedConfigCache>>,
     pub program_counter: Option<Arc<ProgramCounter>>,
     pub background_queue: Arc<background::Queue>,
+
+    pub background_ctx: tsox_core::core::mig::context::Context,
 
     pub snapshot_id: AtomicU64,
 
@@ -52,4 +60,12 @@ pub struct Session {
 
     pub(crate) idle_cache_clean_at: Mutex<Option<Instant>>,
     pub(crate) warm_auto_import_active: AtomicBool,
+
+    pub content_mapper_host: Option<Arc<tsox_compile::mig::m3l_cm_3::HostImpl>>,
+    pub content_mapper_timings: Mutex<tsox_compile::mig::m3l_cm::Timings>,
+    pub initial_user_preferences: Mutex<UserPreferences>,
+    pub typings_installer: Option<Arc<crate::project::ata_ata::TypingsInstaller>>,
+    pub registered_content_mapper_extensions: Mutex<Vec<String>>,
+    pub registered_content_mapper_snapshot_id: AtomicU64,
+    pub npm_executor: Option<Arc<dyn crate::project::ata_ata::NpmExecutor>>,
 }

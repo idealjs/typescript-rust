@@ -2,20 +2,13 @@
 use std::sync::Arc;
 use tsox_checker::bundled::lib_path;
 use tsox_checker::checker::Checker;
-use tsox_checker::checker::NodeLinks;
-use tsox_checker::checker::Ternary;
-use tsox_checker::checker::Tracer;
 use tsox_checker::checker::nodebuilder::*;
 use tsox_compile::compiler::CompilerHost;
 use tsox_compile::compiler::CompilerHostImpl;
 use tsox_compile::compiler::Program;
 use tsox_compile::compiler::ProgramOptions;
-use tsox_core::core::compiler_options::CompilerOptions;
-use tsox_core::core::compiler_options::ModuleKind;
-use tsox_core::core::compiler_options::ModuleResolutionKind;
 use tsox_frontend::ast::Node;
 use tsox_frontend::ast::NodeData;
-use tsox_frontend::ast::Symbol;
 use tsox_frontend::ast::SyntaxKind;
 use tsox_tsoptions::tsoptions::parse_command_line;
 use tsox_tsoptions::vfs::InMemoryFS;
@@ -30,8 +23,14 @@ fn build_checker(source: &str) -> Checker {
         Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
     let program = Arc::new(Program::new(ProgramOptions {
         config: parsed,
-        host,
-    }));
+        host,        use_source_of_project_reference: false,
+        single_threaded: Default::default(),
+        create_checker_pool: None,
+        typings_location: String::new(),
+        project_name: String::new(),
+        tracing: None,
+        skip_module_resolution: false,
+}));
     program.build_checker()
 }
 

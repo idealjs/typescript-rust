@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completion_list_in_scope() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"namespace TestModule {
     var localVariable = "";
     export var exportedVariable = 0;
@@ -62,8 +62,10 @@ class TestClass {
         /*insideMethod*/
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "valueReference", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "typeReference", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "insideMethod", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListInScope", content);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("valueReference"), &["localVariable", "exportedVariable", "localFunction", "exportedFunction", "localClass", "exportedClass", "localModule", "exportedModule", "exportedVariable2", "exportedFunction2", "exportedClass2", "exportedModule2"], &[]);
+    fourslash::go_to_marker(&mut s, "typeReference");
+    // TODO: f.VerifyCompletions(t, "typeReference", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "insideMethod");
+    // TODO: f.VerifyCompletions(t, "insideMethod", &fourslash.CompletionsExpectedList{
 }

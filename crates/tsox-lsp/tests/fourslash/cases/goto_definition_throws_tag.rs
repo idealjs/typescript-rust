@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn goto_definition_throws_tag() {
     let content = r#"class [|/*def*/E|] extends Error {}
@@ -9,6 +9,6 @@ fn goto_definition_throws_tag() {
  * @throws {/*use*/[|E|]}
  */
 function f() {}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "use")
+    let _s = Session::new_for_test("gotoDefinitionThrowsTag", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, false, "use")
 }

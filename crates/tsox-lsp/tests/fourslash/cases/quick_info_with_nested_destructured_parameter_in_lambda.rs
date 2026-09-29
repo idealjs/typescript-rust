@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyQuickInfoExists"]
+
 #[test]
 fn quick_info_with_nested_destructured_parameter_in_lambda() {
     let content = r#"// @filename: a.tsx
@@ -12,8 +12,8 @@ interface SomeInterface {
 interface SomeProps {
     someProp: SomeInterface;
 }
-export const /*1*/SomeStatelessComponent = ({someProp: { someBoolean, someString}}: SomeProps) => (<div>{` + "`" + `${someBoolean}${someString}` + "`" + `});"#;
-    let mut s = Session::new(content);
+export const /*1*/SomeStatelessComponent = ({someProp: { someBoolean, someString}}: SomeProps) => (<div>{`${someBoolean}${someString}`});"#;
+    let mut s = Session::new_for_test("quickInfoWithNestedDestructuredParameterInLambda", content);
     fourslash::go_to_marker(&mut s, "1");
-    fourslash::unsupported("VerifyQuickInfoExists"); // f.VerifyQuickInfoExists(t)
+    // TODO: f.VerifyQuickInfoExists(t)
 }

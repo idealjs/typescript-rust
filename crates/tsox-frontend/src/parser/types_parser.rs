@@ -36,7 +36,19 @@ impl Parser {
             scanner.scan();
             if scanner.token() == SyntaxKind::IsKeyword && !scanner.has_preceding_line_break() {
                 let pos = self.token_pos();
-                let parameter_name = self.parse_identifier();
+                // this 谓词左部是关键字节点，标识符谓词照常解析
+                let parameter_name = if self.token == SyntaxKind::ThisKeyword {
+                    let start = self.token_pos();
+                    let end = self.token_end();
+                    self.next_token();
+                    Arc::new(Node::with_loc(
+                        SyntaxKind::ThisKeyword,
+                        NodeData::Token,
+                        TextRange::new(start, end),
+                    ))
+                } else {
+                    self.parse_identifier()
+                };
                 self.expect(SyntaxKind::IsKeyword);
                 let type_node = self.parse_type();
                 let end = type_node.end();
@@ -77,10 +89,18 @@ impl Parser {
         parse_constituent: fn(&mut Self) -> Arc<Node>,
     ) -> Arc<Node> {
         let pos = self.token_pos();
+        let is_union_type = operator == SyntaxKind::BarToken;
         let has_leading_operator = self.parse_optional(operator);
-        let mut types = vec![parse_constituent(self)];
+        let mut types = vec![if has_leading_operator {
+            self.parse_function_or_constructor_type_to_error(is_union_type, parse_constituent)
+        } else {
+            parse_constituent(self)
+        }];
         while self.parse_optional(operator) {
-            types.push(parse_constituent(self));
+            types.push(self.parse_function_or_constructor_type_to_error(
+                is_union_type,
+                parse_constituent,
+            ));
         }
         if types.len() == 1 && !has_leading_operator {
             return types.pop().unwrap();
@@ -127,7 +147,7 @@ impl Parser {
                 self.next_token();
                 if self.token == SyntaxKind::CloseBracketToken {
                     self.next_token();
-                    let end = self.token_pos();
+                    let end = self.node_pos();
                     type_node = Arc::new(Node::with_loc(
                         SyntaxKind::ArrayType,
                         NodeData::ArrayTypeNode(ArrayTypeNodeData {
@@ -139,7 +159,7 @@ impl Parser {
                 }
                 let index_type = self.parse_type();
                 self.expect(SyntaxKind::CloseBracketToken);
-                let end = self.token_pos();
+                let end = self.node_pos();
                 type_node = Arc::new(Node::with_loc(
                     SyntaxKind::IndexedAccessType,
                     NodeData::IndexedAccessTypeNode(IndexedAccessTypeNodeData {
@@ -166,6 +186,7 @@ impl Parser {
             | SyntaxKind::BooleanKeyword
             | SyntaxKind::UndefinedKeyword
             | SyntaxKind::NeverKeyword
+            | SyntaxKind::IntrinsicKeyword
             | SyntaxKind::ObjectKeyword => {
                 if self.look_ahead_token() == SyntaxKind::DotToken {
                     return self.parse_type_reference();
@@ -271,7 +292,11 @@ impl Parser {
     pub(crate) fn parse_type_reference(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         let type_name = self.parse_entity_name();
-        let type_arguments = self.parse_optional_type_arguments();
+        let type_arguments = if !self.has_preceding_line_break() {
+            self.parse_optional_type_arguments()
+        } else {
+            None
+        };
         let end = type_arguments
             .as_ref()
             .map_or_else(|| type_name.end(), |args| args.end());

@@ -1,8 +1,8 @@
 pub(crate) use crate::stringutil;
-pub(crate) mod directory_separator;
+pub mod directory_separator;
 pub(crate) mod get_common_parents;
-pub(crate) mod get_normalized_absolute_path;
-pub(crate) mod supported_ts_extensions_flat;
+pub mod get_normalized_absolute_path;
+pub mod supported_ts_extensions_flat;
 #[allow(unused_imports)]
 pub use directory_separator::*;
 #[allow(unused_imports)]
@@ -13,3 +13,6 @@ pub use get_normalized_absolute_path::*;
 pub use supported_ts_extensions_flat::*;
 #[cfg(test)]
 pub(crate) mod tests;
+
+// r 轮接线:迁移批次模块
+pub mod mig;

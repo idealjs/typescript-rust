@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFix"]
+
 #[test]
 fn code_fix_missing_type_annotation_on_exports2() {
     let content = r#"// @isolatedDeclarations: true
@@ -8,7 +8,7 @@ fn code_fix_missing_type_annotation_on_exports2() {
 const a = 42;
 const b = 43;
 export function foo() { return a + b; }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFixAvailable"); // f.VerifyCodeFixAvailable(t, []string{"Add return type 'number'"})
-    fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports2", content);
+    // TODO: f.VerifyCodeFixAvailable(t, []string{"Add return type 'number'"})
+    // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

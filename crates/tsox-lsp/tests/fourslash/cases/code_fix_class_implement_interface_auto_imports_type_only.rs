@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFix"]
+
 #[test]
 fn code_fix_class_implement_interface_auto_imports_type_only() {
     let content = r#"// @module: esnext
@@ -24,7 +24,7 @@ export interface Base {
 import type { Base } from './interface';
 
 export class C implements Base {[| |]}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codeFixClassImplementInterfaceAutoImports_typeOnly", content);
     fourslash::go_to_file(&mut s, "index.ts");
-    fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
+    // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

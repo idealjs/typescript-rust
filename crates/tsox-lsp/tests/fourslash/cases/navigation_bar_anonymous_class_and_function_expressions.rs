@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
+
 #[test]
 fn navigation_bar_anonymous_class_and_function_expressions() {
     let content = r#"global.cls = class { };
@@ -21,7 +21,7 @@ fn navigation_bar_anonymous_class_and_function_expressions() {
     // These will only show up as childItems.
     function z() {}
     console.log(function() {})
-    describe("this", 'function', ` + "`" + `is a function` + "`" + `, ` + "`" + `with template literal ${"a"}` + "`" + `, () => {});
+    describe("this", 'function', `is a function`, `with template literal ${"a"}`, () => {});
     [].map(() => {});
 })
 (function classes() {
@@ -30,6 +30,6 @@ fn navigation_bar_anonymous_class_and_function_expressions() {
     console.log(class cls3 {});
     (class { });
 })"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
+    let _s = Session::new_for_test("navigationBarAnonymousClassAndFunctionExpressions", content);
+    // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

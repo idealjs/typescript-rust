@@ -52,6 +52,25 @@ impl Checker {
         None
     }
 
+    pub(crate) fn each_type_related_to_some_type(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool {
+        if source.flags.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
+            && let Some(si) = source.as_union_or_intersection()
+        {
+            for s in &si.types {
+                if !self.type_related_to_some_type(s, target, relation) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        self.type_related_to_some_type(source, target, relation)
+    }
+
     pub(crate) fn some_type_related_to_type(
         &mut self,
         source: &Arc<Type>,
@@ -110,7 +129,7 @@ impl Checker {
                 }
             }
             if any_failed {
-                if self.relater_chain_active && self.speculation_depth == 0 {
+                if self.relater_chain_active {
                     self.relater_error_chain.truncate(save_len);
                     if let Some(t) = failed_nullish {
                         let member_str = self.type_to_string(&t);
@@ -121,55 +140,7 @@ impl Checker {
                             vec![member_str, target_str],
                         );
                     } else if let Some(t) = first_failed {
-                        self.is_type_related_to(&t, target, relation);
-                        let target_str = self.type_to_string(target);
-
-                        let head_source = if !self.type_could_have_top_level_singleton_types(target)
-                            && (crate::checker::is_fresh_literal_type(&t)
-                                || t.flags.intersects(TYPE_FLAGS_LITERAL))
-                        {
-                            let base = self.get_base_type_of_literal_type_for_display(&t);
-                            self.type_to_string(&base)
-                        } else {
-                            self.type_to_string(&t)
-                        };
-
-                        let mut suppress = false;
-                        if let Some(entry) = self.relater_error_chain.last() {
-                            let m = entry.message;
-                            let a = &entry.args;
-                            suppress = if m
-                                == tsox_core::diagnostics::messages_generated::
-                                    PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2
-                            {
-                                a.len() == 3 && a[1] == head_source && a[2] == target_str
-                            } else if m
-                                == tsox_core::diagnostics::messages_generated::
-                                    TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2
-                                || m
-                                    == tsox_core::diagnostics::messages_generated::
-                                        TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2_AND_3_MORE
-                            {
-                                a.len() >= 2 && a[0] == head_source && a[1] == target_str
-                            } else if m
-                                == tsox_core::diagnostics::messages_generated::
-                                    THE_TYPE_0_IS_READONLY_AND_CANNOT_BE_ASSIGNED_TO_THE_MUTABLE_TYPE_1
-                            {
-                                a.len() == 2 && a[0] == head_source && a[1] == target_str
-                            } else {
-                                false
-                            };
-                        }
-                        if !suppress {
-                            let msg = if head_source == target_str {
-                                tsox_core::diagnostics::messages_generated::
-                                    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_TWO_DIFFERENT_TYPES_WITH_THIS_NAME_EXIST_BUT_THEY_ARE_UNRELATED
-                            } else {
-                                tsox_core::diagnostics::messages_generated::
-                                    TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1
-                            };
-                            self.relater_report_error(msg, vec![head_source, target_str]);
-                        }
+                        let _ = self.is_type_related_to(&t, target, relation);
                     }
                 }
                 return false;
@@ -185,52 +156,56 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
     ) -> bool {
+        let source = self.get_regular_type_of_object_literal(source);
         if let Some(ui) = target.as_union_or_intersection() {
             let save_len = self.relater_error_chain.len();
-            let mut best: Option<Vec<RelaterChainEntry>> = None;
-            for t in &ui.types {
-                if self.is_type_related_to(source, t, relation) {
-                    return true;
+            let matched = {
+                let was_active = self.silence_relation_chain();
+                let mut m = false;
+                for t in &ui.types {
+                    if self.is_type_related_to(&source, t, relation) {
+                        m = true;
+                        break;
+                    }
                 }
-                if best
-                    .as_ref()
-                    .is_none_or(|b| b.len() < self.relater_error_chain.len())
-                {
-                    best = Some(self.relater_error_chain.clone());
-                }
+                self.restore_relation_chain(was_active);
                 self.relater_error_chain.truncate(save_len);
+                m
+            };
+            if matched {
+                return true;
             }
 
             if source.flags.contains(TypeFlags::Intersection)
                 && let Some(si) = source.as_union_or_intersection()
             {
-                self.relater_error_chain.truncate(save_len);
+                let was_active = self.silence_relation_chain();
+                let mut any = false;
                 for s in &si.types {
                     if self.is_type_related_to(s, target, relation) {
-                        return true;
+                        any = true;
+                        break;
                     }
                 }
+                self.restore_relation_chain(was_active);
+                if any {
+                    return true;
+                }
                 self.relater_error_chain.truncate(save_len);
-            }
-            if let Some(b) = best {
-                self.relater_error_chain = b;
             }
 
             if self.relater_chain_active
                 && self.speculation_depth == 0
-                && let Some(best_t) = self.get_best_matching_type_for_error(source, target)
+                && !source
+                    .flags
+                    .intersects(crate::checker::types_type_id::TYPE_FLAGS_PRIMITIVE)
+                && !target
+                    .flags
+                    .intersects(crate::checker::types_type_id::TYPE_FLAGS_PRIMITIVE)
+                && let Some(best_t) = self.get_best_matching_type_for_error(&source, target)
             {
                 self.relater_error_chain.truncate(save_len);
-                self.is_type_related_to(source, &best_t, relation);
-                let source_str = self.type_to_string(source);
-                let target_str = self.type_to_string(&best_t);
-                let msg = if source_str == target_str {
-                    tsox_core::diagnostics::messages_generated::
-                        TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_TWO_DIFFERENT_TYPES_WITH_THIS_NAME_EXIST_BUT_THEY_ARE_UNRELATED
-                } else {
-                    tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1
-                };
-                self.relater_report_error(msg, vec![source_str, target_str]);
+                self.is_type_related_to(&source, &best_t, relation);
             }
         }
         false

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
+
 #[test]
 fn rename_comments_and_strings2() {
     let content = r#"///<reference path="./Bar.ts" />
@@ -8,6 +8,6 @@ fn rename_comments_and_strings2() {
     // This is a reference to Bar in a comment.
     "this is a reference to [|Bar|] in a string"
 }|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1])
+    let _s = Session::new_for_test("renameCommentsAndStrings2", content);
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1])
 }

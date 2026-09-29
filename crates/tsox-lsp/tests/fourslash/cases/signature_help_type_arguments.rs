@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
+
 #[test]
 fn signature_help_type_arguments() {
     let content = r#"declare function f(a: number, b: string, c: boolean): void; // ignored, not generic
@@ -19,17 +19,17 @@ declare const C: {
 new C</*C0*/;
 new C<number, /*C1*/;
 new C<number, string, /*C2*/;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpTypeArguments", content);
     fourslash::go_to_marker(&mut s, "f0");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "f<T extends number>(): void", P
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "f<T extends number>(): void", P
     fourslash::go_to_marker(&mut s, "f1");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "f<T, U>(): void", ParameterName
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "f<T, U>(): void", ParameterName
     fourslash::go_to_marker(&mut s, "f2");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "f<T, U, V extends string>(): vo
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "f<T, U, V extends string>(): vo
     fourslash::go_to_marker(&mut s, "C0");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "C<T extends number>(): void", P
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "C<T extends number>(): void", P
     fourslash::go_to_marker(&mut s, "C1");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "C<T, U>(): void", ParameterName
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "C<T, U>(): void", ParameterName
     fourslash::go_to_marker(&mut s, "C2");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "C<T, U, V extends string>(): vo
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "C<T, U, V extends string>(): vo
 }

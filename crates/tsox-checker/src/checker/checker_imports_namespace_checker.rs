@@ -4,14 +4,22 @@ use crate::checker::checker_imports_namespace::*;
 
 impl Checker {
     pub(crate) fn enclosing_function_is_generator(&self, node: &Arc<Node>) -> bool {
-        let mut cur = node.parent.clone();
+        let mut cur = node.parent();
         while let Some(n) = cur {
             let in_name_of_current = tsox_frontend::ast::node_data_generated::node_name(&n)
                 .is_some_and(|name| {
                     name.loc.pos() <= node.loc.pos() && node.loc.end() <= name.loc.end()
                 });
             if in_name_of_current {
-                cur = n.parent.clone();
+                cur = n.parent();
+                continue;
+            }
+            // 装饰器延迟求值：yield 语境取被装饰实体之外的函数
+            //（类成员装饰器跳过成员、类装饰器跳过类）
+            if n.kind == SyntaxKind::Decorator
+                && let Some(decorated) = n.parent()
+            {
+                cur = decorated.parent();
                 continue;
             }
             match &n.data {
@@ -28,10 +36,14 @@ impl Checker {
                 tsox_frontend::ast::NodeData::ArrowFunction(_)
                 | tsox_frontend::ast::NodeData::GetAccessorDeclaration(_)
                 | tsox_frontend::ast::NodeData::SetAccessorDeclaration(_)
-                | tsox_frontend::ast::NodeData::ConstructorDeclaration(_) => return false,
+                | tsox_frontend::ast::NodeData::ConstructorDeclaration(_)
+                // 类字段初始化器/静态块是独立容器：其中的 yield 不在生成器上下文
+                | tsox_frontend::ast::NodeData::PropertyDeclaration(_)
+                | tsox_frontend::ast::NodeData::PropertySignatureDeclaration(_)
+                | tsox_frontend::ast::NodeData::ClassStaticBlockDeclaration(_) => return false,
                 _ => {}
             }
-            cur = n.parent.clone();
+            cur = n.parent();
         }
         false
     }
@@ -60,22 +72,34 @@ impl Checker {
     }
 
     pub(crate) fn get_missing_required_properties(
-        &self,
+        &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
     ) -> Vec<String> {
-        let Some(source_struct) = source.as_structured() else {
-            return Vec::new();
-        };
         let Some(target_struct) = target.as_structured() else {
             return Vec::new();
         };
+        if source.as_structured().is_none() {
+            return Vec::new();
+        }
         let mut missing = Vec::new();
         for target_prop in &target_struct.properties {
             if target_prop.flags.contains(SymbolFlags::Optional) {
                 continue;
             }
-            if source_struct.members.get(&target_prop.name).is_none() {
+            let found = if source
+                .as_structured()
+                .is_some_and(|s| s.members.get(&target_prop.name).is_some())
+            {
+                true
+            } else {
+                let saved = self.property_lookup_skips_index_synthesis;
+                self.property_lookup_skips_index_synthesis = true;
+                let prop = self.get_property_of_type(source, &target_prop.name);
+                self.property_lookup_skips_index_synthesis = saved;
+                prop.is_some()
+            };
+            if !found {
                 missing.push(target_prop.name.clone());
             }
         }
@@ -86,64 +110,53 @@ impl Checker {
         match &node.data {
             NodeData::Identifier(id) => id.text.clone(),
             NodeData::StringLiteral(s) => s.text.clone(),
-            NodeData::NumericLiteral(n) => n.text.clone(),
-            NodeData::ComputedPropertyName(_) => {
-                let file = self
-                    .get_source_file_of_node(node)
-                    .or_else(|| self.current_file.clone());
-                let Some(file) = file else {
-                    return String::new();
-                };
-                let pos = node.loc.pos();
-                let end = node.loc.end();
-                if pos < end && end <= file.text.len() {
-                    file.text[pos..end].to_string()
-                } else {
-                    String::new()
+            NodeData::NumericLiteral(n) => {
+                tsox_core::jsnum::Number::from_string(&n.text).to_string()
+            }
+            NodeData::ComputedPropertyName(cd) => {
+                // `Symbol.<知名符号>` 计算成员用内部名 `__@<name>`
+                //（与 binder member_name_text 一致，两侧命中同一键）
+                if let Some(internal) =
+                    crate::binder::symbols_binder_4::well_known_symbol_member_name(&cd.expression)
+                {
+                    return internal;
                 }
+                // 字面量计算名按字面量名入表（与 binder member_name_text
+                // 共用 computed_member_literal_name，保持两侧同键）
+                if let Some(literal) =
+                    crate::binder::symbols_binder_4::computed_member_literal_name(&cd.expression)
+                {
+                    return literal;
+                }
+                String::new()
             }
             _ => node.text().to_string(),
         }
     }
 
-    pub(crate) fn build_class_instance_type_with_base(&mut self, node: &Arc<Node>) -> Arc<Type> {
-        let (members, heritage_clauses) = match &node.data {
-            tsox_frontend::ast::NodeData::ClassDeclaration(data) => {
-                (&data.members, data.heritage_clauses.clone())
-            }
-
-            tsox_frontend::ast::NodeData::ClassExpression(data) => {
-                (&data.members, data.heritage_clauses.clone())
-            }
-            _ => return self.build_interface_type_from_members(&Arc::new(NodeList::default())),
+    /// 成员声明位的名字（Go lateBindMember 语义）：早绑定名之外，
+    /// 计算名为实体名表达式且其类型可用作属性名（string/number 字面量、
+    /// unique symbol）时，以类型推导的名字入表
+    pub(crate) fn member_declaration_name(&mut self, name: &Arc<Node>) -> String {
+        let early = self.get_property_name_from_node(name);
+        if !early.is_empty() || !matches!(name.data, NodeData::ComputedPropertyName(_)) {
+            return early;
+        }
+        let NodeData::ComputedPropertyName(cd) = &name.data else {
+            unreachable!();
         };
-
-        let own_type = self.build_interface_type_from_members(members);
-
-        if let Some(class_sym) = self.program.symbol_map().symbol_of(node) {
-            let own_mut = Arc::as_ptr(&own_type) as *mut crate::checker::types::Type;
-            unsafe {
-                (*own_mut).symbol = Some(Arc::clone(class_sym));
-            }
+        if !tsox_frontend::ast::is_entity_name_expression(&cd.expression) {
+            return early;
         }
-
-        let mut base_type: Option<Arc<Type>> = None;
-        if let Some(ref heritage) = heritage_clauses {
-            for clause in heritage.iter() {
-                if let tsox_frontend::ast::NodeData::HeritageClause(hc) = &clause.data {
-                    if hc.token == SyntaxKind::ExtendsKeyword {
-                        if let Some(type_ref) = hc.types.iter().next() {
-                            base_type = Some(self.resolve_base_class_instance_type(type_ref));
-                        }
-                        break;
-                    }
-                }
-            }
+        // Go lateBindMember → checkComputedPropertyName：计算名经表达式检查
+        //（未解析名在此报 TS2304）
+        let t = self.check_computed_property_name_type(name);
+        if crate::checker::utilities_token_is_identifier_or_keyword::is_type_usable_as_property_name(
+            &t,
+        ) {
+            return crate::checker::utilities_token_is_identifier_or_keyword::get_property_name_from_type(&t);
         }
-        match base_type {
-            Some(base) => self.merge_instance_types(&own_type, &base),
-            None => own_type,
-        }
+        early
     }
 
     pub(crate) fn get_constituent_property(
@@ -268,16 +281,5 @@ impl Checker {
         self.globals
             .get(name)
             .is_some_and(|s| s.flags.intersects(type_meaning))
-    }
-
-    pub(crate) fn namespace_usable_as_value(&mut self, namespace: &Arc<Symbol>) -> bool {
-        let state_instantiated = namespace
-            .declarations
-            .iter()
-            .filter(|d| d.kind == SyntaxKind::ModuleDeclaration)
-            .any(|d| {
-                module_is_instantiated(d, self.compiler_options.should_preserve_const_enums())
-            });
-        state_instantiated || self.namespace_has_value_side(namespace)
     }
 }

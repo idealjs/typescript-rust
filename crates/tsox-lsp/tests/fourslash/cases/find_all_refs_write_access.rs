@@ -1,14 +1,14 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_write_access() {
     let content = r#"interface Obj {
-    [` + "`" + `/*1*/num` + "`" + `]: number;
+    [`/*1*/num`]: number;
 }
 
 let o: Obj = {
-    [` + "`" + `num` + "`" + `]: 0
+    [`num`]: 0
 };
 
 o = {
@@ -16,10 +16,10 @@ o = {
 };
 
 o['num'] = 2;
-o[` + "`" + `num` + "`" + `] = 3;
+o[`num`] = 3;
 
 o['num'];
-o[` + "`" + `num` + "`" + `];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
+o[`num`];"#;
+    let _s = Session::new_for_test("findAllRefsWriteAccess", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

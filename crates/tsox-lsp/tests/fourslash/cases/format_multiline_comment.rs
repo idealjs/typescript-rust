@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn format_multiline_comment() {
     let content = r#"/*1*//** 1
@@ -20,8 +20,8 @@ class Foo {
 /*12*/          12*/
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formatMultilineComment", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"/** 1"#);
     fourslash::go_to_marker(&mut s, "2");

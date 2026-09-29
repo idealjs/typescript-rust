@@ -10,10 +10,11 @@ impl Parser {
                 let pos = self.token_pos();
                 let end = self.token_end();
                 self.next_token();
-                Arc::new(Node::with_loc(
+                Arc::new(Node::with_loc_flags(
                     SyntaxKind::Identifier,
                     NodeData::Identifier(IdentifierData { text }),
                     TextRange::new(pos, end),
+                    self.context_flags_now(),
                 ))
             }
             SyntaxKind::NumericLiteral => {
@@ -59,15 +60,25 @@ impl Parser {
                 ))
             }
             SyntaxKind::NoSubstitutionTemplateLiteral => {
+                // Go parseTemplateLiteral(isTaggedTemplate=false)：非法转义
+                // 存在时重扫报告 TS1487/1488
+                if crate::scanner::token_flags_intersects(
+                    self.scanner.token_flags(),
+                    crate::scanner::TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE,
+                ) {
+                    self.scanner.re_scan_template_head_token(false);
+                    self.drain_scanner_errors();
+                }
                 let text = self.scanner.token_value();
                 let pos = self.token_pos();
                 let end = self.token_end();
+                let template_flags = self.scanner.token_flags();
                 self.next_token();
                 Arc::new(Node::with_loc(
                     SyntaxKind::NoSubstitutionTemplateLiteral,
                     NodeData::NoSubstitutionTemplateLiteral(NoSubstitutionTemplateLiteralData {
                         text,
-                        template_flags: 0,
+                        template_flags,
                     }),
                     TextRange::new(pos, end),
                 ))
@@ -79,7 +90,7 @@ impl Parser {
                 self.parse_keyword_expression(SyntaxKind::UndefinedKeyword)
             }
             SyntaxKind::ThisKeyword => self.parse_keyword_expression(SyntaxKind::ThisKeyword),
-            SyntaxKind::SuperKeyword => self.parse_keyword_expression(SyntaxKind::SuperKeyword),
+            SyntaxKind::SuperKeyword => self.parse_super_expression(),
             SyntaxKind::OpenParenToken => self.parse_parenthesized_or_arrow(),
             SyntaxKind::OpenBracketToken => self.parse_array_literal(),
             SyntaxKind::OpenBraceToken => self.parse_object_literal(),
@@ -138,7 +149,8 @@ impl Parser {
     }
 
     pub(crate) fn parse_fallback_identifier_or_error(&mut self) -> Arc<Node> {
-        if is_identifier_or_keyword(self.token)
+        // Go parseIdentifierWithDiagnostic：保留字不作表达式标识符（报错且不消费）
+        if self.is_identifier()
             && self.token != SyntaxKind::InKeyword
             && self.token != SyntaxKind::InstanceOfKeyword
         {
@@ -146,15 +158,24 @@ impl Parser {
             let pos = self.token_pos();
             let end = self.token_end();
             self.next_token();
-            Arc::new(Node::with_loc(
+            Arc::new(Node::with_loc_flags(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData { text }),
                 TextRange::new(pos, end),
+                self.context_flags_now(),
             ))
         } else {
-            let pos = self.token_pos();
-            let end = self.token_end();
-            self.parse_error_at(pos, end, tsox_core::diagnostics::EXPRESSION_EXPECTED, &[]);
+            // Go createIdentifierWithDiagnostic：报 Expression expected 后返回
+            // 零宽 missing，不消费当前 token（由外层 expect/列表恢复推进）；
+            // EOF 时报错取零宽 fullStart（与后续 expect 的 token 位错开，
+            // 避免位置去重吞掉两条诊断）
+            if self.token == SyntaxKind::EndOfFile {
+                let p = self.node_pos();
+                self.parse_error_at(p, p, tsox_core::diagnostics::EXPRESSION_EXPECTED, &[]);
+            } else {
+                self.parse_error_at_current_token(tsox_core::diagnostics::EXPRESSION_EXPECTED, &[]);
+            }
+            let pos = self.node_pos();
             Arc::new(Node::with_loc(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData {
@@ -184,33 +205,9 @@ impl Parser {
         let pos = self.token_pos();
         self.next_token();
 
-        let expr = self.parse_expression();
+        let expr = self.allow_in(|p| p.parse_expression());
         self.expect(SyntaxKind::CloseParenToken);
-        let end = self.token_pos();
-
-        if self.token == SyntaxKind::EqualsGreaterThanToken {
-            let arrow_token = self.create_token_node();
-            self.next_token();
-            let body = if self.token == SyntaxKind::OpenBraceToken {
-                self.parse_block()
-            } else {
-                self.parse_assignment_expression()
-            };
-            let end = body.end();
-            return Arc::new(Node::with_loc(
-                SyntaxKind::ArrowFunction,
-                NodeData::ArrowFunction(ArrowFunctionData {
-                    modifiers: None,
-                    type_parameters: None,
-                    parameters: Arc::new(NodeList::default()),
-                    type_node: None,
-                    equals_greater_than_token: arrow_token,
-                    body,
-                    full_signature: None,
-                }),
-                TextRange::new(pos, end),
-            ));
-        }
+        let end = self.node_pos();
 
         Arc::new(Node::with_loc(
             SyntaxKind::ParenthesizedExpression,
@@ -227,7 +224,7 @@ impl Parser {
             Parser::parse_array_literal_element,
         );
         self.expect(SyntaxKind::CloseBracketToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ArrayLiteralExpression,
             NodeData::ArrayLiteralExpression(ArrayLiteralExpressionData {
@@ -241,7 +238,7 @@ impl Parser {
     pub(crate) fn parse_array_literal_element(&mut self) -> Arc<Node> {
         if self.parse_optional(SyntaxKind::DotDotDotToken) {
             let pos = self.token_pos();
-            let expression = self.parse_assignment_expression();
+            let expression = self.allow_in(|p| p.parse_assignment_expression());
             let end = expression.end();
             return Arc::new(Node::with_loc(
                 SyntaxKind::SpreadElement,
@@ -257,7 +254,7 @@ impl Parser {
                 TextRange::new(pos, pos),
             ));
         }
-        self.parse_assignment_expression()
+        self.allow_in(|p| p.parse_assignment_expression())
     }
 
     pub(crate) fn parse_object_literal(&mut self) -> Arc<Node> {
@@ -268,7 +265,7 @@ impl Parser {
             Parser::parse_object_literal_element,
         );
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ObjectLiteralExpression,
             NodeData::ObjectLiteralExpression(ObjectLiteralExpressionData {

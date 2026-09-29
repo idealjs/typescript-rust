@@ -2,7 +2,6 @@ use crate::ls::lsutil_organize_imports_compare_strings::compare_organize_imports
 use crate::ls::lsutil_organize_imports_compare_strings::compare_organize_imports_unicode_strings;
 use std::sync::Arc;
 use tsox_core::core::tristate::Tristate;
-use tsox_core::stringutil;
 use tsox_frontend::ast::Node;
 
 use crate::ls::lsutil_user_preferences::OrganizeImportsCollation;

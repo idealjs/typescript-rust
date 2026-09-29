@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_element_access_numeric() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @target: esnext
 type Tup = [
     /**
@@ -17,6 +17,7 @@ type Tup = [
 ];
 declare var x: Tup;
 x[|./**/|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsElementAccessNumeric", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

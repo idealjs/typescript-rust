@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
+
 #[test]
 fn rename_named_import_use_aliases_for_renames() {
     let content = r#"// @Filename: /a.ts
@@ -10,12 +10,11 @@ const type: MyTypeA = { foo: "bar" };
 export interface MyTypeA {
     foo: string;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSFalse}, "import")
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSTrue}, "import")
+    let _s = Session::new_for_test("renameNamedImportUseAliasesForRenames", content);
+    // TODO: f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSFalse}, "import")
+    // TODO: f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSTrue}, "import")
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
 #[test]
 fn rename_named_import_default_in_node_modules() {
     let content = r#"// @Filename: /index.ts
@@ -29,9 +28,9 @@ declare const f: Foo;
 export interface Foo {
     bar: string;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "fooImport")
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSTrue}, "fooImport")
+    let mut s = Session::new_for_test("renameNamedImportDefaultInNodeModules", content);
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "fooImport")
+    // TODO: f.VerifyBaselineRename(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSTrue}, "fooImport")
     fourslash::go_to_marker(&mut s, "fooImport");
-    fourslash::unsupported("VerifyRenameFailed"); // f.VerifyRenameFailed(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSFalse})
+    // TODO: f.VerifyRenameFailed(t, &lsutil.UserPreferences{UseAliasesForRename: core.TSFalse})
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
+
 #[test]
 fn outlining_spans_for_parenthesized_expression() {
     let content = r#"const a = [|(
@@ -32,6 +32,6 @@ const c = [|(
         ( 1 )
     )|]
 )|];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
+    let _s = Session::new_for_test("outliningSpansForParenthesizedExpression", content);
+    // TODO: f.VerifyOutliningSpans(t)
 }

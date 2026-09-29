@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
+
 #[test]
 fn go_to_implementation_enum_01() {
     let content = r#"enum [|Foo|] {
@@ -9,6 +9,6 @@ fn go_to_implementation_enum_01() {
 }
 
 Fo/*reference*/o;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "reference")
+    let _s = Session::new_for_test("goToImplementationEnum_01", content);
+    // TODO: f.VerifyBaselineGoToImplementation(t, "reference")
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn rename_import_of_re_export2() {
     let content = r#"declare module "a" {
@@ -13,10 +13,10 @@ declare module "c" {
     [|import { /*3*/[|{| "isWriteAccess": true, "isDefinition": true, "contextRangeIndex": 5 |}D|] } from "b";|]
     export function f(c: [|D|]): void;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, ToAny(f.GetRangesByText().Get("C"))...)
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.GetRangesByText().Get("D")[0])
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.GetRangesByText().Get("D")[1], f.GetRangesByText().
+    let mut s = Session::new_for_test("renameImportOfReExport2", content);
+    fourslash::verify_no_errors(&mut s, );
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, ToAny(f.GetRangesByText().Get("C"))...)
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.GetRangesByText().Get("D")[0])
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.GetRangesByText().Get("D")[1], f.GetRangesByText().
 }

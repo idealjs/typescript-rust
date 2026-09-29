@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: capabilities := fourslash.GetDefaultCapabilities()"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn doc_comment_template_class_decl01() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"/*decl*/class C {
     private p;
     constructor(a, b, c, d);
@@ -16,6 +16,6 @@ fn doc_comment_template_class_decl01() {
 }"#;
     // TODO: capabilities := fourslash.GetDefaultCapabilities()
     // TODO: capabilities.TextDocument.Completion.CompletionItem.SnippetSupport = new(false)
-    let mut s = Session::new_with_capabilities(content, None);
-    fourslash::unsupported("VerifyJSDocCompletion"); // f.VerifyJSDocCompletion(t, "decl", 3, `/** */`, nil)
+    let _s = Session::new_with_capabilities(content, None);
+    // TODO: f.VerifyJSDocCompletion(t, "decl", 3, `/** */`, nil)
 }

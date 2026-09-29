@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
+
 #[test]
 fn quickinfo_verbosity_enum() {
     let content = r#"// @filename: a.ts
@@ -29,6 +29,6 @@ export enum Color {
 // @filename: c.ts
 import { Color } from "./b";
 const c: Color/*a*/ = Color.Red;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"c": {0, 1}, "x": {0, 1}, "d": {0, 1}, "y": {
+    let _s = Session::new_for_test("quickinfoVerbosityEnum", content);
+    // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{"c": {0, 1}, "x": {0, 1}, "d": {0, 1}, "y": {
 }

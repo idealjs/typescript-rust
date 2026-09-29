@@ -1,12 +1,12 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
+
 #[test]
 fn navigation_bar_items_symbols2() {
     let content = r#"interface I {
     [Symbol.isRegExp]: string;
     [Symbol.iterator](): string;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
+    let _s = Session::new_for_test("navigationBarItemsSymbols2", content);
+    // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

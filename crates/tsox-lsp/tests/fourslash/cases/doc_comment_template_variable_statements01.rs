@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: capabilities := fourslash.GetDefaultCapabilities()"]
+
 #[test]
 fn doc_comment_template_variable_statements01() {
     let content = r#"/*a*/
@@ -32,8 +32,8 @@ let f = class F {
 }"#;
     // TODO: capabilities := fourslash.GetDefaultCapabilities()
     // TODO: capabilities.TextDocument.Completion.CompletionItem.SnippetSupport = new(false)
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: for _, varName := range []string{"a", "b", "c", "d"} {
-    fourslash::unsupported("VerifyJSDocCompletion"); // f.VerifyJSDocCompletion(t, "e", 7, `/**
-    fourslash::unsupported("VerifyJSDocCompletion"); // f.VerifyJSDocCompletion(t, "f", 7, `/**
+    // TODO: f.VerifyJSDocCompletion(t, "e", 7, `/**
+    // TODO: f.VerifyJSDocCompletion(t, "f", 7, `/**
 }

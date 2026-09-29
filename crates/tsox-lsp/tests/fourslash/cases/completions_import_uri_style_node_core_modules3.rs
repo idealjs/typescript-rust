@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn completions_import_uri_style_node_core_modules3() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @lib: es5
 // @module: commonjs
 // @Filename: /node_modules/@types/node/index.d.ts
@@ -36,13 +36,19 @@ writeFile/*test1*/
 // @Filename: /test2.ts
 import "node:test";
 writeFile/*test2*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "noPrefix", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "prefix", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "mixed1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "mixed2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "test1", []string{"fs", "fs/promises"}, nil /*preferences*/)
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "test2", []string{"node:fs", "node:fs/promises"}, nil /*prefere
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "test1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "test2", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsImport_uriStyleNodeCoreModules3", content);
+    fourslash::go_to_marker(&mut s, "noPrefix");
+    // TODO: f.VerifyCompletions(t, "noPrefix", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "prefix");
+    // TODO: f.VerifyCompletions(t, "prefix", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "mixed1");
+    // TODO: f.VerifyCompletions(t, "mixed1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "mixed2");
+    // TODO: f.VerifyCompletions(t, "mixed2", &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "test1", []string{"fs", "fs/promises"}, nil /*preferences*/)
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "test2", []string{"node:fs", "node:fs/promises"}, nil /*prefere
+    fourslash::go_to_marker(&mut s, "test1");
+    // TODO: f.VerifyCompletions(t, "test1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "test2");
+    // TODO: f.VerifyCompletions(t, "test2", &fourslash.CompletionsExpectedList{
 }

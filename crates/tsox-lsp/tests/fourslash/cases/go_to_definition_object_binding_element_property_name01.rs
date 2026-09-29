@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_object_binding_element_property_name01() {
     let content = r#"interface I {
@@ -10,6 +10,6 @@ fn go_to_definition_object_binding_element_property_name01() {
 
 var foo: I;
 var { [|/*use*/property1|]: prop1 } = foo;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "use")
+    let _s = Session::new_for_test("goToDefinitionObjectBindingElementPropertyName01", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "use")
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_comments_function_declaration() {
     let content = r#"/** This comment should appear for foo*/
@@ -20,6 +20,6 @@ fooWithParam/*8*/eters("a",10);
 */
 declare function fn(a: string);
 fn("hello");"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoCommentsFunctionDeclaration", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

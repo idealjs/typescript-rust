@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn get_jsx_outlining_spans() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"import React, { Component } from 'react';
 
 export class Home extends Component[| {
@@ -38,6 +38,6 @@ export class Home extends Component[| {
     )|];
   }|]
 }|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
+    let _s = Session::new_for_test("getJSXOutliningSpans", content);
+    // TODO: f.VerifyOutliningSpans(t)
 }

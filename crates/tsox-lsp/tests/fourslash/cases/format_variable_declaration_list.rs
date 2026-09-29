@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn format_variable_declaration_list() {
     let content = r#"/*1*/var   fun1   =   function   (     )     {
@@ -16,8 +16,8 @@ fn format_variable_declaration_list() {
 /*10*/            x   =   'Foo'           ;
 /*11*/                return   fun            ;
 /*12*/}   (           fun1            )   )       ;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formatVariableDeclarationList", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"var fun1 = function() {"#);
     fourslash::go_to_marker(&mut s, "2");

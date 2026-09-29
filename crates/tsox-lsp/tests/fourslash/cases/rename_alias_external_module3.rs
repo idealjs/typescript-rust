@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
+
 #[test]
 fn rename_alias_external_module3() {
     let content = r#"// @Filename: a.ts
@@ -9,6 +9,6 @@ export = SomeModule;
 // @Filename: b.ts
 import M = require("./a");
 import C = M.[|SomeClass|];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "SomeClass")
+    let _s = Session::new_for_test("renameAliasExternalModule3", content);
+    // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "SomeClass")
 }

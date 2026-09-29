@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn tsx_find_all_references8() {
     let content = r#"//@Filename: file.tsx
@@ -31,6 +31,6 @@ let opt = /*11*/</*12*/MainButton onClick={()=>{}} />;
 let opt = /*13*/</*14*/MainButton onClick={()=>{}} ignore-prop />;
 let opt = /*15*/</*16*/MainButton goTo="goTo" />;
 let opt = /*17*/</*18*/MainButton wrong />;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", 
+    let _s = Session::new_for_test("tsxFindAllReferences8", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", 
 }

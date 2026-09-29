@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn format_document_with_js_doc() {
     let content = r#"/**
@@ -15,11 +15,9 @@ function f() {
      */
     var multiline;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"/**
+    let mut s = Session::new_for_test("formatDocumentWithJSDoc", content);
+    fourslash::format_document(&mut s, "");
+    fourslash::verify_current_file_content(&mut s, r#"/**
  * JSDoc for things
  */
 function f() {
@@ -30,6 +28,5 @@ function f() {
      * multiline
      */
     var multiline;
-}"#,
-    );
+}"#);
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn references_in_configured_project() {
     let content = r#"// @Filename: /home/src/workspaces/project/referencesForGlobals_1.ts
@@ -11,7 +11,7 @@ class /*0*/globalClass {
 var c = /*1*/globalClass();
 // @Filename: /home/src/workspaces/project/tsconfig.json
 { "files": ["referencesForGlobals_1.ts", "referencesForGlobals_2.ts"], "compilerOptions": { "lib": ["es5"] } }"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("referencesInConfiguredProject", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn get_outlining_spans_for_regions() {
     let content = r#"// @lib: es5
@@ -51,7 +51,7 @@ test // #endregion
 /*
 // #endregion
 */"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("getOutliningSpansForRegions", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t, lsproto.FoldingRangeKindRegion)
+    // TODO: f.VerifyOutliningSpans(t, lsproto.FoldingRangeKindRegion)
 }

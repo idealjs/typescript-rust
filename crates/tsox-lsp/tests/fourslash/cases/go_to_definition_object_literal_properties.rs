@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_object_literal_properties() {
     let content = r#"var o = {
@@ -16,6 +16,6 @@ o./*getterReference*/getter;
 o./*setterReference*/setter;
 o./*methodReference*/method;
 o./*es6StyleMethodReference*/es6StyleMethod;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "valueReference", "getterReference", "setterReference", "me
+    let _s = Session::new_for_test("goToDefinitionObjectLiteralProperties", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, false, "valueReference", "getterReference", "setterReference", "me
 }

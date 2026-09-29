@@ -4,7 +4,7 @@ use crate::checker::flow_union_ops::*;
 
 impl Checker {
     pub(crate) fn constituent_is_definitely_falsy(&self, t: &Arc<Type>) -> bool {
-        if t.flags.intersects(TypeFlags::Undefined | TypeFlags::Null) {
+        if t.flags.intersects(TypeFlags::Undefined | TypeFlags::Null | TypeFlags::Never) {
             return true;
         }
         if t.flags.contains(TypeFlags::BooleanLiteral) {

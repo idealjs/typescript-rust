@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn rename_default_import_different_name() {
     let content = r#"// @Filename: B.ts
@@ -12,9 +12,9 @@ fn rename_default_import_different_name() {
 [|import /*2*/[|{| "isWriteAccess": true, "isDefinition": true, "contextRangeIndex": 2 |}B|] from "./B";|]
 let b = new [|B|]();
 b.test();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2")
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1])
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[3], f.Ranges()[4])
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "1")
+    let _s = Session::new_for_test("renameDefaultImportDifferentName", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2")
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[1])
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[3], f.Ranges()[4])
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "1")
 }

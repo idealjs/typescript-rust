@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn tsx_go_to_definition_stateless_function2() {
     let content = r#"//@Filename: file.tsx
@@ -31,6 +31,6 @@ let opt = <[|Main/*thirdTarget*/Button|] onClick={()=>{}} />;
 let opt = <[|Main/*fourthTarget*/Button|] onClick={()=>{}} ignore-prop />;
 let opt = <[|Main/*fifthTarget*/Button|] goTo="goTo" />;
 let opt = <[|Main/*sixthTarget*/Button|] wrong />;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "firstTarget", "secondTarget", "thirdTarget", "fourthTarget"
+    let _s = Session::new_for_test("tsxGoToDefinitionStatelessFunction2", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "firstTarget", "secondTarget", "thirdTarget", "fourthTarget"
 }

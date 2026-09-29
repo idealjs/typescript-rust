@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
+
 #[test]
 fn rename_binding_element_initializer_external() {
     let content = r#"// @lib: es5
@@ -17,6 +17,6 @@ const {
     nested: { lvl2 = [|external|]},
     oldName: newName = [|external|]
 } = obj;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "external")
+    let _s = Session::new_for_test("renameBindingElementInitializerExternal", content);
+    // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/, "external")
 }

@@ -15,35 +15,152 @@ impl Checker {
         {
             return true;
         }
-        if self.is_simple_type_related_to(source, target, relation) {
+        // Go isTypeRelatedTo：identity 关系跳过简单类型快捷通道，
+        // 结构化/可实例化类型走完整结构比较
+        if relation != RelationKind::Identity
+            && self.is_simple_type_related_to(source, target, relation)
+        {
             return true;
         }
 
         let s = source.flags;
         let t = target.flags;
 
-        if s.contains(TypeFlags::TypeParameter) {
-            if let Some(constraint) = self.get_constraint_of_type_parameter(source) {
-                if self.is_type_related_to(&constraint, target, relation) {
-                    return true;
-                }
+        // Go isRelatedToEx identity 分支：归一化后 flags 必须一致，
+        // singleton 型直接通过，其余跳过全部快捷通道
+        if relation == RelationKind::Identity {
+            if s != t {
+                return false;
             }
+            if s.contains(TYPE_FLAGS_SINGLETON) {
+                return true;
+            }
+        }
+
+        // 可比性 carve-out：两个裸类型参数互比仅当一方约束是类型参数
+        // （Go relater target TypeParameter 分支的 comparable 特例）
+        if relation == RelationKind::Comparable
+            && s.contains(TypeFlags::TypeParameter)
+            && t.contains(TypeFlags::TypeParameter)
+        {
+            if let Some(constraint) = self.get_constraint_of_type_parameter(source)
+                && some_type_is_type_parameter(&constraint)
+            {
+                let was_silent = self.silence_relation_chain();
+                let r = self.is_type_related_to(&constraint, target, relation);
+                self.restore_relation_chain(was_silent);
+                return r;
+            }
+            return false;
+        }
+
+        if relation != RelationKind::Identity && s.contains(TypeFlags::TypeParameter) {
+            let constraint = self
+                .get_constraint_of_type_parameter(source)
+                .unwrap_or_else(|| self.unknown_type());
+            let was_silent = self.silence_relation_chain();
+            let related = self.is_type_related_to(&constraint, target, relation);
+            self.restore_relation_chain(was_silent);
+            if related {
+                return true;
+            }
+        }
+
+        if t.contains(TypeFlags::TypeParameter)
+            && let Some(true) =
+                self.mapped_source_related_to_type_param_target(&source, &target, relation)
+        {
+            return true;
         }
 
         let source_is_indexed_access = s.contains(TypeFlags::IndexedAccess)
             || matches!(source.data, TypeData::IndexedAccess(_));
-        if source_is_indexed_access && !t.contains(TypeFlags::IndexedAccess) {
-            if let Some(constraint) = self.constraint_of_indexed_access(source)
-                && self.is_type_related_to(&constraint, target, relation)
-            {
-                return true;
+        if relation != RelationKind::Identity
+            && source_is_indexed_access
+            && !t.contains(TypeFlags::IndexedAccess)
+        {
+            let constraint = self
+                .indexed_access_constraint_for_chain(source)
+                .or_else(|| self.constraint_of_indexed_access(source));
+            if let Some(constraint) = constraint {
+                let was_silent = self.silence_relation_chain();
+                let related = self.is_type_related_to(&constraint, target, relation);
+                self.restore_relation_chain(was_silent);
+                if related {
+                    return true;
+                }
             }
         }
 
         if s.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
             || t.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
         {
-            return self.is_union_or_intersection_related_to(source, target, relation);
+            // Go structuredTypeRelatedToWorker identity 分支：union/intersection
+            // 双向 eachTypeRelatedToSomeType（成分对成分，非成分对整体）
+            if relation == RelationKind::Identity {
+                return self.each_type_related_to_some_type(source, target, relation)
+                    && self.each_type_related_to_some_type(target, source, relation);
+            }
+            if self.is_union_or_intersection_related_to(source, target, relation) {
+                return true;
+            }
+            if s.contains(TypeFlags::Object) && t.contains(TypeFlags::Union) {
+                return self.type_related_to_discriminated_type(source, target, relation);
+            }
+            return false;
+        }
+
+        // Go relater.go:3424-3437 别名实参变异性快路径：同符号泛型别名实例
+        // 按测量出的方差比较实参；测量未果（空方差）落回后续分派
+        if s.intersects(TypeFlags::Object | TypeFlags::Conditional)
+            && let (Some(source_alias), Some(target_alias)) =
+                (&source.alias, &target.alias)
+            && !source_alias.type_arguments.is_empty()
+            && let (Some(ssym), Some(tsym)) =
+                (source_alias.symbol.as_ref(), target_alias.symbol.as_ref())
+            && ssym.id() == tsym.id()
+            && !self.is_marker_type(source)
+            && !self.is_marker_type(target)
+        {
+            let variances = self.get_alias_variances(ssym);
+            // Go relater.go:3427-3429：递归测量未果返回 Unknown，落回后续
+            // 分派（结构/mapped）而非直接放行
+            if !variances.is_empty() {
+                let (tp_symbols, _) = self.collect_alias_type_params_and_body(ssym);
+                let params: Vec<Arc<Type>> = tp_symbols
+                    .iter()
+                    .map(|tp_sym| self.get_type_parameter_from_symbol(tp_sym))
+                    .collect();
+                let min_params = self.get_min_type_argument_count(&params);
+                let node_is_in_js_file = ssym
+                    .value_declaration
+                    .as_ref()
+                    .is_some_and(|d| crate::checker::mig::m1e::r20k2_defs::is_in_js_file(d));
+                let source_types =
+                    self.fill_missing_type_arguments(
+                        &source_alias.type_arguments,
+                        &params,
+                        min_params,
+                        node_is_in_js_file,
+                    );
+                let target_types =
+                    self.fill_missing_type_arguments(
+                        &target_alias.type_arguments,
+                        &params,
+                        min_params,
+                        node_is_in_js_file,
+                    );
+                if let Some(result) = self.relate_alias_variances(
+                    source,
+                    target,
+                    &source_types,
+                    &target_types,
+                    &variances,
+                    relation,
+                ) {
+                    return result;
+                }
+            }
         }
 
         if t.contains(TypeFlags::Object)
@@ -53,67 +170,172 @@ impl Checker {
         {
             let saved_chain_active = self.relater_chain_active;
             self.relater_chain_active = false;
+            let saved_primitive = std::mem::replace(&mut self.relater_pending_primitive_source, true);
             let r = self.is_type_related_to(&boxed, target, relation);
+            self.relater_pending_primitive_source = saved_primitive;
+            // Go structuredTypeRelatedToWorker isPerformingCommonPropertyChecks
+            // （relater.go:2714）：Primitive 源对弱类型目标的公共属性检查在
+            // 原始源上进行，属性枚举走装箱 apparent 型，报错以原始源显示
+            if !r
+                && saved_chain_active
+                && self.relater_intersection_target_depth == 0
+                && (relation != RelationKind::Comparable
+                    || crate::checker::utilities_token_is_identifier_or_keyword::is_unit_type(source))
+                && self.is_weak_type(target)
+                && (!self.get_properties_of_type(&boxed).is_empty()
+                    || self.type_has_call_or_construct_signatures(&boxed))
+                && !self.has_common_properties(&boxed, target, false)
+            {
+                let source_str = self.type_to_string(source);
+                let target_str = self.type_to_string(target);
+                let calls = self.get_signatures_of_type(&boxed, SignatureKind::Call);
+                let constructs = self.get_signatures_of_type(&boxed, SignatureKind::Construct);
+                let return_related = |checker: &mut Checker, target: &Arc<Type>| {
+                    calls
+                        .first()
+                        .and_then(|sig| checker.get_return_type_of_signature(sig))
+                        .is_some_and(|rt| checker.is_type_related_to(&rt, target, relation))
+                        || constructs
+                            .first()
+                            .and_then(|sig| checker.get_return_type_of_signature(sig))
+                            .is_some_and(|rt| checker.is_type_related_to(&rt, target, relation))
+                };
+                self.relater_chain_active = true;
+                if return_related(self, target) {
+                    self.relater_report_error(
+                        tsox_core::diagnostics::messages_generated::
+                            VALUE_OF_TYPE_0_HAS_NO_PROPERTIES_IN_COMMON_WITH_TYPE_1_DID_YOU_MEAN_TO_CALL_IT,
+                        vec![source_str, target_str],
+                    );
+                } else {
+                    self.relater_report_error(
+                        tsox_core::diagnostics::messages_generated::
+                            TYPE_0_HAS_NO_PROPERTIES_IN_COMMON_WITH_TYPE_1,
+                        vec![source_str, target_str],
+                    );
+                }
+            }
             self.relater_chain_active = saved_chain_active;
             return r;
         }
 
         if s.contains(TypeFlags::Object) && t.contains(TypeFlags::Object) {
+            // ReadonlyArray<T> 接口实例归一化为 readonly 标志数组（与 readonly T[]
+            // 同表示）：数组关系走元素协变快路径，避免逐成员结构比较在
+            // 递归泛型（every/flatMap/concat 互相引用）上实例漂移失效
+            let source = self
+                .normalize_readonly_array_instance(source)
+                .unwrap_or_else(|| Arc::clone(source));
+            let target = self
+                .normalize_readonly_array_instance(target)
+                .unwrap_or_else(|| Arc::clone(target));
+            let source = self.single_base_for_non_augmenting_subtype(&source);
+            let target = self.single_base_for_non_augmenting_subtype(&target);
+
             if let (Some(ss), Some(ts)) = (&source.symbol, &target.symbol)
                 && ss.id() == ts.id()
                 && ss
                     .flags
                     .intersects(SymbolFlags::Interface | SymbolFlags::Class)
             {
-                let source_args = self.get_type_arguments(source);
-                let target_args = self.get_type_arguments(target);
+                let source_args = self.get_type_arguments(&source);
+                let target_args = self.get_type_arguments(&target);
                 if source_args.is_empty() && target_args.is_empty() {
                     return true;
                 }
                 if source_args.len() == target_args.len()
                     && !source_args.is_empty()
-                    && source_args.iter().zip(target_args.iter()).all(|(a, b)| {
-                        self.is_type_related_to(a, b, relation)
-                            && self.is_type_related_to(b, a, relation)
-                    })
+                    && {
+                        let was_silent = self.silence_relation_chain();
+                        let ok = source_args.iter().zip(target_args.iter()).all(|(a, b)| {
+                            self.is_type_related_to(a, b, relation)
+                                && self.is_type_related_to(b, a, relation)
+                        });
+                        self.restore_relation_chain(was_silent);
+                        ok
+                    }
                 {
                     return true;
                 }
             }
 
-            if self.is_array_type(source) && self.is_array_type(target) {
-                return self.is_array_type_related_to(source, target, relation);
+            if self.is_array_type(&source) && self.is_array_type(&target) {
+                let source_is_primitive = std::mem::take(&mut self.relater_pending_primitive_source);
+                let r = self.is_array_type_related_to(&source, &target, relation, source_is_primitive);
+                self.relater_pending_primitive_source = source_is_primitive;
+                return r;
             }
 
-            if self.is_tuple_type(source) && self.is_tuple_type(target) {
-                return self.is_tuple_type_related_to(source, target, relation);
+            if self.is_tuple_type(&source) && self.is_tuple_type(&target) {
+                return self.is_tuple_type_related_to(&source, &target, relation);
             }
 
-            if let Some(result) = self.generic_type_reference_related_to(source, target, relation) {
-                if result.is_true() {
-                    return true;
+            // Go propertiesRelatedTo 元组目标分支：源非数组/元组/演进数组时，
+            // 变长（rest/variadic）目标直接拒绝；固定长度目标要求源 length
+            // 可赋给长度字面量（接口的 length: number 不可赋给 N）
+            if self.is_tuple_type(&target)
+                && !self.is_array_type(&source)
+                && !self.is_tuple_type(&source)
+                && !source
+                    .object_flags
+                    .contains(crate::checker::types::ObjectFlags::EvolvingArray)
+                && !source.flags.contains(TypeFlags::Any)
+                && let crate::checker::types::TypeData::Tuple(tt) = &target.data
+            {
+                if tt
+                    .combined_flags
+                    .intersects(ElementFlags::Rest | ElementFlags::Variadic)
+                {
+                    return false;
                 }
-                if result.is_false() {
+                let Some(length_sym) = self.get_property_of_type(&source, "length") else {
+                    return false;
+                };
+                let source_length = self.get_type_of_symbol(&length_sym);
+                if source_length.flags.contains(TypeFlags::Any) {
+                    // 落结构比较
+                } else if let crate::checker::types::TypeData::Literal(lit) = &source_length.data
+                    && let crate::checker::types::LiteralValue::Number(n) = lit.value
+                {
+                    if tt.fixed_length as f64 > n.0 {
+                        return false;
+                    }
+                } else {
                     return false;
                 }
             }
-            return self.is_object_type_related_to(source, target, relation);
+
+            // Go structuredTypeRelatedToWorker default（relater.go:3837-3843）：
+            // 双侧泛型映射先经 mappedTypeRelatedTo 分派，失败即拒绝；不经此
+            // 分派时 reportUnreliable 置位无从发生，方差测量退化为纯协变
+            if relation != RelationKind::Identity
+                && self.is_generic_mapped_type_relater(&target)
+                && self.is_generic_mapped_type_relater(&source)
+            {
+                if let Some(result) = self.mapped_type_related_to(&source, &target, relation) {
+                    if !result.is_false() {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            if let Some(result) = self.generic_type_reference_related_to(&source, &target, relation) {
+                return !result.is_false();
+            }
+            let source_is_primitive = std::mem::take(&mut self.relater_pending_primitive_source);
+            let r = self.is_object_type_related_to(&source, &target, relation, source_is_primitive);
+            self.relater_pending_primitive_source = source_is_primitive;
+            return r;
         }
 
-        if s.contains(TypeFlags::TypeParameter)
+        if relation != RelationKind::Identity
+            && s.contains(TypeFlags::TypeParameter)
             && t.contains(TypeFlags::TypeParameter)
             && let (Some(ss), Some(ts)) = (&source.symbol, &target.symbol)
             && Arc::ptr_eq(ss, ts)
         {
             return true;
-        }
-
-        if t.contains(TypeFlags::TypeParameter) {
-            if let Some(constraint) = self.get_constraint_of_type_parameter(target) {
-                if self.is_type_related_to(source, &constraint, relation) {
-                    return true;
-                }
-            }
         }
 
         if t.contains(TypeFlags::IndexedAccess) {
@@ -159,6 +381,13 @@ impl Checker {
                                 }
                             }
                         }
+                        if let Some(simplified) =
+                            self.substitute_generic_mapped_indexed_access(object_type, index_type)
+                        {
+                            if self.is_type_related_to(source, &simplified, relation) {
+                                return true;
+                            }
+                        }
                     }
                 }
             }
@@ -176,25 +405,171 @@ impl Checker {
                     return true;
                 }
             }
+            // Go relater.go keyof 分支：S 可赋给 keyof C 即通过，C 为目标型的
+            // 简化型或约束（无约束类型参数隐含 unknown，keyof unknown =
+            // string | number | symbol）；identity 仅直比 target
+            if relation != RelationKind::Identity {
+                if self.is_tuple_type(target_of) {
+                    if let Some(known) = self.get_known_keys_of_tuple_type(target_of)
+                        && self.is_type_related_to(source, &known, relation)
+                    {
+                        return true;
+                    }
+                } else if let Some(constraint) = self.get_simplified_type_or_constraint(target_of) {
+                    // Go getIndexTypeEx：keyof unknown = never、keyof any =
+                    // string | number | symbol；never 走下方守卫跳过
+                    let keys = if constraint.flags.contains(TypeFlags::Any) {
+                        let parts = vec![
+                            self.string_type(),
+                            self.number_type(),
+                            self.es_symbol_type(),
+                        ];
+                        self.get_union_type(parts)
+                    } else {
+                        self.get_index_type(&constraint)
+                    };
+                    if !keys.flags.contains(TypeFlags::Never)
+                        && self.is_type_related_to(source, &keys, relation)
+                    {
+                        return true;
+                    }
+                } else if self.mapped_type_keys_are_generic(target_of)
+                    && let Some(target_keys) = self.mapped_deferred_key_set(target_of, true)
+                {
+                    // Go relater.go:3551-3567：泛型映射型无简化型/约束时，
+                    // 目标键集 = apparent 代入键集 ∪ nameType（或 nameType/约束）
+                    if self.is_type_related_to(source, &target_keys, relation) {
+                        return true;
+                    }
+                }
+            }
         }
 
-        if s.contains(TypeFlags::Conditional) {
-            let resolved = match self.get_resolved_type_of_conditional_type(source) {
-                Some(resolved) => Some(resolved),
-
-                None => self.resolve_conditional_type(source),
+        // Go structuredTypeRelatedToWorker identity 分支：条件类型按四元组
+        // 直比（check/extends/true/false），且要求 distributivity 一致
+        if relation == RelationKind::Identity
+            && s.contains(TypeFlags::Conditional)
+            && t.contains(TypeFlags::Conditional)
+            && let (TypeData::Conditional(sc), TypeData::Conditional(tc)) = (&source.data, &target.data)
+        {
+            let distributive_match = sc
+                .root
+                .as_ref()
+                .is_some_and(|r| r.is_distributive)
+                == tc.root.as_ref().is_some_and(|r| r.is_distributive);
+            if !distributive_match {
+                return false;
+            }
+            let (Some(sc_check), Some(tc_check)) = (
+                sc.root.as_ref().and_then(|r| r.check_type.clone()),
+                tc.root.as_ref().and_then(|r| r.check_type.clone()),
+            ) else {
+                return false;
             };
+            let (Some(sc_extends), Some(tc_extends)) = (
+                sc.root.as_ref().and_then(|r| r.extends_type.clone()),
+                tc.root.as_ref().and_then(|r| r.extends_type.clone()),
+            ) else {
+                return false;
+            };
+            if !self.is_type_related_to(&sc_check, &tc_check, relation)
+                || !self.is_type_related_to(&sc_extends, &tc_extends, relation)
+            {
+                return false;
+            }
+            let (Some(st), Some(tt)) = (
+                self.get_true_type_of_conditional_type(&source),
+                self.get_true_type_of_conditional_type(&target),
+            ) else {
+                return false;
+            };
+            if !self.is_type_related_to(&st, &tt, relation) {
+                return false;
+            }
+            let (Some(sf), Some(tf)) = (
+                self.get_false_type_of_conditional_type(&source),
+                self.get_false_type_of_conditional_type(&target),
+            ) else {
+                return false;
+            };
+            return self.is_type_related_to(&sf, &tf, relation);
+        }
+
+        if relation != RelationKind::Identity
+            && t.contains(TypeFlags::TemplateLiteral)
+            && let crate::checker::types::TypeData::TemplateLiteral(tl) = &target.data
+        {
+            if self.is_type_matched_by_template_literal_type(source, tl) {
+                return true;
+            }
+        }
+
+        if relation == RelationKind::Identity
+            && s.contains(TypeFlags::TemplateLiteral)
+            && t.contains(TypeFlags::TemplateLiteral)
+            && let (
+                crate::checker::types::TypeData::TemplateLiteral(sl),
+                crate::checker::types::TypeData::TemplateLiteral(tl),
+            ) = (&source.data, &target.data)
+        {
+            if sl.texts != tl.texts || sl.types.len() != tl.types.len() {
+                return false;
+            }
+            return sl
+                .types
+                .iter()
+                .zip(tl.types.iter())
+                .all(|(a, b)| self.is_type_related_to(a, b, relation));
+        }
+        if relation == RelationKind::Identity
+            && s.contains(TypeFlags::StringMapping)
+            && t.contains(TypeFlags::StringMapping)
+            && let (
+                crate::checker::types::TypeData::StringMapping(sm),
+                crate::checker::types::TypeData::StringMapping(tm),
+            ) = (&source.data, &target.data)
+        {
+            let same_symbol = source
+                .symbol
+                .as_ref()
+                .zip(target.symbol.as_ref())
+                .is_some_and(|(a, b)| Arc::ptr_eq(a, b));
+            if !same_symbol {
+                return false;
+            }
+            if let (Some(st), Some(tt)) = (&sm.target, &tm.target) {
+                return self.is_type_related_to(st, tt, relation);
+            }
+            return true;
+        }
+
+        if relation != RelationKind::Identity && s.contains(TypeFlags::Conditional) {
+            let source_stack = self.relater_source_stack.clone();
+            if self.relater_is_deeply_nested_type(source, &source_stack, 10) {
+                self.relater_bail_maybe = true;
+                return true;
+            }
+            let resolved = self.resolve_conditional_type(source);
             if let Some(resolved) = resolved {
                 if self.is_type_related_to(&resolved, target, relation) {
                     return true;
                 }
             }
+            if !t.contains(TypeFlags::Conditional)
+                && let Some(distributive) = self.constraint_of_conditional_type(source)
+            {
+                if self.is_type_related_to(&distributive, target, relation) {
+                    return true;
+                }
+            }
         }
-        if t.contains(TypeFlags::Conditional) {
-            let resolved = match self.get_resolved_type_of_conditional_type(target) {
-                Some(resolved) => Some(resolved),
-                None => self.resolve_conditional_type(target),
-            };
+        if relation != RelationKind::Identity && t.contains(TypeFlags::Conditional) {
+            let target_stack = self.relater_target_stack.clone();
+            if self.relater_is_deeply_nested_type(target, &target_stack, 10) {
+                self.relater_bail_maybe = true;
+                return true;
+            }
+            let resolved = self.resolve_conditional_type(target);
             if let Some(resolved) = resolved {
                 if self.is_type_related_to(source, &resolved, relation) {
                     return true;
@@ -209,20 +584,45 @@ impl Checker {
                 if result.is_true() {
                     return true;
                 }
-                if result.is_false() {
-                    return false;
-                }
+            }
+            if s.contains(TypeFlags::Conditional)
+                && self.conditional_four_way_related(source, target, relation) == Some(true)
+            {
+                return true;
             }
         }
 
-        if s.contains(TypeFlags::Object) && source.object_flags.contains(ObjectFlags::Mapped) {
+        if relation != RelationKind::Identity
+            && s.contains(TypeFlags::Object)
+            && source.object_flags.contains(ObjectFlags::Mapped)
+        {
             if let Some(constraint) = self.get_constraint_of_mapped_type(source) {
                 if self.is_type_related_to(&constraint, target, relation) {
                     return true;
                 }
             }
         }
-        if t.contains(TypeFlags::Object) && target.object_flags.contains(ObjectFlags::Mapped) {
+        if relation != RelationKind::Identity
+            && t.contains(TypeFlags::Object)
+            && target.object_flags.contains(ObjectFlags::Mapped)
+        {
+            if let TypeData::Mapped(m) = &target.data
+                && m.name_type.is_none()
+                && let Some(tp) = &m.type_parameter
+                && m.declaration.as_ref().is_none_or(|d| {
+                    !matches!(
+                        &d.data,
+                        tsox_frontend::ast::NodeData::MappedTypeNode(mt)
+                            if mt.question_token.as_ref().is_some_and(|q| q.kind == SyntaxKind::MinusToken)
+                    )
+                })
+                && let Some(tpl) = self.get_template_type_from_mapped_type(target)
+                && let TypeData::IndexedAccess(ia) = &tpl.data
+                && ia.object_type.as_ref().is_some_and(|o| Arc::ptr_eq(o, source))
+                && ia.index_type.as_ref().is_some_and(|i| Arc::ptr_eq(i, tp))
+            {
+                return true;
+            }
             if let Some(constraint) = self.get_constraint_of_mapped_type(target) {
                 if self.is_type_related_to(source, &constraint, relation) {
                     return true;
@@ -241,6 +641,60 @@ impl Checker {
             }
         }
 
+        // Go relater.go:3726-3752 源侧 keyof 分支：keyof 源先按
+        // string | number | symbol 整体尝试；延迟泛型映射型（as 子句）再按
+        // 映射键集（apparent 代入键集/nameType/约束）尝试
+        if relation != RelationKind::Identity
+            && s.contains(TypeFlags::Index)
+            && let TypeData::Index(source_index) = &source.data
+            && let Some(source_of) = source_index.target.clone()
+        {
+            let sns_parts = vec![
+                self.string_type(),
+                self.number_type(),
+                self.es_symbol_type(),
+            ];
+            let sns = self.get_union_type(sns_parts);
+            if self.is_type_related_to(&sns, target, relation) {
+                return true;
+            }
+            let deferred_mapped = source_of.object_flags.contains(ObjectFlags::Mapped)
+                && self.get_name_type_from_mapped_type(&source_of).is_some()
+                && self.mapped_type_keys_are_generic(&source_of);
+            if deferred_mapped
+                && let Some(source_keys) = self.mapped_deferred_key_set(&source_of, false)
+                && self.is_type_related_to(&source_keys, target, relation)
+            {
+                return true;
+            }
+        }
+
+        if relation != RelationKind::Identity
+            && s.contains(TypeFlags::TypeParameter)
+            && !t.contains(TypeFlags::TypeParameter)
+            && let Some(constraint) = self.get_constraint_of_type_parameter(source)
+            && !constraint.flags.contains(TypeFlags::Unknown)
+        {
+            let chain_len = self.relater_error_chain.len();
+            if self.is_type_related_to(&constraint, target, relation) {
+                self.relater_error_chain.truncate(chain_len);
+                return true;
+            }
+        }
+
+        if relation != RelationKind::Identity
+            && source_is_indexed_access
+            && !t.contains(TypeFlags::IndexedAccess)
+            && let Some(constraint) = self.indexed_access_constraint_for_chain(source)
+            && !constraint.flags.contains(TypeFlags::Unknown)
+        {
+            let chain_len = self.relater_error_chain.len();
+            if self.is_type_related_to(&constraint, target, relation) {
+                self.relater_error_chain.truncate(chain_len);
+                return true;
+            }
+        }
+
         false
     }
 
@@ -249,16 +703,87 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
+        source_is_primitive: bool,
     ) -> bool {
         let source_args = self.get_type_arguments(source);
         let target_args = self.get_type_arguments(target);
 
         if source_args.is_empty() || target_args.is_empty() {
-            return self.is_object_type_related_to(source, target, relation);
+            return self.is_object_type_related_to(source, target, relation, source_is_primitive);
+        }
+
+        // readonly → 可变按赋值/子类型关系拒绝（可变 → readonly 放行，
+        // 元素协变照常）
+        let source_ro = source.object_flags.contains(ObjectFlags::IsReadonlyArray);
+        let target_ro = target.object_flags.contains(ObjectFlags::IsReadonlyArray);
+        if source_ro
+            && !target_ro
+            && matches!(
+                relation,
+                RelationKind::Assignable | RelationKind::Subtype | RelationKind::StrictSubtype
+            )
+        {
+            if self.relater_chain_active {
+                let source_str = self.type_to_string(source);
+                let target_str = self.type_to_string(target);
+                self.relater_report_error(
+                    tsox_core::diagnostics::messages_generated::
+                        THE_TYPE_0_IS_READONLY_AND_CANNOT_BE_ASSIGNED_TO_THE_MUTABLE_TYPE_1,
+                    vec![source_str, target_str],
+                );
+            }
+            return false;
         }
 
         let source_elem = &source_args[0];
         let target_elem = &target_args[0];
         self.is_type_related_to(source_elem, target_elem, relation)
     }
+
+    /// Array/ReadonlyArray 接口实例（含关系判定中途惰性解析的 Anonymous 形态）
+    /// → 驻留数组实例（readonly 语义由 IsReadonlyArray 标志承载）；
+    /// 其余类型原样返回。符号比对带名字等价兜底：lib 文件的符号存在双副本
+    /// 实例漂移（globals 与类型引用解析不同 Arc），ptr_eq 会漏
+    pub(crate) fn normalize_readonly_array_instance(
+        &mut self,
+        t: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        if !t.flags.contains(TypeFlags::Object) {
+            return None;
+        }
+        let args_len = t.as_object()?.type_arguments.len();
+        if args_len != 1 {
+            return None;
+        }
+        let symbol = t.symbol.as_ref()?;
+        let array_sym = self.globals.get("Array")?;
+        let readonly_sym = self.globals.get("ReadonlyArray")?;
+        let is_ro_symbol = Arc::ptr_eq(symbol, readonly_sym)
+            || (symbol.name == readonly_sym.name
+                && symbol.flags.contains(SymbolFlags::Interface));
+        let is_array_symbol = Arc::ptr_eq(symbol, array_sym)
+            || (symbol.name == array_sym.name
+                && symbol.flags.contains(SymbolFlags::Interface));
+        let readonly = if is_ro_symbol {
+            true
+        } else if is_array_symbol {
+            t.object_flags
+                .contains(crate::checker::types::ObjectFlags::IsReadonlyArray)
+        } else {
+            return None;
+        };
+        let element = Arc::clone(&t.as_object()?.type_arguments[0]);
+        Some(self.create_array_type_ex(element, readonly))
+    }
+}
+
+fn some_type_is_type_parameter(t: &Arc<Type>) -> bool {
+    if let TypeData::Union(u) = &t.data {
+        return u
+            .union_or_intersection
+            .types
+            .iter()
+            .any(|m| m.flags.contains(TypeFlags::TypeParameter));
+    }
+    t.flags.contains(TypeFlags::TypeParameter)
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn formatting_on_classes() {
     let content = r#"/*1*/         class                    a                  {
@@ -85,8 +85,8 @@ fn formatting_on_classes() {
 /*65*/                                                                         private                pv4  :    number =
 /*66*/                                                                         {};
 /*END*/}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formattingOnClasses", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"class a {"#);
     fourslash::go_to_marker(&mut s, "2");

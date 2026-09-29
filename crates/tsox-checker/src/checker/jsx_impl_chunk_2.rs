@@ -18,3 +18,5 @@ pub use crate::checker::jsx_impl_chunk_2_checker::*;
 pub use crate::checker::jsx_impl_chunk_2_checker_2::*;
 #[allow(unused_imports)]
 pub use crate::checker::jsx_impl_chunk_2_checker_3::*;
+#[allow(unused_imports)]
+pub use crate::checker::jsx_impl_chunk_2_checker_4::*;

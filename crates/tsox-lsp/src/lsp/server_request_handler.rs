@@ -246,9 +246,19 @@ impl Server {
         config.file_names = file_names;
         config.compiler_options.no_lib = tsox_core::core::tristate::Tristate::True;
 
-        let program = Arc::new(tsox_compile::compiler::Program::new(
-            tsox_compile::compiler::ProgramOptions { config, host },
-        ));
+        let program = tsox_compile::compiler::Program::new(
+            tsox_compile::compiler::ProgramOptions {
+                config,
+                host,
+                use_source_of_project_reference: false,
+                single_threaded: tsox_core::core::tristate::Tristate::Unknown,
+                create_checker_pool: None,
+                typings_location: String::new(),
+                project_name: String::new(),
+                tracing: None,
+                skip_module_resolution: false,
+            },
+        );
 
         let ls_host = Box::new(InMemoryLsHost::default());
         Some(LanguageService::new(

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn export_equal_namespace_class_es_module_interop() {
     let content = r#"// @esModuleInterop: true
@@ -17,7 +17,7 @@ export = Foo;
 // @Filename: /index.ts
 import Foo from "foo";
 /**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("exportEqualNamespaceClassESModuleInterop", content);
     fourslash::go_to_file(&mut s, "/index.ts");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, Some(""), &["Foo"], &[]);
 }

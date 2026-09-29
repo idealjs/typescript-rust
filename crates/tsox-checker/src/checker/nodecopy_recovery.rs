@@ -162,4 +162,12 @@ impl SymbolTracker for WrappingTracker {
     fn pop_error_fallback_node(&mut self) {
         self.wrapped.borrow_mut().pop_error_fallback_node();
     }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        self
+    }
 }

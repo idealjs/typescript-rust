@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_node_next_js_require() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @module: node18
 // @allowJs: true
 // @checkJs: true
@@ -16,7 +16,7 @@ exports.dedupeLines = data => {
 }
 // @Filename: /totally-irrelevant-no-way-this-changes-things-right.js
 export default 0;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportNodeNextJSRequire", content);
     fourslash::go_to_file(&mut s, "/main.js");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

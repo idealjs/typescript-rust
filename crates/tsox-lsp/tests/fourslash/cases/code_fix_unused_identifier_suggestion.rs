@@ -1,14 +1,14 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_unused_identifier_suggestion() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: false
 function f([|p|]) {
     const [|x|] = 0;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
-    fourslash::unsupported("VerifyCodeFixAvailable"); // f.VerifyCodeFixAvailable(t, nil)
+    let _s = Session::new_for_test("codeFixUnusedIdentifier_suggestion", content);
+    // TODO: f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
+    // TODO: f.VerifyCodeFixAvailable(t, nil)
 }

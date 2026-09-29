@@ -16,3 +16,4 @@ pub(crate) use tsox_frontend::ast::Symbol;
 pub(crate) use tsox_frontend::ast::SymbolFlags;
 pub(crate) use tsox_frontend::ast::SymbolTable;
 pub(crate) use tsox_frontend::ast::SyntaxKind;
+

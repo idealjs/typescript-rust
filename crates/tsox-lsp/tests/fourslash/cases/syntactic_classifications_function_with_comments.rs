@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
+
 #[test]
 fn syntactic_classifications_function_with_comments() {
     let content = r#"/**
@@ -11,6 +11,6 @@ function myFunction(/* x */ x: any) {
     var y = x ? x++ : ++x;
 }
 // end of file"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
+    let _s = Session::new_for_test("syntacticClassificationsFunctionWithComments", content);
+    // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

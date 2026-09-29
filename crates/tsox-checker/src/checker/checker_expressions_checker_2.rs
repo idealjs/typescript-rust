@@ -175,7 +175,7 @@ impl Checker {
                 }
                 tsox_frontend::ast::NodeData::ShorthandPropertyAssignment(sa) => {
                     let t = self.get_type_of_node(&sa.name);
-                    (t, false)
+                    (self.get_widened_type_of_literal(&t), false)
                 }
                 tsox_frontend::ast::NodeData::GetAccessorDeclaration(gd) => {
                     let t = match &gd.type_node {
@@ -225,7 +225,7 @@ impl Checker {
             id: crate::checker::types::next_type_id(),
             symbol: None,
             alias: None,
-            data: crate::checker::types::TypeData::Object(crate::checker::types::ObjectTypeData {
+            data: crate::checker::types::TypeData::Object(crate::checker::types::ObjectTypeData { node: None,
                 structured: crate::checker::types::StructuredTypeData {
                     members: symbol_table,
                     properties: props,
@@ -268,6 +268,16 @@ impl Checker {
                 }
             }
             SyntaxKind::MethodDeclaration | SyntaxKind::GetAccessor | SyntaxKind::SetAccessor => {
+                // 字面量位方法的参数上下文定型（Go checkFunctionLikeExpression 的
+                // contextuallyTypedParameterCount：经成员名查上下文签名）
+                if node.kind == SyntaxKind::MethodDeclaration
+                    && let tsox_frontend::ast::NodeData::MethodDeclaration(d) = &node.data
+                {
+                    let contextual_count = self
+                        .get_contextual_signature(node)
+                        .map_or(0, |sig| sig.parameters.len());
+                    self.check_parameter_implicit_any(node, &d.parameters, contextual_count);
+                }
                 self.check_class_member(node);
             }
             _ => {

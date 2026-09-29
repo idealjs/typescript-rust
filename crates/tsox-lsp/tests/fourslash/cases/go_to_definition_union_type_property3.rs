@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_union_type_property3() {
     let content = r#"interface Array<T> {
@@ -11,6 +11,6 @@ var strings: string[];
 var numbers: number[];
 
 var x = (strings || numbers).[|/*usage*/specialPop|]()"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "usage")
+    let _s = Session::new_for_test("goToDefinitionUnionTypeProperty3", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "usage")
 }

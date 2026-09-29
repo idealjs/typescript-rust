@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn unused_imports10_fs() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @noUnusedLocals: true
 namespace A {
    export class Calculator {
@@ -14,6 +14,6 @@ namespace A {
 namespace B {
     [|import a = A;|]
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, ``, false, 0, 0)
+    let _s = Session::new_for_test("unusedImports10FS", content);
+    // TODO: f.VerifyRangeAfterCodeFix(t, ``, false, 0, 0)
 }

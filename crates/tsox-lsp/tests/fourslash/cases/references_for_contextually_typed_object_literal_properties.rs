@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn references_for_contextually_typed_object_literal_properties() {
     let content = r#"interface IFoo { /*xy*/xy: number; }
@@ -27,6 +27,6 @@ var w: IFoo = { xy: undefined };
 
 // Untped -- should not be included
 var u = { xy: 0 };"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "xy")
+    let _s = Session::new_for_test("referencesForContextuallyTypedObjectLiteralProperties", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "xy")
 }

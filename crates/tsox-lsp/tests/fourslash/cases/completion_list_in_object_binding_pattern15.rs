@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_in_object_binding_pattern15() {
     let content = r#"class Foo {
@@ -18,9 +18,9 @@ fn completion_list_in_object_binding_pattern15() {
 
 const { /*3*/ } = new Foo();
 const { /*4*/ } = Foo;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListInObjectBindingPattern15", content);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("1"), &["xxx1", "xxx2", "xxx3", "foo"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("2"), &["prototype", "xxx4", "xxx5", "xxx6"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("3"), &["xxx3", "foo"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("4"), &["prototype", "xxx6"]);
 }

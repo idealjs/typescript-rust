@@ -2,11 +2,6 @@
 use std::sync::Arc;
 use tsox_checker::bundled::BundledFS;
 use tsox_checker::bundled::lib_path;
-use tsox_checker::checker::Checker;
-use tsox_checker::checker::NodeLinks;
-use tsox_checker::checker::Ternary;
-use tsox_checker::checker::Tracer;
-use tsox_checker::checker::checker::*;
 use tsox_compile::compiler::CompilerHost;
 use tsox_compile::compiler::CompilerHostImpl;
 use tsox_compile::compiler::Program;
@@ -14,10 +9,6 @@ use tsox_compile::compiler::ProgramOptions;
 use tsox_core::core::compiler_options::CompilerOptions;
 use tsox_core::core::compiler_options::ModuleKind;
 use tsox_core::core::compiler_options::ModuleResolutionKind;
-use tsox_frontend::ast::Node;
-use tsox_frontend::ast::NodeData;
-use tsox_frontend::ast::Symbol;
-use tsox_frontend::ast::SyntaxKind;
 use tsox_tsoptions::tsoptions::ParsedCommandLine;
 use tsox_tsoptions::vfs::InMemoryFS;
 
@@ -48,6 +39,9 @@ pub(crate) fn check_files(
     }
     let fs = Arc::new(BundledFS::new(inner));
     let mut options = CompilerOptions::default();
+    // Go fourslash 基底默认：skipDefaultLibCheck（lib 只作类型来源，
+    // 不对其本身出诊断；避免 lib 全量检查期的解析重入壳污染）
+    options.skip_default_lib_check = tsox_core::core::tristate::Tristate::True;
     configure(&mut options);
     let parsed = ParsedCommandLine {
         file_names: vec![root.to_string()],
@@ -58,8 +52,14 @@ pub(crate) fn check_files(
         Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
     let program = Arc::new(Program::new(ProgramOptions {
         config: parsed,
-        host,
-    }));
+        host,        use_source_of_project_reference: false,
+        single_threaded: Default::default(),
+        create_checker_pool: None,
+        typings_location: String::new(),
+        project_name: String::new(),
+        tracing: None,
+        skip_module_resolution: false,
+}));
     let checker = program.build_checker();
 
     checker

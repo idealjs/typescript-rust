@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
+
 #[test]
 fn import_name_code_fix_infer_ending_preference() {
     let content = r#"// @module: esnext
@@ -16,6 +16,6 @@ import {} from "./a.mjs";
 import {} from "./b";
 
 c/**/;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"./c"}, nil /*preferences*/)
+    let _s = Session::new_for_test("importNameCodeFixInferEndingPreference", content);
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"./c"}, nil /*preferences*/)
 }

@@ -6,10 +6,11 @@ use tsox_frontend::ast::*;
 
 use crate::binder::nameresolver::NameResolver;
 
+#[allow(dead_code)]
 pub struct ReferenceResolverImpl {
-    resolver: Option<NameResolver>,
-    options: Option<Arc<CompilerOptions>>,
-    hooks: ReferenceResolverHooks,
+    pub resolver: Option<NameResolver>,
+    pub options: Option<Arc<CompilerOptions>>,
+    pub hooks: ReferenceResolverHooks,
 }
 
 pub fn new_reference_resolver(
@@ -24,7 +25,7 @@ pub fn new_reference_resolver(
 }
 
 impl ReferenceResolverImpl {
-    fn get_resolved_symbol(&self, node: Option<&Arc<Node>>) -> Option<Arc<Symbol>> {
+    pub fn get_resolved_symbol(&self, node: Option<&Arc<Node>>) -> Option<Arc<Symbol>> {
         if let Some(node) = node {
             if let Some(callback) = &self.hooks.get_resolved_symbol_fn {
                 return callback(node);
@@ -43,119 +44,10 @@ impl ReferenceResolverImpl {
         None
     }
 
-    fn get_parent_of_symbol(&self, symbol: Option<&Arc<Symbol>>) -> Option<Arc<Symbol>> {
-        if let Some(symbol) = symbol {
-            if let Some(callback) = &self.hooks.get_parent_of_symbol_fn {
-                return callback(symbol);
-            }
-            return symbol.parent.clone();
-        }
-        None
-    }
 
-    fn get_symbol_of_declaration(&self, declaration: Option<&Arc<Node>>) -> Option<Arc<Symbol>> {
-        if let Some(declaration) = declaration {
-            if let Some(callback) = &self.hooks.get_symbol_of_declaration_fn {
-                return callback(declaration);
-            }
 
-            return node_symbol(declaration);
-        }
-        None
-    }
 
-    fn get_referenced_value_symbol(
-        &mut self,
-        reference: &Arc<Node>,
-        start_in_declaration_container: bool,
-    ) -> Option<Arc<Symbol>> {
-        let resolved_symbol = self.get_resolved_symbol(Some(reference));
-        if let Some(resolved) = resolved_symbol {
-            return Some(resolved);
-        }
 
-        let location = if start_in_declaration_container {
-            Arc::clone(reference)
-        } else {
-            Arc::clone(reference)
-        };
-
-        if let Some(callback) = &self.hooks.resolve_name_fn {
-            return callback(
-                &location,
-                reference.text(),
-                SymbolFlags::ExportValue
-                    .union(SymbolFlags::VALUE)
-                    .union(SymbolFlags::Alias),
-                None,
-                false,
-                false,
-            );
-        }
-
-        if self.resolver.is_none() {
-            self.resolver = Some(NameResolver {
-                compiler_options: self.options.clone(),
-                ..NameResolver::default()
-            });
-        }
-
-        let resolver = self.resolver.as_mut().unwrap();
-        resolver.resolve(
-            &location,
-            reference.text(),
-            SymbolFlags::ExportValue
-                .union(SymbolFlags::VALUE)
-                .union(SymbolFlags::Alias),
-            None,
-            false,
-            false,
-        )
-    }
-
-    fn is_type_only_alias_declaration(&self, symbol: Option<&Arc<Symbol>>) -> bool {
-        if let Some(symbol) = symbol {
-            if let Some(callback) = &self.hooks.get_type_only_alias_declaration_fn {
-                return callback(symbol, SymbolFlags::VALUE).is_some();
-            }
-
-            let mut node = self.get_declaration_of_alias_symbol(Some(symbol));
-            while let Some(current) = node {
-                match current.kind {
-                    SyntaxKind::ImportEqualsDeclaration | SyntaxKind::ExportDeclaration => {
-                        return node_is_type_only(&current);
-                    }
-                    SyntaxKind::ImportClause
-                    | SyntaxKind::ImportSpecifier
-                    | SyntaxKind::ExportSpecifier => {
-                        if node_is_type_only(&current) {
-                            return true;
-                        }
-                        node = current.parent.clone();
-                        continue;
-                    }
-                    SyntaxKind::NamedImports | SyntaxKind::NamedExports => {
-                        node = current.parent.clone();
-                        continue;
-                    }
-                    _ => break,
-                }
-            }
-        }
-        false
-    }
-
-    fn get_declaration_of_alias_symbol(&self, symbol: Option<&Arc<Symbol>>) -> Option<Arc<Node>> {
-        if let Some(symbol) = symbol {
-            return symbol
-                .declarations
-                .iter()
-                .rev()
-                .find(|d| is_alias_symbol_declaration(d))
-                .cloned();
-        }
-        None
-    }
 
     fn get_export_symbol_of_value_symbol_if_exported(
         &self,
@@ -183,7 +75,7 @@ impl ReferenceResolver for ReferenceResolverImpl {
         node: &Arc<Node>,
         prefix_locals: bool,
     ) -> Option<Arc<Node>> {
-        let start_in_declaration_container = node.parent.as_ref().map_or(false, |parent| {
+        let start_in_declaration_container = node.parent().as_ref().map_or(false, |parent| {
             (parent.kind == SyntaxKind::ModuleDeclaration
                 || parent.kind == SyntaxKind::EnumDeclaration)
                 && parent.name().map(|n| Arc::ptr_eq(n, node)).unwrap_or(false)
@@ -239,10 +131,4 @@ fn node_symbol(_node: &Arc<Node>) -> Option<Arc<Symbol>> {
     None
 }
 
-fn node_is_type_only(_node: &Arc<Node>) -> bool {
-    false
-}
 
-fn is_alias_symbol_declaration(_node: &Arc<Node>) -> bool {
-    false
-}

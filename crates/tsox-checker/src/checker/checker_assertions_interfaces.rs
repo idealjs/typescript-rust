@@ -11,7 +11,6 @@ pub use crate::checker::checker_assertions_interfaces_checker_4::*;
 pub use crate::checker::checker_assertions_interfaces_checker_5::*;
 pub(crate) use std::sync::Arc;
 pub(crate) use tsox_core::core::text::TextRange;
-pub(crate) use tsox_core::jsnum;
 pub(crate) use tsox_frontend::ast::ModifierFlags;
 pub(crate) use tsox_frontend::ast::Node;
 pub(crate) use tsox_frontend::ast::NodeData;

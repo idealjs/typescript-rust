@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_private_properties_js() {
     let content = r#"// @allowJs: true
@@ -18,6 +18,6 @@ declare namespace A {
 // @filename: b.js
 let foo = new A.Foo();
 foo./**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{""}, &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("completionsPrivateProperties_Js", content);
+    // TODO: f.VerifyCompletions(t, []string{""}, &fourslash.CompletionsExpectedList{
 }

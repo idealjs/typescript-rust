@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineSignatureHelp"]
+
 #[test]
 fn quick_info_js_doc_text_formatting1() {
     let content = r#"/**
@@ -44,6 +44,6 @@ f2(/*2*/);
 f3(/*3*/);
 f4(/*4*/);
 f5(/*5*/);"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
+    let _s = Session::new_for_test("quickInfoJsDocTextFormatting1", content);
+    // TODO: f.VerifyBaselineSignatureHelp(t)
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn member_list_of_var_in_arrow_expression() {
     let content = r#"interface IMap<T> {
@@ -15,7 +15,8 @@ each(categories, category => {
     });
 });
 function each<T>(items: T[], handler: (item: T) => void) { }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("memberListOfVarInArrowExpression", content);
     fourslash::verify_quick_info_at(&mut s, "1", "(property) a1: string", "");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

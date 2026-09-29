@@ -1,13 +1,13 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_infer_from_primitive_usage() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @noImplicitAny: true
 function wrap( [| s |] ) {
     return s.length + s.indexOf('hi')
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `s: string | string[]`, false, 0, 0)
+    let _s = Session::new_for_test("codeFixInferFromPrimitiveUsage", content);
+    // TODO: f.VerifyRangeAfterCodeFix(t, `s: string | string[]`, false, 0, 0)
 }

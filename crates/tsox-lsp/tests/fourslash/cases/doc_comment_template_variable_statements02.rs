@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: capabilities := fourslash.GetDefaultCapabilities()"]
+
 #[test]
 fn doc_comment_template_variable_statements02() {
     let content = r#"/*a*/
@@ -32,6 +32,6 @@ let f1 = {
 }, f2 = null;"#;
     // TODO: capabilities := fourslash.GetDefaultCapabilities()
     // TODO: capabilities.TextDocument.Completion.CompletionItem.SnippetSupport = new(false)
-    let mut s = Session::new_with_capabilities(content, None);
+    let _s = Session::new_with_capabilities(content, None);
     // TODO: for _, varName := range []string{"a", "b", "c", "d", "e", "f"} {
 }

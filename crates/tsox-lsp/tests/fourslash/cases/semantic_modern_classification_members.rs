@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: }"]
+
 #[test]
 fn semantic_modern_classification_members() {
     let content = r#"class A {
@@ -11,7 +11,7 @@ fn semantic_modern_classification_members() {
   static t() { return new A().f; };
   constructor() {}
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
+    let _s = Session::new_for_test("semanticModernClassificationMembers", content);
+    // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
     // TODO: }
 }

@@ -7,7 +7,7 @@ impl Parser {
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
     ) -> Arc<Node> {
-        let pos = self.token_pos();
+        let pos = Self::declaration_start(&modifiers, self.token_pos());
         let keyword = self.token;
 
         if self.token == SyntaxKind::GlobalKeyword {
@@ -31,7 +31,7 @@ impl Parser {
             let statements =
                 self.parse_list(ParsingContext::BlockStatements, Parser::parse_statement);
             self.expect(SyntaxKind::CloseBraceToken);
-            let end = self.token_pos();
+            let end = self.node_pos();
             Some(Arc::new(Node::with_loc(
                 SyntaxKind::ModuleBlock,
                 NodeData::ModuleBlock(ModuleBlockData {
@@ -43,60 +43,47 @@ impl Parser {
             self.parse_semicolon();
             None
         };
+
         let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
 
         let mut name = segments.pop().expect("at least one segment");
         let mut inner_body = body;
 
-        let user_modifiers = modifiers;
-        let mut mods = if segments.is_empty() {
-            user_modifiers.clone()
-        } else {
-            None
-        };
-        let outermost = segments.is_empty();
-
-        let export_only: Option<Arc<ModifierList>> = if segments.is_empty() {
-            None
-        } else {
-            let export_tok = Arc::new(Node::with_loc(
-                SyntaxKind::ExportKeyword,
-                NodeData::Token,
-                TextRange::new(pos, pos + 6),
-            ));
-            Some(Arc::new(ModifierList::new(
-                vec![export_tok],
-                ModifierFlags::Export,
-            )))
-        };
         loop {
+            let decl_pos = if segments.is_empty() { pos } else { name.pos() };
+            // Go parser parseNamespaceDeclaration：点分名展开为嵌套声明，
+            // 仅内层段补 export，最外层保留用户修饰符
+            let mods = if segments.is_empty() {
+                modifiers.clone()
+            } else {
+                let phantom_pos = name.pos();
+                let export_tok = Arc::new(Node::with_loc_flags(
+                    SyntaxKind::ExportKeyword,
+                    NodeData::Token,
+                    TextRange::new(phantom_pos, phantom_pos),
+                    crate::ast::NodeFlags::Reparsed,
+                ));
+                let mut ml = ModifierList::new(vec![export_tok], ModifierFlags::Export);
+                ml.list.loc = TextRange::new(phantom_pos, phantom_pos);
+                Some(Arc::new(ml))
+            };
             let decl = Arc::new(Node::with_loc(
                 SyntaxKind::ModuleDeclaration,
                 NodeData::ModuleDeclaration(ModuleDeclarationData {
-                    modifiers: mods.clone().or_else(|| export_only.clone()),
+                    modifiers: mods,
                     keyword,
                     name: Arc::clone(&name),
+                    attributes: None,
                     body: inner_body,
                 }),
-                TextRange::new(pos, end),
+                TextRange::new(decl_pos, end),
             ));
             match segments.pop() {
                 Some(seg) => {
                     name = seg;
                     inner_body = Some(decl);
-                    mods = None;
                 }
-                None => {
-                    if !outermost {
-                        let decl_mut = Arc::as_ptr(&decl) as *mut Node;
-                        unsafe {
-                            if let NodeData::ModuleDeclaration(d) = &mut (*decl_mut).data {
-                                d.modifiers = user_modifiers.clone();
-                            }
-                        }
-                    }
-                    return decl;
-                }
+                None => return decl,
             }
         }
     }
@@ -112,13 +99,18 @@ impl Parser {
         } else {
             self.parse_string_literal_name()
         };
+        let attributes = if self.token == SyntaxKind::WithKeyword {
+            Some(self.parse_import_attributes(self.token, false))
+        } else {
+            None
+        };
         let body = if self.token == SyntaxKind::OpenBraceToken {
             let body_pos = self.token_pos();
             self.next_token();
             let statements =
                 self.parse_list(ParsingContext::BlockStatements, Parser::parse_statement);
             self.expect(SyntaxKind::CloseBraceToken);
-            let end = self.token_pos();
+            let end = self.node_pos();
             Some(Arc::new(Node::with_loc(
                 SyntaxKind::ModuleBlock,
                 NodeData::ModuleBlock(ModuleBlockData {
@@ -137,6 +129,7 @@ impl Parser {
                 modifiers,
                 keyword,
                 name,
+                attributes,
                 body,
             }),
             TextRange::new(pos, end),
@@ -182,6 +175,14 @@ impl Parser {
 
     pub(crate) fn parse_import_declaration(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
+        self.parse_import_declaration_with_modifiers(pos, None)
+    }
+
+    pub(crate) fn parse_import_declaration_with_modifiers(
+        &mut self,
+        pos: usize,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> {
         self.next_token();
 
         let after_import_pos = self.token_pos();
@@ -231,7 +232,12 @@ impl Parser {
                 && phase_modifier != Some(SyntaxKind::DeferKeyword)
             {
                 let is_type_only = phase_modifier == Some(SyntaxKind::TypeKeyword);
-                return self.parse_import_equals_declaration(pos, id.clone(), is_type_only);
+                return self.parse_import_equals_with_modifiers(
+                    pos,
+                    modifiers,
+                    id.clone(),
+                    is_type_only,
+                );
             }
         }
 
@@ -240,17 +246,27 @@ impl Parser {
         let module_specifier = self.parse_module_specifier();
         let attributes = self.try_parse_import_attributes();
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ImportDeclaration,
             NodeData::ImportDeclaration(ImportDeclarationData {
-                modifiers: None,
+                modifiers,
                 import_clause,
                 module_specifier,
                 attributes,
             }),
             TextRange::new(pos, end),
         ))
+    }
+
+    pub(crate) fn parse_import_equals_with_modifiers(
+        &mut self,
+        pos: usize,
+        modifiers: Option<Arc<ModifierList>>,
+        name: Arc<Node>,
+        is_type_only: bool,
+    ) -> Arc<Node> {
+        self.parse_import_equals_tail(pos, modifiers, name, is_type_only)
     }
 
     pub(crate) fn token_after_import_definitely_produces_import_declaration(&self) -> bool {
@@ -270,5 +286,30 @@ impl Parser {
         is_type_only: bool,
     ) -> Arc<Node> {
         self.parse_import_equals_tail(pos, None, name, is_type_only)
+    }
+}
+
+impl Parser {
+    /// 浅消费一个平衡的 `{ ... }` 块（module attributes 等不求值场景）
+    pub(crate) fn skip_balanced_brace_block(&mut self) {
+        if self.token != SyntaxKind::OpenBraceToken {
+            return;
+        }
+        let mut depth = 0usize;
+        loop {
+            let kind = self.token;
+            if kind == SyntaxKind::OpenBraceToken {
+                depth += 1;
+            } else if kind == SyntaxKind::CloseBraceToken {
+                depth = depth.saturating_sub(1);
+                if depth == 0 {
+                    self.next_token();
+                    return;
+                }
+            } else if kind == SyntaxKind::EndOfFile {
+                return;
+            }
+            self.next_token();
+        }
     }
 }

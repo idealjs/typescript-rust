@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
+
 #[test]
 fn import_name_code_fix_export_as_default() {
     let content = r#"// @Filename: /foo.ts
@@ -8,6 +8,6 @@ const foo = 'foo'
 export { foo as default }
 // @Filename: /index.ts
  foo/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
+    let _s = Session::new_for_test("importNameCodeFixExportAsDefault", content);
+    // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

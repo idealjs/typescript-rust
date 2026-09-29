@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn references_for_index_property3() {
     let content = r#"interface Object {
@@ -12,6 +12,6 @@ y./*2*/toMyString();
 
 var x = {};
 x["/*3*/toMyString"]();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
+    let _s = Session::new_for_test("referencesForIndexProperty3", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

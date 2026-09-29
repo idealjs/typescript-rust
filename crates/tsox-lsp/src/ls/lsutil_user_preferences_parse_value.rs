@@ -1,5 +1,4 @@
 use tsox_core::core::tristate::Tristate;
-use tsox_tsoptions::modulespecifiers;
 
 use serde_json::Value;
 

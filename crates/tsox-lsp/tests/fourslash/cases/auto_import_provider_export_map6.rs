@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn auto_import_provider_export_map6() {
     let content = r#"// @types package should be ignored because implementation package has types
@@ -55,8 +55,9 @@ export declare function fooFromAtTypesIndex(): void;
 export declare function fooFromAtTypesLol(): void;
 // @Filename: /home/src/workspaces/project/src/foo.ts
 fooFrom/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportProvider_exportMap6", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

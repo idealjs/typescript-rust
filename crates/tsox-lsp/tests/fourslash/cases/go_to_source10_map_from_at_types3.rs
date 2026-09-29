@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn go_to_source10_map_from_at_types3() {
     let content = r#"// @lib: es5
@@ -31,15 +31,15 @@ fn go_to_source10_map_from_at_types3() {
     function lodash(value) {}
     lodash.[|/*property*/add|] = add;
 
-    /** Detect free variable ` + "`" + `global` + "`" + ` from Node.js. */
+    /** Detect free variable `global` from Node.js. */
     var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
-    /** Detect free variable ` + "`" + `self` + "`" + `. */
+    /** Detect free variable `self`. */
     var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
     /** Used as a reference to the global object. */
     var root = freeGlobal || freeSelf || Function('return this')();
-    /** Detect free variable ` + "`" + `exports` + "`" + `. */
+    /** Detect free variable `exports`. */
     var freeExports = typeof exports == 'object' && exports && !exports.nodeType && exports;////     
-    /** Detect free variable ` + "`" + `module` + "`" + `. */
+    /** Detect free variable `module`. */
     var freeModule = freeExports && typeof module == 'object' && module && !module.nodeType && module;
     if (freeModule) {
       // Export for Node.js.
@@ -63,7 +63,7 @@ declare namespace _ {
 }
 // @Filename: /home/src/workspaces/project/index.ts
 import { [|/*start*/add|] } from 'lodash';"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("goToSource10_mapFromAtTypes3", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "start")
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "start")
 }

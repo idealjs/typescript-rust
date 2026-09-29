@@ -9,12 +9,11 @@ pub(crate) use tsox_frontend::ast::SourceFile;
 pub(crate) use tsox_frontend::ast::SyntaxKind;
 pub(crate) use tsox_frontend::ast::node::LineMap;
 pub(crate) use tsox_frontend::ast::node_data_generated::for_each_child;
-pub(crate) use tsox_frontend::scanner;
 
 pub(crate) use super::language_service::LanguageService;
 pub(crate) use super::types::{DocumentSymbol, SymbolKind};
 
-pub(crate) use crate::ls::symbols_names::*;
+use crate::ls::symbols_names::*;
 
 impl LanguageService {
     pub fn provide_document_symbols(&self, document_uri: &DocumentUri) -> Vec<DocumentSymbol> {

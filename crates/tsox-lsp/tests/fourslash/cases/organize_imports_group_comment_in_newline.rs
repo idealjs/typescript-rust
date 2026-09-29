@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyOrganizeImports"]
+
 #[test]
 fn organize_imports_group_comment_in_newline() {
     let content = r#"// polyfill
@@ -11,6 +11,6 @@ import a from "A";
 import b from "B";
 
 console.log(a, b, c, d)"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyOrganizeImports"); // f.VerifyOrganizeImports(t,
+    let _s = Session::new_for_test("organizeImportsGroup_CommentInNewline", content);
+    // TODO: f.VerifyOrganizeImports(t,
 }

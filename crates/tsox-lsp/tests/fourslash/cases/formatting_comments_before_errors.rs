@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn formatting_comments_before_errors() {
     let content = r#"namespace A {
@@ -15,7 +16,7 @@ fn formatting_comments_before_errors() {
         bar();
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingCommentsBeforeErrors", content);
     fourslash::go_to_marker(&mut s, "1");
     fourslash::insert(&mut s, "\n");
     fourslash::go_to_marker(&mut s, "0");

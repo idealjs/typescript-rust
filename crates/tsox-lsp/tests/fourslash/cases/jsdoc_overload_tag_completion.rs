@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn jsdoc_overload_tag_completion() {
     let content = r#"// @allowJS: true
@@ -9,6 +9,6 @@ fn jsdoc_overload_tag_completion() {
 /**
  * @/**/
  */"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("jsdocOverloadTagCompletion", content);
+    fourslash::verify_completions_include_exclude_at(&mut s, Some(""), &["overload"], &[]);
 }

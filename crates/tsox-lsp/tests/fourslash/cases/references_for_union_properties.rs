@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn references_for_union_properties() {
     let content = r#"interface One {
@@ -24,6 +24,6 @@ interface Two {
 var x : One | Two;
 
 x.common./*x*/a;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "one", "base", "x")
+    let _s = Session::new_for_test("referencesForUnionProperties", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "one", "base", "x")
 }

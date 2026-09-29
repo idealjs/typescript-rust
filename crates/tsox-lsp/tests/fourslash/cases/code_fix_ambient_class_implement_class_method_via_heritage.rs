@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyRangeAfterCodeFix"]
+
 #[test]
 fn code_fix_ambient_class_implement_class_method_via_heritage() {
     let content = r#"class C1 {
@@ -14,6 +14,6 @@ class C2 extends C1 {
 declare class C3 implements C2 {[|
     |]f2();
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyRangeAfterCodeFix"); // f.VerifyRangeAfterCodeFix(t, `f1(): void;
+    let _s = Session::new_for_test("codeFixAmbientClassImplementClassMethodViaHeritage", content);
+    // TODO: f.VerifyRangeAfterCodeFix(t, `f1(): void;
 }

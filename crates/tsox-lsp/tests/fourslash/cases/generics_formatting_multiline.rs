@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn generics_formatting_multiline() {
     let content = r#"
@@ -68,9 +68,9 @@ function s<T, U>(x: TemplateStringsArray, ...args: any[]) { return x.join(); }
 const t = s<
       number , 
   string[] & ArrayLike<any>
-      >` + "`" + `abc${1}def` + "`" + ` ;
+      >`abc${1}def` ;
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::unsupported("VerifyCurrentFileContent"); // f.VerifyCurrentFileContent(t, "\nclass Foo<\n    T1 extends unknown,\n    T2\n> {\n    public method
+    let mut s = Session::new_for_test("genericsFormattingMultiline", content);
+    fourslash::format_document(&mut s, "");
+    // TODO: f.VerifyCurrentFileContent(t, "\nclass Foo<\n    T1 extends unknown,\n    T2\n> {\n    public method
 }

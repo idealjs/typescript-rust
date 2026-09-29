@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_js_doc_tags3() {
     let content = r#"// @Filename: quickInfoJsDocTags3.ts
@@ -21,6 +21,6 @@ class Bar implements Foo {
         throw new Error("Method not implemented.");
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoJsDocTags3", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

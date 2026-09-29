@@ -52,8 +52,8 @@ impl Scanner {
         self.token_end = self.pos;
         if has_escape {
             cooked.push_str(&self.text[segment_start..self.pos]);
-            self.identifier_value = Some(cooked);
-            self.token = SyntaxKind::Identifier;
+            self.identifier_value = Some(cooked.clone());
+            self.token = string_to_keyword(&cooked).unwrap_or(SyntaxKind::Identifier);
         } else {
             let text = &self.text[start..self.pos];
             self.token = string_to_keyword(text).unwrap_or(SyntaxKind::Identifier);
@@ -124,6 +124,7 @@ impl Scanner {
                     }
                 }
             }
+            self.token_flags |= TOKEN_FLAGS_UNICODE_ESCAPE;
         }
         let code = u32::from_str_radix(&digits, 16).ok()?;
         char::from_u32(code)
@@ -149,119 +150,6 @@ impl Scanner {
         }
         self.token_end = self.pos;
         self.token = SyntaxKind::PrivateIdentifier;
-        self.token
-    }
-
-    pub(crate) fn scan_number(&mut self) -> SyntaxKind {
-        let start = self.pos;
-        if self.text.as_bytes()[self.pos] as char == '0' && self.pos + 1 < self.end {
-            let next = self.text.as_bytes()[self.pos + 1] as char;
-            if next == 'x' || next == 'X' {
-                self.pos += 2;
-                self.scan_number_fragment_with_sep(true, true);
-                self.token_end = self.pos;
-                self.token = SyntaxKind::NumericLiteral;
-                self.token_flags |= TOKEN_FLAGS_HEX_SPECIFIER;
-                return self.token;
-            }
-            if next == 'b' || next == 'B' {
-                self.pos += 2;
-                self.scan_binary_fragment_with_sep();
-                self.token_end = self.pos;
-                self.token = SyntaxKind::NumericLiteral;
-                self.token_flags |= TOKEN_FLAGS_BINARY_SPECIFIER;
-                return self.token;
-            }
-            if next == 'o' || next == 'O' {
-                self.pos += 2;
-                self.scan_octal_specifier_fragment_with_sep();
-                self.token_end = self.pos;
-                self.token = SyntaxKind::NumericLiteral;
-                self.token_flags |= TOKEN_FLAGS_OCTAL_SPECIFIER;
-                return self.token;
-            }
-        }
-
-        if self.text.as_bytes()[self.pos] as char == '0' {
-            self.pos += 1;
-            if self.pos < self.end && self.text.as_bytes()[self.pos] as char == '_' {
-                self.token_flags |=
-                    TOKEN_FLAGS_CONTAINS_SEPARATOR | TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR;
-                self.report_error(DiagnosticKind::NumericSeparatorNotAllowed, self.pos, 1);
-                self.pos = start;
-                self.scan_number_fragment_with_sep(false, false);
-            } else {
-                let digits_start = self.pos;
-                let mut is_octal = true;
-                while self.pos < self.end {
-                    let c = self.text.as_bytes()[self.pos] as char;
-                    if is_digit(c) {
-                        if !is_octal_digit(c) {
-                            is_octal = false;
-                        }
-                        self.pos += 1;
-                    } else {
-                        break;
-                    }
-                }
-                if self.pos > digits_start && is_octal {
-                    self.token_flags |= TOKEN_FLAGS_OCTAL;
-                    let with_minus = self.token == SyntaxKind::MinusToken;
-                    let err_start = if with_minus { start - 1 } else { start };
-                    self.report_error(
-                        DiagnosticKind::OctalLiteralNotAllowed,
-                        err_start,
-                        self.pos - err_start,
-                    );
-                    self.token_end = self.pos;
-                    self.token = SyntaxKind::NumericLiteral;
-                    return self.token;
-                } else if self.pos > digits_start {
-                    self.token_flags |= TOKEN_FLAGS_CONTAINS_LEADING_ZERO;
-                }
-            }
-        } else {
-            self.scan_number_fragment_with_sep(false, false);
-        }
-
-        if self.pos < self.end && self.text.as_bytes()[self.pos] as char == '.' {
-            self.pos += 1;
-            self.scan_number_fragment_with_sep(false, false);
-        }
-
-        if self.pos < self.end {
-            let c = self.text.as_bytes()[self.pos] as char;
-            if c == 'e' || c == 'E' {
-                self.pos += 1;
-                if self.pos < self.end {
-                    let sign = self.text.as_bytes()[self.pos] as char;
-                    if sign == '+' || sign == '-' {
-                        self.pos += 1;
-                    }
-                }
-                self.scan_number_fragment_with_sep(false, false);
-                self.token_flags |= TOKEN_FLAGS_SCIENTIFIC;
-            }
-        }
-
-        if token_flags_contains(self.token_flags, TOKEN_FLAGS_CONTAINS_LEADING_ZERO) {
-            self.report_error(
-                DiagnosticKind::DecimalWithLeadingZero,
-                start,
-                self.pos - start,
-            );
-        }
-
-        if self.pos < self.end && self.text.as_bytes()[self.pos] as char == 'n' {
-            self.pos += 1;
-            self.token_end = self.pos;
-            self.token = SyntaxKind::BigIntLiteral;
-            return self.token;
-        }
-
-        let _ = start;
-        self.token_end = self.pos;
-        self.token = SyntaxKind::NumericLiteral;
         self.token
     }
 }

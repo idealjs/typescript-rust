@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_meaning() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @lib: es5
 // @module: commonjs
 // @Filename: foo.d.ts
@@ -28,17 +28,17 @@ const i: foo/*foo_type*/ = { x: 1, y: 2 };
 [|import bar = require("bar_module");|]
 const x = bar/*bar_value*/;
 const i: bar/*bar_type*/ = { x: 1, y: 2 };"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
-    fourslash::unsupported("VerifyWorkspaceSymbol"); // f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
+    let mut s = Session::new_for_test("quickInfoMeaning", content);
+    fourslash::verify_no_errors(&mut s, );
+    // TODO: f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
     fourslash::go_to_marker(&mut s, "foo_value");
-    fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "const foo: number", "")
+    // TODO: f.VerifyQuickInfoIs(t, "const foo: number", "")
     fourslash::go_to_marker(&mut s, "foo_type");
-    fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "(alias) interface foo\nimport foo = require(\"foo_module\")", "")
-    fourslash::unsupported("VerifyWorkspaceSymbol"); // f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
+    // TODO: f.VerifyQuickInfoIs(t, "(alias) interface foo\nimport foo = require(\"foo_module\")", "")
+    // TODO: f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
     fourslash::go_to_marker(&mut s, "bar_value");
-    fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "(alias) const bar: number\nimport bar = require(\"bar_module\")", "")
+    // TODO: f.VerifyQuickInfoIs(t, "(alias) const bar: number\nimport bar = require(\"bar_module\")", "")
     fourslash::go_to_marker(&mut s, "bar_type");
-    fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "interface bar", "")
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "foo_value", "foo_type", "bar_value", "bar_type")
+    // TODO: f.VerifyQuickInfoIs(t, "interface bar", "")
+    // TODO: f.VerifyBaselineGoToDefinition(t, false, "foo_value", "foo_type", "bar_value", "bar_type")
 }

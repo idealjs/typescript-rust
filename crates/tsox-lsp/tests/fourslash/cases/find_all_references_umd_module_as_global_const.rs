@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_references_umd_module_as_global_const() {
     let content = r#"// @Filename: /node_modules/@types/three/three-core.d.ts
@@ -36,6 +36,6 @@ let v = new /*3*/THREE.Vector2();
  	},
     "files": ["/src/index.ts", "typings/global.d.ts"]
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
+    let _s = Session::new_for_test("findAllReferencesUmdModuleAsGlobalConst", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
 }

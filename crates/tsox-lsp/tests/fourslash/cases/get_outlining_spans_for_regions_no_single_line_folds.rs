@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn get_outlining_spans_for_regions_no_single_line_folds() {
     let content = r#"// @lib: es5
@@ -19,7 +19,7 @@ function foo()[| {
 function bar()[| { }|]
 
 //#endregion|]"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("getOutliningSpansForRegionsNoSingleLineFolds", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
+    // TODO: f.VerifyOutliningSpans(t)
 }

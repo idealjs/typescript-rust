@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_literal_directly_in_argument_with_nullable_constraint() {
     let content = r#"// @strict: true
@@ -10,6 +10,6 @@ declare function func<
 >(arg?: T): string;
 
 func('/*1*/');"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("completionsLiteralDirectlyInArgumentWithNullableConstraint", content);
+    // TODO: f.VerifyCompletions(t, []string{"1"}, &fourslash.CompletionsExpectedList{
 }

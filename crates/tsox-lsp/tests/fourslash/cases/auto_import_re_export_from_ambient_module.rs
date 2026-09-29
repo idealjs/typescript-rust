@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn auto_import_re_export_from_ambient_module() {
     let content = r#"// @Filename: /home/src/workspaces/project/tsconfig.json
@@ -19,8 +19,9 @@ declare module "fs" {
 export * from "fs";
 // @Filename: /home/src/workspaces/project/index.ts
 access/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportReExportFromAmbientModule", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

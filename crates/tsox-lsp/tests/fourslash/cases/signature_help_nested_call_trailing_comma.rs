@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: // Both outer and inner calls must have trailing commas, and"]
+
 #[test]
 fn signature_help_nested_call_trailing_comma() {
     // TODO: // Regression test for crash when requesting signature help on a call target
@@ -10,7 +10,7 @@ fn signature_help_nested_call_trailing_comma() {
 declare function inner(a: any): any;
 
 outer(inner/*1*/(undefined,),);"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("signatureHelpNestedCallTrailingComma", content);
     fourslash::go_to_marker(&mut s, "1");
-    fourslash::unsupported("VerifySignatureHelpPresent"); // f.VerifySignatureHelpPresent(t, &lsproto.SignatureHelpContext{
+    // TODO: f.VerifySignatureHelpPresent(t, &lsproto.SignatureHelpContext{
 }

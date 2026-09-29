@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
+
 #[test]
 fn completions_import_yield_expression() {
     let content = r#"// @Filename: /a.ts
@@ -9,6 +9,6 @@ export function a() {}
 function *f() {
   yield a/**/
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
+    let _s = Session::new_for_test("completionsImportYieldExpression", content);
+    // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

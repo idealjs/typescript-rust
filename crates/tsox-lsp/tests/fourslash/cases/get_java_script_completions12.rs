@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn get_java_script_completions12() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @allowNonTsExtensions: true
 // @Filename: Foo.js
 /**
@@ -26,8 +26,10 @@ convert(1, "")./*3*/
  * @param {number} x
  */
 var test1 = function(x) { return x./*4*/ }, test2 = function(a) { return a./*5*/ };"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"2", "3", "4"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("getJavaScriptCompletions12", content);
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyCompletions(t, []string{"2", "3", "4"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "5");
+    // TODO: f.VerifyCompletions(t, "5", &fourslash.CompletionsExpectedList{
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: }"]
+
 #[test]
 fn quick_info_comments_comment_parsing() {
     let content = r#"/// This is simple /// comments
@@ -204,7 +204,7 @@ jsDocComme/*47q*/ntAlignmentTest3("hello",1, 2);
 /**/
 class NoQuic/*50q*/kInfoClass {
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoCommentsCommentParsing", content);
+    // TODO: f.VerifyBaselineHover(t)
     // TODO: }
 }

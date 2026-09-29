@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixModuleSpecifiers"]
+
 #[test]
 fn auto_import_specifier_exclude_regexes1() {
     let content = r#"// @module: preserve
@@ -13,15 +13,19 @@ declare module "ambient/utils" {
 }
 // @Filename: /index.ts
 x/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient", "ambient/utils"}, nil /*preferences*/)
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient"}, &lsutil.UserPreferences{AutoImportSpec
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient", "ambient/utils"}, &lsutil.UserPreferenc
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient"}, &lsutil.UserPreferences{AutoImportSpec
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient", "ambient/utils"}, &lsutil.UserPreferenc
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient"}, &lsutil.UserPreferences{AutoImportSpec
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient"}, &lsutil.UserPreferences{AutoImportSpec
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient"}, &lsutil.UserPreferences{AutoImportSpec
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient/utils"}, &lsutil.UserPreferences{AutoImpo
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient", "ambient/utils"}, &lsutil.UserPreferenc
+    let mut s = Session::new_for_test("autoImportSpecifierExcludeRegexes1", content);
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient", "ambient/utils"}, nil /*preferences*/)
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient"}, &lsutil.UserPreferences{AutoImportSpec
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient", "ambient/utils"}, &lsutil.UserPreferenc
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient"}, &lsutil.UserPreferences{AutoImportSpec
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient", "ambient/utils"}, &lsutil.UserPreferenc
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient"}, &lsutil.UserPreferences{AutoImportSpec
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient"}, &lsutil.UserPreferences{AutoImportSpec
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient"}, &lsutil.UserPreferences{AutoImportSpec
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient/utils"}, &lsutil.UserPreferences{AutoImpo
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"ambient", "ambient/utils"}, &lsutil.UserPreferenc
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

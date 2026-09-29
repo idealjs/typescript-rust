@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_from_contextual_union_type3() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: true
 declare const foo1: <D extends Foo1<D>>(definition: D) => D;
 
@@ -30,17 +30,7 @@ type Prop<T, K> = K extends keyof T ? T[K] : never;
 foo1({ bar: { /*1*/X: "test" } });
 
 foo2({ bar: { /*2*/X: "test" } });"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "1",
-        "(property) X: \"Error: bar should be boolean\"",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "2",
-        "(property) X: \"Error: bar should be boolean\"",
-        "",
-    );
+    let mut s = Session::new_for_test("quickInfoFromContextualUnionType3", content);
+    fourslash::verify_quick_info_at(&mut s, "1", "(property) X: \"Error: bar should be boolean\"", "");
+    fourslash::verify_quick_info_at(&mut s, "2", "(property) X: \"Error: bar should be boolean\"", "");
 }

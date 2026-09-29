@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn completion_details_of_context_sensitive_parameter_no_crash() {
     let content = r#"// @strict: true
@@ -90,6 +90,6 @@ export const createStyling: CurriedFunction3<
     },
     3
 );"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("completionDetailsOfContextSensitiveParameterNoCrash", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

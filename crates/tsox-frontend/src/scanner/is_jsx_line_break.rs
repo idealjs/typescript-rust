@@ -109,8 +109,52 @@ pub(crate) fn is_unicode_identifier_part(c: char) -> bool {
     unicode_ident::is_xid_continue(c) || c == '\u{200C}' || c == '\u{200D}'
 }
 
-pub(crate) fn unescape_string(s: &str) -> String {
-    let mut result = String::with_capacity(s.len());
+fn push_unicode_escape(result: &mut String, hex: &str) {
+    let Ok(n) = u32::from_str_radix(hex, 16) else {
+        return;
+    };
+    match char::from_u32(n) {
+        Some(c) => result.push(c),
+        None if (0xD800..=0xDBFF).contains(&n) => {
+            result.push_str(&format!("\\u{:04X}", n));
+        }
+        None if (0xDC00..=0xDFFF).contains(&n) => {
+            if !combine_trailing_high_surrogate(result, n) {
+                result.push_str(&format!("\\u{:04X}", n));
+            }
+        }
+        None => result.push('\u{FFFD}'),
+    }
+}
+
+fn combine_trailing_high_surrogate(result: &mut String, low: u32) -> bool {
+    let bytes = result.as_bytes();
+    if bytes.len() < 6 {
+        return false;
+    }
+    let tail = &result[result.len() - 6..];
+    let mut chars = tail.chars();
+    let Some('\\') = chars.next() else { return false };
+    let Some('u') = chars.next() else { return false };
+    let hex: String = chars.by_ref().collect();
+    if hex.len() != 4 || !hex.chars().all(|c| c.is_ascii_hexdigit()) {
+        return false;
+    }
+    let Ok(high) = u32::from_str_radix(&hex, 16) else {
+        return false;
+    };
+    if !(0xD800..=0xDBFF).contains(&high) {
+        return false;
+    }
+    for _ in 0..6 {
+        result.pop();
+    }
+    let combined = 0x10000 + ((high - 0xD800) << 10) + (low - 0xDC00);
+    result.push(char::from_u32(combined).unwrap_or('\u{FFFD}'));
+    true
+}
+
+pub(crate) fn unescape_string(s: &str) -> String {    let mut result = String::with_capacity(s.len());
     let mut chars = s.chars().peekable();
     while let Some(c) = chars.next() {
         if c == '\\' {
@@ -132,14 +176,10 @@ pub(crate) fn unescape_string(s: &str) -> String {
                     if chars.peek() == Some(&'{') {
                         chars.next();
                         let hex: String = chars.by_ref().take_while(|c| *c != '}').collect();
-                        if let Ok(n) = u32::from_str_radix(&hex, 16) {
-                            result.push(char::from_u32(n).unwrap_or('\u{FFFD}'));
-                        }
+                        push_unicode_escape(&mut result, &hex);
                     } else {
                         let hex: String = chars.by_ref().take(4).collect();
-                        if let Ok(n) = u32::from_str_radix(&hex, 16) {
-                            result.push(char::from_u32(n).unwrap_or('\u{FFFD}'));
-                        }
+                        push_unicode_escape(&mut result, &hex);
                     }
                 }
                 Some('\\') => result.push('\\'),

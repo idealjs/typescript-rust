@@ -80,6 +80,8 @@ pub struct Program {
     pub(crate) diagnostics: Vec<Arc<Diagnostic>>,
     pub(crate) host: Arc<dyn CompilerHost>,
     pub(crate) config_file_name: String,
+    pub(crate) resolved_modules:
+        HashMap<String, Vec<(String, Option<tsox_tsoptions::module::ResolvedModule>)>>,
 
     pub(crate) symbol_map: NodeSymbolMap,
 }

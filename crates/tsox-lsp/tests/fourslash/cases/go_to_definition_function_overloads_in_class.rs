@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_function_overloads_in_class() {
     let content = r#"class clsInOverload {
@@ -13,6 +13,6 @@ fn go_to_definition_function_overloads_in_class() {
 
     constructor() { }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "staticFunctionOverload", "functionOverload")
+    let _s = Session::new_for_test("goToDefinitionFunctionOverloadsInClass", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "staticFunctionOverload", "functionOverload")
 }

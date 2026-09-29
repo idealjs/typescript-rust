@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn formatting_chaining_methods() {
     let content = r#" z$ = this.store.select(this.fake())
@@ -23,11 +23,9 @@ fn formatting_chaining_methods() {
 1
     .toFixed(
         2);"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"z$ = this.store.select(this.fake())
+    let mut s = Session::new_for_test("formattingChainingMethods", content);
+    fourslash::format_document(&mut s, "");
+    fourslash::verify_current_file_content(&mut s, r#"z$ = this.store.select(this.fake())
     .ofType(
         'ACTION',
         'ACTION-2'
@@ -46,6 +44,5 @@ fn formatting_chaining_methods() {
 
 1
     .toFixed(
-        2);"#,
-    );
+        2);"#);
 }

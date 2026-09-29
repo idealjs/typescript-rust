@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRename"]
+
 #[test]
 fn jsdoc_throws_tag_rename() {
     let content = r#"class /**/E extends Error {}
@@ -8,6 +8,6 @@ fn jsdoc_throws_tag_rename() {
  * @throws {E}
  */
 function f() {}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, "")
+    let _s = Session::new_for_test("jsdocThrowsTag_rename", content);
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, "")
 }

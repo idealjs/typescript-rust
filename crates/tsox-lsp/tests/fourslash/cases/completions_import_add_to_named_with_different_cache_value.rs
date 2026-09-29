@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn completions_import_add_to_named_with_different_cache_value() {
     let content = r#"// @Filename: /home/src/workspaces/project/tsconfig.json
@@ -21,14 +21,16 @@ export class MyClass2 {}
 
 const a = new MyClass/*1*/();
 const b = new MyClass2/*2*/();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_addToNamedWithDifferentCacheValue", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "1");
     // TODO: opts1267 := f.GetOptions()
     // TODO: opts1267.FormatCodeSettings.NewLineCharacter = "\n"
-    fourslash::unsupported("Configure"); // f.Configure(t, opts1267)
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new("1"), &fourslash.ApplyCodeActionFromCompletionOptions{
-    fourslash::unsupported("ReplaceLine"); // f.ReplaceLine(t, 0, "import { MyClass } from \"mylib\";")
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
+    // TODO: f.Configure(t, opts1267)
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyApplyCodeActionFromCompletion(t, new("1"), &fourslash.ApplyCodeActionFromCompletionOptions{
+    // TODO: f.ReplaceLine(t, 0, "import { MyClass } from \"mylib\";")
+    fourslash::go_to_marker(&mut s, "2");
+    // TODO: f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
 }

@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_name_code_fix_uri_style_node_core_modules3() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @module: commonjs
 // @Filename: /node_modules/@types/node/index.d.ts
 declare module "path" { function join(...segments: readonly string[]): string; }
@@ -35,11 +35,11 @@ writeFile/*test1*/
 // @Filename: /test2.ts
 import "node:test";
 writeFile/*test2*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "noPrefix", []string{"fs", "fs/promises"}, nil /*preferences*/)
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "prefix", []string{"node:fs", "node:fs/promises"}, nil /*prefer
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "mixed1", []string{"node:fs", "node:fs/promises"}, nil /*prefer
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "mixed2", []string{"node:fs", "node:fs/promises"}, nil /*prefer
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "test1", []string{"fs", "fs/promises"}, nil /*preferences*/)
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "test2", []string{"node:fs", "node:fs/promises"}, nil /*prefere
+    let _s = Session::new_for_test("importNameCodeFix_uriStyleNodeCoreModules3", content);
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "noPrefix", []string{"fs", "fs/promises"}, nil /*preferences*/)
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "prefix", []string{"node:fs", "node:fs/promises"}, nil /*prefer
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "mixed1", []string{"node:fs", "node:fs/promises"}, nil /*prefer
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "mixed2", []string{"node:fs", "node:fs/promises"}, nil /*prefer
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "test1", []string{"fs", "fs/promises"}, nil /*preferences*/)
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "test2", []string{"node:fs", "node:fs/promises"}, nil /*prefere
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.GoToEachMarker"]
+
 #[test]
 fn completions_in_jsx_tag_different_spread_element_types() {
     let content = r#"
@@ -48,6 +48,6 @@ export function ComponentNumber(props: number) {
     return <SomeComponent {...props} /*number*//>;
 }
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("GoToEachMarker"); // f.GoToEachMarker(t, nil, func(marker *fourslash.Marker, index int) {
+    let _s = Session::new_for_test("completionsInJsxTagDifferentSpreadElementTypes", content);
+    // TODO: f.GoToEachMarker(t, nil, func(marker *fourslash.Marker, index int) {
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: // Regression test for https://github.com/microsoft/TypeScri"]
+
 #[test]
 fn completions_from_untitled_file() {
     // TODO: // Test that completions work in untitled files without crashing.
@@ -10,7 +10,8 @@ export function helper() {}
 
 // @filename: ^/untitled/ts-nul-authority/Untitled-1.ts
 /**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsFromUntitledFile", content);
     // TODO: // Request completions - this should not crash
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

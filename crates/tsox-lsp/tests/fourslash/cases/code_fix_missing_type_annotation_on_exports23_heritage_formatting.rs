@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_missing_type_annotation_on_exports23_heritage_formatting() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @isolatedDeclarations: true
 // @declaration: true
 function mixin<T extends new (...a: any) => any>(ctor: T): T {
@@ -19,7 +19,7 @@ export class Point3D extends
     {
               z = 0;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFixAvailable"); // f.VerifyCodeFixAvailable(t, []string{"Extract base class to variable"})
-    fourslash::unsupported("VerifyCodeFix"); // f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports23_heritage_formatting", content);
+    // TODO: f.VerifyCodeFixAvailable(t, []string{"Extract base class to variable"})
+    // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
 }

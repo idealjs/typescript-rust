@@ -4,8 +4,6 @@ use std::sync::{Arc, Mutex, Once};
 
 use tsox_core::collections::syncmap::SyncMap;
 use tsox_core::core::compiler_options::CompilerOptions;
-use tsox_core::tspath;
-use tsox_tsoptions::module;
 use tsox_tsoptions::vfs::FS;
 
 use crate::project::ata_discover_typings::AtaLogger;
@@ -53,10 +51,11 @@ pub struct TypingsInstaller {
     pub host: Arc<dyn TypingsInstallerHost>,
 
     init_once: Once,
-    package_name_to_typing_location: SyncMap<String, Arc<CachedTyping>>,
-    missing_typings_set: SyncMap<String, bool>,
-    types_registry: Mutex<HashMap<String, HashMap<String, String>>>,
-    install_run_count: AtomicI32,
+    pub(crate) package_name_to_typing_location: SyncMap<String, Arc<CachedTyping>>,
+    pub(crate) missing_typings_set: SyncMap<String, bool>,
+    pub(crate) types_registry: Mutex<HashMap<String, HashMap<String, String>>>,
+    #[allow(dead_code)]
+    pub(crate) install_run_count: AtomicI32,
 }
 
 impl TypingsInstaller {
@@ -91,7 +90,7 @@ impl TypingsInstaller {
     }
 
     pub fn install_typings(
-        &mut self,
+        &self,
         _request: &TypingsInstallRequest,
     ) -> Result<TypingsInstallResult, String> {
         todo!("install_typings requires npm install and types registry infrastructure")

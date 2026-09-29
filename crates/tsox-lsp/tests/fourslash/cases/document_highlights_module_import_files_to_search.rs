@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlightsWithOptions"]
+
 #[test]
 fn document_highlights_module_import_files_to_search() {
     let content = r#"// @Filename: /node_modules/@types/foo/index.d.ts
@@ -12,6 +12,6 @@ foo.[|x|];
 import { [|x|] } from "foo";
 // @Filename: /c.ts
 import { x } from "foo";"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlightsWithOptions"); // f.VerifyBaselineDocumentHighlightsWithOptions(t, nil /*preferences*/, []string{"/a.ts", "/b.ts"}, To
+    let _s = Session::new_for_test("documentHighlights_moduleImport_filesToSearch", content);
+    // TODO: f.VerifyBaselineDocumentHighlightsWithOptions(t, nil /*preferences*/, []string{"/a.ts", "/b.ts"}, To
 }

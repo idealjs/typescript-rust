@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn formatting_on_object_literal() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"var x = /*1*/{foo:/*2*/ 1,
 bar: "tt",/*3*/
 boo: /*4*/1 + 5}/*5*/;
@@ -31,8 +31,8 @@ var x2 = {/*20*/
 
 var x={    };/*26*/
 var y = {};/*27*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formattingOnObjectLiteral", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"var x = {"#);
     fourslash::go_to_marker(&mut s, "2");
@@ -66,15 +66,9 @@ var y = {};/*27*/"#;
     fourslash::go_to_marker(&mut s, "16");
     fourslash::verify_current_line_content(&mut s, r#"}"#);
     fourslash::go_to_marker(&mut s, "17");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"// Rule for object literal members for the "value" of the memebr to follow the indent"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"// Rule for object literal members for the "value" of the memebr to follow the indent"#);
     fourslash::go_to_marker(&mut s, "18");
-    fourslash::verify_current_line_content(
-        &mut s,
-        r#"// of the member, i.e. the relative position of the value is maintained when the member"#,
-    );
+    fourslash::verify_current_line_content(&mut s, r#"// of the member, i.e. the relative position of the value is maintained when the member"#);
     fourslash::go_to_marker(&mut s, "19");
     fourslash::verify_current_line_content(&mut s, r#"// is indented."#);
     fourslash::go_to_marker(&mut s, "20");

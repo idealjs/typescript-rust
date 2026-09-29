@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn auto_import_provider2() {
     let content = r#"// @Filename: /home/src/workspaces/project/node_modules/direct-dependency/package.json
@@ -18,11 +18,11 @@ export declare class IndirectDependency
 { "dependencies": { "direct-dependency": "*" } }
 // @Filename: /home/src/workspaces/project/index.ts
 IndirectDependency/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportProvider2", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
     // TODO: opts1155 := f.GetOptions()
     // TODO: opts1155.FormatCodeSettings.NewLineCharacter = "\n"
-    fourslash::unsupported("Configure"); // f.Configure(t, opts1155)
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{}, nil /*preferences*/)
+    // TODO: f.Configure(t, opts1155)
+    // TODO: f.VerifyImportFixAtPosition(t, []string{}, nil /*preferences*/)
 }

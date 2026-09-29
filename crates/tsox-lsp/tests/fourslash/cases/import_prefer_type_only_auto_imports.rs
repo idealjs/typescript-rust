@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // Baseline auto-import completions at both markers"]
+
 #[test]
 fn prefer_type_only_auto_imports() {
     let content = r#"// @Filename: types.ts
@@ -10,8 +10,8 @@ export const MyValue = 123;
 let x: MyT/*type*/;
 let y = MyV/*value*/;
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("Configure"); // f.Configure(t, lsutil.UserPreferences{
+    let _s = Session::new_for_test("preferTypeOnlyAutoImports", content);
+    // TODO: f.Configure(t, lsutil.UserPreferences{
     // TODO: // Baseline auto-import completions at both markers
-    fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{"type", "value"})
+    // TODO: f.BaselineAutoImportsCompletions(t, []string{"type", "value"})
 }

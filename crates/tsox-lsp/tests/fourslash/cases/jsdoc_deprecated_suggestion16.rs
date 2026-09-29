@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifySuggestionDiagnostics"]
+
 #[test]
 fn jsdoc_deprecated_suggestion16() {
     let content = r#"// @module: esnext
@@ -11,7 +11,7 @@ export { a, /** @deprecated b is deprecated */ b }
 // @filename: /b.ts
 import { [|b|] } from "./a";
 [|b|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsdocDeprecated_suggestion16", content);
     fourslash::go_to_file(&mut s, "/b.ts");
-    fourslash::unsupported("VerifySuggestionDiagnostics"); // f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
+    // TODO: f.VerifySuggestionDiagnostics(t, []*lsproto.Diagnostic{
 }

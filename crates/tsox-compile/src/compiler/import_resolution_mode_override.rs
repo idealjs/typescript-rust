@@ -6,7 +6,7 @@ pub(crate) fn import_resolution_mode_override(
     import_node: &Arc<tsox_frontend::ast::Node>,
 ) -> tsox_core::core::compiler_options::ModuleKind {
     use tsox_core::core::compiler_options::ModuleKind;
-    let Some(decl) = import_node.parent.as_ref() else {
+    let Some(decl) = import_node.parent() else {
         return ModuleKind::None;
     };
     let (attributes, type_only) = match &decl.data {
@@ -98,10 +98,21 @@ pub(crate) fn cached_parse(
     Arc<SourceFile>,
     Vec<tsox_frontend::parser::ParserDiagnostic>,
 ) {
+    // 只缓存 bundled lib 文件：内容稳定、被每个 Program 重复解析，
+    // 收益集中于此。用户/测试文件一律不缓存，否则每个唯一文件名都会
+    // 永久钉住一棵 AST（fourslash 每用例默认文件名唯一，全量跑即缓慢
+    // 泄漏至数十 GiB）。lib 文件版本替换与容量上限做双保险。
+    if !tsox_checker::bundled::is_bundled(file_name) {
+        let (file, diags) =
+            Parser::parse_source_file_text_with_diagnostics(file_name, text.to_string());
+        let file = Arc::new(file);
+        tsox_checker::binder::wire_parent_pointers(&file);
+        return (file, diags);
+    }
     static CACHE: std::sync::OnceLock<
         Mutex<
             HashMap<
-                (String, u64),
+                String,
                 (
                     Arc<SourceFile>,
                     Vec<tsox_frontend::parser::ParserDiagnostic>,
@@ -110,16 +121,19 @@ pub(crate) fn cached_parse(
         >,
     > = std::sync::OnceLock::new();
     let cache = CACHE.get_or_init(|| Mutex::new(HashMap::new()));
-    use std::hash::{Hash, Hasher};
-    let mut hasher = std::collections::hash_map::DefaultHasher::new();
-    text.hash(&mut hasher);
-    let key = (file_name.to_string(), hasher.finish());
-    if let Some(hit) = cache.lock().unwrap().get(&key) {
-        return (Arc::clone(&hit.0), hit.1.clone());
+    let key = file_name.to_string();
+    {
+        let map = cache.lock().unwrap();
+        if let Some(hit) = map.get(&key) {
+            if hit.0.text == text {
+                return (Arc::clone(&hit.0), hit.1.clone());
+            }
+        }
     }
     let (file, diags) =
         Parser::parse_source_file_text_with_diagnostics(file_name, text.to_string());
     let file = Arc::new(file);
+    tsox_checker::binder::wire_parent_pointers(&file);
     cache
         .lock()
         .unwrap()
@@ -214,70 +228,37 @@ pub(crate) fn load_source_file_with_references(
 
     let text = file.text.as_str();
     let refs = extract_reference_path_directives(text, &normalized);
-    for ref_path in &refs {
-        load_source_file_with_references(
-            ref_path,
-            host,
-            source_files,
-            by_name,
-            diagnostics,
-            allow_js,
-        );
+    for ref_dir in &refs {
+        match resolve_reference_path(host, &ref_dir.resolved, &ref_dir.raw, &normalized) {
+            Err((message, args)) => {
+                diagnostics.push(Arc::new(Diagnostic::new(
+                    Some(Arc::clone(&file)),
+                    TextRange::new(ref_dir.value_range.0, ref_dir.value_range.1),
+                    message,
+                    args,
+                )));
+            }
+            Ok(load_path) => {
+                load_source_file_with_references(
+                    &load_path,
+                    host,
+                    source_files,
+                    by_name,
+                    diagnostics,
+                    allow_js,
+                );
+            }
+        }
     }
 
     source_files.push(file);
 }
 
-pub(crate) fn extract_reference_path_directives(text: &str, containing_file: &str) -> Vec<String> {
-    let mut refs = Vec::new();
-    let base_dir = tsox_core::tspath::get_directory_path(containing_file);
-    for line in text.lines() {
-        let trimmed = line.trim_start();
-        let Some(rest) = trimmed.strip_prefix("///") else {
-            continue;
-        };
-
-        if !rest.trim_start().starts_with("<reference") {
-            continue;
-        }
-        if let Some(start) = rest.find("path=\"") {
-            let after = &rest[start + 6..];
-            if let Some(end) = after.find('"') {
-                let path = &after[..end];
-                let resolved = if tsox_core::tspath::is_rooted_disk_path(path) {
-                    tsox_core::tspath::normalize_path(path)
-                } else {
-                    tsox_core::tspath::normalize_path(&tsox_core::tspath::combine_paths(
-                        &base_dir,
-                        &[path],
-                    ))
-                };
-                refs.push(resolved);
-            }
-        } else if let Some(start) = rest.find("path='") {
-            let after = &rest[start + 6..];
-            if let Some(end) = after.find('\'') {
-                let path = &after[..end];
-                let resolved = if tsox_core::tspath::is_rooted_disk_path(path) {
-                    tsox_core::tspath::normalize_path(path)
-                } else {
-                    tsox_core::tspath::normalize_path(&tsox_core::tspath::combine_paths(
-                        &base_dir,
-                        &[path],
-                    ))
-                };
-                refs.push(resolved);
-            }
-        }
-    }
-    refs
-}
-
 pub(crate) struct ReferenceTypesDirective {
-    pub(crate) name: String,
-    pub(crate) mode_value: Option<String>,
+    pub name: String,
+    pub mode_value: Option<String>,
     #[allow(dead_code)]
-    pub(crate) mode_value_range: (usize, usize),
+    pub mode_value_range: (usize, usize),
 
-    pub(crate) types_value_range: (usize, usize),
+    pub types_value_range: (usize, usize),
 }

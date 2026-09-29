@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn member_list_on_explicit_this() {
     let content = r#"interface Restricted {
@@ -14,8 +14,9 @@ class C1 implements Restricted {
 }
 function f(this: void) {this./*3*/}
 function g(this: Restricted) {this./*4*/}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"2", "4"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", nil)
+    let mut s = Session::new_for_test("memberListOnExplicitThis", content);
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyCompletions(t, []string{"2", "4"}, &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_empty_at(&mut s, Some("3"));
 }

@@ -267,8 +267,8 @@ impl Checker {
         &mut self,
         location: &Arc<Node>,
     ) -> Option<Arc<Symbol>> {
-        let parent = location.parent.as_ref()?;
-        let grandparent = parent.parent.as_ref()?;
+        let parent = location.parent().as_ref()?;
+        let grandparent = parent.parent().as_ref()?;
 
         if is_array_literal_or_object_literal_destructuring_pattern(grandparent) {
             if let Some(type_of_object_literal) = self.get_type_of_assignment_pattern(grandparent) {

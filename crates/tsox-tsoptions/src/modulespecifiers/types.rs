@@ -1,7 +1,11 @@
 use std::sync::Arc;
 use tsox_core::core::compiler_options::ResolutionMode;
+use tsox_core::symlinks::KnownSymlinks;
+use tsox_core::tspath::Path;
 use tsox_frontend::ast::Node;
 use tsox_frontend::ast::Symbol;
+
+use crate::mig::m5i::SourceOutputAndProjectReference;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ModulePath {
@@ -22,6 +26,32 @@ pub trait ModuleSpecifierGenerationHost {
     fn use_case_sensitive_file_names(&self) -> bool;
     fn common_source_directory(&self) -> String;
     fn file_exists(&self, path: &str) -> bool;
+
+    fn get_default_resolution_mode_for_file(
+        &self,
+        _file: &dyn SourceFileForSpecifierGeneration,
+    ) -> ResolutionMode {
+        ResolutionMode::None
+    }
+
+    fn get_project_reference_from_source(
+        &self,
+        _path: &Path,
+    ) -> Option<SourceOutputAndProjectReference> {
+        None
+    }
+
+    fn get_redirect_targets(&self, _path: &Path) -> Vec<String> {
+        Vec::new()
+    }
+
+    fn get_symlink_cache(&self) -> Option<&KnownSymlinks> {
+        None
+    }
+
+    fn get_global_typings_cache_location(&self) -> String {
+        String::new()
+    }
 }
 
 pub type ImportModuleSpecifierPreference = String;
@@ -87,6 +117,12 @@ pub enum ModuleSpecifierEnding {
     TsExtension = 3,
 }
 
+impl std::fmt::Display for ModuleSpecifierEnding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", *self as u8)
+    }
+}
+
 pub struct ModuleSpecifierPreferences {
     pub relative_preference: RelativePreferenceKind,
     pub exclude_regexes: Vec<String>,
@@ -96,6 +132,10 @@ pub trait SourceFileForSpecifierGeneration {
     fn path(&self) -> &str;
     fn file_name(&self) -> &str;
     fn is_js(&self) -> bool;
+
+    fn imports(&self) -> &[Arc<Node>] {
+        &[]
+    }
 }
 
 pub trait CheckerShape {

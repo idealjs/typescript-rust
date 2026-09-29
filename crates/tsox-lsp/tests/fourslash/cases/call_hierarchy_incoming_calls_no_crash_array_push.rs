@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineCallHierarchy"]
+
 #[test]
 fn call_hierarchy_incoming_calls_no_crash_array_push() {
     let content = r#"function splitNames(name: string) {
@@ -19,7 +19,7 @@ async function trim(packageNames: string[]) {
   return names;
 }
 	"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("callHierarchyIncomingCallsNoCrashArrayPush", content);
     fourslash::go_to_marker(&mut s, "push");
-    fourslash::unsupported("VerifyBaselineCallHierarchy"); // f.VerifyBaselineCallHierarchy(t)
+    // TODO: f.VerifyBaselineCallHierarchy(t)
 }

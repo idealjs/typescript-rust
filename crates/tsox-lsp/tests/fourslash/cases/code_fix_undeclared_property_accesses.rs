@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_undeclared_property_accesses() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"interface I { x: number; }
 let i: I;
 i.y;
@@ -17,6 +17,6 @@ obj.c;
 type T<U> = I | U;
 let t: T<number>;
 t.x;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFixAvailable"); // f.VerifyCodeFixAvailable(t, nil)
+    let _s = Session::new_for_test("codeFixUndeclaredPropertyAccesses", content);
+    // TODO: f.VerifyCodeFixAvailable(t, nil)
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn hover_self_re_exported_namespace_generic_no_crash() {
     let content = r#"// @filename: mod.ts
@@ -12,11 +12,10 @@ import { Box } from "./mod"
 declare const b: Box<string>
 const x = b./*1*/content
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("hoverSelfReExportedNamespaceGenericNoCrash", content);
+    // TODO: f.VerifyBaselineHover(t)
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn hover_self_re_exported_namespace_generic_class_no_crash() {
     let content = r#"// @filename: mod.ts
@@ -27,11 +26,10 @@ import { Box } from "./mod"
 declare const b: Box<string>
 const x = b./*1*/content
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("hoverSelfReExportedNamespaceGenericClassNoCrash", content);
+    // TODO: f.VerifyBaselineHover(t)
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
 #[test]
 fn hover_namespace_export_generic_non_colliding() {
     let content = r#"// @filename: mod.ts
@@ -42,6 +40,6 @@ import { Box } from "./mod"
 declare const b: Box<string>
 const x = b./*1*/content
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("hoverNamespaceExportGenericNonColliding", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

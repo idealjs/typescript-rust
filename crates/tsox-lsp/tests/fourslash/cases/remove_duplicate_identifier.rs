@@ -1,11 +1,11 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.DeleteAtCaret"]
+
 #[test]
 fn remove_duplicate_identifier() {
     let content = r#"class foo{}
 function foo() { return null; }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("GoToBOF"); // f.GoToBOF(t)
-    fourslash::unsupported("DeleteAtCaret"); // f.DeleteAtCaret(t, 11)
+    let mut s = Session::new_for_test("removeDuplicateIdentifier", content);
+    fourslash::go_to_bof(&mut s, );
+    // TODO: f.DeleteAtCaret(t, 11)
 }

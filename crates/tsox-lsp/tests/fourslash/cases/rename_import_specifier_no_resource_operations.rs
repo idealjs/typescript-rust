@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: capabilities := fourslash.GetDefaultCapabilities()"]
+
 #[test]
 fn rename_import_specifier_no_resource_operations() {
     let content = r#"
@@ -12,5 +12,5 @@ import * as a from ".//*rename*/a";"#;
     // TODO: capabilities.Workspace.WorkspaceEdit = &lsproto.WorkspaceEditClientCapabilities{
     let mut s = Session::new_with_capabilities(content, None);
     fourslash::go_to_marker(&mut s, "rename");
-    fourslash::unsupported("VerifyRenameFailed"); // f.VerifyRenameFailed(t, nil /*preferences*/)
+    // TODO: f.VerifyRenameFailed(t, nil /*preferences*/)
 }

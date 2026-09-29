@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineCallHierarchy"]
+
 #[test]
 fn call_hierarchy_jsx_element() {
     let content = r#"// @jsx: preserve
@@ -15,7 +15,7 @@ function /**/Bar() {
 
 function baz() {
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("callHierarchyJsxElement", content);
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyBaselineCallHierarchy"); // f.VerifyBaselineCallHierarchy(t)
+    // TODO: f.VerifyBaselineCallHierarchy(t)
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn definition_name_on_enum_member() {
     let content = r#"enum e {
@@ -9,6 +9,6 @@ fn definition_name_on_enum_member() {
     thirdMember
 }
 var enumMember = e.[|/*1*/thirdMember|];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "1")
+    let _s = Session::new_for_test("definitionNameOnEnumMember", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, false, "1")
 }

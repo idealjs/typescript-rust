@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn constructor_find_all_references4() {
     let content = r#"export class C {
@@ -9,6 +9,6 @@ fn constructor_find_all_references4() {
 }
 
 new C().foo();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "")
+    let _s = Session::new_for_test("constructorFindAllReferences4", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "")
 }

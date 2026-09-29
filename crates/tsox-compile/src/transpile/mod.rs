@@ -4,7 +4,6 @@ use crate::compiler::{CompilerHostImpl, Program, ProgramOptions};
 use tsox_core::core::compiler_options::CompilerOptions;
 use tsox_core::core::compiler_options::JsxEmit;
 use tsox_core::core::tristate::Tristate;
-use tsox_core::tspath;
 use tsox_frontend::ast::Diagnostic;
 use tsox_tsoptions::tsoptions::ParsedCommandLine;
 use tsox_tsoptions::vfs::InMemoryFS;
@@ -135,7 +134,17 @@ pub fn transpile_worker(
         file_names: vec![input_file_name.clone()],
         ..Default::default()
     };
-    let program = Arc::new(Program::new(ProgramOptions { config, host }));
+    let program = Program::new(ProgramOptions {
+        config,
+        host,
+        use_source_of_project_reference: false,
+        single_threaded: Tristate::Unknown,
+        create_checker_pool: None,
+        typings_location: String::new(),
+        project_name: String::new(),
+        tracing: None,
+        skip_module_resolution: false,
+    });
 
     let mut all_diagnostics: Vec<Diagnostic> = Vec::new();
     if options.report_diagnostics {

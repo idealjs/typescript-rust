@@ -123,11 +123,35 @@ impl Checker {
         property_name: &Arc<Node>,
     ) -> Option<Arc<Type>> {
         match property_name.kind {
-            SyntaxKind::StringLiteral => Some(self.get_string_literal_type(property_name.text())),
-            SyntaxKind::NumericLiteral => None,
-            SyntaxKind::PrivateIdentifier => None,
-            SyntaxKind::ComputedPropertyName => None,
-            _ => None,
+            SyntaxKind::PrivateIdentifier => Some(self.never_type()),
+            SyntaxKind::NumericLiteral => {
+                let lit = self.infer_number_literal_type(property_name.text());
+                Some(self.get_regular_type_of_literal_type(&lit))
+            }
+            SyntaxKind::ComputedPropertyName => {
+                let NodeData::ComputedPropertyName(d) = &property_name.data else {
+                    return None;
+                };
+                let t = self.get_type_of_node(&d.expression);
+                Some(self.get_regular_type_of_literal_type(&t))
+            }
+            SyntaxKind::StringLiteral | SyntaxKind::Identifier => {
+                Some(self.get_string_literal_type(property_name.text()))
+            }
+            // Go getLiteralTypeFromPropertyName→GetPropertyNameForPropertyNameNode：
+            // NoSubstitutionTemplateLiteral 与 JsxNamespacedName（namespace:name
+            // 合成文本）按字面量名取型；落 `_` 臂产 never 时 never 可赋给任意
+            // 键型，JSX 命名空间属性会被误判适用于非匹配索引签名
+            SyntaxKind::NoSubstitutionTemplateLiteral => {
+                Some(self.get_string_literal_type(property_name.text()))
+            }
+            SyntaxKind::JsxNamespacedName => {
+                let name = property_name
+                    .jsx_namespaced_name_text()
+                    .unwrap_or_default();
+                Some(self.get_string_literal_type(&name))
+            }
+            _ => Some(self.never_type()),
         }
     }
 
@@ -144,21 +168,126 @@ impl Checker {
 
     pub fn get_contextual_type_for_element_expression(
         &mut self,
-        _contextual_type: &Arc<Type>,
-        _element_index: usize,
+        contextual_type: &Arc<Type>,
+        element_index: usize,
         _length: Option<usize>,
-        _first_spread_index: i32,
+        first_spread_index: i32,
         _last_spread_index: i32,
     ) -> Option<Arc<Type>> {
-        None
+        let constituents: Vec<Arc<Type>> = if let crate::checker::types::TypeData::Union(u) =
+            &contextual_type.data
+        {
+            u.union_or_intersection.types.clone()
+        } else {
+            vec![Arc::clone(contextual_type)]
+        };
+        let mut result: Option<Arc<Type>> = None;
+        for t in constituents {
+            let Some(mapped) =
+                self.element_contextual_constituent(&t, element_index, first_spread_index)
+            else {
+                continue;
+            };
+            result = Some(match result {
+                None => mapped,
+                Some(prev) => self.get_union_type(vec![prev, mapped]),
+            });
+        }
+        result
     }
 
-    pub(crate) fn global_callable_function_type(&self) -> Option<Arc<Type>> {
-        None
+    fn element_contextual_constituent(
+        &mut self,
+        t: &Arc<Type>,
+        element_index: usize,
+        first_spread_index: i32,
+    ) -> Option<Arc<Type>> {
+        if let crate::checker::types::TypeData::Tuple(tuple) = &t.data {
+            if (first_spread_index < 0 || (element_index as i32) < first_spread_index)
+                && element_index < tuple.fixed_length
+            {
+                let info = tuple.element_infos.get(element_index)?;
+                let elem = info.type_.clone()?;
+                let optional = info.flags.contains(ElementFlags::Optional);
+                return Some(self.remove_missing_type(elem, optional));
+            }
+            let start = tuple.fixed_length.min(if first_spread_index >= 0 {
+                first_spread_index as usize
+            } else {
+                usize::MAX
+            });
+            let types: Vec<Arc<Type>> = tuple
+                .element_infos
+                .iter()
+                .skip(start)
+                .filter_map(|i| i.type_.clone())
+                .collect();
+            if types.is_empty() {
+                return None;
+            }
+            if types.len() == 1 {
+                return types.into_iter().next();
+            }
+            return Some(self.get_union_type(types));
+        }
+        if first_spread_index < 0 || (element_index as i32) < first_spread_index {
+            let prop = self.get_type_of_property_of_contextual_type(t, &element_index.to_string());
+            if prop.is_some() {
+                return prop;
+            }
+        }
+        self.get_iterated_type_or_element_type(
+            crate::checker::checker_iteration::IterationUse::Element,
+            t,
+            None,
+        )
     }
 
-    pub(crate) fn global_newable_function_type(&self) -> Option<Arc<Type>> {
-        None
+    pub(crate) fn remove_missing_type(&mut self, t: Arc<Type>, is_optional: bool) -> Arc<Type> {
+        if !is_optional {
+            return t;
+        }
+        if let crate::checker::types::TypeData::Union(u) = &t.data {
+            let filtered: Vec<Arc<Type>> = u
+                .union_or_intersection
+                .types
+                .iter()
+                .filter(|m| !m.flags.contains(TypeFlags::Undefined))
+                .cloned()
+                .collect();
+            if filtered.len() != u.union_or_intersection.types.len() {
+                if filtered.is_empty() {
+                    return self.never_type();
+                }
+                return self.get_union_type(filtered);
+            }
+            return t;
+        }
+        if t.flags.contains(TypeFlags::Undefined) {
+            return self.never_type();
+        }
+        t
+    }
+
+    pub(crate) fn global_function_type_of(&mut self, name: &str) -> Option<Arc<Type>> {
+        let sym = self.globals.get(name).cloned()?;
+        Some(self.get_declared_type_of_symbol(&sym))
+    }
+
+    pub(crate) fn global_callable_function_type(&mut self) -> Option<Arc<Type>> {
+        if self.strict_bind_call_apply {
+            self.global_function_type_of("CallableFunction")
+        } else {
+            self.global_function_type_of("Function")
+        }
+    }
+
+    pub(crate) fn global_newable_function_type(&mut self) -> Option<Arc<Type>> {
+        if self.strict_bind_call_apply {
+            self.global_function_type_of("NewableFunction")
+        } else {
+            self.global_function_type_of("Function")
+        }
     }
 
     pub(crate) fn get_jsx_type_symbol(
@@ -181,7 +310,7 @@ impl Checker {
                 }
                 return None;
             }
-            current = current.parent.clone()?;
+            current = current.parent()?;
         }
     }
 }
@@ -283,7 +412,7 @@ pub(crate) fn is_array_literal_or_object_literal_destructuring_pattern(node: &Ar
         node.kind,
         SyntaxKind::ArrayLiteralExpression | SyntaxKind::ObjectLiteralExpression
     ) && node
-        .parent
+        .parent()
         .as_ref()
         .map(|p| {
             p.kind == SyntaxKind::BinaryExpression

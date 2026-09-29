@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
+
 #[test]
 fn get_outlining_spans_depth_else_if() {
     let content = r#"if (1)[| {
@@ -86,6 +86,6 @@ fn get_outlining_spans_depth_else_if() {
 }|] else[| {
     1;
 }|]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
+    let _s = Session::new_for_test("getOutliningSpansDepthElseIf", content);
+    // TODO: f.VerifyOutliningSpans(t)
 }

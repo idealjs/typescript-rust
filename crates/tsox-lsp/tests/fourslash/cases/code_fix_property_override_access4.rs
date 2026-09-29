@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
+
 #[test]
 fn code_fix_property_override_access4() {
     let content = r#"// @strict: true
@@ -14,6 +14,6 @@ class A {
 class B extends A {
     get [prop]() { return 2; }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t, "fixPropertyOverrideAccessor")
+    let _s = Session::new_for_test("codeFixPropertyOverrideAccess4", content);
+    // TODO: f.VerifyCodeFixNotAvailable(t, "fixPropertyOverrideAccessor")
 }

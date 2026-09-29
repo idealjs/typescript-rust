@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_generator_functions() {
     let content = r#"function /*a*/ ;
@@ -16,9 +16,10 @@ const o: I = {
     */*e*/
 };
 1 * /*f*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"a", "b"}, nil)
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"c", "d"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "e", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "f", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsGeneratorFunctions", content);
+    // TODO: f.VerifyCompletions(t, []string{"a", "b"}, nil)
+    // TODO: f.VerifyCompletions(t, []string{"c", "d"}, &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_exact_at(&mut s, Some("e"), &["baseMethod"]);
+    fourslash::go_to_marker(&mut s, "f");
+    // TODO: f.VerifyCompletions(t, "f", &fourslash.CompletionsExpectedList{
 }

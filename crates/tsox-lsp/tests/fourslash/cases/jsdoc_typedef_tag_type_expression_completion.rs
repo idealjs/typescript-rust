@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn jsdoc_typedef_tag_type_expression_completion() {
     let content = r#"// @lib: es5
@@ -33,13 +33,19 @@ Foo./*valueMemberOfFoo*/;
   * @type { {/*propertyName*/ageX: number} }
   */
 var y;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "type1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "typeFooMember", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "NamespaceMember", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "globalValue", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "valueMemberOfSomeType", nil)
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "valueMemberOfFooInstance", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "valueMemberOfFoo", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "propertyName", nil)
+    let mut s = Session::new_for_test("jsdocTypedefTagTypeExpressionCompletion", content);
+    fourslash::go_to_marker(&mut s, "type1");
+    // TODO: f.VerifyCompletions(t, "type1", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "typeFooMember");
+    // TODO: f.VerifyCompletions(t, "typeFooMember", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "NamespaceMember");
+    // TODO: f.VerifyCompletions(t, "NamespaceMember", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "globalValue");
+    // TODO: f.VerifyCompletions(t, "globalValue", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_empty_at(&mut s, Some("valueMemberOfSomeType"));
+    fourslash::go_to_marker(&mut s, "valueMemberOfFooInstance");
+    // TODO: f.VerifyCompletions(t, "valueMemberOfFooInstance", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "valueMemberOfFoo");
+    // TODO: f.VerifyCompletions(t, "valueMemberOfFoo", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_empty_at(&mut s, Some("propertyName"));
 }

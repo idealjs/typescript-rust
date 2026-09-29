@@ -42,7 +42,7 @@ fn is_identifier_text(text: &str) -> bool {
     chars.all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '$')
 }
 
-fn is_numeric_literal_name(name: &str) -> bool {
+pub fn is_numeric_literal_name(name: &str) -> bool {
     !name.is_empty() && name.chars().all(|c| c.is_ascii_digit() || c == '.')
 }
 
@@ -50,7 +50,7 @@ pub fn is_external_module_symbol(symbol: &Symbol) -> bool {
     symbol.is_external_module()
 }
 
-pub fn get_meaning_of_entity_name_reference(node: &Arc<Node>) -> SymbolFlags {
+pub fn get_meaning_of_entity_name_reference(_node: &Arc<Node>) -> SymbolFlags {
     SymbolFlags::TYPE
 }
 

@@ -30,3 +30,6 @@ pub(crate) mod tests;
 pub(crate) mod vfsmatch_impl_chunk;
 pub(crate) mod vfsmatch_is_package_folder;
 pub(crate) mod vfsmatch_unlimited_depth;
+
+// r 轮接线:迁移批次模块
+pub mod mig;

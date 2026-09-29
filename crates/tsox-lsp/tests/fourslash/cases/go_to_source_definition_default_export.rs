@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // default-exported classes/functions via the AST visitor."]
+
 #[test]
 fn go_to_source_named_and_default_export() {
     // TODO: // findDeclarationNodesByName correctly finds both named exports and
@@ -18,11 +18,10 @@ export function /*targetHelper*/helper() {}
 import /*importDefault*/Widget, { /*importHelper*/helper } from "pkg";
 Widget;
 helper();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importDefault", "importHelper")
+    let _s = Session::new_for_test("goToSourceNamedAndDefaultExport", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importDefault", "importHelper")
 }
 
-#[ignore = "generator: // Default import navigates to the actual export default dec"]
 #[test]
 fn go_to_source_default_import_not_first_statement() {
     // TODO: // Default import navigates to the actual export default declaration,
@@ -39,11 +38,10 @@ export default class /*targetWidget*/Widget {}
 // @Filename: /home/src/workspaces/project/index.ts
 import /*importDefault*/Widget from "pkg";
 Widget;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importDefault")
+    let _s = Session::new_for_test("goToSourceDefaultImportNotFirstStatement", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importDefault")
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
 #[test]
 fn go_to_source_unnamed_default_export() {
     let content = r#"// @moduleResolution: bundler
@@ -56,11 +54,10 @@ export default /*targetDefault*/function() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import /*importDefault*/myFunc from "pkg";
 myFunc/*usage*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importDefault", "usage")
+    let _s = Session::new_for_test("goToSourceUnnamedDefaultExport", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importDefault", "usage")
 }
 
-#[ignore = "generator: // getCandidateSourceDeclarationNames returns empty names,"]
 #[test]
 fn go_to_source_empty_names_entry_fallback() {
     // TODO: // getCandidateSourceDeclarationNames returns empty names,
@@ -76,11 +73,10 @@ export default { run() {} };
 // @Filename: /home/src/workspaces/project/index.ts
 import /*defaultImport*/pkg from "pkg";
 pkg.run();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "defaultImport")
+    let _s = Session::new_for_test("goToSourceEmptyNamesEntryFallback", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "defaultImport")
 }
 
-#[ignore = "generator: // ExportAssignment/default path in findDeclarationNodesByNa"]
 #[test]
 fn go_to_source_export_assignment_default() {
     // TODO: // ExportAssignment/default path in findDeclarationNodesByName
@@ -96,11 +92,10 @@ export default _default;
 // @Filename: /home/src/workspaces/project/index.ts
 import pkg from "pkg";
 pkg/*usage*/;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
+    let _s = Session::new_for_test("goToSourceExportAssignmentDefault", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
-#[ignore = "generator: // findDeclarationNodesByName finds export assignment (expor"]
 #[test]
 fn go_to_source_export_assignment() {
     // TODO: // findDeclarationNodesByName finds export assignment (export = ...)
@@ -117,11 +112,10 @@ module.exports = legacyFn;
 // @Filename: /home/src/workspaces/project/index.ts
 import /*importName*/legacyFn from "legacy";
 legacyFn();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importName")
+    let _s = Session::new_for_test("goToSourceExportAssignment", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName")
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
 #[test]
 fn go_to_source_export_assignment_expression() {
     let content = r#"// @moduleResolution: bundler
@@ -134,6 +128,6 @@ export default function createThing() { return { value: 42 }; }
 // @Filename: /home/src/workspaces/project/index.ts
 import /*defaultName*/createThing from "pkg";
 createThing/*callDefault*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "defaultName", "callDefault")
+    let _s = Session::new_for_test("goToSourceExportAssignmentExpression", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "defaultName", "callDefault")
 }

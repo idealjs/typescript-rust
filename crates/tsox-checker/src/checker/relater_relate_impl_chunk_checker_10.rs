@@ -16,17 +16,17 @@ impl Checker {
         };
 
         let source_parent = if source_symbol.flags.contains(SymbolFlags::EnumMember) {
-            source_symbol.parent.as_ref().unwrap_or(source_symbol)
+            source_symbol.parent().clone().unwrap_or_else(|| Arc::clone(source_symbol))
         } else {
-            source_symbol
+            Arc::clone(source_symbol)
         };
         let target_parent = if target_symbol.flags.contains(SymbolFlags::EnumMember) {
-            target_symbol.parent.as_ref().unwrap_or(target_symbol)
+            target_symbol.parent().clone().unwrap_or_else(|| Arc::clone(target_symbol))
         } else {
-            target_symbol
+            Arc::clone(target_symbol)
         };
 
-        if Arc::ptr_eq(source_parent, target_parent) {
+        if Arc::ptr_eq(&source_parent, &target_parent) {
             return true;
         }
 
@@ -48,8 +48,8 @@ impl Checker {
             }
         }
 
-        let source_type = self.get_type_of_symbol(source_parent);
-        let target_type = self.get_type_of_symbol(target_parent);
+        let source_type = self.get_type_of_symbol(&source_parent);
+        let target_type = self.get_type_of_symbol(&target_parent);
         let source_properties = self.get_properties_of_type(&source_type);
 
         for source_prop in source_properties {
@@ -118,7 +118,7 @@ impl Checker {
         has_undefined && has_null && has_empty_object
     }
 
-    pub(crate) fn is_empty_anonymous_object_type(&self, t: &Arc<Type>) -> bool {
+    pub fn is_empty_anonymous_object_type(&self, t: &Arc<Type>) -> bool {
         if !t.object_flags.contains(ObjectFlags::Anonymous) {
             return false;
         }
@@ -128,14 +128,17 @@ impl Checker {
 
         if let Some(sym) = t.symbol.as_ref() {
             if sym.flags.contains(SymbolFlags::TypeLiteral) {
-                return self.get_properties_of_type(t).is_empty();
+                return self.structured_type_is_empty(t);
             }
         }
         false
     }
 
     pub(crate) fn structured_type_is_empty(&self, t: &Arc<Type>) -> bool {
-        self.get_properties_of_type(t).is_empty()
+        !Arc::ptr_eq(t, &self.any_function_type())
+            && self.get_properties_of_type(t).is_empty()
+            && t.as_structured()
+                .is_none_or(|s| s.signatures.is_empty() && s.index_infos.is_empty())
     }
 
     pub(crate) fn is_index_signatures_related_to(
@@ -143,72 +146,118 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
+        source_is_primitive: bool,
     ) -> bool {
+        use tsox_core::diagnostics::messages_generated as msg;
         if source.flags.contains(TypeFlags::Any) {
             return true;
         }
-        let source_struct = match source.as_structured() {
-            Some(s) => s,
-            None => return false,
-        };
-        let target_struct = match target.as_structured() {
-            Some(t) => t,
-            None => return false,
-        };
-
-        let source_indexes = &source_struct.index_infos;
-        let target_indexes = &target_struct.index_infos;
-
+        let target_indexes = self.get_index_infos_of_type(target);
         if target_indexes.is_empty() {
             return true;
         }
+        let target_has_string_index = target_indexes.iter().any(|info| {
+            info.key_type
+                .as_ref()
+                .is_some_and(|k| k.flags.contains(TypeFlags::String))
+        });
 
         for target_index in target_indexes {
-            let target_key = &target_index.key_type;
-            let target_value = &target_index.value_type;
+            let target_key_is_string = target_index
+                .key_type
+                .as_ref()
+                .is_some_and(|k| k.flags.contains(TypeFlags::String));
+            let target_value_any = target_index
+                .value_type
+                .as_ref()
+                .is_some_and(|v| v.flags.contains(TypeFlags::Any));
 
-            let mut found_match = false;
-            for source_index in source_indexes {
-                let source_key = &source_index.key_type;
-                let source_value = &source_index.value_type;
-
-                let key_match = match (target_key, source_key) {
-                    (Some(tk), Some(sk)) => self.is_type_related_to(sk, tk, relation),
-                    (None, _) => true,
-                    (_, None) => false,
-                };
-
-                if !key_match {
-                    continue;
+            if relation != RelationKind::StrictSubtype
+                && !source_is_primitive
+                && target_has_string_index
+                && target_value_any
+            {
+                continue;
+            }
+            if self.is_generic_mapped_type(source) && target_key_is_string {
+                let template = self.get_template_type_from_mapped_type(source);
+                match template {
+                    Some(template) => {
+                        let target_value = target_index
+                            .value_type
+                            .clone()
+                            .unwrap_or_else(|| self.any_type());
+                        if !self.is_type_related_to(&template, &target_value, relation) {
+                            return false;
+                        }
+                    }
+                    None => return false,
                 }
-
-                let value_match = match (target_value, source_value) {
-                    (Some(tv), Some(sv)) => self.is_type_related_to(sv, tv, relation),
-
-                    (None, _) => true,
-                    (_, None) => false,
-                };
-
-                if value_match {
-                    found_match = true;
-                    break;
-                }
+                continue;
             }
 
-            if !found_match {
-                let result = self.members_related_to_index_info(source, target_index, relation);
-                if result.is_false() {
-                    let key_str = target_key
-                        .as_ref()
-                        .map(|k| self.type_to_string(k))
-                        .unwrap_or_else(|| "string".to_string());
-                    let source_str = self.type_to_string(source);
-                    self.relater_report_error(
-                        tsox_core::diagnostics::messages_generated::
-                            INDEX_SIGNATURE_FOR_TYPE_0_IS_MISSING_IN_TYPE_1,
-                        vec![key_str, source_str],
-                    );
-                    return false;
+            let target_key = target_index.key_type.clone().unwrap_or_else(|| self.string_type());
+            match self.get_applicable_index_info(source, &target_key) {
+                Some(source_info) => {
+                    let source_value = source_info
+                        .value_type
+                        .clone()
+                        .unwrap_or_else(|| self.any_type());
+                    let target_value = target_index
+                        .value_type
+                        .clone()
+                        .unwrap_or_else(|| self.any_type());
+                    if !self.is_type_related_to(&source_value, &target_value, relation) {
+                        if self.relater_chain_active {
+                            let same_key = source_info
+                                .key_type
+                                .as_ref()
+                                .and_then(|k| target_index.key_type.as_ref().map(|t| (k, t)))
+                                .is_some_and(|(k, t)| {
+                                    Arc::ptr_eq(k, t) || k.flags == t.flags
+                                });
+                            if same_key {
+                                let key_str = self.type_to_string(&target_key);
+                                self.relater_report_error(
+                                    msg::X_0_INDEX_SIGNATURES_ARE_INCOMPATIBLE,
+                                    vec![key_str],
+                                );
+                            } else {
+                                let sk = source_info
+                                    .key_type
+                                    .clone()
+                                    .unwrap_or_else(|| self.string_type());
+                                let sk_str = self.type_to_string(&sk);
+                                let tk_str = self.type_to_string(&target_key);
+                                self.relater_report_error(
+                                    msg::X_0_AND_1_INDEX_SIGNATURES_ARE_INCOMPATIBLE,
+                                    vec![sk_str, tk_str],
+                                );
+                            }
+                        }
+                        return false;
+                    }
+                }
+                None => {
+                    let inferable = relation != RelationKind::StrictSubtype
+                        || source.object_flags.contains(ObjectFlags::FreshLiteral);
+                    if inferable && self.is_object_type_with_inferable_index(source) {
+                        if self.members_related_to_index_info(source, &target_index, relation)
+                            .is_false()
+                        {
+                            return false;
+                        }
+                    } else {
+                        if self.relater_chain_active {
+                            let key_str = self.type_to_string(&target_key);
+                            let source_str = self.type_to_string(source);
+                            self.relater_report_error(
+                                msg::INDEX_SIGNATURE_FOR_TYPE_0_IS_MISSING_IN_TYPE_1,
+                                vec![key_str, source_str],
+                            );
+                        }
+                        return false;
+                    }
                 }
             }
         }

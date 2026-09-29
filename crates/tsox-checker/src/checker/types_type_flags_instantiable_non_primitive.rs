@@ -89,6 +89,7 @@ bitflags! {
         const IdenticalBaseTypeExists                    = 1 << 28;
         const UnresolvedMembers                          = 1 << 29;
         const FromTypeNode                                = 1 << 30;
+        const IsReadonlyArray                             = 1 << 31;
         const IsGenericTypeComputed                      = 1 << 22;
         const IsGenericObjectType                        = 1 << 23;
         const IsGenericIndexType                         = 1 << 24;
@@ -106,6 +107,11 @@ pub const OBJECT_FLAGS_CLASS_OR_INTERFACE: ObjectFlags =
 pub const OBJECT_FLAGS_REQUIRES_WIDENING: ObjectFlags = ObjectFlags::from_bits_truncate(
     ObjectFlags::ContainsWideningType.bits() | ObjectFlags::ContainsObjectOrArrayLiteral.bits(),
 );
+pub fn regular_literal_object_flags(original: ObjectFlags) -> ObjectFlags {
+    ObjectFlags::Anonymous
+        | ObjectFlags::ObjectLiteral
+        | (original & (ObjectFlags::JSLiteral | ObjectFlags::NonInferrableType))
+}
 pub const OBJECT_FLAGS_PROPAGATING_FLAGS: ObjectFlags = ObjectFlags::from_bits_truncate(
     ObjectFlags::ContainsWideningType.bits()
         | ObjectFlags::ContainsObjectOrArrayLiteral.bits()
@@ -245,4 +251,14 @@ pub enum Ternary {
     Unknown = 1,
     Maybe = 3,
     True = -1,
+}
+
+impl std::ops::BitAndAssign for Ternary {
+    fn bitand_assign(&mut self, rhs: Self) {
+        if *self == Ternary::False || rhs == Ternary::False {
+            *self = Ternary::False;
+        } else if *self == Ternary::Maybe || rhs == Ternary::Maybe {
+            *self = Ternary::Maybe;
+        }
+    }
 }

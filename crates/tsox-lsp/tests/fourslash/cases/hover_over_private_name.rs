@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn hover_over_private_name() {
     let content = r#"class A {
@@ -16,7 +17,7 @@ fn hover_over_private_name() {
         return "" + n;
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("hoverOverPrivateName", content);
     fourslash::verify_quick_info_at(&mut s, "1", "(property) A.#foo: number", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(property) A.#bar: number", "");
     fourslash::verify_quick_info_at(&mut s, "3", "(property) A.#baz: () => string", "");

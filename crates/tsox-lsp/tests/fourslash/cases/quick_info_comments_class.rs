@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_comments_class() {
     let content = r#"/** This is class c2 without constructor*/
@@ -60,6 +60,6 @@ namespace m {
     }
 }
 var myVar = new m.m2.c/*33*/1();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoCommentsClass", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

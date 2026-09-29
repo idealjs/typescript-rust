@@ -36,11 +36,24 @@ impl Checker {
                 return name == "length" || self.is_array_mutation_method(name);
             }
 
+            // Go getTupleBaseType：元组的属性存在性经 Array<元素并集> 基类型判定
+            if self.is_tuple_type(t) {
+                return name == "length" || self.global_interface_has_property("Array", name);
+            }
+
             if t.object_flags.contains(ObjectFlags::Anonymous)
-                && structured.call_signature_count > 0
-                && self.global_interface_has_property("Function", name)
+                && !structured.signatures.is_empty()
             {
-                return true;
+                let fallback_type = if structured.call_signature_count > 0 {
+                    self.global_callable_function_type()
+                } else {
+                    self.global_newable_function_type()
+                };
+                if let Some(ft) = fallback_type
+                    && self.get_property_of_type(&ft, name).is_some()
+                {
+                    return true;
+                }
             }
 
             if t.flags.contains(TypeFlags::Object)
@@ -52,11 +65,15 @@ impl Checker {
 
         if t.flags.contains(TypeFlags::Union) {
             if let TypeData::Union(u) = &t.data {
-                for ct in &u.union_or_intersection.types {
-                    if ct.flags.intersects(TypeFlags::Undefined | TypeFlags::Null) {
+                let types = u.union_or_intersection.types.clone();
+                for ct in &types {
+                    if ct
+                        .flags
+                        .intersects(TypeFlags::Undefined | TypeFlags::Null | TypeFlags::Never)
+                    {
                         continue;
                     }
-                    if !self.has_property_of_type(ct, name) {
+                    if !self.constituent_admits_property(ct, name) {
                         return false;
                     }
                 }
@@ -76,11 +93,15 @@ impl Checker {
         }
 
         if t.flags.contains(TypeFlags::TypeParameter) {
-            if let Some(constraint) = self.get_constraint_of_type_parameter(t) {
+            if let Some(constraint) = self.get_constraint_of_type_parameter(t)
+                && !constraint.flags.contains(TypeFlags::Unknown)
+            {
                 return self.has_property_of_type(&constraint, name);
             }
-
-            return true;
+            if self.strict_null_checks {
+                return false;
+            }
+            return self.global_interface_has_property("Object", name);
         }
 
         if t.flags.contains(TypeFlags::Conditional) {
@@ -120,6 +141,17 @@ impl Checker {
             if self.global_interface_has_property("Array", name) {
                 return true;
             }
+            if let Some(array_sym) = self.globals.get("Array")
+                && let Some(declared) = self
+                    .type_alias_links
+                    .get(array_sym)
+                    .and_then(|l| l.declared_type.clone())
+                && declared
+                    .as_structured()
+                    .is_some_and(|s| s.members.get(name).is_some())
+            {
+                return true;
+            }
             return false;
         }
 
@@ -131,33 +163,43 @@ impl Checker {
             return name == "length";
         }
 
-        if t.flags
-            .intersects(TypeFlags::String | TypeFlags::StringLiteral)
-        {
-            return self.global_interface_has_property("String", name);
+        if t.flags.intersects(
+            TypeFlags::String
+                | TypeFlags::StringLiteral
+                | TypeFlags::TemplateLiteral
+                | TypeFlags::StringMapping,
+        ) {
+            return self.global_interface_has_property("String", name)
+                || self.global_interface_has_property("Object", name);
         }
 
         if t.flags
             .intersects(TypeFlags::Number | TypeFlags::NumberLiteral)
         {
-            return self.global_interface_has_property("Number", name);
+            return self.global_interface_has_property("Number", name)
+                || self.global_interface_has_property("Object", name);
         }
 
         if t.flags
             .intersects(TypeFlags::Boolean | TypeFlags::BooleanLiteral)
         {
-            return self.global_interface_has_property("Boolean", name);
+            return self.global_interface_has_property("Boolean", name)
+                || self.global_interface_has_property("Object", name);
         }
 
         if t.flags
             .intersects(TypeFlags::BigInt | TypeFlags::BigIntLiteral)
         {
-            return self.global_interface_has_property("BigInt", name);
+            return self.global_interface_has_property("BigInt", name)
+                || self.global_interface_has_property("Object", name);
         }
 
-        if t.flags
-            .intersects(TypeFlags::ESSymbol | TypeFlags::Void | TypeFlags::UniqueESSymbol)
-        {
+        if t.flags.intersects(TypeFlags::ESSymbol | TypeFlags::UniqueESSymbol) {
+            return self.global_interface_has_property("Symbol", name)
+                || self.global_interface_has_property("Object", name);
+        }
+
+        if t.flags.contains(TypeFlags::Void) {
             return false;
         }
 
@@ -222,7 +264,7 @@ impl Checker {
     }
 
     pub(crate) fn is_indirect_call_comma(&self, comma: &Arc<Node>) -> bool {
-        let Some(paren) = comma.parent.as_ref() else {
+        let Some(paren) = comma.parent() else {
             return false;
         };
         if paren.kind != SyntaxKind::ParenthesizedExpression {
@@ -235,11 +277,11 @@ impl Checker {
         if !zero_left {
             return false;
         }
-        let Some(grand) = paren.parent.as_ref() else {
+        let Some(grand) = paren.parent() else {
             return false;
         };
         let call_uses_paren = matches!(&grand.data, tsox_frontend::ast::NodeData::CallExpression(ce)
-            if std::ptr::eq(&ce.expression, paren));
+            if Arc::as_ptr(&ce.expression) == Arc::as_ptr(&paren));
         if !call_uses_paren && grand.kind != SyntaxKind::TaggedTemplateExpression {
             return false;
         }

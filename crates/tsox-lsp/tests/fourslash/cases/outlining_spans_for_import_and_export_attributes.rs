@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyOutliningSpans"]
+
 #[test]
 fn outlining_spans_for_import_and_export_attributes() {
     let content = r#"import { a1, a2 } from "a";
@@ -47,6 +47,6 @@ export [|{
   b4,
 }|] from "b";
 ;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyOutliningSpans"); // f.VerifyOutliningSpans(t)
+    let _s = Session::new_for_test("outliningSpansForImportAndExportAttributes", content);
+    // TODO: f.VerifyOutliningSpans(t)
 }

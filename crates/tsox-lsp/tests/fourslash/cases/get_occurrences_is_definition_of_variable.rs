@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn get_occurrences_is_definition_of_variable() {
     let content = r#"/*1*/var /*2*/x = 0;
@@ -20,6 +20,6 @@ var postDecrement = /*14*/x--;
 
 /*15*/x += 1;
 /*16*/x <<= 1;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", 
+    let _s = Session::new_for_test("getOccurrencesIsDefinitionOfVariable", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", 
 }

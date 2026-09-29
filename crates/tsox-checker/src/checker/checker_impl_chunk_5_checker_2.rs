@@ -29,6 +29,7 @@ impl Checker {
                         src_prop.check_flags & tsox_frontend::ast::CheckFlags::Readonly;
 
                     (*sym_mut).declarations = src_prop.declarations.clone();
+                    (*sym_mut).value_declaration = src_prop.value_declaration.clone();
                 }
             }
             members.insert(name, Arc::clone(&symbol));
@@ -41,13 +42,14 @@ impl Checker {
             );
             props.push(symbol);
         }
+        // Go getWidenedTypeOfObjectLiteral：newAnonymousType(t.symbol, ...) 保留原符号
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous | ObjectFlags::ObjectLiteral,
             id: crate::checker::types::next_type_id(),
-            symbol: None,
+            symbol: t.symbol.clone(),
             alias: None,
-            data: TypeData::Object(ObjectTypeData {
+            data: TypeData::Object(ObjectTypeData { node: None,
                 structured: StructuredTypeData {
                     members,
                     properties: props,
@@ -89,7 +91,8 @@ impl Checker {
             let b = t.flags.bits();
             b & b.wrapping_neg()
         });
-        Arc::new(Type::new(
+        let enum_symbol = crate::checker::typenode_constructors_checker::uniform_enum_symbol(&seen);
+        let mut union = Type::new(
             TypeFlags::Union,
             TypeData::Union(UnionTypeData {
                 union_or_intersection: UnionOrIntersectionTypeData {
@@ -102,7 +105,9 @@ impl Checker {
                 key_property_name: None,
                 constituent_map: HashMap::new(),
             }),
-        ))
+        );
+        union.symbol = enum_symbol;
+        Arc::new(union)
     }
 
     pub fn get_constraint_of_type_parameter(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
@@ -180,6 +185,12 @@ impl Checker {
         let Some(decl) = sig.declaration.as_ref() else {
             return None;
         };
+        // TS5.5 body 谓词推断：唯一 return 表达式是参数方法的 this 谓词调用
+        if decl.type_node().is_none() {
+            if let Some(pred) = self.infer_type_predicate_from_body(decl, sig) {
+                return Some(pred);
+            }
+        }
         let Some(type_node) = decl.type_node() else {
             return None;
         };
@@ -239,7 +250,12 @@ impl Checker {
 
     pub fn get_base_constraint_of_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
         match &t.data {
-            TypeData::TypeParameter(tp) => tp.constrained.resolved_base_constraint.get().cloned(),
+            TypeData::TypeParameter(tp) => tp
+                .constrained
+                .resolved_base_constraint
+                .get()
+                .cloned()
+                .or_else(|| tp.constraint.clone()),
             TypeData::Conditional(ct) => ct.constrained.resolved_base_constraint.get().cloned(),
             TypeData::IndexedAccess(ia) => ia.constrained.resolved_base_constraint.get().cloned(),
             TypeData::Index(it) => it.constrained.resolved_base_constraint.get().cloned(),
@@ -260,5 +276,77 @@ impl Checker {
 
     pub fn was_canceled(&self) -> bool {
         false
+    }
+}
+
+impl Checker {
+    /// Go checkIfExpressionRefinesParameter（简化移植）：
+    /// `return g.isLeader()` 且 isLeader 的签名是 `this is T` 谓词 → 推断 `g is T`
+    fn infer_type_predicate_from_body(
+        &mut self,
+        decl: &Arc<Node>,
+        sig: &Arc<Signature>,
+    ) -> Option<TypePredicate> {
+        let body = match &decl.data {
+            NodeData::FunctionDeclaration(d) => d.body.as_ref(),
+            _ => None,
+        }?;
+        let NodeData::Block(block) = &body.data else {
+            return None;
+        };
+        let rets: Vec<&Arc<Node>> = block
+            .statements
+            .iter()
+            .filter(|s| s.kind == SyntaxKind::ReturnStatement)
+            .collect();
+        if rets.len() != 1 {
+            return None;
+        }
+        let NodeData::ReturnStatement(ret) = &rets[0].data else {
+            return None;
+        };
+        let call = ret.expression.as_ref()?;
+        if call.kind != SyntaxKind::CallExpression {
+            return None;
+        }
+        let NodeData::CallExpression(cd) = &call.data else {
+            return None;
+        };
+        // 返回类型应为 boolean
+        let ret_type = self.get_return_type_of_signature(sig)?;
+        if !ret_type.flags.contains(TypeFlags::Boolean) {
+            return None;
+        }
+        let callee = match &cd.expression.data {
+            NodeData::PropertyAccessExpression(p) => p,
+            _ => return None,
+        };
+        let NodeData::Identifier(recv) = &callee.expression.data else {
+            return None;
+        };
+        // 接收者须是本签名的参数
+        let param = sig
+            .parameters
+            .iter()
+            .find(|p| p.name == recv.text)?;
+        let callee_type = self.get_type_of_node(&cd.expression);
+        if !callee_type.flags.contains(TypeFlags::Object) {
+            return None;
+        }
+        let callee_sig = self
+            .get_signatures_of_type(&callee_type, crate::checker::SignatureKind::Call)
+            .into_iter()
+            .next()?;
+        let pred = self.compute_type_predicate_of_signature(&callee_sig)?;
+        if !matches!(pred.kind, TypePredicateKind::This) {
+            return None;
+        }
+        let t = pred.t?;
+        Some(TypePredicate {
+            kind: TypePredicateKind::Identifier,
+            parameter_name: param.name.clone(),
+            parameter_index: -1,
+            t: Some(t),
+        })
     }
 }

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn import_fixes_global_typings_cache() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /project/tsconfig.json
  { "compilerOptions": { "allowJs": true, "checkJs": true, "module": "commonjs" } }
 // @Filename: /home/src/Library/Caches/typescript/node_modules/@types/react-router-dom/package.json
@@ -16,7 +16,7 @@ export class BrowserRouter {}
  export const BrowserRouter = () => null;
 // @Filename: /project/index.js
 BrowserRouter/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importFixesGlobalTypingsCache", content);
     fourslash::go_to_file(&mut s, "/project/index.js");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

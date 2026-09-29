@@ -18,7 +18,7 @@ pub(crate) fn build_project(
         Err(diag) => {
             let mut writer = sys.writer();
             let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty, locale));
-            return CommandLineResult {
+            return CommandLineResult { watcher: None,
                 status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
             };
         }
@@ -27,7 +27,7 @@ pub(crate) fn build_project(
     let normalized_config = tsox_core::tspath::normalize_path(&config_file_name);
 
     if seen_projects.contains(&normalized_config) {
-        return CommandLineResult {
+        return CommandLineResult { watcher: None,
             status: ExitStatus::Success,
         };
     }
@@ -39,7 +39,7 @@ pub(crate) fn build_project(
             vec![cycle_stack.join("\n")],
         );
         let _ = writeln!(writer, "{}", format_diagnostic(&diag, pretty, locale));
-        return CommandLineResult {
+        return CommandLineResult { watcher: None,
             status: ExitStatus::ProjectReferenceCycle_OutputsSkipped,
         };
     }
@@ -61,7 +61,7 @@ pub(crate) fn build_project(
         cycle_stack.pop();
         building.remove(&normalized_config);
         seen_projects.insert(normalized_config);
-        return CommandLineResult {
+        return CommandLineResult { watcher: None,
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
         };
     }
@@ -112,7 +112,7 @@ pub(crate) fn build_project(
                         cycle_stack.pop();
                         building.remove(&normalized_config);
                         seen_projects.insert(normalized_config);
-                        return CommandLineResult {
+                        return CommandLineResult { watcher: None,
                             status: ExitStatus::Success,
                         };
                     }
@@ -129,7 +129,7 @@ pub(crate) fn build_project(
             cycle_stack.pop();
             building.remove(&normalized_config);
             seen_projects.insert(normalized_config);
-            return CommandLineResult {
+            return CommandLineResult { watcher: None,
                 status: ExitStatus::Success,
             };
         }
@@ -155,7 +155,7 @@ pub(crate) fn build_project(
     building.remove(&normalized_config);
     seen_projects.insert(normalized_config);
 
-    CommandLineResult { status }
+    CommandLineResult { watcher: None, status }
 }
 
 pub(crate) fn resolve_project_config(

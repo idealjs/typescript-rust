@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn get_java_script_global_completions1() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @allowNonTsExtensions: true
 // @Filename: Foo.js
 function f() {
@@ -15,6 +15,6 @@ function f() {
 }
 
 hello/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("getJavaScriptGlobalCompletions1", content);
+    // TODO: f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn array_call_and_construct_typings() {
     let content = r#"var a/*1*/1 = new Array();
@@ -12,7 +13,7 @@ var a/*7*/7 = Array(1);
 var a/*8*/8 = Array<boolean>();
 var a/*9*/9 = Array<boolean>(1);
 var a/*10*/10 = Array("s");"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("arrayCallAndConstructTypings", content);
     fourslash::verify_quick_info_at(&mut s, "1", "var a1: any[]", "");
     fourslash::verify_quick_info_at(&mut s, "2", "var a2: any[]", "");
     fourslash::verify_quick_info_at(&mut s, "3", "var a3: boolean[]", "");

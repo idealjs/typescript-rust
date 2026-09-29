@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn auto_import_provider_pnpm() {
     let content = r#"// @Filename: /home/src/workspaces/project/tsconfig.json
@@ -14,8 +14,8 @@ export declare function autorun(): void;
 // @Filename: /home/src/workspaces/project/index.ts
 autorun/**/
 // @link: /home/src/workspaces/project/node_modules/.pnpm/mobx@6.0.4/node_modules/mobx -> /home/src/workspaces/project/node_modules/mobx"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportProvider_pnpm", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

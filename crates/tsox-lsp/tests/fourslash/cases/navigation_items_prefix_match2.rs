@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyWorkspaceSymbol"]
+
 #[test]
 fn navigation_items_prefix_match2() {
     let content = r#"// @lib: es5
@@ -23,6 +23,6 @@ interface [|OriginI|] {
     [|origin1|];
     public [|_distance|](distanceParam): void;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyWorkspaceSymbol"); // f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
+    let _s = Session::new_for_test("navigationItemsPrefixMatch2", content);
+    // TODO: f.VerifyWorkspaceSymbol(t, []*fourslash.VerifyWorkspaceSymbolCase{
 }

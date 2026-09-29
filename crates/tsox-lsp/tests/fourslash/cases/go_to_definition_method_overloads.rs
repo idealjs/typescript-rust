@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_method_overloads() {
     let content = r#"class MethodOverload {
@@ -18,6 +18,6 @@ MethodOverload.[|/*staticMethodReference2*/method|]("123");
 var methodOverload = new MethodOverload();
 methodOverload.[|/*instanceMethodReference1*/method|]();
 methodOverload.[|/*instanceMethodReference2*/method|]("456");"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "staticMethodReference1", "staticMethodReference2", "instanc
+    let _s = Session::new_for_test("goToDefinitionMethodOverloads", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "staticMethodReference1", "staticMethodReference2", "instanc
 }

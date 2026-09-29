@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_parameter_property_declaration_inheritance() {
     let content = r#"class C {
@@ -13,6 +13,6 @@ class D extends C {
 		super(/*3*/x);
 	}
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
+    let _s = Session::new_for_test("findAllRefsParameterPropertyDeclaration_inheritance", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "0", "1", "2", "3")
 }

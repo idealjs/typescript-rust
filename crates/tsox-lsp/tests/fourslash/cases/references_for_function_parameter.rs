@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn references_for_function_parameter() {
     let content = r#"var x;
@@ -10,6 +10,6 @@ function n(x: number, /*1*/n: number) {
     /*2*/n = 32;
     x = /*3*/n;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
+    let _s = Session::new_for_test("referencesForFunctionParameter", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

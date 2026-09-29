@@ -10,6 +10,44 @@ impl Checker {
             self.check_computed_property_name(&name);
         }
 
+        // Go checkMethodDeclaration/checkConstructorDeclaration 尾段：合并符号上
+        // 检查重复实现/过载一致性/实现缺失（每符号一次）
+        // Go：checkFunctionOrConstructorSymbol 仅类成员（对象字面量方法走
+        // checkObjectLiteralMethod，无此检查）
+        let in_class = node
+            .parent()
+            .is_some_and(|p| matches!(p.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression));
+        // Go hasBindableName：动态名（非字面量、非 well-known 计算名）成员
+        // 跳过合并符号检查（不报 TS2391/TS2393 族）
+        let bindable_name = node.name().is_some_and(|n| {
+            if n.kind == SyntaxKind::ComputedPropertyName {
+                match &n.data {
+                    tsox_frontend::ast::NodeData::ComputedPropertyName(cd) => {
+                        crate::binder::symbols_binder_4::well_known_symbol_member_name(&cd.expression)
+                            .is_some()
+                            || matches!(
+                                cd.expression.kind,
+                                SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral
+                            )
+                    }
+                    _ => false,
+                }
+            } else {
+                true
+            }
+        });
+        if in_class
+            && bindable_name
+            && matches!(
+            node.kind,
+            SyntaxKind::MethodDeclaration | SyntaxKind::Constructor | SyntaxKind::GetAccessor | SyntaxKind::SetAccessor
+        ) && let Some(symbol) = self
+            .get_symbol_of_declaration(node)
+            .filter(|_| !node.flags.contains(NodeFlags::JavaScriptFile))
+        {
+            self.check_function_or_constructor_symbol(&symbol);
+        }
+
         let (body, type_node, parameters): (
             Option<Arc<Node>>,
             Option<Arc<Node>>,
@@ -66,13 +104,28 @@ impl Checker {
 
         if let Some(params) = &parameters {
             let is_ctor_impl = matches!(node.kind, SyntaxKind::Constructor) && body.is_some();
+            // Go checkGrammarFunctionLikeDeclaration：方法/构造函数/访问器
+            // 参数表走同一文法检查（TS1015 等）
+            self.check_grammar_parameter_list(params);
             self.check_parameter_property_modifiers(params, is_ctor_impl);
 
             if matches!(
                 node.kind,
                 SyntaxKind::MethodDeclaration | SyntaxKind::Constructor
             ) {
-                self.check_parameter_implicit_any(node, params, 0);
+                // 对象字面量位方法：参数上下文计数经成员名查上下文签名
+                //（Go checkFunctionLikeExpression 的 contextuallyTypedParameterCount）
+                let contextual_count = if node.kind == SyntaxKind::MethodDeclaration
+                    && node
+                        .parent()
+                        .is_some_and(|p| p.kind == SyntaxKind::ObjectLiteralExpression)
+                {
+                    self.get_contextual_signature(node)
+                        .map_or(0, |sig| sig.parameters.len())
+                } else {
+                    0
+                };
+                self.check_parameter_implicit_any(node, params, contextual_count);
             }
             for p in params.iter() {
                 if let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &p.data
@@ -85,6 +138,10 @@ impl Checker {
                     }
                 }
             }
+            // Go checkSignatureDeclaration：参数初始化器作为表达式检查
+            for p in params.iter() {
+                self.check_parameter_default_initializer(p);
+            }
         }
         if let Some(tn) = &type_node {
             self.check_type_annotation(tn);
@@ -94,6 +151,11 @@ impl Checker {
             && matches!(node.kind, SyntaxKind::MethodDeclaration)
             && type_node.is_none()
             && body.is_none()
+            && !self.declaration_belongs_to_private_ambient_member(node)
+            && !self
+                .current_file
+                .as_ref()
+                .is_some_and(|f| f.has_parse_diagnostics)
         {
             if let Some(name) = Self::class_member_name_node(node) {
                 if name.kind == SyntaxKind::Identifier {
@@ -110,13 +172,8 @@ impl Checker {
             }
         }
         if let Some(body) = body {
-            if node.kind == SyntaxKind::Constructor
-                && self
-                    .enclosing_class_stack
-                    .last()
-                    .is_some_and(|c| self.extends_base_of(c).is_some())
-            {
-                self.check_super_before_this(&body);
+            if node.kind == SyntaxKind::Constructor {
+                self.check_constructor_super_calls(node, &body);
             }
 
             let is_static = node.has_syntactic_modifier(ModifierFlags::Static);
@@ -153,9 +210,10 @@ impl Checker {
             self.this_container_stack.pop();
 
             if let Some(ret_type) = &declared_return
-                && !ret_type.flags.contains(TypeFlags::Void)
-                && !ret_type.flags.contains(TypeFlags::Undefined)
-                && !ret_type.flags.contains(TypeFlags::Any)
+                && !self.maybe_type_of_kind(ret_type, TypeFlags::Void)
+                && !ret_type
+                    .flags
+                    .intersects(TypeFlags::Undefined | TypeFlags::Any)
                 && body.kind == SyntaxKind::Block
                 && !self.function_body_definitely_returns(&body)
             {

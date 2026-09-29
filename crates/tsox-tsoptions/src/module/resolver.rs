@@ -11,7 +11,6 @@ pub(crate) use tsox_core::core::compiler_options::CompilerOptions;
 pub(crate) use tsox_core::core::compiler_options::ModuleKind;
 pub(crate) use tsox_core::core::compiler_options::ModuleResolutionKind;
 pub(crate) use tsox_core::core::compiler_options::ResolutionMode;
-pub(crate) use tsox_core::tspath;
 bitflags! {
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     pub struct Extensions: i32 {

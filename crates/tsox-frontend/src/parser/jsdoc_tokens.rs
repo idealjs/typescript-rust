@@ -3,16 +3,6 @@
 use crate::parser::jsdoc::*;
 
 impl crate::parser::Parser {
-    pub(crate) fn next_token_jsdoc(&mut self) -> SyntaxKind {
-        self.token = self.scanner.scan_jsdoc_token();
-        self.token
-    }
-
-    pub(crate) fn next_jsdoc_comment_text_token(&mut self, in_backticks: bool) -> SyntaxKind {
-        self.token = self.scanner.scan_jsdoc_comment_text_token(in_backticks);
-        self.token
-    }
-
     pub(crate) fn parse_optional_jsdoc(&mut self, kind: SyntaxKind) -> bool {
         if self.token == kind {
             self.next_token_jsdoc();

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_class_member_after_js_doc_with_invalid_js_doc_tag_in_the_comment1() {
     let content = r#"export class NeedsPrefix {
@@ -17,6 +17,7 @@ fn completion_class_member_after_js_doc_with_invalid_js_doc_tag_in_the_comment1(
     return true;
   }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionClassMemberAfterJSDocWithInvalidJSDocTagInTheComment1", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

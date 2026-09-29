@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn formatting_comma() {
     let content = r#"var x = [1 , 2];/*x*/
@@ -22,8 +22,8 @@ var z5 = {
     x: () => { } ,/*z5*/
     y: () => { }
 }; "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formattingComma", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "x");
     fourslash::verify_current_line_content(&mut s, r#"var x = [1, 2];"#);
     fourslash::go_to_marker(&mut s, "y");

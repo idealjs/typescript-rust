@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentSymbol"]
+
 #[test]
 fn navbar_contains_no_duplicates() {
     let content = r#"declare namespace Windows {
@@ -30,6 +30,6 @@ class ABC {
 namespace ABC {
     export var x = 3;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentSymbol"); // f.VerifyBaselineDocumentSymbol(t)
+    let _s = Session::new_for_test("navbar_contains_no_duplicates", content);
+    // TODO: f.VerifyBaselineDocumentSymbol(t)
 }

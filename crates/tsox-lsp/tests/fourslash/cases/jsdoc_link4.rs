@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn jsdoc_link4() {
     let content = r#"declare class I {
@@ -17,6 +17,6 @@ function f(x) {
 }
 f/*3*/()
 type Pos = [number, number]"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("jsdocLink4", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

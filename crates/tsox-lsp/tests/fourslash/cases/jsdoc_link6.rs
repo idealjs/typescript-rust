@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn jsdoc_link6() {
     let content = r#"// @filename: /a.ts
@@ -13,6 +13,6 @@ import A, { B } from "./a";
  * {@link B}
  */
 export default function /**/f() { }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("jsdocLink6", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

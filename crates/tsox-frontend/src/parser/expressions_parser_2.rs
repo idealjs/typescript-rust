@@ -29,7 +29,12 @@ impl Parser {
 
         let mut p = self.clone_state();
         p.next_token();
-        !p.has_preceding_line_break() && p.is_start_of_expression()
+        let candidate = crate::parser::binary_precedence::is_identifier_or_keyword(p.token)
+            || matches!(
+                p.token,
+                SyntaxKind::NumericLiteral | SyntaxKind::BigIntLiteral | SyntaxKind::StringLiteral
+            );
+        candidate && !p.has_preceding_line_break()
     }
 
     pub(crate) fn parse_yield_expression(&mut self) -> Arc<Node> {
@@ -63,11 +68,43 @@ impl Parser {
 
     pub(crate) fn is_parenthesized_arrow_function(&self) -> bool {
         let mut scanner = self.scanner.clone();
+        let second = scanner.scan();
+        // Go nextIsParenthesizedArrowFunctionExpression：`(xxx` 的 xxx 既非
+        // 标识符（含 await 在 [Await] 上下文）也非 this/模式/修饰符时不是箭头
+        if second != SyntaxKind::CloseParenToken
+            && second != SyntaxKind::OpenBracketToken
+            && second != SyntaxKind::OpenBraceToken
+            && second != SyntaxKind::DotDotDotToken
+            && second != SyntaxKind::ThisKeyword
+            && !crate::ast::node_data_generated::is_modifier_kind(second)
+            && !self.token_is_identifier_in_context(second)
+        {
+            return false;
+        }
+        // Go TSTrue 提前判定："()" 后跟 =>/:/{（缺 => 的恢复路径）、
+        // "(..."（rest 参数）、"(xxx:"（类型注解参数）都按箭头解析
+        if second == SyntaxKind::CloseParenToken {
+            let third = scanner.scan();
+            return matches!(
+                third,
+                SyntaxKind::EqualsGreaterThanToken
+                    | SyntaxKind::ColonToken
+                    | SyntaxKind::OpenBraceToken
+            );
+        }
+        if second == SyntaxKind::DotDotDotToken {
+            return true;
+        }
+        let mut token = second;
+        if second != SyntaxKind::OpenBracketToken && second != SyntaxKind::OpenBraceToken {
+            let third = scanner.scan();
+            if third == SyntaxKind::ColonToken {
+                return true;
+            }
+            token = third;
+        }
         let mut depth = 1usize;
-        let mut scanned_tokens = 0usize;
         loop {
-            let token = scanner.scan();
-            scanned_tokens += 1;
             match token {
                 SyntaxKind::EndOfFile => return false,
                 SyntaxKind::OpenParenToken
@@ -84,7 +121,7 @@ impl Parser {
                             return Self::scanner_reaches_arrow_before_line_end(&mut scanner);
                         }
 
-                        if next == SyntaxKind::OpenBraceToken && scanned_tokens == 1 {
+                        if next == SyntaxKind::OpenBraceToken {
                             return true;
                         }
                         return false;
@@ -95,7 +132,21 @@ impl Parser {
                 }
                 _ => {}
             }
+            token = scanner.scan();
         }
+    }
+
+    pub(crate) fn token_is_identifier_in_context(&self, token: SyntaxKind) -> bool {
+        if token == SyntaxKind::YieldKeyword && self.yield_context {
+            return false;
+        }
+        if token == SyntaxKind::AwaitKeyword && self.await_context {
+            return false;
+        }
+        if crate::parser::binary_precedence::is_reserved_word_kind(token) {
+            return false;
+        }
+        token == SyntaxKind::Identifier || crate::parser::binary_precedence::is_keyword(token)
     }
 
     pub(crate) fn scanner_reaches_arrow_before_line_end(scanner: &mut Scanner) -> bool {
@@ -192,16 +243,28 @@ impl Parser {
         let pos = self.token_pos();
         let parameters = self.parse_parameter_list();
         let type_node = self.parse_optional_return_type();
+        let last_token = self.token;
         let equals_greater_than_token = self.create_token_node();
         self.expect(SyntaxKind::EqualsGreaterThanToken);
         let saved_await = self.await_context;
+        let saved_yield = self.yield_context;
         self.await_context = true;
-        let body = if self.token == SyntaxKind::OpenBraceToken {
-            self.parse_block()
+        self.yield_context = false;
+        // Go parseParenthesizedArrowFunctionExpression：'=>' 缺失且当前非
+        // '{' 时 body 取单个标识符（不走赋值表达式，避免 '.' 等被当成员访问）
+        let body = if last_token == SyntaxKind::EqualsGreaterThanToken
+            || last_token == SyntaxKind::OpenBraceToken
+        {
+            if self.token == SyntaxKind::OpenBraceToken {
+                self.parse_block_ex(true)
+            } else {
+                self.parse_assignment_expression()
+            }
         } else {
-            self.parse_assignment_expression()
+            self.parse_identifier()
         };
         self.await_context = saved_await;
+        self.yield_context = saved_yield;
         let end = body.end();
         Arc::new(Node::with_loc(
             SyntaxKind::ArrowFunction,

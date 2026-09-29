@@ -11,4 +11,3 @@ pub(crate) use crate::scanner::regexp::is_octal_digit;
 pub use crate::scanner::regexp_escapes_reg_exp_parser::*;
 #[allow(unused_imports)]
 pub use crate::scanner::regexp_escapes_reg_exp_parser_2::*;
-pub(crate) use tsox_core::diagnostics;

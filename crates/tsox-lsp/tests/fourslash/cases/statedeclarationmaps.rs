@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: // Open temp file and verify all projects alive"]
+
 #[test]
 fn declaration_maps_workspace_symbols() {
     let content = r#"// @stateBaseline: true
@@ -74,16 +74,15 @@ export function fnUser() {
 /*dummy*/export const a = 10;
 // @Filename: dummy/tsconfig.json
 {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("declarationMapsWorkspaceSymbols", content);
     fourslash::go_to_marker(&mut s, "user");
     // TODO: // Ref projects are loaded after as part of this command
-    fourslash::unsupported("VerifyBaselineWorkspaceSymbol"); // f.VerifyBaselineWorkspaceSymbol(t, "fn")
+    // TODO: f.VerifyBaselineWorkspaceSymbol(t, "fn")
     // TODO: // Open temp file and verify all projects alive
-    fourslash::unsupported("CloseFileOfMarker"); // f.CloseFileOfMarker(t, "user")
+    // TODO: f.CloseFileOfMarker(t, "user")
     fourslash::go_to_marker(&mut s, "dummy");
 }
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
 #[test]
 fn declaration_maps_find_all_refs_definition_in_mapped_file() {
     let content = r#"
@@ -119,11 +118,10 @@ export declare function f(): void;
 	"names":[],
 	"mappings":"AAAA,wBAAgB,CAAC,SAAK"
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1")
+    let _s = Session::new_for_test("declarationMapsFindAllRefsDefinitionInMappedFile", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1")
 }
 
-#[ignore = "generator: //"]
 #[test]
 fn declaration_maps_non_monotonic_mappings() {
     // TODO: // The source map creates a non-monotonic mapping:
@@ -156,6 +154,6 @@ import { a, b } from "./indexdef";
 /*2*/b();
 // @Filename: /src/tsconfig.json
 {}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1", "2")
+    let _s = Session::new_for_test("declarationMapsNonMonotonicMappings", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "1", "2")
 }

@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn ng_proxy4() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: tsconfig.json
 {
     "compilerOptions": {
@@ -18,7 +18,7 @@ fn ng_proxy4() {
 let x = [1, 2];
 x/**/
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("ngProxy4", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
     fourslash::verify_number_of_errors_in_current_file(&mut s, 1);

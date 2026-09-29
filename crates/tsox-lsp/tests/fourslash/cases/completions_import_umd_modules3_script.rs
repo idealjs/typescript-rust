@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_import_umd_modules3_script() {
     let content = r#"// @filename: /package.json
@@ -16,7 +16,7 @@ export as namespace classNames;
 // @filename: /SomeReactComponent.tsx
 
 const el1 = <div className={class/*1*/}>foo</div>"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_umdModules3_script", content);
     fourslash::go_to_marker(&mut s, "1");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyCompletions(t, nil, &fourslash.CompletionsExpectedList{
 }

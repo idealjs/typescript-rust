@@ -1,9 +1,9 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.VerifyCodeFixAvailable(t, []string{'Add return type 'Promi"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn code_fix_missing_type_annotation_on_exports28_long_types() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @strict: false
 // @isolatedDeclarations: true
 // @declaration: true
@@ -41,6 +41,8 @@ export const sessionLoader = {
         };
     },
 };"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("codeFixMissingTypeAnnotationOnExports28_long_types", content);
     // TODO: f.VerifyCodeFixAvailable(t, []string{"Add return type 'Promise<{\n    PROP_1: {\n        name: boole
+    // TODO: f.VerifyCodeFix(t, fourslash.VerifyCodeFixOptions{
+    // TODO: }
 }

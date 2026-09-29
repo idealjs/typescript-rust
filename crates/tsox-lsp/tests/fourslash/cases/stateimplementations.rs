@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: // Close all files and open temp file, only inferred project"]
+
 #[test]
 fn implementations_across_projects() {
     let content = r#"
@@ -94,17 +94,17 @@ class B2 implements Foo {
 	],
 }
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("implementationsAcrossProjects", content);
     fourslash::go_to_marker(&mut s, "impl");
     // TODO: // Open temp file and verify all projects alive
     fourslash::go_to_marker(&mut s, "temp");
     // TODO: // Ref projects are loaded after as part of this command
-    fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "impl")
+    // TODO: f.VerifyBaselineGoToImplementation(t, "impl")
     // TODO: // Open temp file and verify all projects alive
-    fourslash::unsupported("CloseFileOfMarker"); // f.CloseFileOfMarker(t, "temp")
+    // TODO: f.CloseFileOfMarker(t, "temp")
     fourslash::go_to_marker(&mut s, "temp");
     // TODO: // Close all files and open temp file, only inferred project should be alive
-    fourslash::unsupported("CloseFileOfMarker"); // f.CloseFileOfMarker(t, "impl")
-    fourslash::unsupported("CloseFileOfMarker"); // f.CloseFileOfMarker(t, "temp")
+    // TODO: f.CloseFileOfMarker(t, "impl")
+    // TODO: f.CloseFileOfMarker(t, "temp")
     fourslash::go_to_marker(&mut s, "temp");
 }

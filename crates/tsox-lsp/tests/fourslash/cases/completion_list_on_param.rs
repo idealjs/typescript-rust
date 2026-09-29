@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_on_param() {
     let content = r#"namespace Bar {
@@ -10,6 +10,6 @@ fn completion_list_on_param() {
 class Point {
     public Foo(x: Bar./**/Blah, y: Bar.Blah) { }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListOnParam", content);
+    fourslash::verify_completions_exact_at(&mut s, Some(""), &["Blah"]);
 }

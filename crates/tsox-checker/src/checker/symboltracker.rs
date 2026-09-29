@@ -100,6 +100,9 @@ pub trait SymbolTracker {
     fn report_inference_fallback(&mut self, node: &Arc<Node>);
     fn push_error_fallback_node(&mut self, node: &Arc<Node>);
     fn pop_error_fallback_node(&mut self);
+
+    fn as_any(&self) -> &dyn std::any::Any;
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any;
 }
 
 #[derive(Clone)]
@@ -262,5 +265,13 @@ impl SymbolTracker for SymbolTrackerImpl {
         if let Some(ref mut inner) = self.inner {
             inner.pop_error_fallback_node();
         }
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        self
     }
 }

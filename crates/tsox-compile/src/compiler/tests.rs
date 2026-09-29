@@ -7,6 +7,20 @@ use tsox_tsoptions::tsoptions::parse_command_line;
 use tsox_tsoptions::vfs::InMemoryFS;
 use tsox_tsoptions::vfs::OsFS;
 
+fn program_options(config: ParsedCommandLine, host: Arc<dyn CompilerHost>) -> ProgramOptions {
+    ProgramOptions {
+        config,
+        host,
+        use_source_of_project_reference: false,
+        single_threaded: Tristate::Unknown,
+        create_checker_pool: None,
+        typings_location: String::new(),
+        project_name: String::new(),
+        tracing: None,
+        skip_module_resolution: false,
+    }
+}
+
 #[test]
 fn program_parses_input_files() {
     let fs = Arc::new(InMemoryFS::new());
@@ -21,10 +35,7 @@ fn program_parses_input_files() {
     ];
     let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
     let host = Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
-    let program = Program::new(ProgramOptions {
-        config: parsed,
-        host,
-    });
+    let program = Program::new(program_options(parsed, host));
     assert_eq!(program.source_files().len(), 2);
 
     assert!(
@@ -41,10 +52,7 @@ fn program_does_not_load_bundled_libs_without_root_files() {
     let args: Vec<String> = vec![];
     let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
     let host = Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
-    let program = Program::new(ProgramOptions {
-        config: parsed,
-        host,
-    });
+    let program = Program::new(program_options(parsed, host));
     assert!(program.source_files().is_empty());
 }
 
@@ -57,10 +65,7 @@ fn program_loads_bundled_libs_with_root_files() {
     let args: Vec<String> = vec!["/proj/a.ts".to_string()];
     let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
     let host = Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
-    let program = Program::new(ProgramOptions {
-        config: parsed,
-        host,
-    });
+    let program = Program::new(program_options(parsed, host));
 
     assert!(program.source_files().len() > 1);
     assert!(
@@ -112,29 +117,14 @@ fn program_file_ordering_with_reference_paths() {
             opts
         },
         file_names: vec!["/dev/src/index.ts".to_string()],
-        errors: vec![],
-        config_file_name: String::new(),
-        raw_options: None,
-        include: vec![],
-        exclude: vec![],
-        files_spec: vec![],
-        has_include_spec: false,
-        has_exclude_spec: false,
-        has_files_spec: false,
-        references: vec![],
-        compile_on_save: None,
-        watch: false,
-        watch_options: Default::default(),
+        ..Default::default()
     };
     let host = Arc::new(CompilerHostImpl::new(
         fs,
         "/dev/src".to_string(),
         lib_path(),
     ));
-    let program = Program::new(ProgramOptions {
-        config: parsed,
-        host,
-    });
+    let program = Program::new(program_options(parsed, host));
 
     let actual: Vec<&str> = program
         .source_files()
@@ -217,10 +207,7 @@ fn program_file_ordering_imports() {
         "/dev/src".to_string(),
         lib_path(),
     ));
-    let program = Program::new(ProgramOptions {
-        config: parsed,
-        host,
-    });
+    let program = Program::new(program_options(parsed, host));
 
     let actual: Vec<&str> = program
         .source_files()
@@ -303,10 +290,7 @@ fn program_file_ordering_cycles() {
         "/dev/src".to_string(),
         lib_path(),
     ));
-    let program = Program::new(ProgramOptions {
-        config: parsed,
-        host,
-    });
+    let program = Program::new(program_options(parsed, host));
 
     let actual: Vec<&str> = program
         .source_files()
@@ -353,10 +337,7 @@ fn program_resolves_module_imports() {
         "/src".to_string(),
         "lib.d.ts".to_string(),
     ));
-    let program = Program::new(ProgramOptions {
-        config: parsed,
-        host,
-    });
+    let program = Program::new(program_options(parsed, host));
 
     assert_eq!(program.source_files().len(), 2);
     assert!(
@@ -397,10 +378,7 @@ fn program_resolves_transitive_module_imports() {
         "/src".to_string(),
         "lib.d.ts".to_string(),
     ));
-    let program = Program::new(ProgramOptions {
-        config: parsed,
-        host,
-    });
+    let program = Program::new(program_options(parsed, host));
 
     assert_eq!(program.source_files().len(), 3);
     assert!(program.get_source_file("/src/b.ts").is_some());
@@ -421,27 +399,11 @@ fn include_processor_diagnostics_with_missing_file_casing() {
             opts.skip_lib_check = Tristate::True;
             opts
         },
-
         file_names: vec!["/src/MyFile.ts".to_string(), "/src/myFile.ts".to_string()],
-        errors: vec![],
-        config_file_name: String::new(),
-        raw_options: None,
-        include: vec![],
-        exclude: vec![],
-        files_spec: vec![],
-        has_include_spec: false,
-        has_exclude_spec: false,
-        has_files_spec: false,
-        references: vec![],
-        compile_on_save: None,
-        watch: false,
-        watch_options: Default::default(),
+        ..Default::default()
     };
     let host = Arc::new(CompilerHostImpl::new(fs, "/".to_string(), lib_path()));
-    let program = Program::new(ProgramOptions {
-        config: parsed,
-        host,
-    });
+    let program = Program::new(program_options(parsed, host));
 
     let diags = program.diagnostics();
     assert!(
@@ -460,14 +422,16 @@ fn include_processor_diagnostics_with_missing_file_casing() {
 fn extract_reference_path_directives_resolves_relative() {
     let text = "/// <reference path='./b/3.ts' />\n/// <reference path='/abs/4.ts' />";
     let refs = extract_reference_path_directives(text, "/dev/src2/a/5.ts");
-    assert_eq!(refs, vec!["/dev/src2/a/b/3.ts", "/abs/4.ts"]);
+    let resolved: Vec<&str> = refs.iter().map(|r| r.resolved.as_str()).collect();
+    assert_eq!(resolved, vec!["/dev/src2/a/b/3.ts", "/abs/4.ts"]);
 }
 
 #[test]
 fn extract_reference_path_directives_single_quotes() {
     let text = "/// <reference path='b/3.ts' />";
     let refs = extract_reference_path_directives(text, "/dev/src2/a/5.ts");
-    assert_eq!(refs, vec!["/dev/src2/a/b/3.ts"]);
+    let resolved: Vec<&str> = refs.iter().map(|r| r.resolved.as_str()).collect();
+    assert_eq!(resolved, vec!["/dev/src2/a/b/3.ts"]);
 }
 
 fn parse_bundled_lib(lib_name: &str) -> Vec<tsox_frontend::parser::ParserDiagnostic> {
@@ -558,10 +522,7 @@ fn node_modules_js_skipped_when_allow_js_false() {
         ..Default::default()
     };
     let host = Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
-    let program = Program::new(ProgramOptions {
-        config: parsed,
-        host,
-    });
+    let program = Program::new(program_options(parsed, host));
 
     assert!(
         program
@@ -613,10 +574,7 @@ fn node_modules_js_loaded_when_allow_js_true() {
         ..Default::default()
     };
     let host = Arc::new(CompilerHostImpl::new(fs, "/proj".to_string(), lib_path()));
-    let program = Program::new(ProgramOptions {
-        config: parsed,
-        host,
-    });
+    let program = Program::new(program_options(parsed, host));
 
     assert!(
         program

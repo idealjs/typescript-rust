@@ -60,6 +60,9 @@ impl crate::parser::Parser {
                 PropertyLikeParse(PropertyLikeParse::PARAMETER),
                 margin,
             ),
+            // Go parseTag 无 prop/property 分支：主循环的 @property 走 unknown
+            // 标签（comments 从类型表达式文本起算），真正的 property 解析仅在
+            // typedef/callback 子标签收集（try_parse_child_tag）
             "return" | "returns" => self.parse_return_tag(start, tag_name, margin, &indent_text),
             "template" => self.parse_template_tag(start, tag_name, margin, &indent_text),
             "type" => self.parse_type_tag(start, tag_name, margin, &indent_text),

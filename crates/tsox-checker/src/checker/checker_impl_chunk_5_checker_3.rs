@@ -22,6 +22,8 @@ impl Checker {
         self.current_file_id = file_id;
         self.current_file_symbol = source_file_symbol;
 
+        self.check_grammar_source_file(&file_arc);
+
         self.push_scope(&file_node);
 
         let statements: Vec<Arc<Node>> = match &file_node.data {
@@ -38,7 +40,16 @@ impl Checker {
 
         self.check_export_assignment_conflicts(&statements);
 
+        if file.external_module_indicator.is_some() {
+            self.check_export_star_ambiguity(&file_node);
+            self.check_external_module_export_duplicates(&statements);
+        }
+
+        self.check_declaration_diagnostics(&statements);
+
         self.check_unused_identifiers_in_file(&file_node);
+
+        self.check_unused_renamed_binding_elements(&file_node);
 
         self.pop_scope();
         self.current_file = None;

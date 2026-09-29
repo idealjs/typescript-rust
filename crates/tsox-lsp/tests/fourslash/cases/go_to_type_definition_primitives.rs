@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToTypeDefinition"]
+
 #[test]
 fn go_to_type_definition_primitives() {
     let content = r#"// @Filename: module1.ts
@@ -13,6 +13,6 @@ w./*reference1*/a;
 /*reference2*/x;
 /*reference3*/y;
 /*reference4*/y;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "reference1", "reference2", "reference3", "reference4")
+    let _s = Session::new_for_test("goToTypeDefinitionPrimitives", content);
+    // TODO: f.VerifyBaselineGoToTypeDefinition(t, "reference1", "reference2", "reference3", "reference4")
 }

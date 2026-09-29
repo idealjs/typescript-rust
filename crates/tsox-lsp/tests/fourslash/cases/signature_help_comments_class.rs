@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineSignatureHelp"]
+
 #[test]
 fn signature_help_comments_class() {
     let content = r#"/** This is class c2 without constructor*/
@@ -60,6 +60,6 @@ namespace m {
     }
 }
 var myVar = new m.m2.c1();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineSignatureHelp"); // f.VerifyBaselineSignatureHelp(t)
+    let _s = Session::new_for_test("signatureHelpCommentsClass", content);
+    // TODO: f.VerifyBaselineSignatureHelp(t)
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_import_umd_default_no_crash2() {
     let content = r#"// @moduleResolution: bundler
@@ -35,6 +35,7 @@ fn completions_import_umd_default_no_crash2() {
 // @Filename: /src/index.js
 import Dottie from 'dottie';
 /**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsImport_umdDefaultNoCrash2", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

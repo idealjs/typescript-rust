@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn underscore_typings01() {
     let content = r#"interface Iterator_<T, U> {
@@ -29,7 +29,7 @@ var /*9*/cc = _(aa).map(/*10*/x => x.length);
 var /*11*/dd = aa.map(/*12*/x => x.length);
 
 var e = a.map(x => x./*13*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("underscoreTypings01", content);
     fourslash::verify_quick_info_at(&mut s, "1", "var b: number[]", "");
     fourslash::verify_quick_info_at(&mut s, "2", "(parameter) x: string", "");
     fourslash::verify_quick_info_at(&mut s, "3", "var c: number[]", "");
@@ -42,5 +42,6 @@ var e = a.map(x => x./*13*/"#;
     fourslash::verify_quick_info_at(&mut s, "10", "(parameter) x: any", "");
     fourslash::verify_quick_info_at(&mut s, "11", "var dd: any[]", "");
     fourslash::verify_quick_info_at(&mut s, "12", "(parameter) x: any", "");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "13", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "13");
+    // TODO: f.VerifyCompletions(t, "13", &fourslash.CompletionsExpectedList{
 }

@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn generic_derived_type_across_module_boundary1() {
     let content = r#"namespace M {
@@ -14,7 +15,7 @@ namespace N {
 var n = new N.D1();
 var /*1*/n2 = new N.D2<number>();
 var /*2*/n3 = new N.D2();"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("genericDerivedTypeAcrossModuleBoundary1", content);
     fourslash::verify_quick_info_at(&mut s, "1", "var n2: N.D2<number>", "");
     fourslash::verify_quick_info_at(&mut s, "2", "var n3: N.D2<unknown>", "");
 }

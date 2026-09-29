@@ -3,6 +3,80 @@
 use crate::checker::relater_probing::*;
 
 impl Checker {
+    pub(crate) fn substitute_reference_property_symbols(
+        &mut self,
+        o: &ObjectTypeData,
+        params: &[Arc<Type>],
+        substitutions: &[Arc<Type>],
+    ) -> Option<(SymbolTable, Vec<Arc<Symbol>>)> {
+        if self.infer_subst_ancestor_stack.len() > 4 || self.in_return_substitution {
+            return None;
+        }
+        let mut new_members = o.structured.members.clone();
+        let mut new_props: Vec<Arc<Symbol>> = Vec::with_capacity(o.structured.properties.len());
+        let mut changed = false;
+        for prop in &o.structured.properties {
+            let old_t = self
+                .value_symbol_links
+                .get(prop)
+                .and_then(|l| l.resolved_type.clone());
+            let Some(old_t) = old_t else {
+                new_props.push(Arc::clone(prop));
+                continue;
+            };
+            let new_t = self.substitute_infer_type_parameters(&old_t, params, substitutions);
+            if Arc::ptr_eq(&new_t, &old_t) {
+                new_props.push(Arc::clone(prop));
+                continue;
+            }
+            changed = true;
+            let mut new_sym = Symbol::new(prop.flags, prop.name.clone());
+            new_sym.declarations = prop.declarations.clone();
+            new_sym.check_flags = prop.check_flags;
+            if let Some(parent) = prop.parent() {
+                new_sym.set_parent(&parent);
+            }
+            let new_sym = Arc::new(new_sym);
+            self.value_symbol_links.insert(
+                &new_sym,
+                ValueSymbolLinks {
+                    resolved_type: Some(new_t),
+                    target: Some(Arc::clone(prop)),
+                    ..Default::default()
+                },
+            );
+            new_members.insert(prop.name.clone(), Arc::clone(&new_sym));
+            new_props.push(new_sym);
+        }
+        changed.then_some((new_members, new_props))
+    }
+
+    fn resolved_property_type_for_substitution(
+        &mut self,
+        prop: &Arc<Symbol>,
+    ) -> Option<Arc<Type>> {
+        if let Some(t) = self
+            .value_symbol_links
+            .get(prop)
+            .and_then(|l| l.resolved_type.clone())
+        {
+            return Some(t);
+        }
+        let deferred_type_literal_member = prop
+            .declarations
+            .iter()
+            .any(|d| d.kind == tsox_frontend::ast::SyntaxKind::PropertySignature);
+        if !deferred_type_literal_member
+            || self.is_resolving(
+                Arc::as_ptr(prop) as *const Symbol,
+                crate::checker::TypeResolutionProperty::Type,
+            )
+        {
+            return None;
+        }
+        Some(self.get_type_of_symbol(prop))
+    }
+
     pub(crate) fn substitute_object_properties_deep(
         &mut self,
         t: &Arc<Type>,
@@ -20,16 +94,12 @@ impl Checker {
         let mut old_types: Vec<Option<Arc<Type>>> =
             Vec::with_capacity(o.structured.properties.len());
         for prop in &o.structured.properties {
-            old_types.push(
-                self.value_symbol_links
-                    .get(prop)
-                    .and_then(|l| l.resolved_type.clone()),
-            );
+            old_types.push(self.resolved_property_type_for_substitution(prop));
         }
 
         let shell = Arc::new(Type::new(
             t.flags,
-            TypeData::Object(ObjectTypeData {
+            TypeData::Object(ObjectTypeData { node: None,
                 structured: StructuredTypeData {
                     members: o.structured.members.clone(),
                     properties: o.structured.properties.clone(),
@@ -80,6 +150,38 @@ impl Checker {
             new_members.insert(prop.name.clone(), Arc::clone(&new_sym));
             new_props.push(new_sym);
         }
+        // 索引签名值类型同样实例化（Go instantiateIndexInfos）
+        let mut new_index_infos: Vec<Arc<crate::checker::IndexInfo>> =
+            Vec::with_capacity(o.structured.index_infos.len());
+        for info in &o.structured.index_infos {
+            let new_value = info
+                .value_type
+                .as_ref()
+                .map(|v| self.substitute_infer_type_parameters(v, params, substitutions));
+            let value_changed = new_value.as_ref().is_some_and(|nv| {
+                info.value_type.as_ref().is_some_and(|ov| !Arc::ptr_eq(nv, ov))
+            });
+            let new_key = info
+                .key_type
+                .as_ref()
+                .map(|k| self.substitute_infer_type_parameters(k, params, substitutions));
+            let key_changed = new_key.as_ref().is_some_and(|nk| {
+                info.key_type.as_ref().is_some_and(|ok| !Arc::ptr_eq(nk, ok))
+            });
+            if !value_changed && !key_changed {
+                new_index_infos.push(Arc::clone(info));
+                continue;
+            }
+            changed = true;
+            new_index_infos.push(Arc::new(crate::checker::IndexInfo {
+                key_type: new_key,
+                value_type: new_value,
+                is_readonly: info.is_readonly,
+                declaration: info.declaration.clone(),
+                index_symbol: info.index_symbol.clone(),
+                components: info.components.clone(),
+            }));
+        }
         if !changed {
             self.subst_object_in_progress.remove(&key);
             return Arc::clone(t);
@@ -91,6 +193,7 @@ impl Checker {
                 if let TypeData::Object(so) = &mut (*shell_mut).data {
                     so.structured.members = new_members;
                     so.structured.properties = new_props;
+                    so.structured.index_infos = new_index_infos;
                 }
             }
         }

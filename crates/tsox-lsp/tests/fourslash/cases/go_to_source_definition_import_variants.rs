@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // findContainingModuleSpecifier handles require() calls."]
+
 #[test]
 fn go_to_source_require_call() {
     // TODO: // findContainingModuleSpecifier handles require() calls.
@@ -16,11 +16,10 @@ exports./*target*/helper = function() { return "ok"; };
 // @Filename: /home/src/workspaces/project/index.js
 const { /*importName*/helper } = require("pkg");
 helper/*usage*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "importName", "usage")
+    let _s = Session::new_for_test("goToSourceRequireCall", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "importName", "usage")
 }
 
-#[ignore = "generator: // findContainingModuleSpecifier handles dynamic import() ca"]
 #[test]
 fn go_to_source_dynamic_import() {
     // TODO: // findContainingModuleSpecifier handles dynamic import() calls.
@@ -38,6 +37,6 @@ async function main() {
     const mod = await import("pkg");
     mod./*usage*/dynHelper();
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
+    let _s = Session::new_for_test("goToSourceDynamicImport", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }

@@ -14,7 +14,7 @@ pub(crate) fn tsc_compilation(
         for e in &command_line.errors {
             let _ = writeln!(writer, "{}", format_diagnostic(e, pretty, locale.as_ref()));
         }
-        return CommandLineResult {
+        return CommandLineResult { watcher: None,
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
         };
     }
@@ -28,14 +28,14 @@ pub(crate) fn tsc_compilation(
     if options.version.is_true() {
         let mut writer = sys.writer();
         let _ = writeln!(writer, "Version {}", VERSION);
-        return CommandLineResult {
+        return CommandLineResult { watcher: None,
             status: ExitStatus::Success,
         };
     }
 
     if options.help.is_true() || options.all.is_true() {
         print_help(sys, options.all.is_true());
-        return CommandLineResult {
+        return CommandLineResult { watcher: None,
             status: ExitStatus::Success,
         };
     }
@@ -51,7 +51,7 @@ pub(crate) fn tsc_compilation(
             "{}",
             format_diagnostic(&diag, pretty, locale.as_ref())
         );
-        return CommandLineResult {
+        return CommandLineResult { watcher: None,
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
         };
     }
@@ -70,7 +70,7 @@ pub(crate) fn tsc_compilation(
                 "{}",
                 format_diagnostic(&diag, pretty, locale.as_ref())
             );
-            return CommandLineResult {
+            return CommandLineResult { watcher: None,
                 status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
             };
         }
@@ -91,7 +91,7 @@ pub(crate) fn tsc_compilation(
                     "{}",
                     format_diagnostic(&diag, pretty, locale.as_ref())
                 );
-                return CommandLineResult {
+                return CommandLineResult { watcher: None,
                     status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
                 };
             }
@@ -108,7 +108,7 @@ pub(crate) fn tsc_compilation(
                     "{}",
                     format_diagnostic(&diag, pretty, locale.as_ref())
                 );
-                return CommandLineResult {
+                return CommandLineResult { watcher: None,
                     status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
                 };
             }
@@ -129,7 +129,7 @@ pub(crate) fn tsc_compilation(
                     "{}",
                     format_diagnostic(&diag, pretty, locale.as_ref())
                 );
-                return CommandLineResult {
+                return CommandLineResult { watcher: None,
                     status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
                 };
             }
@@ -146,7 +146,7 @@ pub(crate) fn tsc_compilation(
             );
             let _ = writeln!(writer, "  Searching for: tsconfig.json");
             print_help(sys, false);
-            return CommandLineResult {
+            return CommandLineResult { watcher: None,
                 status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
             };
         }
@@ -168,7 +168,7 @@ pub(crate) fn tsc_compilation(
             for e in &config_parsed.errors {
                 let _ = writeln!(writer, "{}", format_diagnostic(e, pretty, locale.as_ref()));
             }
-            return CommandLineResult {
+            return CommandLineResult { watcher: None,
                 status: ExitStatus::DiagnosticsPresent_OutputsGenerated,
             };
         }
@@ -179,7 +179,7 @@ pub(crate) fn tsc_compilation(
 
     if show_config_requested {
         show_config(sys, &config_for_compilation);
-        return CommandLineResult {
+        return CommandLineResult { watcher: None,
             status: ExitStatus::Success,
         };
     }

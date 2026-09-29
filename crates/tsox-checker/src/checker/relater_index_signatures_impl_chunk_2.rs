@@ -19,7 +19,7 @@ impl Checker {
             let inferable_symbol_kinds = sf.intersects(
                 SymbolFlags::ObjectLiteral
                     | SymbolFlags::TypeLiteral
-                    | SymbolFlags::EnumMember
+                    | SymbolFlags::ENUM
                     | SymbolFlags::ValueModule,
             );
             if inferable_symbol_kinds
@@ -30,9 +30,9 @@ impl Checker {
             }
         }
 
-        if t.object_flags
-            .intersects(ObjectFlags::JSLiteral | ObjectFlags::ObjectRestType)
-        {
+        if t.object_flags.intersects(
+            ObjectFlags::JSLiteral | ObjectFlags::ObjectRestType | ObjectFlags::JsxAttributes,
+        ) {
             return true;
         }
 
@@ -52,6 +52,7 @@ impl Checker {
         target_info: &IndexInfo,
         relation: RelationKind,
     ) -> Ternary {
+        use tsox_core::diagnostics::messages_generated as msg;
         let Some(target_key) = target_info.key_type.as_ref() else {
             return Ternary::True;
         };
@@ -63,13 +64,42 @@ impl Checker {
         let props = self.get_properties_of_type(source);
         let mut result = Ternary::True;
         for prop in props {
-            let literal_key = self.get_literal_type_from_property(&prop, target_key);
+            if source.object_flags.contains(ObjectFlags::JsxAttributes)
+                && crate::checker::relater_predicates::is_hyphenated_jsx_name(&prop.name)
+            {
+                continue;
+            }
+            let literal_key = self.get_literal_type_from_property(&prop);
             if !self.is_applicable_index_type(&literal_key, target_key) {
                 continue;
             }
             let prop_type = self.get_type_of_symbol(&prop);
-            let related = self.compare_types(prop_type, Arc::clone(&target_value), relation, false);
+            let compared = if self.exact_optional_property_types
+                || prop_type.flags.contains(TypeFlags::Undefined)
+                || target_key.flags.contains(TypeFlags::Number)
+                || !prop.flags.contains(SymbolFlags::Optional)
+            {
+                prop_type
+            } else {
+                self.remove_undefined_from_union(&prop_type)
+            };
+            let related = self.compare_types(compared.clone(), Arc::clone(&target_value), relation, false);
             if related.is_false() {
+                if self.relater_chain_active {
+                    let name = self.chain_property_arg_name(&prop);
+                    // Go 链上去重：同一属性对同一索引值的失败只报一轮
+                    let already = (0..2).any(|i| {
+                        self.chain_message_key(i)
+                            == Some(msg::PROPERTY_0_IS_INCOMPATIBLE_WITH_INDEX_SIGNATURE.key)
+                            && self.chain_args(i).is_some_and(|a| a.first() == Some(&name))
+                    });
+                    if !already {
+                        self.relater_report_error(
+                            msg::PROPERTY_0_IS_INCOMPATIBLE_WITH_INDEX_SIGNATURE,
+                            vec![name],
+                        );
+                    }
+                }
                 return Ternary::False;
             }
             result = result.and(related);
@@ -89,39 +119,45 @@ impl Checker {
         result
     }
 
-    pub fn is_applicable_index_type(&self, key: &Arc<Type>, target_key: &Arc<Type>) -> bool {
+    pub fn is_applicable_index_type(&mut self, key: &Arc<Type>, target_key: &Arc<Type>) -> bool {
         if Arc::ptr_eq(key, target_key) {
             return true;
         }
 
-        if key.flags.contains(TypeFlags::StringLiteral)
-            && target_key.flags.contains(TypeFlags::String)
-        {
-            return true;
-        }
-
-        if key.flags.contains(TypeFlags::NumberLiteral)
-            && target_key.flags.contains(TypeFlags::Number)
-        {
-            return true;
-        }
-
-        if key.flags.contains(TypeFlags::Number) && target_key.flags.contains(TypeFlags::String) {
-            return true;
-        }
-        false
+        // Go isApplicableIndexType：string 索引签名适用于可赋给 string 的键
+        //（含模板字面量/字符串映射型），number 索引签名适用于可赋给 number 的键。
+        // 两处 isTypeAssignableTo 均为谓词探针（reportErrors=false），
+        // 静默链防探针失败向 elaboration 链泄漏垃圾链节
+        let was_silent = self.silence_relation_chain();
+        let applicable = self.is_type_assignable_to(key, target_key)
+            || (target_key.flags.contains(TypeFlags::String)
+                && self.is_type_assignable_to(key, &self.number_type()));
+        self.restore_relation_chain(was_silent);
+        applicable
     }
 
-    pub fn get_literal_type_from_property(
-        &mut self,
-        prop: &Arc<Symbol>,
-        target_key: &Arc<Type>,
-    ) -> Arc<Type> {
-        if target_key.flags.contains(TypeFlags::Number) {
-            if let Ok(n) = prop.name.parse::<i64>() {
-                return self.get_number_literal_type(tsox_core::jsnum::Number::from(n));
-            }
+    pub fn get_literal_type_from_property(&mut self, prop: &Arc<Symbol>) -> Arc<Type> {
+        let non_public =
+            crate::checker::exports::get_declaration_modifier_flags_from_symbol(prop)
+                .intersects(tsox_frontend::ast::ModifierFlags::NonPublicAccessibilityModifier);
+        if non_public {
+            return self.never_type();
         }
-        self.get_string_literal_type(&prop.name)
+        let t = if let Some(decl) = prop.value_declaration.as_ref() {
+            tsox_frontend::ast::utilities::get_name_of_declaration(decl)
+                .and_then(|name| self.get_literal_type_from_property_name(&name))
+                .unwrap_or_else(|| self.get_string_literal_type(&prop.name))
+        } else {
+            self.get_string_literal_type(&prop.name)
+        };
+        if t.flags.intersects(
+            TypeFlags::StringLiteral
+                | TypeFlags::NumberLiteral
+                | TypeFlags::UniqueESSymbol,
+        ) {
+            t
+        } else {
+            self.never_type()
+        }
     }
 }

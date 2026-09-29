@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.GoToPosition"]
+
 #[test]
 fn underscore_typings02() {
     let content = r#"// @strict: false
@@ -21,7 +21,7 @@ export interface ChainedArray<T> extends ChainedObject<Array<T>> {
     groupBy(): ChainedDictionary<any[]>;
     groupBy(propertyName): ChainedDictionary<any[]>;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("GoToPosition"); // f.GoToPosition(t, 0)
+    let mut s = Session::new_for_test("underscoreTypings02", content);
+    // TODO: f.GoToPosition(t, 0)
     fourslash::verify_number_of_errors_in_current_file(&mut s, 2);
 }

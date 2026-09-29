@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_for_string_literal_details() {
     let content = r#"// @Filename: /other.ts
@@ -18,8 +18,11 @@ interface I {
 }
 declare const o: I;
 o["[|/*prop*/|]"];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "path", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "type", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "prop", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionForStringLiteral_details", content);
+    fourslash::go_to_marker(&mut s, "path");
+    // TODO: f.VerifyCompletions(t, "path", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "type");
+    // TODO: f.VerifyCompletions(t, "type", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "prop");
+    // TODO: f.VerifyCompletions(t, "prop", &fourslash.CompletionsExpectedList{
 }

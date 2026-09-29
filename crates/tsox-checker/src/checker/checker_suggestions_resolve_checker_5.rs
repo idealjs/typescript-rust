@@ -11,10 +11,10 @@ impl Checker {
         if self.emit_standard_class_fields {
             return false;
         }
-        let Some(parent) = node.parent.as_ref() else {
+        let Some(parent) = node.parent() else {
             return false;
         };
-        let Some(property) = tsox_frontend::ast::utilities::find_ancestor(parent, |n| {
+        let Some(property) = tsox_frontend::ast::utilities::find_ancestor(&parent, |n| {
             n.kind == SyntaxKind::PropertyDeclaration
         }) else {
             return false;
@@ -22,9 +22,9 @@ impl Checker {
 
         if let Some(sym) = self.resolve_identifier(node) {
             let binds_in_initializer_fn = sym.declarations.iter().any(|d| {
-                let mut cur = d.parent.as_ref();
+                let mut cur = d.parent();
                 while let Some(a) = cur {
-                    if Arc::ptr_eq(a, &property) {
+                    if Arc::ptr_eq(&a, &property) {
                         return false;
                     }
                     if matches!(
@@ -35,7 +35,7 @@ impl Checker {
                     ) {
                         return true;
                     }
-                    cur = a.parent.as_ref();
+                    cur = a.parent();
                 }
                 false
             });
@@ -46,7 +46,7 @@ impl Checker {
         if property.has_syntactic_modifier(ModifierFlags::Static) {
             return false;
         }
-        let Some(class) = property.parent.as_ref() else {
+        let Some(class) = property.parent() else {
             return false;
         };
         if !matches!(

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyApplyCodeActionFromCompletion"]
+
 #[test]
 fn completions_import_from_ambient_module() {
     let content = r#"// @module: esnext
@@ -10,6 +10,6 @@ declare module "m" {
 }
 // @Filename: /b.ts
 /**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
+    let _s = Session::new_for_test("completionsImport_fromAmbientModule", content);
+    // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

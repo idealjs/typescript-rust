@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_with_optional_properties_generic_partial() {
     let content = r#"// @strict: true
@@ -12,6 +12,7 @@ interface Foo {
 }
 function partialFoo<T extends Partial<Foo>>(t: T) {return t}
 partialFoo({ /*1*/ });"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsWithOptionalPropertiesGenericPartial", content);
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

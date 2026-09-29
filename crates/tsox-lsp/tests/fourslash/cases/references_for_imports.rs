@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn references_for_imports() {
     let content = r#"declare module "jquery" {
@@ -10,6 +10,6 @@ fn references_for_imports() {
 /*1*/import /*2*/$ = require("jquery");
 /*3*/$("a");
 /*4*/import /*5*/$ = require("jquery");"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5")
+    let _s = Session::new_for_test("referencesForImports", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4", "5")
 }

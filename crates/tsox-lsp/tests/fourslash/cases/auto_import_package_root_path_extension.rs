@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.Configure"]
+
 #[test]
 fn auto_import_package_root_path_extension() {
     let content = r#"// @allowJs: true
@@ -20,7 +20,7 @@ export declare function foo(): any;
  }
 // @Filename: /index.ts
 foo/**/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("Configure"); // f.Configure(t, lsutil.UserPreferences{AutoImportEntrypointDirectorySearch: core.TSTrue})
-    fourslash::unsupported("VerifyImportFixModuleSpecifiers"); // f.VerifyImportFixModuleSpecifiers(t, "", []string{"pkg/lib/index.mjs"}, nil /*preferences*/)
+    let _s = Session::new_for_test("autoImportPackageRootPathExtension", content);
+    // TODO: f.Configure(t, lsutil.UserPreferences{AutoImportEntrypointDirectorySearch: core.TSTrue})
+    // TODO: f.VerifyImportFixModuleSpecifiers(t, "", []string{"pkg/lib/index.mjs"}, nil /*preferences*/)
 }

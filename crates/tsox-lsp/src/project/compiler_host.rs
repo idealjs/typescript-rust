@@ -1,10 +1,17 @@
 #![allow(dead_code)]
 
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 
-use tsox_compile::compiler::CompilerHost;
+pub use tsox_compile::compiler::CompilerHost;
+use tsox_compile::mig::m3l_cm_2::Project as MapperProject;
 use tsox_core::tspath::Path;
 use tsox_tsoptions::vfs::FS;
+
+use super::config_file_registry::ConfigFileRegistry;
+use super::logging_log_tree::LogTree;
+use super::mig::m5e_7::SourceFS;
+use super::project::Project;
+use super::project_collection_builder::ProjectCollectionBuilder;
 
 #[derive(Clone)]
 pub struct SessionOptions {
@@ -18,6 +25,7 @@ pub struct SessionOptions {
     pub push_diagnostics_enabled: bool,
     pub debounce_delay: std::time::Duration,
     pub locale: String,
+    pub run_external_code: bool,
 }
 
 impl Default for SessionOptions {
@@ -33,6 +41,7 @@ impl Default for SessionOptions {
             push_diagnostics_enabled: false,
             debounce_delay: std::time::Duration::from_millis(250),
             locale: "en".to_string(),
+            run_external_code: false,
         }
     }
 }
@@ -48,6 +57,13 @@ pub struct CompilerHostImpl {
     session_options: SessionOptions,
     fs: Arc<dyn FS>,
     frozen: bool,
+
+    source_fs: Option<SourceFS>,
+    config_file_registry: Option<Arc<ConfigFileRegistry>>,
+    project: Option<Arc<Project>>,
+    builder: Option<Arc<ProjectCollectionBuilder>>,
+    logger: Option<Arc<LogTree>>,
+    content_mapper_project: OnceLock<Option<Arc<dyn MapperProject>>>,
 }
 
 impl CompilerHostImpl {
@@ -63,6 +79,13 @@ impl CompilerHostImpl {
             session_options,
             fs,
             frozen: false,
+
+            source_fs: None,
+            config_file_registry: None,
+            project: None,
+            builder: None,
+            logger: None,
+            content_mapper_project: OnceLock::new(),
         }
     }
 
@@ -74,6 +97,68 @@ impl CompilerHostImpl {
         if self.frozen {
             panic!("method must not be called after snapshot initialization");
         }
+    }
+
+    pub fn set_source_fs(&mut self, source_fs: SourceFS) {
+        self.source_fs = Some(source_fs);
+    }
+
+    pub fn source_fs(&self) -> &SourceFS {
+        self.source_fs
+            .as_ref()
+            .expect("source fs must be initialized")
+    }
+
+    pub fn set_config_file_registry(&mut self, registry: ConfigFileRegistry) {
+        self.config_file_registry = Some(Arc::new(registry));
+    }
+
+    pub fn config_file_registry(&self) -> Option<&ConfigFileRegistry> {
+        self.config_file_registry.as_deref()
+    }
+
+    pub fn has_builder(&self) -> bool {
+        self.builder.is_some()
+    }
+
+    pub fn set_builder(&mut self, builder: Arc<ProjectCollectionBuilder>) {
+        self.builder = Some(builder);
+    }
+
+    pub fn builder(&self) -> &ProjectCollectionBuilder {
+        self.builder
+            .as_ref()
+            .expect("builder must be initialized while host is alive")
+    }
+
+    pub fn set_project(&mut self, project: Arc<Project>) {
+        self.project = Some(project);
+    }
+
+    pub fn project(&self) -> &Project {
+        self.project
+            .as_ref()
+            .expect("project must be initialized while host is alive")
+    }
+
+    pub fn set_logger(&mut self, logger: Option<Arc<LogTree>>) {
+        self.logger = logger;
+    }
+
+    pub fn logger(&self) -> Option<Arc<LogTree>> {
+        self.logger.clone()
+    }
+
+    pub fn content_mapper_project(&self) -> Option<Arc<dyn MapperProject>> {
+        let project = self.content_mapper_project.get()?;
+        project.clone()
+    }
+
+    pub fn init_content_mapper_project(
+        &self,
+        init: impl FnOnce() -> Option<Arc<dyn MapperProject>>,
+    ) {
+        self.content_mapper_project.get_or_init(init);
     }
 }
 
@@ -89,5 +174,37 @@ impl CompilerHost for CompilerHostImpl {
     }
     fn default_library_path(&self) -> &str {
         &self.session_options.default_library_path
+    }
+    fn get_source_file(
+        &self,
+        opts: &tsox_frontend::ast::mig::m3b_2::SourceFileParseOptions,
+    ) -> Option<Arc<tsox_frontend::ast::SourceFile>> {
+        let lsp_opts = crate::project::mig::m5d_2::SourceFileParseOptions {
+            file_name: opts.file_name.clone(),
+            path: Path(opts.path.clone()),
+        };
+        CompilerHostImpl::get_source_file(self, &lsp_opts)
+    }
+    fn get_content_mapped_source_files(
+        &self,
+        parse_options: &tsox_frontend::ast::mig::m3b_2::SourceFileParseOptions,
+        mapper: &tsox_compile::mig::m3l_cm::Mapper,
+    ) -> Result<
+        tsox_compile::mig::m3l_cm_2::SourceFiles,
+        tsox_compile::mig::m4v_3::ContentMapperError,
+    > {
+        let lsp_opts = crate::project::mig::m5d_2::SourceFileParseOptions {
+            file_name: parse_options.file_name.clone(),
+            path: Path(parse_options.path.clone()),
+        };
+        CompilerHostImpl::get_content_mapped_source_files(self, &lsp_opts, mapper)
+            .map_err(Into::into)
+    }
+    fn get_resolved_project_reference(
+        &self,
+        file_name: &str,
+        path: &Path,
+    ) -> Option<tsox_tsoptions::tsoptions::ParsedCommandLine> {
+        CompilerHostImpl::get_resolved_project_reference(self, file_name, path)
     }
 }

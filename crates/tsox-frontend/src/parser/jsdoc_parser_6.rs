@@ -35,6 +35,11 @@ impl crate::parser::Parser {
 
     pub(crate) fn parse_jsdoc_type(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
+        // Go parseJSDocType：类型解析期间扫描器跳过 jsdoc 续行 `*` 边距，
+        // 否则边距星号成为 AsteriskToken，类型成员表解析对不可成名 token
+        // 无进展（无限缺名节点）
+        let saved_skip = self.scanner.skip_jsdoc_leading_asterisks_raw();
+        self.scanner.set_skip_jsdoc_leading_asterisks(true);
         let t = match self.token {
             SyntaxKind::AsteriskToken => {
                 self.next_token_jsdoc();
@@ -76,6 +81,8 @@ impl crate::parser::Parser {
             }
             _ => self.parse_type(),
         };
+        self.scanner
+            .set_skip_jsdoc_leading_asterisks_raw(saved_skip);
 
         if self.token == SyntaxKind::EqualsToken {
             self.next_token_jsdoc();

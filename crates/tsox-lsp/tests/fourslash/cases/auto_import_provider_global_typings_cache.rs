@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_provider_global_typings_cache() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /home/src/Library/Caches/typescript/node_modules/@types/react-router-dom/package.json
  { "name": "@types/react-router-dom", "version": "16.8.4", "types": "index.d.ts" }
 // @Filename: /home/src/Library/Caches/typescript/node_modules/@types/react-router-dom/index.d.ts
@@ -21,7 +21,8 @@ fn auto_import_provider_global_typings_cache() {
  export const BrowserRouterFromJs = () => null;
 // @Filename: /home/src/workspaces/project/index.js
 BrowserRouter/**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportProvider_globalTypingsCache", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
 }

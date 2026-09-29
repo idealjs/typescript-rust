@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn quick_info_for_getter_and_setter() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"class Test {
     constructor() {
         this.value;
@@ -19,9 +19,9 @@ fn quick_info_for_getter_and_setter() {
         this.value = value;
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("quickInfoForGetterAndSetter", content);
     fourslash::go_to_marker(&mut s, "1");
-    fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "(getter) Test.value: any", "Getter text")
+    // TODO: f.VerifyQuickInfoIs(t, "(getter) Test.value: any", "Getter text")
     fourslash::go_to_marker(&mut s, "2");
-    fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "(setter) Test.value: any", "Setter text")
+    // TODO: f.VerifyQuickInfoIs(t, "(setter) Test.value: any", "Setter text")
 }

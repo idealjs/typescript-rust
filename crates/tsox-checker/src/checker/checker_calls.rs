@@ -1,6 +1,7 @@
 pub(crate) use crate::checker::checker::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_calls_call_argument_checks::*;
+pub use crate::checker::checker_calls_type_arg_constraints::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_calls_checker::*;
 #[allow(unused_imports)]

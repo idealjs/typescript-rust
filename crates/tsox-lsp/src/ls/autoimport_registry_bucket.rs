@@ -1,7 +1,6 @@
 use crate::ls::lsutil_user_preferences::UserPreferences;
 use tsox_core::collections::set::Set;
 use tsox_core::core::tristate::Tristate;
-use tsox_core::tspath;
 
 use crate::ls::autoimport_export::Export;
 use crate::ls::autoimport_index::Index;

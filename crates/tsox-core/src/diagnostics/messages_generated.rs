@@ -24058,3 +24058,63 @@ pub fn key_to_message(key: Key) -> Option<&'static Message> {
         _ => None,
     }
 }
+
+pub static AN_IMPORT_ATTRIBUTES_TYPE_MAY_ONLY_CONTAIN_PROPERTY_SIGNATURES: Message = Message {
+    code: 1552,
+    category: Category::Error,
+    key: "An_import_attributes_type_may_only_contain_property_signatures_1552",
+    text: "An import attributes type may only contain property signatures.",
+    reports_unnecessary: false,
+    elided_in_compatibility_pyramid: false,
+    reports_deprecated: false,
+};
+
+pub static AN_IMPORT_ATTRIBUTES_PROPERTY_MUST_HAVE_A_TYPE_ANNOTATION: Message = Message {
+    code: 1553,
+    category: Category::Error,
+    key: "An_import_attributes_property_must_have_a_type_annotation_1553",
+    text: "An import attributes property must have a type annotation.",
+    reports_unnecessary: false,
+    elided_in_compatibility_pyramid: false,
+    reports_deprecated: false,
+};
+
+pub static AN_IMPORT_ATTRIBUTES_PROPERTY_MUST_HAVE_A_STRING_LITERAL_OR_IDENTIFIER_NAME: Message = Message {
+    code: 1554,
+    category: Category::Error,
+    key: "An_import_attributes_property_must_have_a_string_literal_or_identifier_name_1554",
+    text: "An import attributes property must have a string literal or identifier name.",
+    reports_unnecessary: false,
+    elided_in_compatibility_pyramid: false,
+    reports_deprecated: false,
+};
+
+pub static AN_IMPORT_ATTRIBUTES_PROPERTY_MUST_HAVE_A_STRING_LITERAL_TYPE_ANNOTATION: Message = Message {
+    code: 1555,
+    category: Category::Error,
+    key: "An_import_attributes_property_must_have_a_string_literal_type_annotation_1555",
+    text: "An import attributes property must have a string literal type annotation.",
+    reports_unnecessary: false,
+    elided_in_compatibility_pyramid: false,
+    reports_deprecated: false,
+};
+
+pub static AN_IMPORT_ATTRIBUTES_PROPERTY_CANNOT_BE_OPTIONAL: Message = Message {
+    code: 1556,
+    category: Category::Error,
+    key: "An_import_attributes_property_cannot_be_optional_1556",
+    text: "An import attributes property cannot be optional.",
+    reports_unnecessary: false,
+    elided_in_compatibility_pyramid: false,
+    reports_deprecated: false,
+};
+
+pub static X_0_IS_NOT_A_VALID_KEY_FOR_AN_IMPORT_ATTRIBUTES_TYPE: Message = Message {
+    code: 1557,
+    category: Category::Error,
+    key: "_0_is_not_a_valid_key_for_an_import_attributes_type_1557",
+    text: "'{0}' is not a valid key for an import attributes type.",
+    reports_unnecessary: false,
+    elided_in_compatibility_pyramid: false,
+    reports_deprecated: false,
+};

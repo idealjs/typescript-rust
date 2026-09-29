@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: }"]
+
 #[test]
 fn get_occurrences_loop_break_continue2() {
     let content = r#"var arr = [1, 2, 3, 4];
@@ -65,7 +65,7 @@ label1: for (var n in arr) {
 label5: while (true) break label5;
 
 label7: while (true) continue label5;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
+    let _s = Session::new_for_test("getOccurrencesLoopBreakContinue2", content);
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, ToAny(f.Ranges())...)
     // TODO: }
 }

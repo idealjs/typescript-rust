@@ -43,8 +43,27 @@ impl Program {
         let skip_lib = self.options.skip_lib_check.is_true();
         let skip_default_lib = self.options.skip_default_lib_check.is_true();
 
-        let checker = self.build_checker_internal(skip_lib, skip_default_lib);
-        let check_diagnostics = checker.get_semantic_diagnostics();
+        // Go collectCheckerDiagnosticsFromFiles 按文件逐个向 checker pool 取
+        // checker：零（可检）文件时 checker 从不创建，initializeChecker 的
+        // getGlobalType(Array/Object/...) 不执行，空程序不得产 TS2318 族
+        let has_checkable_files = self.source_files.iter().any(|file| {
+            if skip_lib && (file.is_declaration_file || is_external_library_file(&file.file_name)) {
+                return false;
+            }
+            if skip_default_lib && self.default_library_file_names.contains(&file.file_name) {
+                return false;
+            }
+            true
+        });
+        let mut check_diagnostics = if has_checkable_files {
+            let checker = self.build_checker_internal(skip_lib, skip_default_lib);
+            checker.get_semantic_diagnostics()
+        } else {
+            Vec::new()
+        };
+        if self.options.no_check.is_true() {
+            return Vec::new();
+        }
 
         let mut diagnostics: Vec<Diagnostic> = if skip_lib {
             self.symbol_map
@@ -73,9 +92,74 @@ impl Program {
         } else {
             self.symbol_map.binder_diagnostics.iter().cloned().collect()
         };
+        if skip_lib {
+            check_diagnostics.retain(|d| {
+                d.file
+                    .as_ref()
+                    .map(|f| !f.is_declaration_file && !is_external_library_file(&f.file_name))
+                    .unwrap_or(true)
+            });
+        } else if skip_default_lib {
+            check_diagnostics.retain(|d| {
+                d.file
+                    .as_ref()
+                    .map(|f| !self.default_library_file_names.contains(&f.file_name))
+                    .unwrap_or(true)
+            });
+        }
         diagnostics.extend(check_diagnostics);
+        let mut diagnostics = self.filter_diagnostics_with_preceding_directives(diagnostics);
+        {
+            // 键含文件名：多文件同偏移同码的诊断（exportNamespace7 的
+            // c/e 两份 TS1362）不可跨文件互吞
+            let mut seen: std::collections::HashSet<(usize, usize, i32, String, String)> =
+                std::collections::HashSet::new();
+            for d in &self.diagnostics {
+                if is_program_phase_module_not_found(d) {
+                    seen.insert((
+                        d.loc.pos(),
+                        d.loc.end(),
+                        d.code,
+                        d.message_args.join("\u{1}"),
+                        d.file
+                            .as_ref()
+                            .map(|f| f.file_name.clone())
+                            .unwrap_or_default(),
+                    ));
+                }
+            }
+            let mut deduped: Vec<Diagnostic> = Vec::with_capacity(diagnostics.len());
+            for d in diagnostics.drain(..) {
+                let key = (
+                    d.loc.pos(),
+                    d.loc.end(),
+                    d.code,
+                    d.message_args.join("\u{1}"),
+                    d.file
+                        .as_ref()
+                        .map(|f| f.file_name.clone())
+                        .unwrap_or_default(),
+                );
+                if seen.insert(key) {
+                    deduped.push(d);
+                }
+            }
+            diagnostics = deduped;
+        }
 
         diagnostics.retain(|d| self.includes_semantic_diagnostic(d));
+        // Go harnessutil.CompileFiles：GetEmitDeclarations 时在语义诊断后并入
+        // GetDeclarationDiagnostics（isolatedDeclarations 的 TS90xx 族唯一发射通道）。
+        // 语料 harness 只消费本方法，这里收窄到 isolatedDeclarations 旗标避免波及
+        // 全部 @declaration 用例的 TS4xxx 可见性通道
+        if self.options.get_emit_declarations() && self.options.isolated_declarations.is_true() {
+            let decl: Vec<Diagnostic> = self
+                .get_declaration_diagnostics(None)
+                .into_iter()
+                .map(|d| (*d).clone())
+                .collect();
+            diagnostics.extend(decl);
+        }
         diagnostics
     }
 
@@ -87,7 +171,7 @@ impl Program {
         }
     }
 
-    pub(crate) fn includes_semantic_diagnostic(&self, d: &Diagnostic) -> bool {
+    pub fn includes_semantic_diagnostic(&self, d: &Diagnostic) -> bool {
         let Some(file) = &d.file else {
             return true;
         };
@@ -113,6 +197,16 @@ impl Program {
         let tracer = Arc::new(tsox_checker::checker::Tracer::new());
         let program: Arc<dyn tsox_checker::checker::Program> = Arc::clone(self) as _;
         let mut checker = tsox_checker::checker::Checker::new(program, tracer);
+        for file in &self.source_files {
+            if skip_lib && (file.is_declaration_file || is_external_library_file(&file.file_name)) {
+                continue;
+            }
+
+            if skip_default_lib && self.default_library_file_names.contains(&file.file_name) {
+                continue;
+            }
+            checker.merge_module_augmentations_in_file(file);
+        }
         for file in &self.source_files {
             if skip_lib && (file.is_declaration_file || is_external_library_file(&file.file_name)) {
                 continue;
@@ -182,6 +276,12 @@ impl tsox_checker::checker::Program for Program {
     fn is_source_file_default_library(&self, path: &str) -> bool {
         Program::is_source_file_default_library(self, path)
     }
+    fn get_resolved_modules(
+        &self,
+    ) -> std::collections::HashMap<String, Vec<(String, Option<tsox_tsoptions::module::ResolvedModule>)>>
+    {
+        Program::get_resolved_modules(self)
+    }
     fn resolve_external_module_path(
         &self,
         specifier: &str,
@@ -200,7 +300,7 @@ impl tsox_checker::checker::Program for Program {
             resolver.resolve_module_name(specifier, containing_file, resolution_mode, None);
         resolved
             .filter(|m| m.is_resolved())
-            .map(|m| m.resolved_file_name)
+            .map(|m| self.host.fs().realpath(m.resolved_file_name.as_str()))
     }
     fn symbol_map(&self) -> &NodeSymbolMap {
         Program::symbol_map(self)
@@ -220,6 +320,10 @@ impl tsox_checker::checker::Program for Program {
             .collect();
         tsox_emit::emitter::compute_program_common_source_directory(&source_files, &self.options)
     }
+    fn canonicalize_path(&self, path: &str) -> String {
+        self.host.fs().realpath(path)
+    }
+
     fn read_file(&self, file_name: &str) -> Option<String> {
         self.host.fs().read_file(file_name)
     }
@@ -251,4 +355,15 @@ impl tsox_checker::checker::Program for Program {
             other => other,
         }
     }
+}
+
+fn is_program_phase_module_not_found(d: &Diagnostic) -> bool {
+    use tsox_core::diagnostics::messages_generated as msg;
+    const KEYS: &[&str] = &[
+        msg::CANNOT_FIND_MODULE_0_OR_ITS_CORRESPONDING_TYPE_DECLARATIONS.key,
+        msg::CANNOT_FIND_NAME_0_DO_YOU_NEED_TO_INSTALL_TYPE_DEFINITIONS_FOR_NODE_TRY_NPM_I_SAVE_DEV_TYPES_SLASHNODE.key,
+        msg::CANNOT_FIND_NAME_0_DO_YOU_NEED_TO_INSTALL_TYPE_DEFINITIONS_FOR_NODE_TRY_NPM_I_SAVE_DEV_TYPES_SLASHNODE_AND_THEN_ADD_NODE_TO_THE_TYPES_FIELD_IN_YOUR_TSCONFIG.key,
+        msg::CANNOT_FIND_MODULE_OR_TYPE_DECLARATIONS_FOR_SIDE_EFFECT_IMPORT_OF_0.key,
+    ];
+    KEYS.contains(&d.message_key)
 }

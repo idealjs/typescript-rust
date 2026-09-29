@@ -12,3 +12,9 @@ pub mod stringutil;
 pub mod symlinks;
 pub mod tracing;
 pub mod tspath;
+
+// r 轮接线:迁移批次模块
+pub mod fswatch;
+pub mod osutil;
+pub mod pprof;
+pub mod repo;

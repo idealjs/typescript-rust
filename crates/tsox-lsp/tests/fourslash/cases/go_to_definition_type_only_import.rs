@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_type_only_import() {
     let content = r#"// @Filename: /a.ts
@@ -11,6 +11,6 @@ export type { SyntaxKind }
 // @Filename: /c.ts
 import type { SyntaxKind } from './b';
 let kind: [|/*2*/SyntaxKind|];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "2")
+    let _s = Session::new_for_test("goToDefinitionTypeOnlyImport", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "2")
 }

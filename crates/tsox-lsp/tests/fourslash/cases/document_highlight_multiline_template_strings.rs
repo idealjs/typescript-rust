@@ -1,13 +1,13 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: [|b|]"]
+
 #[test]
 fn document_highlight_multiline_template_strings() {
-    let content = r#"const foo = ` + "`" + "#;
-    // TODO: a
-    // TODO: [|b|]
-    // TODO: c
-    // TODO: ` + "`" + ``
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, f.Ranges()[0])
+    let content = r#"const foo = `
+    a
+    [|b|]
+    c
+`"#;
+    let _s = Session::new_for_test("documentHighlightMultilineTemplateStrings", content);
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, f.Ranges()[0])
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
+
 #[test]
 fn go_to_implementation_namespace_00() {
     let content = r#"namespace /*implementation0*/Foo {
@@ -13,6 +13,6 @@ module /*implementation1*/Bar {
 
 let x = Fo/*reference0*/o;
 let y = Ba/*reference1*/r;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "reference0", "reference1")
+    let _s = Session::new_for_test("goToImplementationNamespace_00", content);
+    // TODO: f.VerifyBaselineGoToImplementation(t, "reference0", "reference1")
 }

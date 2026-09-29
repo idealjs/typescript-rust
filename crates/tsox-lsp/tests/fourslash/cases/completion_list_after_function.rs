@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_after_function() {
     let content = r#"// Outside the function
@@ -14,9 +14,11 @@ function f3(c: number) { }/*3*/
 
 // inside the function
 function f4(d: number) { /*4*/}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListAfterFunction", content);
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("2"), &["b"], &[]);
+    fourslash::go_to_marker(&mut s, "3");
+    // TODO: f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
+    fourslash::verify_completions_include_exclude_at(&mut s, Some("4"), &["d"], &[]);
 }

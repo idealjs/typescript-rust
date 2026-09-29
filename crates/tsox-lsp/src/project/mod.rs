@@ -44,3 +44,6 @@ pub(crate) mod session_watch_request_timeout;
 pub mod snapshot;
 pub mod snapshot_fs;
 pub mod watch;
+
+// r 轮接线:迁移批次模块
+pub mod mig;

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.Backspace"]
+
 #[test]
 fn edit_lambda_arg_to_type_parameter1() {
     let content = r#"class C<T> {
@@ -9,12 +9,12 @@ fn edit_lambda_arg_to_type_parameter1() {
     }
 }
 /*2*/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("editLambdaArgToTypeParameter1", content);
     fourslash::go_to_marker(&mut s, "1");
-    fourslash::unsupported("Backspace"); // f.Backspace(t, 6)
+    fourslash::backspace(&mut s, 6);
     fourslash::insert(&mut s, "T");
-    fourslash::verify_no_errors(&mut s);
+    fourslash::verify_no_errors(&mut s, );
     fourslash::go_to_marker(&mut s, "2");
-    fourslash::unsupported("InsertLine"); // f.InsertLine(t, "")
-    fourslash::verify_no_errors(&mut s);
+    fourslash::insert_line(&mut s, "");
+    fourslash::verify_no_errors(&mut s, );
 }

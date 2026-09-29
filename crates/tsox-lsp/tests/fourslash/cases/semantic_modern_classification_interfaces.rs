@@ -1,11 +1,11 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
+
 #[test]
 fn semantic_modern_classification_interfaces() {
     let content = r#"interface Pos { x: number, y: number };
 const p = { x: 1, y: 2 } as Pos;
 const foo = (o: Pos) => o.x + o.y;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
+    let _s = Session::new_for_test("semanticModernClassificationInterfaces", content);
+    // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

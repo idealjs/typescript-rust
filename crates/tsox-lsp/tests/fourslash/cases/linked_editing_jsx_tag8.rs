@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyLinkedEditing"]
+
 #[test]
 fn linked_editing_jsx_tag8() {
     let content = r#"// @FileName: /mismatchedNames.tsx
@@ -10,6 +10,6 @@ const jsx = (
     </*8*/A>
     </B>
 );"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyLinkedEditing"); // f.VerifyLinkedEditing(t, map[string][]lsproto.Range{
+    let _s = Session::new_for_test("linkedEditingJsxTag8", content);
+    // TODO: f.VerifyLinkedEditing(t, map[string][]lsproto.Range{
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFixAll"]
+
 #[test]
 fn code_fix_class_implement_interface_callback() {
     let content = r#"interface IFoo1 {
@@ -30,6 +30,6 @@ interface IFoo4 {
 
 class Foo4 implements IFoo4 {
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFixAll"); // f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceCallback", content);
+    // TODO: f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

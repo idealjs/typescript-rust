@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn quick_info_js_doc_typedef_property_with_invalid_tag() {
     let content = r#"// @allowJs: true
@@ -54,37 +55,12 @@ const obj4 = { /*4n*/name: "", /*4a*/age: 10 };
 /** @type {/*t5*/MyType5} */
 const obj5 = { /*5n*/name: "", /*5a*/age: 10 };
 "#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "t1",
-        "type MyType1 = {\n    name: string;\n    age: number;\n}",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "t2",
-        "type MyType2 = {\n    name: string;\n    age: number;\n}",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "t3",
-        "type MyType3 = {\n    name: string;\n    age: number;\n}",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "t4",
-        "type MyType4 = {\n    name: string;\n    age: number;\n}",
-        "",
-    );
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "t5",
-        "type MyType5 = {\n    name: string;\n}",
-        concat!("", "\n\n*@foo* — *bar", "\n\n*@property* — {number} age"),
-    );
+    let mut s = Session::new_for_test("quickInfoJSDocTypedefPropertyWithInvalidTag", content);
+    fourslash::verify_quick_info_at(&mut s, "t1", "type MyType1 = {\n    name: string;\n    age: number;\n}", "");
+    fourslash::verify_quick_info_at(&mut s, "t2", "type MyType2 = {\n    name: string;\n    age: number;\n}", "");
+    fourslash::verify_quick_info_at(&mut s, "t3", "type MyType3 = {\n    name: string;\n    age: number;\n}", "");
+    fourslash::verify_quick_info_at(&mut s, "t4", "type MyType4 = {\n    name: string;\n    age: number;\n}", "");
+    fourslash::verify_quick_info_at(&mut s, "t5", "type MyType5 = {\n    name: string;\n}", concat!("", "\n\n*@foo* — *bar", "\n\n*@property* — {number} age"));
     fourslash::verify_quick_info_at(&mut s, "1n", "(property) name: string", "@-rule");
     fourslash::verify_quick_info_at(&mut s, "2n", "(property) name: string", "some comment");
     fourslash::verify_quick_info_at(&mut s, "3n", "(property) name: string", "@*stars");

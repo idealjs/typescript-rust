@@ -10,7 +10,7 @@ pub mod binary_search;
 #[cfg(test)]
 pub(crate) mod binary_search_tests;
 pub mod compiler_options;
-pub(crate) mod compiler_options_kinds;
+pub mod compiler_options_kinds;
 pub(crate) mod compiler_options_options;
 pub(crate) mod compiler_options_resolve;
 #[cfg(test)]
@@ -40,3 +40,6 @@ pub(crate) mod watch_options_tests;
 pub mod work_group;
 #[cfg(test)]
 pub(crate) mod work_group_tests;
+
+// r 轮接线:迁移批次模块
+pub mod mig;

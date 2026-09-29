@@ -75,6 +75,15 @@ impl Binder {
             }
             self.bind_case_clause(clause, &entry_flow);
             fallthrough_flow = self.current_flow.clone();
+            if self
+                .current_flow
+                .as_ref()
+                .is_some_and(|f| !f.flags.contains(FlowFlags::UNREACHABLE))
+                && i + 1 < clause_nodes.len()
+            {
+                self.symbol_map
+                    .set_flow_node(clause, self.current_flow.clone().unwrap());
+            }
             i += 1;
         }
 
@@ -290,6 +299,11 @@ impl Binder {
             if let Some(expr) = &data.expression {
                 self.bind(expr);
             }
+        }
+        if let Some(rt) = &self.current_return_target
+            && let Some(current) = &self.current_flow
+        {
+            self.add_antecedent_to_flow(rt, current);
         }
         self.current_flow = Some(self.unreachable_flow());
         self.has_explicit_return = true;

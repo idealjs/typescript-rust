@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn declaration_maps_go_to_definition_same_name_different_directory() {
     let content = r#"// @Filename: BaseClass/Source.d.ts
@@ -59,7 +59,7 @@ class Button extends [|/*1*/Control|] {
         }
     }
 }"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("declarationMapsGoToDefinitionSameNameDifferentDirectory", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1", "3")
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "1", "3")
 }

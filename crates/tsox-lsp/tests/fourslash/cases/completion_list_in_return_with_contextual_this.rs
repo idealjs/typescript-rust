@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_in_return_with_contextual_this() {
     let content = r#"interface Ctx {
@@ -21,7 +21,7 @@ wrap(function () {
     const y = xs./*involvedInReturn*/
     return y;
 });"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "inReturn", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "involvedInReturn", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionListInReturnWithContextualThis", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("inReturn"), &["x"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("involvedInReturn"), &["x"]);
 }

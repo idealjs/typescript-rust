@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatSelection"]
+
 #[test]
 fn formatting_on_nested_statements() {
     let content = r#"{
@@ -8,8 +8,8 @@ fn formatting_on_nested_statements() {
 /*3*/test
 }/*2*/
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatSelection"); // f.FormatSelection(t, "1", "2")
+    let mut s = Session::new_for_test("formattingOnNestedStatements", content);
+    fourslash::format_selection(&mut s, "1", "2");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"    {"#);
     fourslash::go_to_marker(&mut s, "3");

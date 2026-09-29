@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn auto_import_cross_project_symlinks_strip_src() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @Filename: /home/src/workspaces/project/packages/app/package.json
 { "name": "app", "dependencies": { "dep": "*" } }
 // @Filename: /home/src/workspaces/project/packages/app/tsconfig.json
@@ -33,8 +33,8 @@ import "./sub/folder";
 // @Filename: /home/src/workspaces/project/packages/dep/src/sub/folder/index.ts
 export const dep = 0;
 // @link: /home/src/workspaces/project/packages/dep -> /home/src/workspaces/project/packages/app/node_modules/dep"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportCrossProject_symlinks_stripSrc", content);
     // TODO: f.MarkTestAsStradaServer()
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

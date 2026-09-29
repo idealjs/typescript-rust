@@ -1,3 +1,5 @@
+use std::time::SystemTime;
+
 use super::types::{Entries, FileInfo};
 
 pub trait FS: Send + Sync {
@@ -7,6 +9,9 @@ pub trait FS: Send + Sync {
     fn write_file(&self, path: &str, data: &str) -> std::io::Result<()>;
     fn append_file(&self, path: &str, data: &str) -> std::io::Result<()>;
     fn remove(&self, path: &str) -> std::io::Result<()>;
+    fn chtimes(&self, _path: &str, _atime: SystemTime, _mtime: SystemTime) -> std::io::Result<()> {
+        Ok(())
+    }
     fn directory_exists(&self, path: &str) -> bool;
     fn get_accessible_entries(&self, path: &str) -> Entries;
     fn stat(&self, path: &str) -> Option<FileInfo>;

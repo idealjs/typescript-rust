@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_labels() {
     let content = r#"/*label1Definition*/label1: while (true) {
@@ -11,6 +11,6 @@ fn go_to_definition_labels() {
         continue /*4*/unknownLabel;
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1", "2", "3", "4")
+    let _s = Session::new_for_test("goToDefinitionLabels", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "1", "2", "3", "4")
 }

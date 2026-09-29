@@ -37,19 +37,15 @@ impl Checker {
                     if let Some(expected) =
                         self.return_type_stack.last().and_then(|opt| opt.clone())
                     {
-                        let actual = self.get_type_of_node(&body);
-                        if !actual.flags.contains(TypeFlags::Any)
-                            && !self.is_type_assignable_to(&actual, &expected)
-                        {
-                            let actual_str = self.type_to_string(&actual);
-                            let expected_str = self.type_to_string(&expected);
-                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                                self.current_file.clone(),
-                                body.loc,
-                                TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                                vec![actual_str, expected_str],
-                            ));
-                        }
+                        // Go checkArrowFunction：表达式体经 checkReturnExpression
+                        //（条件表达式按分支比较，错误锚定分支）
+                        self.check_return_expression_against_type(
+                            &expected,
+                            node,
+                            &body,
+                            false,
+                            false,
+                        );
                     }
                 }
             }
@@ -59,6 +55,11 @@ impl Checker {
                 self.pop_arrow_function_scope();
             } else {
                 self.pop_function_scope();
+            }
+            if let Some(tn) = type_node.as_ref() {
+                self.check_all_code_paths_annotated(node, tn);
+            } else {
+                self.check_no_implicit_returns(node, None);
             }
         }
     }
@@ -115,6 +116,7 @@ impl Checker {
                         self.check_jsx_attribute(attr);
                     }
                 }
+                self.check_jsx_attributes_spread_overrides(&attrs);
             }
         }
 
@@ -154,8 +156,17 @@ impl Checker {
 
     pub(crate) fn cannot_find_name_message_for(
         name: &str,
+        node: Option<&Arc<Node>>,
     ) -> Option<&'static tsox_core::diagnostics::Message> {
         use tsox_core::diagnostics::messages_generated as mg;
+        if name == "await"
+            && node.is_some_and(|n| {
+                n.parent()
+                    .is_some_and(|p| p.kind == SyntaxKind::CallExpression)
+            })
+        {
+            return Some(&mg::CANNOT_FIND_NAME_0_DID_YOU_MEAN_TO_WRITE_THIS_IN_AN_ASYNC_FUNCTION);
+        }
         match name {
             "document" | "console" => Some(
                 &mg::CANNOT_FIND_NAME_0_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_INCLUDE_DOM,
@@ -163,7 +174,26 @@ impl Checker {
             "process" | "require" | "Buffer" | "module" | "NodeJS" => Some(
                 &mg::CANNOT_FIND_NAME_0_DO_YOU_NEED_TO_INSTALL_TYPE_DEFINITIONS_FOR_NODE_TRY_NPM_I_SAVE_DEV_TYPES_SLASHNODE_AND_THEN_ADD_NODE_TO_THE_TYPES_FIELD_IN_YOUR_TSCONFIG,
             ),
-            _ => None,
+            "$" => Some(
+                &mg::CANNOT_FIND_NAME_0_DO_YOU_NEED_TO_INSTALL_TYPE_DEFINITIONS_FOR_JQUERY_TRY_NPM_I_SAVE_DEV_TYPES_SLASHJQUERY_AND_THEN_ADD_JQUERY_TO_THE_TYPES_FIELD_IN_YOUR_TSCONFIG,
+            ),
+            "beforeEach" | "describe" | "suite" | "it" | "test" => Some(
+                &mg::CANNOT_FIND_NAME_0_DO_YOU_NEED_TO_INSTALL_TYPE_DEFINITIONS_FOR_A_TEST_RUNNER_TRY_NPM_I_SAVE_DEV_TYPES_SLASHJEST_OR_NPM_I_SAVE_DEV_TYPES_SLASHMOCHA_AND_THEN_ADD_JEST_OR_MOCHA_TO_THE_TYPES_FIELD_IN_YOUR_TSCONFIG,
+            ),
+            "Bun" => Some(
+                &mg::CANNOT_FIND_NAME_0_DO_YOU_NEED_TO_INSTALL_TYPE_DEFINITIONS_FOR_BUN_TRY_NPM_I_SAVE_DEV_TYPES_SLASHBUN_AND_THEN_ADD_BUN_TO_THE_TYPES_FIELD_IN_YOUR_TSCONFIG,
+            ),
+            _ => {
+                if node.is_some_and(|n| {
+                    n.parent()
+                        .is_some_and(|p| p.kind == SyntaxKind::ShorthandPropertyAssignment)
+                }) {
+                    return Some(
+                        &mg::NO_VALUE_EXISTS_IN_SCOPE_FOR_THE_SHORTHAND_PROPERTY_0_EITHER_DECLARE_ONE_OR_PROVIDE_AN_INITIALIZER,
+                    );
+                }
+                None
+            }
         }
     }
 
@@ -172,6 +202,47 @@ impl Checker {
             && let Some(init) = &pd.initializer
         {
             self.check_expression(init);
+            // Go checkVariableLikeDeclaration：带初始化式的绑定模式参数按 widened
+            // 类型逐元素急切解析（TS2339 等在声明检查期发出）
+            if matches!(
+                pd.name.kind,
+                SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+            ) {
+                self.check_binding_pattern_element_types(&pd.name);
+                self.check_binding_pattern_element_initializers(&pd.name);
+                return;
+            }
+            // Go getTypeOfVariableOrParameterOrPropertyWorker 对无注解参数的符号型
+            // 是 widened initializer 型,与初始化式比较恒真;上下文定型只发生在
+            // 签名实例化位,声明检查期不可见
+            if pd.type_node.is_none() {
+                return;
+            }
+            let Some(symbol) = self.get_symbol_of_declaration(param) else {
+                return;
+            };
+            if symbol
+                .value_declaration
+                .as_ref()
+                .is_some_and(|vd| !Arc::ptr_eq(vd, param))
+            {
+                return;
+            }
+            let declared = self.get_type_of_symbol(&symbol);
+            let declared = if declared.intrinsic_name() == Some("auto") {
+                self.get_any_type()
+            } else {
+                declared
+            };
+            let init_type = self.get_type_of_node(init);
+            self.check_type_assignable_to_and_optionally_elaborate(
+                &init_type,
+                &declared,
+                Some(param),
+                Some(init),
+                None,
+                None,
+            );
         }
     }
 }

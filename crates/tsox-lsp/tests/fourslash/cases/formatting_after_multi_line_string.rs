@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.InsertLine"]
+
 #[test]
 fn formatting_after_multi_line_string() {
     let content = r#"class foo {
@@ -9,9 +9,9 @@ fn formatting_after_multi_line_string() {
 "/*2*/
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingAfterMultiLineString", content);
     fourslash::go_to_marker(&mut s, "2");
-    fourslash::unsupported("InsertLine"); // f.InsertLine(t, "")
+    fourslash::insert_line(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, "        var s = \"hello\\");
 }

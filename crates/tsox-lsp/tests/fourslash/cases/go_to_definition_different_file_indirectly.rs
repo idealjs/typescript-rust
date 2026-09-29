@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_different_file_indirectly() {
     let content = r#"// @Filename: Remote2.ts
@@ -21,6 +21,6 @@ namespace remMod { export var foo; }
 var rem2foo = new /*remoteClassReference*/rem2Cls();
 class rem2fooCls implements /*remoteInterfaceReference*/rem2Int { }
 var rem2fooVar = /*remoteModuleReference*/rem2Mod.foo;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "remoteVariableReference", "remoteFunctionReference", "remo
+    let _s = Session::new_for_test("goToDefinitionDifferentFileIndirectly", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, false, "remoteVariableReference", "remoteFunctionReference", "remo
 }

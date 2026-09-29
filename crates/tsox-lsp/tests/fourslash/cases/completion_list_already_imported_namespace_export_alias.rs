@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: result := f.VerifyCompletions(t, '', &fourslash.CompletionsE"]
+
 #[test]
 fn completion_list_already_imported_namespace_export_alias() {
     let content = r#"// @module: node18
@@ -17,7 +17,7 @@ export { Group };
 import { Group } from "./namespace.js";
 
 console.log(Grou/**/);"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("completionListAlreadyImportedNamespaceExportAlias", content);
     // TODO: result := f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     // TODO: result.AndHasNoCodeAction(t, &fourslash.CompletionsExpectedCodeAction{
 }

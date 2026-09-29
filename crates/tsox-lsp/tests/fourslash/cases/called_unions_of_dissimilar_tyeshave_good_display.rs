@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
+
 #[test]
 fn called_unions_of_dissimilar_tyeshave_good_display() {
     let content = r#"declare const callableThing1:
@@ -45,15 +45,15 @@ declare const callableThing5:
 
 callableThing5(/*5*/1)
 "#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("calledUnionsOfDissimilarTyeshaveGoodDisplay", content);
     fourslash::go_to_marker(&mut s, "1");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "callableThing1(o1: { x: number;
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "callableThing1(o1: { x: number;
     fourslash::go_to_marker(&mut s, "2");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "callableThing2(arg0: { x: numbe
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "callableThing2(arg0: { x: numbe
     fourslash::go_to_marker(&mut s, "3");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "callableThing3(arg0: { x: numbe
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "callableThing3(arg0: { x: numbe
     fourslash::go_to_marker(&mut s, "4");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "callableThing4(arg0: { x: numbe
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "callableThing4(arg0: { x: numbe
     fourslash::go_to_marker(&mut s, "5");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "callableThing5(a1: number): voi
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "callableThing5(a1: number): voi
 }

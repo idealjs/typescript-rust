@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn formatting_jsx_texts2() {
     let content = r#"//@Filename: file.tsx
@@ -40,11 +40,9 @@ const f =
   {     foobar  }
   bar
           </div>"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"const a = (
+    let mut s = Session::new_for_test("formattingJsxTexts2", content);
+    fourslash::format_document(&mut s, "");
+    fourslash::verify_current_file_content(&mut s, r#"const a = (
     <div>
         foo
     </div>
@@ -79,6 +77,5 @@ const f =
         foo
         {foobar}
         bar
-    </div>"#,
-    );
+    </div>"#);
 }

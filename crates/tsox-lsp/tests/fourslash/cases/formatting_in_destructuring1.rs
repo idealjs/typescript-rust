@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: }"]
+
 #[test]
 fn formatting_in_destructuring1() {
     let content = r#"interface let { }
@@ -13,8 +13,8 @@ function foo() {
 /*4*/    for (let[x] = [];x < 1;) {
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formattingInDestructuring1", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"var x: let[];"#);
     fourslash::go_to_marker(&mut s, "2");

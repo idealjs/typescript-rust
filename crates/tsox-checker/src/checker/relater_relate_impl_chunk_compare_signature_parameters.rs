@@ -28,16 +28,17 @@ impl Checker {
         };
         for i in 0..param_count {
             let source_type = if i as isize == rest_index {
-                self.get_rest_or_any_type_at_position(&source, i)
+                Some(self.get_rest_or_any_type_at_position(&source, i))
             } else {
                 self.try_get_type_at_position(&source, i)
-                    .unwrap_or_else(|| self.any_type())
             };
             let target_type = if i as isize == rest_index {
-                self.get_rest_or_any_type_at_position(&target, i)
+                Some(self.get_rest_or_any_type_at_position(&target, i))
             } else {
                 self.try_get_type_at_position(&target, i)
-                    .unwrap_or_else(|| self.any_type())
+            };
+            let (Some(source_type), Some(target_type)) = (source_type, target_type) else {
+                continue;
             };
 
             if Arc::ptr_eq(&source_type, &target_type)
@@ -47,14 +48,14 @@ impl Checker {
             }
 
             let mut source_sig: Option<Arc<Signature>> = None;
-            if !check_mode.contains(SignatureCheckMode::Callback)
+            if !check_mode.intersects(SIGNATURE_CHECK_MODE_CALLBACK)
                 && !self.is_instantiated_generic_parameter(&source, i)
             {
                 let non_nullable = self.get_non_nullable_type_of(&source_type);
                 source_sig = self.get_single_call_signature(&non_nullable);
             }
             let mut target_sig: Option<Arc<Signature>> = None;
-            if !check_mode.contains(SignatureCheckMode::Callback)
+            if !check_mode.intersects(SIGNATURE_CHECK_MODE_CALLBACK)
                 && !self.is_instantiated_generic_parameter(&target, i)
             {
                 let non_nullable = self.get_non_nullable_type_of(&target_type);
@@ -90,13 +91,15 @@ impl Checker {
                     relation,
                 );
             } else {
-                if !check_mode.contains(SignatureCheckMode::Callback) && !strict_variance {
+                if !check_mode.intersects(SIGNATURE_CHECK_MODE_CALLBACK) && !strict_variance {
+                    let was_silent = self.silence_relation_chain();
                     related = self.compare_types(
                         source_type.clone(),
                         target_type.clone(),
                         relation,
                         false,
                     );
+                    self.restore_relation_chain(was_silent);
                 }
                 if related.is_false() {
                     related = self.compare_types(
@@ -108,15 +111,7 @@ impl Checker {
                 }
             }
             if related.is_false() {
-                if self.relater_chain_active {
-                    let ts = self.type_to_string(&target_type);
-                    let ss = self.type_to_string(&source_type);
-                    self.push_relation_head_with_tp_note(
-                        &target_type,
-                        &source_type,
-                        tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                        vec![ts, ss],
-                    );
+                if self.relater_chain_active && relation != RelationKind::Identity {
                     let sn = source.parameters.get(i).map(|p| p.name.clone());
                     let tn = target.parameters.get(i).map(|p| p.name.clone());
                     self.relater_report_error(

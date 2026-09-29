@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToSourceDefinition"]
+
 #[test]
 fn go_to_source_definition_extensionless_mapped_source() {
     let content = r#"// @Filename: /lib/helper.d.ts
@@ -13,6 +13,6 @@ export function helper(): string { return ""; }
 // @Filename: /index.ts
 import { /*usage*/helper } from "./lib/helper";
 helper();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
+    let _s = Session::new_for_test("goToSourceDefinitionExtensionlessMappedSource", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }

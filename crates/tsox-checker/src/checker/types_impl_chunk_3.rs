@@ -278,6 +278,8 @@ pub struct ValueSymbolLinks {
     pub name_type: Option<Arc<Type>>,
     pub containing_type: Option<Arc<Type>>,
     pub function_or_constructor_checked: bool,
+    pub instantiation_params: Vec<Arc<Type>>,
+    pub instantiation_args: Vec<Arc<Type>>,
 }
 
 #[derive(Debug, Default)]

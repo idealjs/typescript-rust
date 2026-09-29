@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: // This should show projectBFunction once, not twice (not fr"]
+
 #[test]
 fn auto_import_symlinked_monorepo_project_references_no_pkg_exports() {
     let content = r#"// @Filename: /packages/project-b/tsconfig.json
@@ -46,8 +46,8 @@ import { projectBValue } from "project-b";
 console.log(projectBValue);
 projectBFunc/**/
 // @link: /packages/project-b -> /packages/project-a/node_modules/project-b"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("autoImportSymlinkedMonorepoProjectReferencesNoPkgExports", content);
     fourslash::go_to_marker(&mut s, "");
     // TODO: // This should show projectBFunction once, not twice (not from both src and dist)
-    fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
+    // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }

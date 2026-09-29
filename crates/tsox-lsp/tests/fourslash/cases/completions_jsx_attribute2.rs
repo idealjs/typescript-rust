@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_jsx_attribute2() {
     let content = r#"// @jsx: preserve
@@ -21,9 +21,9 @@ declare namespace JSX {
 <div foo={true} /*2*/></div>;
 <div bar="test" /*3*/></div>;
 <div aria-foo /*4*/></div>;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("completionsJsxAttribute2", content);
+    fourslash::verify_completions_exact_at(&mut s, Some("1"), &["aria-foo", "bar"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("2"), &["aria-foo", "bar"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("3"), &["aria-foo", "foo"]);
+    fourslash::verify_completions_exact_at(&mut s, Some("4"), &["bar", "foo"]);
 }

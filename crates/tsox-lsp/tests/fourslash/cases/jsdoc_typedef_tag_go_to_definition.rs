@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn jsdoc_typedef_tag_go_to_definition() {
     let content = r#"// @lib: es5
@@ -21,7 +21,7 @@ var person; person.[|personName/*3*/|]
 
 /** @type {Animal} */
 var animal; animal.[|animalName/*4*/|]"#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("jsdocTypedefTagGoToDefinition", content);
     // TODO: f.MarkTestAsStradaServer()
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "3", "4")
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "3", "4")
 }

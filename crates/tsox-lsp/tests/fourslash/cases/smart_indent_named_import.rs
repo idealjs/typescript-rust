@@ -1,14 +1,14 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn smart_indent_named_import() {
     let content = r#"import {/*0*/
     numbers as bn,/*1*/
     list/*2*/
 } from '@bykov/basics';/*3*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("smartIndentNamedImport", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "0");
     fourslash::verify_current_line_content(&mut s, r#"import {"#);
     fourslash::go_to_marker(&mut s, "1");

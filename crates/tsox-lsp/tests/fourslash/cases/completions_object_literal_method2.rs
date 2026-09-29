@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completions_object_literal_method2() {
     let content = r#"// @newline: LF
@@ -19,5 +19,6 @@ const obj: IBar = {
     /*a*/
 }"#;
     let mut s = Session::new_with_capabilities(content, None);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "a");
+    // TODO: f.VerifyCompletions(t, "a", &fourslash.CompletionsExpectedList{
 }

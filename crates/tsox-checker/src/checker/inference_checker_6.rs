@@ -80,7 +80,7 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
 
-        let parent = node.parent.as_ref()?;
+        let parent = node.parent().as_ref()?;
         let binary = match &parent.data {
             NodeData::BinaryExpression(data) => data,
             _ => return None,
@@ -118,7 +118,7 @@ impl Checker {
     ) -> Option<Arc<Type>> {
         use tsox_frontend::ast::NodeData;
 
-        let object_literal = node.parent.as_ref()?;
+        let object_literal = node.parent().as_ref()?;
 
         let contextual_type = self.get_contextual_type(object_literal, _context_flags)?;
 
@@ -201,6 +201,10 @@ impl Checker {
         } else {
             self.get_common_supertype(&base_candidates)
         };
+        // Go getWidenedType 不拓宽顶层字面量类型；此处保持推断出的字面量
+        if unwidened_type.flags.intersects(crate::checker::types::TYPE_FLAGS_LITERAL) {
+            return Some(unwidened_type);
+        }
         Some(self.get_widened_type(&unwidened_type))
     }
 

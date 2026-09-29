@@ -16,3 +16,6 @@ pub(crate) mod set_tests;
 pub mod syncmap;
 #[cfg(test)]
 pub(crate) mod syncmap_tests;
+
+// r 轮接线:迁移批次模块
+pub mod mig;

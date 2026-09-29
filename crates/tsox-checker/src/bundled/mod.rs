@@ -149,3 +149,6 @@ pub(crate) fn bundled_lib_name(rest: &str) -> Option<&'static str> {
 
 #[cfg(test)]
 pub(crate) mod tests;
+
+// r 轮接线:迁移批次模块
+pub mod mig;

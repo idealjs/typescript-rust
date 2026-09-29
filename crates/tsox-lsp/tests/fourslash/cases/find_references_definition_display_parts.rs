@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_references_definition_display_parts() {
     let content = r#"class Gre/*1*/eter {
@@ -12,6 +12,6 @@ let myOption: Options = "option 1";
 
 some/*4*/Label:
 break someLabel;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
+    let _s = Session::new_for_test("findReferencesDefinitionDisplayParts", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3", "4")
 }

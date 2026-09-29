@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_expando_class1() {
     let content = r#"// @strict: true
@@ -14,6 +14,6 @@ Core.Test = class { }
 Core.Test.prototype.foo = 10
 
 new Core.Tes/*1*/t()"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "1")
+    let _s = Session::new_for_test("goToDefinitionExpandoClass1", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "1")
 }

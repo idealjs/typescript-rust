@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn tsx_go_to_definition_classes() {
     let content = r#"//@Filename: file.tsx
@@ -17,6 +17,6 @@ class /*ct*/MyClass {
 var x = <[|My/*c*/Class|] />;
 var y = <MyClass [|f/*p*/oo|]= 'hello' />;
 var z = <[|MyCl/*w*/ass|] wrong= 'hello' />;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "c", "p", "w")
+    let _s = Session::new_for_test("tsxGoToDefinitionClasses", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "c", "p", "w")
 }

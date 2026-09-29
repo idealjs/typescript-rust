@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn format_tsx_closing_after_jsx_text() {
     let content = r#"// @Filename: foo.tsx
@@ -17,11 +17,9 @@ const b = (
                </div>
 )
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
-    fourslash::verify_current_file_content(
-        &mut s,
-        r#"
+    let mut s = Session::new_for_test("formatTsxClosingAfterJsxText", content);
+    fourslash::format_document(&mut s, "");
+    fourslash::verify_current_file_content(&mut s, r#"
 const a = (
     <div>
         text
@@ -33,6 +31,5 @@ const b = (
         twice
     </div>
 )
-"#,
-    );
+"#);
 }

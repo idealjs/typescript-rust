@@ -7,21 +7,88 @@ impl Binder {
         &mut self,
         node: &Arc<Node>,
         includes: SymbolFlags,
-        _excludes: SymbolFlags,
+        excludes: SymbolFlags,
         target: DeclareTarget,
     ) -> Arc<Symbol> {
         let name = self.get_declaration_name(node);
 
         let existing: Option<Arc<Symbol>> = match &target {
             DeclareTarget::Exports(parent_sym) => parent_sym.exports.get(&name).cloned(),
-            DeclareTarget::Locals(container) => self
-                .symbol_map
-                .locals
-                .get(&container.id())
-                .and_then(|locals| locals.get(&name).cloned()),
+            DeclareTarget::Members(parent_sym) => parent_sym.members.get(&name).cloned(),
+            DeclareTarget::Locals(container) => {
+                let locals_hit = || {
+                    self.symbol_map
+                        .locals
+                        .get(&container.id())
+                        .and_then(|locals| locals.get(&name).cloned())
+                };
+                // 文件顶层的别名（import）与普通声明（typedef/class 等，经
+                // declare_symbol 进容器符号 members）必须互相可见才能合并
+                if container.kind == SyntaxKind::SourceFile {
+                    locals_hit().or_else(|| {
+                        self.symbol_map
+                            .symbol_of(container)
+                            .and_then(|sym| sym.members.get(&name).cloned())
+                    })
+                } else {
+                    locals_hit()
+                }
+            }
         };
 
         if let Some(existing) = existing {
+            // Go declareSymbol 冲突路径：existing 与 excludes 相交时报所有既有
+            // 声明 + 当前声明，且不合并、不替换表内既有符号
+            let assignment_merge_exception = (includes.contains(SymbolFlags::FunctionScopedVariable)
+                && existing.flags.contains(SymbolFlags::Assignment))
+                || (includes.contains(SymbolFlags::Assignment)
+                    && existing
+                        .flags
+                        .contains(SymbolFlags::FunctionScopedVariable));
+            if !name.is_empty()
+                && !excludes.is_empty()
+                && existing.flags.intersects(excludes)
+                && !assignment_merge_exception
+            {
+                // Go declareSymbolEx：export default EA 冲突报 2528（multiple
+                // default exports），本表不跟踪 default 命名的 class/function/
+                // interface 声明，2528/2323 由 checker 的
+                // check_external_module_export_duplicates 统一重放，binder 侧不报
+                let default_ea = matches!(&node.data, tsox_frontend::ast::NodeData::ExportAssignment(d) if !d.is_export_equals);
+                if !default_ea {
+                    if existing.flags.intersects(SymbolFlags::ENUM)
+                        || includes.intersects(SymbolFlags::ENUM)
+                    {
+                        self.report_declaration_conflict_all(
+                            node,
+                            &existing,
+                            None,
+                            &tsox_core::diagnostics::messages_generated::ENUM_DECLARATIONS_CAN_ONLY_MERGE_WITH_NAMESPACE_OR_OTHER_ENUM_DECLARATIONS,
+                        );
+                    } else if existing.flags.contains(SymbolFlags::BlockScopedVariable) {
+                        self.report_declaration_conflict_all(
+                            node,
+                            &existing,
+                            Some(&name),
+                            &CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0,
+                        );
+                    } else {
+                        self.report_duplicate_identifier_all(node, &existing, &name);
+                    }
+                }
+                let symbol = self.new_symbol(includes, name.clone());
+                let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+                unsafe {
+                    (*symbol_mut).declarations.push(Arc::clone(node));
+                    if (*symbol_mut).value_declaration.is_none()
+                        && includes.intersects(SymbolFlags::VALUE)
+                    {
+                        (*symbol_mut).value_declaration = Some(Arc::clone(node));
+                    }
+                }
+                self.symbol_map.set_symbol(node, Arc::clone(&symbol));
+                return symbol;
+            }
             if self.can_merge_symbols(existing.flags, includes) {
                 let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
                 unsafe {
@@ -52,15 +119,21 @@ impl Binder {
         }
 
         match &target {
-            DeclareTarget::Exports(parent_sym) => {
+            DeclareTarget::Exports(parent_sym) | DeclareTarget::Members(parent_sym) => {
                 let parent_mut = Arc::as_ptr(parent_sym) as *mut Symbol;
                 unsafe {
-                    (*parent_mut)
-                        .exports
-                        .insert(name.clone(), Arc::clone(&symbol));
+                    if matches!(target, DeclareTarget::Members(_)) {
+                        (*parent_mut)
+                            .members
+                            .insert(name.clone(), Arc::clone(&symbol));
+                    } else {
+                        (*parent_mut)
+                            .exports
+                            .insert(name.clone(), Arc::clone(&symbol));
+                    }
 
                     let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
-                    (*symbol_mut).parent = Some(Arc::clone(parent_sym));
+                    (*symbol_mut).set_parent(parent_sym);
                 }
             }
             DeclareTarget::Locals(container) => {
@@ -70,6 +143,16 @@ impl Binder {
                     .entry(container.id())
                     .or_insert_with(SymbolTable::new);
                 locals.insert(name.clone(), Arc::clone(&symbol));
+                if container.kind == SyntaxKind::SourceFile
+                    && let Some(container_sym) = self.symbol_map.symbol_of(container)
+                {
+                    let container_sym_mut = Arc::as_ptr(&container_sym) as *mut Symbol;
+                    unsafe {
+                        (*container_sym_mut)
+                            .members
+                            .insert(name.clone(), Arc::clone(&symbol));
+                    }
+                }
             }
         }
 
@@ -77,36 +160,47 @@ impl Binder {
         symbol
     }
 
-    pub(crate) fn ns_is_instantiated_static(ns: &Arc<Node>) -> bool {
-        let NodeData::ModuleDeclaration(md) = &ns.data else {
-            return false;
-        };
-        let Some(body) = &md.body else {
-            return false;
-        };
-        let mut found = false;
-        tsox_frontend::ast::node_data_generated::for_each_child(body, |stmt| {
-            match stmt.kind {
-                SyntaxKind::InterfaceDeclaration
-                | SyntaxKind::TypeAliasDeclaration
-                | SyntaxKind::ImportDeclaration
-                | SyntaxKind::ImportEqualsDeclaration
-                | SyntaxKind::ExportDeclaration => {}
-                _ => found = true,
-            }
-            false
-        });
-        found
-    }
     pub(crate) fn can_merge_symbols(
         &self,
         existing_flags: SymbolFlags,
         new_flags: SymbolFlags,
     ) -> bool {
+        // Go bindExportDeclaration 以 excludes=None 声明 __export：多个
+        // export * 恒合并进同一符号的 declarations
+        if existing_flags.contains(SymbolFlags::ExportStar)
+            && new_flags.contains(SymbolFlags::ExportStar)
+        {
+            return true;
+        }
         let existing_alias = existing_flags.contains(SymbolFlags::Alias);
         let new_alias = new_flags.contains(SymbolFlags::Alias);
         if existing_alias || new_alias {
             return !(existing_alias && new_alias);
+        }
+
+        // Go declareSymbol：var 的 excludes（Value & ^FunctionScopedVariable）
+        // 不含 var 自身，重复 var（含参数名）并入同一符号；类型一致性由
+        // checker 的 TS2403 按声明序比较。既有符号带其他值意义位
+        //（function/class/let 等）时不并入，走冲突报告
+        if existing_flags.contains(SymbolFlags::FunctionScopedVariable)
+            && new_flags == SymbolFlags::FunctionScopedVariable
+            && !existing_flags.intersects(SymbolFlags::VALUE & !SymbolFlags::FunctionScopedVariable)
+        {
+            return true;
+        }
+
+        // Go NamespaceModuleExcludes = None：非实例化 namespace 声明与任何既有符号合并且不冲突
+        if new_flags.contains(SymbolFlags::NamespaceModule) {
+            return true;
+        }
+        // 镜像：既有非实例化 namespace（纯类型导出）与任何后续声明合并
+        //（Go NamespaceModule 位不属于任何 excludes 集合：VALUE/TYPE 并集均
+        // 不含它，declareSymbol 无 excludes 冲突即无条件合并；interface/
+        // type alias/值声明与 namespace 的声明位互不重叠）
+        if existing_flags.contains(SymbolFlags::NamespaceModule)
+            && !existing_flags.contains(SymbolFlags::ValueModule)
+        {
+            return true;
         }
 
         if existing_flags.contains(SymbolFlags::Interface)
@@ -119,7 +213,26 @@ impl Binder {
         let new_interface = new_flags.contains(SymbolFlags::Interface);
         let existing_type_alias = existing_flags.contains(SymbolFlags::TypeAlias);
         let new_type_alias = new_flags.contains(SymbolFlags::TypeAlias);
-        let class_side = SymbolFlags::Class;
+        let _class_side = SymbolFlags::Class;
+
+        // Go TypeAliasExcludes = SymbolFlagsType（仅类型意义 class/interface/enum）：
+        // type alias 与 class/interface/enum 相遇是 TS2300；与纯值声明（var/let/const/
+        // function）合法合并（lib 形态：type NodeFilter + declare var NodeFilter）
+        if (existing_type_alias
+            && new_flags
+                .intersects(SymbolFlags::Interface | SymbolFlags::Class | SymbolFlags::ENUM))
+            || (new_type_alias
+                && existing_flags
+                    .intersects(SymbolFlags::Interface | SymbolFlags::Class | SymbolFlags::ENUM))
+        {
+            return false;
+        }
+        // type alias 与纯值声明合并
+        if (existing_type_alias && new_flags.intersects(SymbolFlags::VALUE))
+            || (new_type_alias && existing_flags.intersects(SymbolFlags::VALUE))
+        {
+            return true;
+        }
 
         let enum_side = SymbolFlags::ENUM;
         if (existing_flags.intersects(enum_side) && new_interface)
@@ -127,16 +240,10 @@ impl Binder {
         {
             return false;
         }
-        if (existing_interface && !new_interface && !new_type_alias)
-            || (new_interface && !existing_interface && !existing_type_alias)
-            || (existing_type_alias
-                && !new_type_alias
-                && !new_flags.intersects(class_side)
-                && !new_interface)
-            || (new_type_alias
-                && !existing_type_alias
-                && !existing_flags.intersects(class_side)
-                && !existing_interface)
+        // Go InterfaceExcludes = Type & ^(Interface|Class)：interface 与 class/值意义
+        // （var/function 等）合法合并；type alias 冲突已由上方分支处理
+        if (existing_interface && new_flags.intersects(SymbolFlags::VALUE | SymbolFlags::Class))
+            || (new_interface && existing_flags.intersects(SymbolFlags::VALUE | SymbolFlags::Class))
         {
             return true;
         }
@@ -147,6 +254,11 @@ impl Binder {
         let new_fn = new_flags.contains(SymbolFlags::Function);
         if (existing_class && new_fn) || (existing_fn && new_class) {
             return true;
+        }
+        // Go ClassExcludes 含 Class：同名 class 相交冲突（TS2300，含 ambient），
+        // 冲突符号另建、不合并 declarations
+        if existing_class && new_class {
+            return false;
         }
 
         let existing_ns = existing_flags.contains(SymbolFlags::ValueModule);
@@ -174,8 +286,29 @@ impl Binder {
             }
         }
 
+        // Go declareSymbol：var 对 var（FSVExcludes 不含 FSV）、属性/访问器
+        // 同组（Property/Accessor excludes 互不含对方位）无冲突即合并
+        if existing_flags.intersects(SymbolFlags::VARIABLE)
+            && new_flags.intersects(SymbolFlags::VARIABLE)
+        {
+            return true;
+        }
+        if existing_flags.intersects(SymbolFlags::PROPERTY_OR_ACCESSOR)
+            && new_flags.intersects(SymbolFlags::PROPERTY_OR_ACCESSOR)
+        {
+            return true;
+        }
+
         if existing_flags.contains(SymbolFlags::Function)
             && new_flags.contains(SymbolFlags::Function)
+        {
+            return true;
+        }
+
+        // Go declareSymbol：Method excludes 不含 Method 位，同名方法过载
+        //（含 MethodSignature）合并进同一符号的 declarations
+        if existing_flags.contains(SymbolFlags::Method)
+            && new_flags.contains(SymbolFlags::Method)
         {
             return true;
         }
@@ -199,14 +332,27 @@ impl Binder {
     }
 
     pub(crate) fn is_let_or_const_declaration(node: &Arc<Node>) -> bool {
-        if node.kind == SyntaxKind::VariableDeclaration {
-            if let Some(parent) = node.parent.as_ref() {
-                if parent.kind == SyntaxKind::VariableDeclarationList {
-                    return parent.flags.intersects(NodeFlags::Let | NodeFlags::Const);
+        // Go IsBlockOrCatchScoped：沿父链找变量声明列表的 let/const 位；
+        // 参数按 IsPartOfParameterDeclaration 归函数作用域，catch 变量按块作用域
+        let mut n = Arc::clone(node);
+        loop {
+            match n.kind {
+                SyntaxKind::VariableDeclaration => {
+                    return match n.parent() {
+                        Some(p) if p.kind == SyntaxKind::VariableDeclarationList => {
+                            p.flags.intersects(NodeFlags::Let | NodeFlags::Const)
+                        }
+                        Some(p) if p.kind == SyntaxKind::CatchClause => true,
+                        _ => false,
+                    };
                 }
+                SyntaxKind::Parameter => return false,
+                _ => match n.parent() {
+                    Some(p) => n = p,
+                    None => return true,
+                },
             }
         }
-        true
     }
 
     pub(crate) fn has_export_declarations(container: &Arc<Node>) -> bool {
@@ -232,7 +378,7 @@ impl Binder {
     #[allow(dead_code)]
     pub(crate) fn is_var_declaration(node: &Arc<Node>) -> bool {
         if node.kind == SyntaxKind::VariableDeclaration {
-            if let Some(parent) = node.parent.as_ref() {
+            if let Some(parent) = node.parent().as_ref() {
                 if parent.kind == SyntaxKind::VariableDeclarationList {
                     return !parent.flags.intersects(NodeFlags::Let | NodeFlags::Const);
                 }
@@ -242,20 +388,18 @@ impl Binder {
     }
 
     pub(crate) fn declaration_is_var(node: &Arc<Node>) -> bool {
-        let mut current = node;
+        let mut current = Arc::clone(node);
         loop {
             match current.kind {
                 SyntaxKind::VariableDeclaration => {
-                    return if let Some(parent) = current.parent.as_ref() {
+                    return current.parent().is_some_and(|parent| {
                         parent.kind == SyntaxKind::VariableDeclarationList
                             && !parent.flags.intersects(NodeFlags::Let | NodeFlags::Const)
-                    } else {
-                        false
-                    };
+                    });
                 }
                 SyntaxKind::BindingElement
                 | SyntaxKind::ObjectBindingPattern
-                | SyntaxKind::ArrayBindingPattern => match current.parent.as_ref() {
+                | SyntaxKind::ArrayBindingPattern => match current.parent() {
                     Some(parent) => current = parent,
                     None => return false,
                 },
@@ -279,10 +423,10 @@ impl Binder {
     pub(crate) fn get_combined_modifier_flags(&self, node: &Arc<Node>) -> ModifierFlags {
         let mut flags = node.syntactic_modifier_flags();
         if node.kind == SyntaxKind::VariableDeclaration {
-            if let Some(parent) = &node.parent {
+            if let Some(parent) = node.parent() {
                 if parent.kind == SyntaxKind::VariableDeclarationList {
                     flags |= parent.syntactic_modifier_flags();
-                    if let Some(gp) = &parent.parent {
+                    if let Some(gp) = parent.parent() {
                         if gp.kind == SyntaxKind::VariableStatement {
                             flags |= gp.syntactic_modifier_flags();
                         }
@@ -293,3 +437,4 @@ impl Binder {
         flags
     }
 }
+

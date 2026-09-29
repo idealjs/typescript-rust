@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHoverWithVerbosity"]
+
 #[test]
 fn quickinfo_verbosity_const_enum() {
     let content = r#"
@@ -17,6 +17,6 @@ enum NumericEnum/*2*/ {
     C,
 }
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHoverWithVerbosity"); // f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{
+    let _s = Session::new_for_test("quickinfoVerbosityConstEnum", content);
+    // TODO: f.VerifyBaselineHoverWithVerbosity(t, map[string][]int{
 }

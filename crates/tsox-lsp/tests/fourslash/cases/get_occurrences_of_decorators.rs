@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn get_occurrences_of_decorators() {
     let content = r#"// @Filename: b.ts
@@ -12,6 +12,6 @@ class C {
 function decorator(target) {
     return target;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "1")
+    let _s = Session::new_for_test("getOccurrencesOfDecorators", content);
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "1")
 }

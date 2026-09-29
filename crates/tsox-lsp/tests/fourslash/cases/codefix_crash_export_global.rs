@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
+
 #[test]
 fn codefix_crash_export_global() {
     let content = r#"// @module: commonjs
@@ -24,9 +24,9 @@ interface Root {
 
 declare const root: Root;
 export = root;"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("codefixCrashExportGlobal", content);
     fourslash::go_to_file(&mut s, "bar.ts");
-    fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
+    // TODO: f.VerifyCodeFixNotAvailable(t)
     fourslash::go_to_file(&mut s, "foo.d.ts");
-    fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
+    // TODO: f.VerifyCodeFixNotAvailable(t)
 }

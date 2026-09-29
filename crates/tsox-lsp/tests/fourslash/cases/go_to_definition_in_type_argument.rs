@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_in_type_argument() {
     let content = r#"class /*fooDefinition*/Foo<T> { }
@@ -8,6 +8,6 @@ fn go_to_definition_in_type_argument() {
 class /*barDefinition*/Bar { }
 
 var x = new Fo/*fooReference*/o<Ba/*barReference*/r>();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "barReference", "fooReference")
+    let _s = Session::new_for_test("goToDefinitionInTypeArgument", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, false, "barReference", "fooReference")
 }

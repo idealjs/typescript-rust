@@ -38,13 +38,6 @@ impl Checker {
         if !self.is_jsx_enabled() {
             self.grammar_error_on_node(error_node, &CANNOT_USE_JSX_UNLESS_THE_JSX_FLAG_IS_PROVIDED);
         }
-
-        if self.no_implicit_any && self.get_jsx_namespace().is_none() {
-            self.grammar_error_on_node(
-                error_node,
-                &JSX_ELEMENT_IMPLICITLY_HAS_TYPE_ANY_BECAUSE_THE_GLOBAL_TYPE_JSX_ELEMENT_DOES_NOT_EXIST,
-            );
-        }
     }
 
     pub(crate) fn ensure_jsx_implicit_container(&mut self, error_node: &Arc<Node>) {
@@ -54,18 +47,12 @@ impl Checker {
             return;
         }
         let resolved: Option<std::sync::Arc<tsox_frontend::ast::Symbol>> =
-            match self.compiler_options.jsx {
-                JsxEmit::ReactJSX | JsxEmit::ReactJSXDev => {
-                    let source = if self.compiler_options.jsx_import_source.is_empty() {
-                        "react"
-                    } else {
-                        self.compiler_options.jsx_import_source.as_str()
-                    };
-                    let module_ref = if self.compiler_options.jsx == JsxEmit::ReactJSXDev {
-                        format!("{source}/jsx-dev-runtime")
-                    } else {
-                        format!("{source}/jsx-runtime")
-                    };
+            if let Some(source) = self.jsx_implicit_import_base() {
+                let module_ref = if self.compiler_options.jsx == JsxEmit::ReactJSXDev {
+                    format!("{source}/jsx-dev-runtime")
+                } else {
+                    format!("{source}/jsx-runtime")
+                };
                     match self
                         .resolve_module_file_symbol(&module_ref)
                         .or_else(|| self.resolve_jsx_runtime_by_path(&module_ref))
@@ -80,8 +67,8 @@ impl Checker {
                         }
                         None => {
                             let mut span = error_node.loc;
-                            let mut node: &Arc<Node> = error_node;
-                            while let Some(parent) = node.parent.as_ref() {
+                            let mut node = Arc::clone(error_node);
+                            while let Some(parent) = node.parent() {
                                 match parent.kind {
                                     tsox_frontend::ast::SyntaxKind::JsxElement
                                     | tsox_frontend::ast::SyntaxKind::JsxSelfClosingElement
@@ -95,12 +82,59 @@ impl Checker {
                             self.pending_jsx_2875 = Some((span, module_ref));
                             None
                         }
-                    }
                 }
-
-                _ => None,
+            } else {
+                // Go getJsxNamespace：经典模式的命名空间名 = jsxFactory
+                //（pragma/选项）首段，否则 reactNamespace；解析该名字取其
+                // JSX 成员（import 别名/合并命名空间皆可命中）
+                let namespace_name = self
+                    .local_jsx_pragma_factory("jsx")
+                    .or_else(|| self.local_jsx_pragma_factory("jsxFactory"))
+                    .and_then(|f| f.split('.').next().map(str::to_string))
+                    .or_else(|| {
+                        let factory = self.compiler_options.jsx_factory.clone();
+                        (!factory.is_empty()).then(|| {
+                            factory.split('.').next().unwrap_or_default().to_string()
+                        })
+                    })
+                    .or_else(|| {
+                        let ns = self.compiler_options.react_namespace.clone();
+                        (!ns.is_empty()).then_some(ns)
+                    });
+                match namespace_name.and_then(|ns| self.jsx_namespace_container_symbol(&ns)) {
+                    Some(container) => container
+                        .exports
+                        .get(JsxNames::JSX)
+                        .or_else(|| container.members.get(JsxNames::JSX))
+                        .cloned(),
+                    None => None,
+                }
             };
         self.jsx_implicit_namespace.insert(file_id, resolved);
+    }
+
+    fn jsx_namespace_container_symbol(
+        &mut self,
+        name: &str,
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+        let symbol_map = self.program.symbol_map();
+        for &container_id in self.scope_stack.iter().rev() {
+            let found = symbol_map
+                .locals
+                .get(&container_id)
+                .and_then(|locals| locals.get(name))
+                .or_else(|| {
+                    symbol_map
+                        .symbols
+                        .get(&container_id)
+                        .and_then(|cs| cs.members.get(name))
+                })
+                .cloned();
+            if let Some(sym) = found {
+                return Some(self.resolve_alias_base(sym));
+            }
+        }
+        None
     }
 
     pub(crate) fn resolve_jsx_runtime_by_path(
@@ -150,12 +184,19 @@ impl Checker {
             .or_else(|| intrinsic_elements.exports.get(&tag_text));
 
         if member.is_none() {
-            let has_index_signature = intrinsic_elements.declarations.iter().any(|d| {
-                matches!(&d.data, tsox_frontend::ast::NodeData::InterfaceDeclaration(id) if id
-                    .members
-                    .iter()
-                    .any(|m| m.kind == SyntaxKind::IndexSignature))
-            });
+            // Go getApplicableIndexInfo：接口解析合并基类型索引签名
+            //（IntrinsicElements extends Record<string, any> 命中 string 键）
+            let resolved = self.resolve_interface_type(&intrinsic_elements, None);
+            let intrinsic_type = if resolved.flags.contains(crate::checker::types::TypeFlags::Any)
+                || resolved.as_structured().is_none()
+            {
+                self.get_type_of_symbol(&intrinsic_elements)
+            } else {
+                resolved
+            };
+            let has_index_signature = !self
+                .get_index_infos_of_type(&intrinsic_type)
+                .is_empty();
             if intrinsic_elements.members.is_empty()
                 && intrinsic_elements.exports.is_empty()
                 && !has_index_signature
@@ -188,14 +229,11 @@ impl Checker {
             return;
         }
 
-        let has_call_sigs = !self
-            .get_signatures_of_type(&tag_type, crate::checker::SignatureKind::Call)
-            .is_empty();
-        let has_construct_sigs = !self
-            .get_signatures_of_type(&tag_type, crate::checker::SignatureKind::Construct)
+        let has_signatures = !self
+            .get_uninstantiated_jsx_signatures_of_type(&tag_type, &tag_name)
             .is_empty();
 
-        if !has_call_sigs && !has_construct_sigs {
+        if !has_signatures {
             let text = tag_name.text().to_string();
             self.grammar_error_on_node_with_args(
                 &tag_name,
@@ -206,46 +244,7 @@ impl Checker {
     }
 
     pub(crate) fn jsx_factory_namespace_in_scope(&self, name: &str) -> bool {
-        use tsox_frontend::ast::SymbolFlags;
-        let symbol_map = self.program.symbol_map();
-        let value = |sym: &std::sync::Arc<tsox_frontend::ast::Symbol>| {
-            if sym.flags.intersects(SymbolFlags::Alias) {
-                match self.follow_alias(sym) {
-                    Some(t) if std::sync::Arc::ptr_eq(&t, sym) => true,
-                    Some(t) => t.flags.intersects(SymbolFlags::VALUE),
-                    None => true,
-                }
-            } else {
-                sym.flags.intersects(SymbolFlags::VALUE)
-            }
-        };
-        for &container_id in self.scope_stack.iter().rev() {
-            if let Some(locals) = symbol_map.locals.get(&container_id)
-                && let Some(sym) = locals.get(name)
-                && value(sym)
-            {
-                return true;
-            }
-            if let Some(cs) = symbol_map.symbols.get(&container_id)
-                && (!cs.flags.intersects(SymbolFlags::Class)
-                    || cs.flags.intersects(SymbolFlags::Function))
-                && let Some(sym) = cs.members.get(name)
-                && value(sym)
-            {
-                return true;
-            }
-            if let Some(cs) = symbol_map.symbols.get(&container_id)
-                && cs.flags.intersects(SymbolFlags::MODULE)
-                && !cs.flags.intersects(SymbolFlags::Class)
-                && let Some(sym) = cs.exports.get(name)
-                && value(sym)
-            {
-                return true;
-            }
-        }
-        self.globals
-            .get(name)
-            .is_some_and(|g| g.flags.intersects(SymbolFlags::VALUE))
+        self.jsx_factory_namespace_symbol(name).is_some()
     }
 
     pub(crate) fn local_jsx_pragma_factory(&self, pragma: &str) -> Option<String> {

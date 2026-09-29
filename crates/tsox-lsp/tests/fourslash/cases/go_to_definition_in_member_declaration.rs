@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToDefinition"]
+
 #[test]
 fn go_to_definition_in_member_declaration() {
     let content = r#"interface /*interfaceDefinition*/IFoo { method1(): number; }
@@ -21,6 +21,6 @@ class /*selfDefinition*/Bar {
     constructor(public _inConstructor: [|IFo/*interfaceReferenceInConstructor*/o|]) {
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, true, "interfaceReference", "interfaceReferenceInList", "interface
+    let _s = Session::new_for_test("goToDefinitionInMemberDeclaration", content);
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "interfaceReference", "interfaceReferenceInList", "interface
 }

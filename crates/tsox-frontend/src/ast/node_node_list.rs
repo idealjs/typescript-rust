@@ -3,7 +3,7 @@ use crate::ast::node_node::Node;
 use std::sync::Arc;
 use tsox_core::core::text::TextRange;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct NodeList {
     pub loc: TextRange,
     pub nodes: Vec<Arc<Node>>,

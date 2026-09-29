@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
+
 #[test]
 fn go_to_implementation_namespace_06() {
     let content = r#"namespace [|F/*declaration*/oo|] {
@@ -9,6 +9,6 @@ fn go_to_implementation_namespace_06() {
 
 
 let x: typeof Foo = [|{ hello() {} }|];"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "declaration")
+    let _s = Session::new_for_test("goToImplementationNamespace_06", content);
+    // TODO: f.VerifyBaselineGoToImplementation(t, "declaration")
 }

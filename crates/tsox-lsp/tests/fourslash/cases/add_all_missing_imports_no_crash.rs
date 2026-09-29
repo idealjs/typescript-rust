@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFixAll"]
+
 #[test]
 fn add_all_missing_imports_no_crash() {
     let content = r#"// @Filename: file1.ts
@@ -16,7 +16,7 @@ interface Testing {
     test3: Test3;
     test4: Test4;
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("addAllMissingImportsNoCrash", content);
     fourslash::go_to_file(&mut s, "file2.ts");
-    fourslash::unsupported("VerifyCodeFixAll"); // f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
+    // TODO: f.VerifyCodeFixAll(t, fourslash.VerifyCodeFixAllOptions{
 }

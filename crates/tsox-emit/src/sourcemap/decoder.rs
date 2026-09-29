@@ -41,6 +41,15 @@ impl<'a> MappingsDecoder<'a> {
         self.pos
     }
 
+    pub(crate) fn set_error(&mut self, error: &str) {
+        self.error = Some(error.to_string());
+    }
+
+    pub(crate) fn stop_iterating(&mut self) -> (Option<Mapping>, bool) {
+        self.done = true;
+        (None, true)
+    }
+
     pub fn error(&self) -> Option<&str> {
         self.error.as_deref()
     }

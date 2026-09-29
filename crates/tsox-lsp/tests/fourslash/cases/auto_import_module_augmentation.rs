@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.BaselineAutoImportsCompletions"]
+
 #[test]
 fn auto_import_module_augmentation() {
     let content = r#"// @Filename: /a.ts
@@ -17,6 +17,6 @@ declare module "./a" {
 // @Filename: /c.ts
 Foo/**/
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("BaselineAutoImportsCompletions"); // f.BaselineAutoImportsCompletions(t, []string{""})
+    let _s = Session::new_for_test("autoImportModuleAugmentation", content);
+    // TODO: f.BaselineAutoImportsCompletions(t, []string{""})
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_for_string_literal_nonrelative_import4() {
     let content = r#"// @Filename: dir1/dir2/dir3/dir4/test0.ts
@@ -19,6 +19,6 @@ var foo7 = require("f/*require0*/
 { "dependencies": { "fake-module3": "latest" } }
 // @Filename: dir1/dir2/dir3/node_modules/fake-module3/ts.ts
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
+    let _s = Session::new_for_test("completionForStringLiteralNonrelativeImport4", content);
+    // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

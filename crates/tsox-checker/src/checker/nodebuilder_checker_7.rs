@@ -5,19 +5,39 @@ use crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
 
 impl Checker {
     pub fn type_to_string(&mut self, t: &Arc<Type>) -> String {
-        self.type_to_string_ex(t, TypeFormatFlags::ALLOW_UNIQUE_ES_SYMBOL_TYPE)
+        self.type_to_string_ex(
+            t,
+            TypeFormatFlags::ALLOW_UNIQUE_ES_SYMBOL_TYPE
+                .union(TypeFormatFlags::NO_TRUNCATION),
+        )
     }
 
     pub fn type_to_string_ex(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String {
         let key = Arc::as_ptr(t) as usize;
         if self.type_print_stack.len() >= 300 || self.type_print_stack.contains(&key) {
+            if self.type_print_stack.contains(&key)
+                && let Some(s) = self.self_referential_fn_symbol_to_string(t)
+            {
+                return s;
+            }
             return "...".to_string();
         }
         if self.serialization_level >= MAX_SERIALIZATION_LEVEL {
             return "?".to_string();
         }
         self.type_print_stack.push(key);
+        let outermost = self.type_print_stack.len() == 1;
+        let saved_length = self.display_approximate_length;
+        let saved_truncating = self.display_truncating;
+        if outermost {
+            self.display_approximate_length = 0;
+            self.display_truncating = false;
+        }
         let result = self.type_to_string_ex_worker(t, flags);
+        if outermost {
+            self.display_approximate_length = saved_length;
+            self.display_truncating = saved_truncating;
+        }
         self.type_print_stack.pop();
         result
     }
@@ -28,7 +48,21 @@ impl Checker {
         flags: TypeFormatFlags,
     ) -> String {
         if let Some(name) = t.intrinsic_name() {
+            if name == "error" {
+                return "any".to_string();
+            }
             return name.to_string();
+        }
+
+        if t.flags.contains(TypeFlags::EnumLiteral)
+            && !t.is_union()
+            && let Some(sym) = &t.symbol
+            && sym
+                .flags
+                .intersects(tsox_frontend::ast::SymbolFlags::EnumMember)
+            && let Some(parent) = sym.parent()
+        {
+            return format!("{}.{}", parent.name, sym.name);
         }
 
         if let Some(val) = t.literal_value() {
@@ -46,6 +80,38 @@ impl Checker {
 
         if t.flags.contains(TypeFlags::Never) {
             return "never".to_string();
+        }
+
+        if t.is_union()
+            && let Some(sym) = &t.symbol
+            && sym.flags.intersects(tsox_frontend::ast::SymbolFlags::ENUM)
+        {
+            return sym.name.clone();
+        }
+
+        // Go typeToTypeNode：alias 可达时先于 union/intersection/类型参数/类接口
+        // 按别名引用呈现（命名空间限定 + 类型实参；Array 单实参写 []）
+        if let Some(alias) = &t.alias
+            && let Some(sym) = &alias.symbol
+        {
+            let args: Vec<String> = alias
+                .type_arguments
+                .iter()
+                .map(|a| self.type_to_string_ex(a, flags))
+                .collect();
+            if args.len() == 1 && sym.name == "Array" {
+                let elem =
+                    self.maybe_parenthesize_array_element_ex(&alias.type_arguments[0], flags);
+                return format!("{elem}[]");
+            }
+            let qualified = self
+                .namespace_qualifier_of(sym)
+                .map(|q| format!("{q}.{}", sym.name))
+                .unwrap_or_else(|| sym.name.clone());
+            if args.is_empty() {
+                return qualified;
+            }
+            return format!("{}<{}>", qualified, args.join(", "));
         }
 
         if t.is_union() {
@@ -149,13 +215,28 @@ impl Checker {
         }
         if let TypeData::Substitution(sub) = &t.data {
             if let Some(base) = &sub.base_type {
-                return self.type_to_string_ex(base, flags);
+                let base_str = self.type_to_string_ex(base, flags);
+                if self.is_no_infer_type(t) {
+                    return format!("NoInfer<{base_str}>");
+                }
+                return base_str;
             }
             if let Some(c) = &sub.constraint {
                 return self.type_to_string_ex(c, flags);
             }
         }
         if let TypeData::Conditional(c) = &t.data {
+            // Go conditionalTypeToTypeNode：已解析/可解析的条件显示解析值，
+            // 别名形态只留给泛型挂起的条件
+            let resolved = c
+                .resolved_true_type
+                .get()
+                .or_else(|| c.resolved_false_type.get())
+                .cloned()
+                .or_else(|| self.resolve_conditional_type(t));
+            if let Some(resolved) = resolved {
+                return self.type_to_string_ex(&resolved, flags);
+            }
             if let Some(alias) = &t.alias
                 && let Some(sym) = &alias.symbol
             {
@@ -173,7 +254,16 @@ impl Checker {
             let check = root
                 .and_then(|r| r.check_type.clone())
                 .or_else(|| c.check_type.clone())
-                .map(|ct| self.type_to_string_ex(&ct, flags))
+                .map(|ct| {
+                    // Go conditionalTypeToTypeNode：函数/构造形态的 check 需要
+                    // 括号分组（(...t: T) => void extends ...）
+                    let s = self.type_to_string_ex(&ct, flags);
+                    if ct.as_structured().is_some_and(|st| !st.signatures.is_empty()) {
+                        format!("({s})")
+                    } else {
+                        s
+                    }
+                })
                 .unwrap_or_else(|| "unknown".to_string());
             let extends = root
                 .and_then(|r| r.extends_type.clone())
@@ -223,6 +313,40 @@ impl Checker {
             return format!("{check} extends {extends} ? {true_t} : {false_t}");
         }
 
+        // 泛型函数内声明的类经调用位实例化：f<string>.C 形态
+        // （alias=外层函数+实参，symbol=类）
+        if let Some(alias) = &t.alias
+            && let Some(fn_sym) = &alias.symbol
+            && fn_sym.flags.contains(tsox_frontend::ast::SymbolFlags::Function)
+            && let Some(class_sym) = &t.symbol
+            && class_sym.flags.contains(tsox_frontend::ast::SymbolFlags::Class)
+            && !alias.type_arguments.is_empty()
+        {
+            let args: Vec<String> = alias
+                .type_arguments
+                .iter()
+                .map(|a| self.type_to_string_ex(a, flags))
+                .collect();
+            return format!("{}<{}>.{}", fn_sym.name, args.join(", "), class_sym.name);
+        }
+
+        // Go typeToString：hover flags 带 UseAliasDefinedOutsideCurrentScope 时
+        // 优先按别名符号打印（Name<args>）
+        if flags.contains(TypeFormatFlags::USE_ALIAS_DEFINED_OUTSIDE_CURRENT_SCOPE)
+            && let Some(alias) = &t.alias
+            && let Some(sym) = &alias.symbol
+        {
+            let args: Vec<String> = alias
+                .type_arguments
+                .iter()
+                .map(|a| self.type_to_string_ex(a, flags))
+                .collect();
+            if args.is_empty() {
+                return sym.name.clone();
+            }
+            return format!("{}<{}>", sym.name, args.join(", "));
+        }
+
         if t.object_flags.contains(ObjectFlags::Tuple) {
             return self.tuple_to_string(t, flags);
         }
@@ -231,13 +355,36 @@ impl Checker {
             return self.reference_to_string(t, flags);
         }
 
+        // Go typeToString：实例化别名的对象结果（Partial<Foo> 展开体）按别名
+        // 呈现，先于成员展开
+        if let Some(alias) = &t.alias
+            && let Some(sym) = &alias.symbol
+            && !matches!(&t.data, TypeData::Mapped(_) | TypeData::Conditional(_))
+        {
+            let args: Vec<String> = alias
+                .type_arguments
+                .iter()
+                .map(|a| self.type_to_string_ex(a, flags))
+                .collect();
+            if args.is_empty() {
+                return sym.name.clone();
+            }
+            return format!("{}<{}>", sym.name, args.join(", "));
+        }
+
         if let Some(structured) = t.as_structured() {
-            if structured.call_signature_count > 0 && t.symbol.is_none() {
+            if !self.symbol_type_printed_by_name(t)
+                && structured.signatures.len() == 1
+                && structured.properties.is_empty()
+                && structured.index_infos.is_empty()
+            {
                 return self.function_type_to_string(t, structured, flags);
             }
         }
 
-        if let Some(sym) = &t.symbol {
+        if self.symbol_type_printed_by_name(t)
+            && let Some(sym) = &t.symbol
+        {
             return self.symbol_type_to_string(t, sym, flags);
         }
 
@@ -249,7 +396,13 @@ impl Checker {
             {
                 return self.object_literal_to_string(t, structured, flags);
             }
-            if t.object_flags.contains(ObjectFlags::ObjectLiteral) && t.symbol.is_none() {
+            // 空匿名对象字面量形态（Go createTypeNodeFromObjectType 无成员 TypeLiteral）：
+            // 内部名匿名符号（þobject 等）与 TypeLiteral 符号同按 {} 展示
+            if t
+                .symbol
+                .as_ref()
+                .is_none_or(|s| s.name.starts_with('\u{FE}') || s.flags.contains(SymbolFlags::TypeLiteral))
+            {
                 return "{}".to_string();
             }
         }
@@ -272,6 +425,51 @@ impl Checker {
             LiteralValue::Boolean(true) => "true".to_string(),
             LiteralValue::Boolean(false) => "false".to_string(),
             LiteralValue::None => String::new(),
+        }
+    }
+
+    pub(crate) fn is_fn_symbol_anonymous_type(&self, t: &Arc<Type>) -> bool {
+        t.object_flags.contains(ObjectFlags::Anonymous)
+            && t.symbol.as_ref().is_some_and(|s| {
+                s.flags.contains(SymbolFlags::Function)
+                    && !s
+                        .flags
+                        .intersects(SymbolFlags::Class | SymbolFlags::ENUM | SymbolFlags::ValueModule)
+            })
+    }
+
+    pub(crate) fn symbol_type_printed_by_name(&self, t: &Arc<Type>) -> bool {
+        t.symbol.as_ref().is_some_and(|sym| {
+            !sym.flags.contains(SymbolFlags::TypeLiteral)
+                && (!sym.name.starts_with('\u{FE}') || sym.flags.contains(SymbolFlags::Class))
+                && sym.flags.intersects(
+                    SymbolFlags::Class
+                        | SymbolFlags::ENUM
+                        | SymbolFlags::ValueModule
+                        | SymbolFlags::Interface,
+                )
+        })
+    }
+
+    fn self_referential_fn_symbol_to_string(&self, t: &Arc<Type>) -> Option<String> {
+        if !self.is_fn_symbol_anonymous_type(t) {
+            return None;
+        }
+        let sym = t.symbol.as_ref()?;
+        if !sym.flags.contains(SymbolFlags::Function) {
+            return None;
+        }
+        let is_non_local = sym.parent().is_some()
+            || sym.declarations.iter().any(|d| {
+                matches!(
+                    d.parent().map(|p| p.kind),
+                    Some(SyntaxKind::SourceFile) | Some(SyntaxKind::ModuleBlock)
+                )
+            });
+        if is_non_local {
+            Some(format!("typeof {}", sym.name))
+        } else {
+            None
         }
     }
 }

@@ -53,7 +53,7 @@ fn find_jsx_linked_ranges(node: &Arc<Node>, line_map: &LineMap) -> Vec<Range> {
         SyntaxKind::JsxOpeningElement => {
             let opening_range = jsx_tag_name_range(&tag_node, line_map);
 
-            let closing_range = tag_node.parent.as_ref().and_then(|parent| {
+            let closing_range = tag_node.parent().as_ref().and_then(|parent| {
                 if let NodeData::JsxElement(data) = &parent.data {
                     jsx_tag_name_range(&data.closing_element, line_map)
                 } else {
@@ -69,7 +69,7 @@ fn find_jsx_linked_ranges(node: &Arc<Node>, line_map: &LineMap) -> Vec<Range> {
         SyntaxKind::JsxClosingElement => {
             let closing_range = jsx_tag_name_range(&tag_node, line_map);
 
-            let opening_range = tag_node.parent.as_ref().and_then(|parent| {
+            let opening_range = tag_node.parent().as_ref().and_then(|parent| {
                 if let NodeData::JsxElement(data) = &parent.data {
                     jsx_tag_name_range(&data.opening_element, line_map)
                 } else {
@@ -101,7 +101,7 @@ fn find_jsx_tag_ancestor(node: &Arc<Node>) -> Option<Arc<Node>> {
             }
             _ => {}
         }
-        current = n.parent.clone();
+        current = n.parent();
     }
     None
 }

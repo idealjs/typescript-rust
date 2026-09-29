@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn format_comments() {
     let content = r#"_.chain()
@@ -14,8 +14,8 @@ wow(
     4
 // wua/*argument2*/
 );"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formatComments", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "callChain1");
     fourslash::verify_current_line_content(&mut s, r#"    // wow"#);
     fourslash::go_to_marker(&mut s, "callChain2");

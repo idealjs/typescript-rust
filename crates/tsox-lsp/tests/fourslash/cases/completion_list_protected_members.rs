@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn completion_list_protected_members() {
     let content = r#"class Base {
@@ -20,10 +20,10 @@ class D3 extends D1 {
 }
 var b: Base;
 f./*5*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "2", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "3", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "4", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "5", nil)
+    let mut s = Session::new_for_test("completionListProtectedMembers", content);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("1"), &["y", "x", "method"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("2"), &["z", "method1", "y", "x", "method"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("3"), &["method2", "y", "x", "method"]);
+    fourslash::verify_completions_unsorted_at(&mut s, Some("4"), &["method2", "z", "method1", "y", "x", "method"]);
+    fourslash::verify_completions_empty_at(&mut s, Some("5"));
 }

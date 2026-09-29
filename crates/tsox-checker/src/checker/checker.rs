@@ -10,6 +10,11 @@ pub use crate::checker::checker_attach_explicit_type_arguments::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_checker::*;
 #[allow(unused_imports)]
+pub use crate::checker::checker_checker_checker::{
+    CachedSignatureKey, FlowLoopInfo, FlowLoopKey, SignatureKey, SubstitutionTypeKey,
+    TypeResolution, TypeSystemEntity,
+};
+#[allow(unused_imports)]
 pub use crate::checker::checker_get_excluded_symbol_flags::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_heritage_retry_limit::*;
@@ -22,6 +27,8 @@ pub use crate::checker::checker_impl_chunk_6::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_module_alias_target_state::*;
 #[allow(unused_imports)]
+pub use crate::checker::checker_module_element_context::*;
+#[allow(unused_imports)]
 pub use crate::checker::checker_object_literal_is_destructuring_target::*;
 pub(crate) use std::collections::{HashMap, HashSet};
 pub(crate) use std::sync::atomic::{AtomicU32, Ordering};
@@ -30,7 +37,6 @@ pub(crate) use tsox_core::core::compiler_options::CompilerOptions;
 pub(crate) use tsox_core::core::compiler_options::ModuleKind;
 pub(crate) use tsox_core::core::compiler_options::ModuleResolutionKind;
 pub(crate) use tsox_core::core::compiler_options::ScriptTarget;
-pub(crate) use tsox_core::jsnum;
 pub(crate) use tsox_frontend::ast::CheckFlags;
 pub(crate) use tsox_frontend::ast::DiagnosticsCollection;
 pub(crate) use tsox_frontend::ast::ModifierFlags;

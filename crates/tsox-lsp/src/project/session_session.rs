@@ -40,9 +40,11 @@ impl Session {
             logger: init.logger,
             fs: Some(overlay_fs),
             parse_cache: Some(parse_cache),
+            content_mapped_parse_cache: init.content_mapped_parse_cache.clone(),
             extended_config_cache: Some(Arc::new(ExtendedConfigCache::new())),
             program_counter: Some(Arc::new(ProgramCounter::new())),
             background_queue: Arc::new(background::Queue::new()),
+            background_ctx: init.background_ctx.clone(),
             snapshot_id: AtomicU64::new(0),
             snapshot: RwLock::new(Some(snapshot)),
             pending_file_changes: Mutex::new(Vec::new()),
@@ -58,6 +60,13 @@ impl Session {
             diagnostics_refresh_at: Mutex::new(None),
             idle_cache_clean_at: Mutex::new(None),
             warm_auto_import_active: AtomicBool::new(false),
+            content_mapper_host: None,
+            content_mapper_timings: Mutex::new(tsox_compile::mig::m3l_cm::Timings::default()),
+            initial_user_preferences: Mutex::new(new_default_user_preferences()),
+            typings_installer: None,
+            npm_executor: None,
+            registered_content_mapper_extensions: Mutex::new(Vec::new()),
+            registered_content_mapper_snapshot_id: AtomicU64::new(0),
         }
     }
 

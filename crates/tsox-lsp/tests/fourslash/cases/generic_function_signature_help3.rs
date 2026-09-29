@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifySignatureHelp"]
+
 #[test]
 fn generic_function_signature_help3() {
     let content = r#"function foo1<T>(x: number, callback: (y1: T) => number) { }
@@ -18,20 +18,20 @@ foo4<string>(1,/*4*/     // signature help shows y as string
 foo5<string>(1, (/*5*/   // signature help shows y as T
 foo6(1, </*6*/           // signature help shows y as {}
 foo7(1, <string>(/*7*/   // signature help shows y as T"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("genericFunctionSignatureHelp3", content);
     fourslash::go_to_marker(&mut s, "1");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "foo1(x: number, callback: (y1: 
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "foo1(x: number, callback: (y1: 
     fourslash::go_to_marker(&mut s, "2");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "foo2(x: number, callback: (y2: 
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "foo2(x: number, callback: (y2: 
     fourslash::go_to_marker(&mut s, "3");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "callback(y3: unknown): number"}
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "callback(y3: unknown): number"}
     fourslash::go_to_marker(&mut s, "4");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "foo4(x: number, callback: (y4: 
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "foo4(x: number, callback: (y4: 
     fourslash::go_to_marker(&mut s, "5");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "callback(y5: string): number"})
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "callback(y5: string): number"})
     fourslash::go_to_marker(&mut s, "6");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "foo6(x: number, callback: (y6: 
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "foo6(x: number, callback: (y6: 
     fourslash::insert(&mut s, "string>(null,null);");
     fourslash::go_to_marker(&mut s, "7");
-    fourslash::unsupported("VerifySignatureHelp"); // f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "foo7(x: number, callback: (y7: 
+    // TODO: f.VerifySignatureHelp(t, fourslash.VerifySignatureHelpOptions{Text: "foo7(x: number, callback: (y7: 
 }

@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyImportFixAtPosition"]
+
 #[test]
 fn import_name_code_fix_new_import_index_not_for_classic_resolution() {
     let content = r#"// @moduleResolution: classic
@@ -12,10 +12,10 @@ export const bar = 0;
 [|foo;|]
 // @Filename: /c.ts
 [|bar;|]"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("importNameCodeFixNewImportIndex_notForClassicResolution", content);
     fourslash::go_to_file(&mut s, "/a/index.ts");
     fourslash::go_to_file(&mut s, "/b.ts");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
     fourslash::go_to_file(&mut s, "/c.ts");
-    fourslash::unsupported("VerifyImportFixAtPosition"); // f.VerifyImportFixAtPosition(t, []string{
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
 }

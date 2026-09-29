@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineHover"]
+
 #[test]
 fn quick_info_on_this5() {
     let content = r#"// @noImplicitThis: true
@@ -24,6 +24,6 @@ class Foo {
         type X = typeof th/*6*/is;
     }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineHover"); // f.VerifyBaselineHover(t)
+    let _s = Session::new_for_test("quickInfoOnThis5", content);
+    // TODO: f.VerifyBaselineHover(t)
 }

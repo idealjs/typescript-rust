@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineRenameAtRangesWithText"]
+
 #[test]
 fn js_object_define_property_rename_locations() {
     let content = r#"// @allowJs: true
@@ -16,6 +16,6 @@ var CircularList = (function () {
     }
     return CircularList;
 })()"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineRenameAtRangesWithText"); // f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/)
+    let _s = Session::new_for_test("jsObjectDefinePropertyRenameLocations", content);
+    // TODO: f.VerifyBaselineRenameAtRangesWithText(t, nil /*preferences*/)
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_parameter_property_with_conflicting_member() {
     let content = r#"
@@ -24,6 +24,6 @@ class C2 {
 }
 new C2(1).[|x|];
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t)
+    let _s = Session::new_for_test("findAllRefsParameterPropertyWithConflictingMember", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t)
 }

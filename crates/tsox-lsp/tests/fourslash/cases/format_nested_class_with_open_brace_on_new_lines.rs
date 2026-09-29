@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: opts168 := f.GetOptions()"]
+
 #[test]
 fn format_nested_class_with_open_brace_on_new_lines() {
     let content = r#"module A
@@ -8,13 +8,17 @@ fn format_nested_class_with_open_brace_on_new_lines() {
     class B {
         /*1*/
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formatNestedClassWithOpenBraceOnNewLines", content);
     // TODO: opts168 := f.GetOptions()
-    // TODO: opts168.FormatCodeSettings.PlaceOpenBraceOnNewLineForControlBlocks = core.TSTrue
-    fourslash::unsupported("Configure"); // f.Configure(t, opts168)
+    fourslash::configure_format_settings(&mut s, &[("place_open_brace_on_new_line_for_control_blocks", "true")]);
     // TODO: opts232 := f.GetOptions()
-    // TODO: opts232.FormatCodeSettings.PlaceOpenBraceOnNewLineForFunctions = core.TSTrue
-    fourslash::unsupported("Configure"); // f.Configure(t, opts232)
+    fourslash::configure_format_settings(&mut s, &[("place_open_brace_on_new_line_for_functions", "true")]);
     fourslash::go_to_marker(&mut s, "1");
-    fourslash::unsupported("Insert"); // f.Insert(t, "}")
+    fourslash::insert(&mut s, "}");
+    fourslash::verify_current_file_content(&mut s, r#"module A
+{
+    class B
+    {
+    }
+}"#);
 }

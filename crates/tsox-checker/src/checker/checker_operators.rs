@@ -8,7 +8,7 @@ use tsox_frontend::ast::SyntaxKind;
 use crate::checker::checker::*;
 
 impl Checker {
-    fn op_display(kind: tsox_frontend::ast::SyntaxKind) -> &'static str {
+    pub(crate) fn op_display(kind: tsox_frontend::ast::SyntaxKind) -> &'static str {
         use tsox_frontend::ast::SyntaxKind::*;
         match kind {
             AsteriskToken => "*",
@@ -35,6 +35,10 @@ impl Checker {
             CaretEqualsToken => "^=",
             AmpersandToken => "&",
             AmpersandEqualsToken => "&=",
+            LessThanToken => "<",
+            GreaterThanToken => ">",
+            LessThanEqualsToken => "<=",
+            GreaterThanEqualsToken => ">=",
             _ => "?",
         }
     }
@@ -91,6 +95,18 @@ impl Checker {
         if !arith_nonplus && !plus {
             return;
         }
+        // Go plus 分支：任一操作数 string-like 可赋值（非 strict 下含
+        // null/undefined）时跳过 checkNonNullType，18050 不报
+        if plus {
+            let lt = self.get_type_of_node(&data.left);
+            let rt = self.get_type_of_node(&data.right);
+            let s = self.string_type();
+            let skip = self.is_type_assignable_to(&lt, &s)
+                || self.is_type_assignable_to(&rt, &s);
+            if skip {
+                return;
+            }
+        }
         for operand in [&data.left, &data.right] {
             if matches!(operand.kind, NullKeyword | UndefinedKeyword) {
                 let word = if operand.kind == NullKeyword {
@@ -130,7 +146,7 @@ impl Checker {
                 let file = self.current_file.clone();
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,
-                    node.loc,
+                    data.operator_token.loc,
                     tsox_core::diagnostics::messages_generated::
                         THE_0_OPERATOR_IS_NOT_ALLOWED_FOR_BOOLEAN_TYPES_CONSIDER_USING_1_INSTEAD,
                     vec![Self::op_display(op).to_string(), sugg.to_string()],
@@ -191,12 +207,12 @@ impl Checker {
             .unwrap_or_else(|| self.get_type_of_node(&data.left));
         let rt = self.get_type_of_node(&data.right);
         let number_like = |t: &Arc<Type>| {
-            (!self.strict_null_checks && t.flags.intersects(TypeFlags::Undefined | TypeFlags::Null))
-                || t.flags.contains(TypeFlags::Never)
+            t.flags.contains(TypeFlags::Never)
                 || t.flags.intersects(
                     TypeFlags::Number
                         | TypeFlags::NumberLiteral
                         | TypeFlags::EnumLiteral
+                        | TypeFlags::Enum
                         | TypeFlags::Union,
                 )
         };
@@ -208,24 +224,37 @@ impl Checker {
             t.flags
                 .intersects(TypeFlags::String | TypeFlags::StringLiteral)
         };
-        let valid = (number_like(&lt) && number_like(&rt))
-            || (bigint_like(&lt) && bigint_like(&rt))
-            || string_like(&lt)
-            || string_like(&rt)
-            || lt.flags.contains(TypeFlags::Any)
-            || rt.flags.contains(TypeFlags::Any);
-        if !valid {
-            let lt_str = self.type_to_string(&lt);
-            let rt_str = self.type_to_string(&rt);
-            let file = self.current_file.clone();
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                file,
-                node.loc,
-                tsox_core::diagnostics::messages_generated::
-                    OPERATOR_0_CANNOT_BE_APPLIED_TO_TYPES_1_AND_2,
-                vec!["+".to_string(), lt_str, rt_str],
-            ));
+        let valid_pair = |lt: &Arc<Type>, rt: &Arc<Type>| {
+            (number_like(lt) && number_like(rt))
+                || (bigint_like(lt) && bigint_like(rt))
+                || string_like(lt)
+                || string_like(rt)
+                || lt.flags.contains(TypeFlags::Any)
+                || rt.flags.contains(TypeFlags::Any)
+        };
+        if valid_pair(&lt, &rt) {
+            self.check_for_disallowed_es_symbol_operand(&data.left, &data.right, &lt, &rt, op);
+            return;
         }
+        // Go getBaseTypesIfUnrelated：基类型仍不相关时按基类型展示
+        //（true→boolean、E.a→E 等字面量提升）
+        let base_lt = self.get_base_type_of_literal_type(&lt);
+        let base_rt = self.get_base_type_of_literal_type(&rt);
+        let (el, er) = if valid_pair(&base_lt, &base_rt) {
+            (&lt, &rt)
+        } else {
+            (&base_lt, &base_rt)
+        };
+        let lt_str = self.type_to_string(el);
+        let rt_str = self.type_to_string(er);
+        let file = self.current_file.clone();
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            file,
+            node.loc,
+            tsox_core::diagnostics::messages_generated::
+                OPERATOR_0_CANNOT_BE_APPLIED_TO_TYPES_1_AND_2,
+            vec!["+".to_string(), lt_str, rt_str],
+        ));
     }
 
     pub(crate) fn logical_rhs_frame(

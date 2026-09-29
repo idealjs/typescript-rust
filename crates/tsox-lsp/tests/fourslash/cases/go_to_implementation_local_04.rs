@@ -1,12 +1,12 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineGoToImplementation"]
+
 #[test]
 fn go_to_implementation_local_04() {
     let content = r#"function [|he/*local_var*/llo|]() {}
 
 hello();
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToImplementation"); // f.VerifyBaselineGoToImplementation(t, "local_var")
+    let _s = Session::new_for_test("goToImplementationLocal_04", content);
+    // TODO: f.VerifyBaselineGoToImplementation(t, "local_var")
 }

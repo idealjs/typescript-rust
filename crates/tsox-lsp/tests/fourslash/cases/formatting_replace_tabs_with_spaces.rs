@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.FormatDocument"]
+
 #[test]
 fn formatting_replace_tabs_with_spaces() {
     let content = r#"namespace Foo {
@@ -12,8 +12,8 @@ fn formatting_replace_tabs_with_spaces() {
 /*6*/    class Test { }
 /*7*/     class Test { }
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    let mut s = Session::new_for_test("formattingReplaceTabsWithSpaces", content);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"    class Test { }"#);
     fourslash::go_to_marker(&mut s, "2");

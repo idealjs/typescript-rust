@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn generic_interface_property_inference1() {
     let content = r#"// @strict: false
@@ -89,8 +90,8 @@ var f5_/*e6*/r12 = f5.ofIG4;
 var f5_/*e7*/r14 = f5.ofIG6;
 var f5_/*e8*/r18 = f5.ofC2;
 var f5_/*e9*/r20 = f5.ofC4;"#;
-    let mut s = Session::new(content);
-    fourslash::verify_no_errors(&mut s);
+    let mut s = Session::new_for_test("genericInterfacePropertyInference1", content);
+    fourslash::verify_no_errors(&mut s, );
     fourslash::verify_quick_info_at(&mut s, "a1", "var f_r1: number", "");
     fourslash::verify_quick_info_at(&mut s, "a2", "var f_r2: string", "");
     fourslash::verify_quick_info_at(&mut s, "a3", "var f_r3: any", "");
@@ -124,19 +125,9 @@ var f5_/*e9*/r20 = f5.ofC4;"#;
     fourslash::verify_quick_info_at(&mut s, "d4", "var f4_r5: Foo<number>", "");
     fourslash::verify_quick_info_at(&mut s, "d5", "var f4_r8: I", "");
     fourslash::verify_quick_info_at(&mut s, "d6", "var f4_r12: {\n    x: number;\n}", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "d7",
-        "var f4_r14: {\n    x: {\n        x: number;\n    };\n}",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "d7", "var f4_r14: {\n    x: {\n        x: number;\n    };\n}", "");
     fourslash::verify_quick_info_at(&mut s, "d8", "var f4_r18: C<number>", "");
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "d9",
-        "var f4_r20: C<{\n    x: {\n        x: number;\n    };\n}>",
-        "",
-    );
+    fourslash::verify_quick_info_at(&mut s, "d9", "var f4_r20: C<{\n    x: {\n        x: number;\n    };\n}>", "");
     fourslash::verify_quick_info_at(&mut s, "e1", "var f5_r1: number", "");
     fourslash::verify_quick_info_at(&mut s, "e2", "var f5_r2: string", "");
     fourslash::verify_quick_info_at(&mut s, "e3", "var f5_r3: Foo<number>", "");

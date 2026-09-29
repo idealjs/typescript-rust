@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn contextually_typed_object_literal_method_declaration_param01() {
     let content = r#"// @noImplicitAny: true
@@ -26,7 +27,7 @@ function getFoo1(): Foo {
         }
     }
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("contextuallyTypedObjectLiteralMethodDeclarationParam01", content);
     fourslash::verify_quick_info_at(&mut s, "param1", "(parameter) arg: A", "");
     fourslash::verify_quick_info_at(&mut s, "param2", "(parameter) arg: B", "");
 }

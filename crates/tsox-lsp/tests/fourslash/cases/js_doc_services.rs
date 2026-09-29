@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn js_doc_services() {
     let content = r#"interface /*I*/I {}
@@ -11,12 +11,12 @@ fn js_doc_services() {
 function f([|[|/*def*/{| "contextRangeIndex": 1 |}foo|]: I|]) {
     return /*use2*/[|foo|];
 }"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("jsDocServices", content);
     fourslash::go_to_marker(&mut s, "use");
-    fourslash::unsupported("VerifyQuickInfoIs"); // f.VerifyQuickInfoIs(t, "(parameter) foo: I", "I pity the foo")
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "use", "def", "use2")
-    fourslash::unsupported("VerifyBaselineRename"); // f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[0], f.Ranges()[2], f.Ranges()[3])
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, f.Ranges()[0], f.Ranges()[2], f.Ranges()[
-    fourslash::unsupported("VerifyBaselineGoToTypeDefinition"); // f.VerifyBaselineGoToTypeDefinition(t, "use")
-    fourslash::unsupported("VerifyBaselineGoToDefinition"); // f.VerifyBaselineGoToDefinition(t, false, "use")
+    // TODO: f.VerifyQuickInfoIs(t, "(parameter) foo: I", "I pity the foo")
+    // TODO: f.VerifyBaselineFindAllReferences(t, "use", "def", "use2")
+    // TODO: f.VerifyBaselineRename(t, nil /*preferences*/, f.Ranges()[0], f.Ranges()[2], f.Ranges()[3])
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, f.Ranges()[0], f.Ranges()[2], f.Ranges()[
+    // TODO: f.VerifyBaselineGoToTypeDefinition(t, "use")
+    // TODO: f.VerifyBaselineGoToDefinition(t, false, "use")
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // When the cursor is on a usage of a default import (not on"]
+
 #[test]
 fn go_to_source_default_import_usage_site_checker() {
     // TODO: // When the cursor is on a usage of a default import (not on the import
@@ -21,11 +21,10 @@ export default class /*targetWidget*/Widget {
 import Widget from "pkg";
 const w = new Widget/*constructUsage*/("test");
 w./*methodUsage*/render();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "constructUsage", "methodUsage")
+    let _s = Session::new_for_test("goToSourceDefaultImportUsageSiteChecker", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "constructUsage", "methodUsage")
 }
 
-#[ignore = "generator: // Default import re-exported and then used at a call site. "]
 #[test]
 fn go_to_source_default_import_re_export_usage() {
     // TODO: // Default import re-exported and then used at a call site. The checker
@@ -41,6 +40,6 @@ export default function /*targetGreet*/greet(name) { return "Hello, " + name; }
 // @Filename: /home/src/workspaces/project/index.ts
 import greet from "pkg";
 greet/*callUsage*/("world");"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "callUsage")
+    let _s = Session::new_for_test("goToSourceDefaultImportReExportUsage", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "callUsage")
 }

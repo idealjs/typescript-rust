@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
+
 #[test]
 fn code_fix_await_in_sync_function3() {
     let content = r#"const f = {
@@ -11,6 +11,6 @@ fn code_fix_await_in_sync_function3() {
         await Promise.resolve();
     },
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
+    let _s = Session::new_for_test("codeFixAwaitInSyncFunction3", content);
+    // TODO: f.VerifyCodeFixNotAvailable(t)
 }

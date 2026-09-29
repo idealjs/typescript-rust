@@ -242,7 +242,7 @@ pub(crate) fn match_pattern_or_exact(parsed: &ParsedPatterns, candidate: &str) -
 
 #[derive(Clone, Debug)]
 pub struct DiagAndArgs {
-    pub message: String,
+    pub message: &'static tsox_core::diagnostics::Message,
     pub args: Vec<String>,
 }
 

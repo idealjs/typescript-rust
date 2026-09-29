@@ -1,4 +1,5 @@
 use super::*;
+use tsox_core::core::compiler_options::ScriptTarget;
 use tsox_core::core::tristate::Tristate;
 use tsox_frontend::parser::Parser;
 use tsox_tsoptions::vfs::InMemoryFS;

@@ -22,18 +22,23 @@ impl Parser {
     pub(crate) fn parse_identifier_name_or_keyword(&mut self) -> Arc<Node> {
         if self.is_identifier() {
             self.parse_identifier()
-        } else {
+        } else if is_keyword(self.token) {
             let text = format!("{:?}", self.token)
                 .trim_end_matches("Keyword")
                 .to_lowercase();
             let pos = self.token_pos();
             let end = self.token_end();
             self.next_token();
-            Arc::new(Node::with_loc(
+            Arc::new(Node::with_loc_flags(
                 SyntaxKind::Identifier,
                 NodeData::Identifier(IdentifierData { text }),
                 TextRange::new(pos, end),
+                self.context_flags_now(),
             ))
+        } else {
+            // Go createIdentifierWithDiagnostic：保留字与普通 token 分别报
+            // TS1003 两种变体，给缺失名且不消费当前 token
+            self.identifier_expected_error_and_missing()
         }
     }
 
@@ -52,19 +57,23 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn make_export_modifier(&self, pos: usize, end: usize) -> ModifierList {
-        let export_token = Arc::new(Node::with_loc(
-            SyntaxKind::ExportKeyword,
-            NodeData::Token,
-            TextRange::new(pos, end),
-        ));
-        ModifierList::new(vec![export_token], ModifierFlags::Export)
+    pub(crate) fn parse_export_declaration(&mut self) -> Arc<Node> {
+        self.parse_export_declaration_with_pre(Vec::new())
     }
 
-    pub(crate) fn parse_export_declaration(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_export_declaration_with_pre(
+        &mut self,
+        pre: Vec<(SyntaxKind, usize, usize)>,
+    ) -> Arc<Node> {
         let pos = self.token_pos();
         let export_end = self.token_end();
         self.next_token();
+        let with_export =
+            |pre: &Vec<(SyntaxKind, usize, usize)>| -> Vec<(SyntaxKind, usize, usize)> {
+                let mut v = pre.clone();
+                v.push((SyntaxKind::ExportKeyword, pos, export_end));
+                v
+            };
 
         if matches!(
             self.token,
@@ -77,17 +86,32 @@ impl Parser {
                 | SyntaxKind::ProtectedKeyword
                 | SyntaxKind::StaticKeyword
         ) {
-            return self.parse_declaration_with_modifiers(vec![(
-                SyntaxKind::ExportKeyword,
-                pos,
-                export_end,
-            )]);
+            return self.parse_declaration_with_modifiers(with_export(&pre));
+        }
+
+        if self.token == SyntaxKind::UsingKeyword
+            || (self.token == SyntaxKind::AwaitKeyword && self.is_await_using_declaration())
+        {
+            return self.parse_declaration_with_modifiers(with_export(&pre));
         }
 
         if self.token == SyntaxKind::DefaultKeyword {
             let default_pos = self.token_pos();
             let default_end = self.token_end();
             self.next_token();
+            if self.token == SyntaxKind::AsyncKeyword
+                && self.look_ahead_token() == SyntaxKind::FunctionKeyword
+            {
+                let async_pos = self.token_pos();
+                let async_end = self.token_end();
+                self.next_token();
+                let modifiers = self.make_modifier_list(vec![
+                    (SyntaxKind::ExportKeyword, pos, export_end),
+                    (SyntaxKind::DefaultKeyword, default_pos, default_end),
+                    (SyntaxKind::AsyncKeyword, async_pos, async_end),
+                ]);
+                return self.parse_function_declaration_with_modifiers(Some(modifiers));
+            }
             if self.token == SyntaxKind::FunctionKeyword {
                 let modifiers = self.make_modifier_list(vec![
                     (SyntaxKind::ExportKeyword, pos, export_end),
@@ -112,16 +136,17 @@ impl Parser {
 
             let expr = self.parse_assignment_expression();
             self.parse_semicolon();
-            let end = self.token_pos();
+            let end = self.node_pos();
+            let decl_pos = pre.first().map_or(pos, |m| m.1.min(pos));
             return Arc::new(Node::with_loc(
                 SyntaxKind::ExportAssignment,
                 NodeData::ExportAssignment(ExportAssignmentData {
-                    modifiers: None,
+                    modifiers: self.make_optional_modifier_list(&pre),
                     is_export_equals: false,
-                    type_node: expr.clone(),
+                    type_node: self.missing_node(pos),
                     expression: expr,
                 }),
-                TextRange::new(pos, end),
+                TextRange::new(decl_pos, end),
             ));
         }
 
@@ -129,16 +154,17 @@ impl Parser {
             self.next_token();
             let expr = self.parse_assignment_expression();
             self.parse_semicolon();
-            let end = self.token_pos();
+            let end = self.node_pos();
+            let decl_pos = pre.first().map_or(pos, |m| m.1.min(pos));
             return Arc::new(Node::with_loc(
                 SyntaxKind::ExportAssignment,
                 NodeData::ExportAssignment(ExportAssignmentData {
-                    modifiers: None,
+                    modifiers: self.make_optional_modifier_list(&pre),
                     is_export_equals: true,
-                    type_node: expr.clone(),
+                    type_node: self.missing_node(pos),
                     expression: expr,
                 }),
-                TextRange::new(pos, end),
+                TextRange::new(decl_pos, end),
             ));
         }
 
@@ -148,11 +174,11 @@ impl Parser {
                 self.next_token();
                 let name = self.parse_identifier_name_or_keyword();
                 self.parse_semicolon();
-                let end = self.token_pos();
+                let end = self.node_pos();
                 return Arc::new(Node::with_loc(
                     SyntaxKind::NamespaceExportDeclaration,
                     NodeData::NamespaceExportDeclaration(NamespaceExportDeclarationData {
-                        modifiers: None,
+                        modifiers: self.make_optional_modifier_list(&pre),
                         name,
                     }),
                     TextRange::new(pos, end),
@@ -167,22 +193,15 @@ impl Parser {
             | SyntaxKind::EnumKeyword
             | SyntaxKind::NamespaceKeyword
             | SyntaxKind::ModuleKeyword
-            | SyntaxKind::ImportKeyword => {
-                return self.parse_declaration_with_modifiers(vec![(
-                    SyntaxKind::ExportKeyword,
-                    pos,
-                    export_end,
-                )]);
+            | SyntaxKind::ImportKeyword
+            | SyntaxKind::ExportKeyword => {
+                return self.parse_declaration_with_modifiers(with_export(&pre));
             }
             SyntaxKind::TypeKeyword => {
                 let mut s = self.scanner.clone();
                 s.scan();
                 if !s.has_preceding_line_break() && Self::token_is_identifier(&s) {
-                    return self.parse_declaration_with_modifiers(vec![(
-                        SyntaxKind::ExportKeyword,
-                        pos,
-                        export_end,
-                    )]);
+                    return self.parse_declaration_with_modifiers(with_export(&pre));
                 }
                 self.next_token();
                 return self.parse_export_declaration_tail(pos, true);
@@ -191,22 +210,18 @@ impl Parser {
                 if self.token == SyntaxKind::ConstKeyword {
                     let mut s = self.scanner.clone();
                     if s.scan() == SyntaxKind::EnumKeyword {
-                        return self.parse_declaration_with_modifiers(vec![(
-                            SyntaxKind::ExportKeyword,
-                            pos,
-                            export_end,
-                        )]);
+                        return self.parse_declaration_with_modifiers(with_export(&pre));
                     }
                 }
 
-                let export_mod = self.make_export_modifier(pos, export_end);
+                let export_mod = self.make_modifier_list(with_export(&pre));
                 let declaration_list = self.parse_variable_declaration_list(false);
                 self.parse_semicolon();
-                let end = self.token_pos();
+                let end = self.node_pos();
                 return Arc::new(Node::with_loc(
                     SyntaxKind::VariableStatement,
                     NodeData::VariableStatement(VariableStatementData {
-                        modifiers: Some(Arc::new(export_mod)),
+                        modifiers: Some(export_mod),
                         declaration_list,
                     }),
                     TextRange::new(pos, end),
@@ -246,7 +261,7 @@ impl Parser {
         };
         let attributes = self.try_parse_import_attributes();
         self.parse_semicolon();
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::ExportDeclaration,
             NodeData::ExportDeclaration(ExportDeclarationData {
@@ -268,7 +283,7 @@ impl Parser {
             Parser::parse_export_specifier,
         );
         self.expect(SyntaxKind::CloseBraceToken);
-        let end = self.token_pos();
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::NamedExports,
             NodeData::NamedExports(NamedExportsData {

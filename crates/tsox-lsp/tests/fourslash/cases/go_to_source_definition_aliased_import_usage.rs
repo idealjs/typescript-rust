@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // When the cursor is on a usage of an aliased import (not o"]
+
 #[test]
 fn go_to_source_aliased_import_at_usage_site() {
     // TODO: // When the cursor is on a usage of an aliased import (not on the import
@@ -20,11 +20,10 @@ export function /*target*/original() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import { original as renamed } from "pkg";
 renamed/*usage*/();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
+    let _s = Session::new_for_test("goToSourceAliasedImportAtUsageSite", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }
 
-#[ignore = "generator: // When an aliased namespace import (import * as ns) is used"]
 #[test]
 fn go_to_source_aliased_import_at_usage_site_namespace_import() {
     // TODO: // When an aliased namespace import (import * as ns) is used at a property
@@ -40,6 +39,6 @@ export function /*target*/helper() { return "ok"; }
 // @Filename: /home/src/workspaces/project/index.ts
 import * as ns from "pkg";
 ns./*usage*/helper();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "usage")
+    let _s = Session::new_for_test("goToSourceAliasedImportAtUsageSiteNamespaceImport", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "usage")
 }

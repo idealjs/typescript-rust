@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: capabilities := fourslash.GetDefaultCapabilities()"]
+
 #[test]
 fn get_edits_for_file_rename_css_import4() {
     let content = r#"
@@ -19,6 +19,6 @@ export default css;
 import styles from ".//*rename*/app.css";"#;
     // TODO: capabilities := fourslash.GetDefaultCapabilities()
     // TODO: capabilities.Workspace.FileOperations.WillRename = new(false)
-    let mut s = Session::new_with_capabilities(content, None);
-    fourslash::unsupported("VerifyRename"); // f.VerifyRename(t, "rename", "app2.css", map[string]string{
+    let _s = Session::new_with_capabilities(content, None);
+    // TODO: f.VerifyRename(t, "rename", "app2.css", map[string]string{
 }

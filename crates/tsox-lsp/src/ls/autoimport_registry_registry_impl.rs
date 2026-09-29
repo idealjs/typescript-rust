@@ -5,7 +5,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tsox_core::collections::set::Set;
 use tsox_core::collections::syncmap::SyncMap;
-use tsox_core::tspath;
 
 use crate::ls::autoimport::{LogTree, RegistryCloneHost, ResolvedEntrypoint};
 

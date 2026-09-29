@@ -17,6 +17,13 @@ pub(crate) fn perform_compilation(
     let program = Arc::new(Program::new(ProgramOptions {
         config,
         host: Arc::clone(&host),
+        use_source_of_project_reference: false,
+        single_threaded: Tristate::Unknown,
+        create_checker_pool: None,
+        typings_location: String::new(),
+        project_name: String::new(),
+        tracing: None,
+        skip_module_resolution: false,
     }));
 
     let diags = program.get_diagnostics_to_report();
@@ -75,7 +82,7 @@ pub(crate) fn perform_compilation(
         }
     }
 
-    CommandLineResult { status }
+    CommandLineResult { watcher: None, status }
 }
 
 pub(crate) fn find_config_file(
@@ -243,7 +250,7 @@ pub(crate) fn write_config_file(sys: &dyn System, options: &CompilerOptions) -> 
             vec![config_file_name.clone()],
         );
         let _ = writeln!(writer, "{}", format_diagnostic(&diag, false, None));
-        return CommandLineResult {
+        return CommandLineResult { watcher: None,
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
         };
     }
@@ -255,7 +262,7 @@ pub(crate) fn write_config_file(sys: &dyn System, options: &CompilerOptions) -> 
             writer,
             "error TS5033: Could not write file '{config_file_name}': {err}."
         );
-        return CommandLineResult {
+        return CommandLineResult { watcher: None,
             status: ExitStatus::DiagnosticsPresent_OutputsSkipped,
         };
     }
@@ -264,7 +271,7 @@ pub(crate) fn write_config_file(sys: &dyn System, options: &CompilerOptions) -> 
     let _ = writeln!(writer);
     let _ = writeln!(writer, "Created a new tsconfig.json");
     let _ = writeln!(writer, "You can learn more at https://aka.ms/tsconfig");
-    CommandLineResult {
+    CommandLineResult { watcher: None,
         status: ExitStatus::Success,
     }
 }

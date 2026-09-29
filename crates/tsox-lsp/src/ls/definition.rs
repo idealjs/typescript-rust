@@ -10,7 +10,6 @@ use tsox_frontend::ast::Node;
 use tsox_frontend::ast::SourceFile;
 use tsox_frontend::ast::node::LineMap;
 use tsox_frontend::ast::node_data_generated::for_each_child;
-use tsox_frontend::scanner;
 
 use super::language_service::LanguageService;
 use super::types::LocationLink;
@@ -110,6 +109,11 @@ pub fn get_declarations_from_type(ty: &tsox_checker::checker::Type) -> Vec<Arc<N
         return symbol.declarations.clone();
     }
     Vec::new()
+}
+
+#[doc(hidden)]
+pub fn find_deepest_node_for_probe(node: &Arc<Node>, offset: usize) -> Arc<Node> {
+    find_deepest_node(node, offset)
 }
 
 fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {

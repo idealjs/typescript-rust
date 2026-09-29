@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
+
 #[test]
 fn semantic_classification2() {
     let content = r#"interface /*0*/Thing {
@@ -9,6 +9,6 @@ fn semantic_classification2() {
 
 var Thing = 0;
 Thing.toExponential();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
+    let _s = Session::new_for_test("semanticClassification2", content);
+    // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

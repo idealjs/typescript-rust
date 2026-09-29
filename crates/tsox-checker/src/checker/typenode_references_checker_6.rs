@@ -44,11 +44,11 @@ impl Checker {
         signatures.extend(base_data.construct_signatures().iter().cloned());
         let merged = Arc::new(Type {
             flags: TypeFlags::Object,
-            object_flags: ObjectFlags::Anonymous,
+            object_flags: ObjectFlags::Anonymous | ObjectFlags::Interface,
             id: crate::checker::types::next_type_id(),
             symbol: None,
             alias: None,
-            data: TypeData::Object(ObjectTypeData {
+            data: TypeData::Object(ObjectTypeData { node: None,
                 structured: StructuredTypeData {
                     members: symbol_table,
                     properties: props,
@@ -78,131 +78,15 @@ impl Checker {
             return cached;
         }
 
-        let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol;
-        if !self.push_type_resolution(
-            key,
-            crate::checker::checker::TypeResolutionProperty::DeclaredType,
-        ) {
-            return self.error_type();
-        }
-
-        let sym_map = self.program.symbol_map();
-        let mut entries: Vec<(Option<Arc<Symbol>>, String, Option<Arc<Node>>)> = Vec::new();
-        for decl in symbol.declarations.iter() {
-            if let NodeData::EnumDeclaration(data) = &decl.data {
-                for member_node in data.members.iter() {
-                    let NodeData::EnumMember(member) = &member_node.data else {
-                        continue;
-                    };
-                    let member_name = member.name.text().to_string();
-                    let member_sym = sym_map.symbol_of(member_node).map(Arc::clone);
-                    entries.push((member_sym, member_name, member.initializer.clone()));
-                }
-            }
-        }
-        let result = if entries.is_empty() {
-            self.error_type()
-        } else {
-            let mut member_types: Vec<Arc<Type>> = Vec::new();
-            let mut next_value: Option<f64> = Some(0.0);
-            for (member_sym, member_name, initializer) in &entries {
-                let base = match initializer {
-                    Some(init) => {
-                        let t = self.get_type_of_node(init);
-
-                        if t.flags.contains(TypeFlags::NumberLiteral) {
-                            if let TypeData::Literal(LiteralTypeData {
-                                value: LiteralValue::Number(n),
-                                ..
-                            }) = &t.data
-                            {
-                                next_value = Some(n.0 + 1.0);
-                            }
-                        } else if t.flags.contains(TypeFlags::StringLiteral) {
-                            next_value = None;
-                        }
-                        t
-                    }
-                    None => match next_value {
-                        Some(v) => {
-                            next_value = Some(v + 1.0);
-                            self.get_number_literal_type(tsox_core::jsnum::Number::from(v))
-                        }
-                        None => self.get_any_type(),
-                    },
-                };
-
-                let member_type = if base
-                    .flags
-                    .intersects(TypeFlags::NumberLiteral | TypeFlags::StringLiteral)
-                {
-                    let value = match &base.data {
-                        TypeData::Literal(lit) => lit.value.clone(),
-                        _ => LiteralValue::None,
-                    };
-                    let enum_literal_flags = base.flags | TypeFlags::EnumLiteral;
-                    let mut regular_ty = Type::new(
-                        enum_literal_flags,
-                        TypeData::Literal(LiteralTypeData {
-                            value: value.clone(),
-                            fresh_type: OnceLock::new(),
-                            regular_type: OnceLock::new(),
-                        }),
-                    );
-                    regular_ty.symbol = member_sym.clone();
-                    let regular_ty = Arc::new(regular_ty);
-                    let mut fresh_ty = Type::new(
-                        enum_literal_flags,
-                        TypeData::Literal(LiteralTypeData {
-                            value,
-                            fresh_type: OnceLock::new(),
-                            regular_type: OnceLock::from(Arc::clone(&regular_ty)),
-                        }),
-                    );
-                    fresh_ty.symbol = member_sym.clone();
-                    let fresh_ty = Arc::new(fresh_ty);
-
-                    if let TypeData::Literal(reg_lit) = &regular_ty.data {
-                        let _ = reg_lit.fresh_type.set(Arc::clone(&fresh_ty));
-                    }
-                    if let Some(ms) = member_sym {
-                        self.value_symbol_links.insert(
-                            ms,
-                            ValueSymbolLinks {
-                                resolved_type: Some(fresh_ty),
-                                ..Default::default()
-                            },
-                        );
-                    }
-                    regular_ty
-                } else {
-                    if let Some(ms) = member_sym {
-                        self.value_symbol_links.insert(
-                            ms,
-                            ValueSymbolLinks {
-                                resolved_type: Some(Arc::clone(&base)),
-                                ..Default::default()
-                            },
-                        );
-                    }
-                    base
-                };
-                let _ = member_name;
-                member_types.push(member_type);
-            }
-            match member_types.len() {
-                0 => self.never_type(),
-                1 => member_types.into_iter().next().unwrap(),
-                _ => self.get_union_type(member_types),
-            }
-        };
-        self.pop_type_resolution();
-        self.type_alias_links.get_or_default(symbol).declared_type = Some(result.clone());
+        let result = self.get_declared_type_of_enum(symbol);
+        self.type_alias_links
+            .get_or_default(symbol)
+            .declared_type = Some(Arc::clone(&result));
         result
     }
 
     pub(crate) fn get_type_of_prototype_property(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
-        let Some(parent) = symbol.parent.clone() else {
+        let Some(parent) = symbol.parent().clone() else {
             return self.get_any_type();
         };
         let Some(class_decl) = parent
@@ -241,6 +125,42 @@ impl Checker {
         }
         let any_t = self.get_any_type();
         let anys: Vec<Arc<Type>> = tp_types.iter().map(|_| Arc::clone(&any_t)).collect();
-        self.substitute_infer_type_parameters(&instance_type, &tp_types, &anys)
+        let substituted = self.substitute_infer_type_parameters(&instance_type, &tp_types, &anys);
+        self.rebuild_with_type_arguments(&substituted, anys)
+    }
+
+    pub(crate) fn rebuild_with_type_arguments(
+        &self,
+        base: &Arc<Type>,
+        args: Vec<Arc<Type>>,
+    ) -> Arc<Type> {
+        if args.is_empty() {
+            return Arc::clone(base);
+        }
+        if let TypeData::Object(o) = &base.data {
+            if !o.type_arguments.is_empty() {
+                return Arc::clone(base);
+            }
+            let mut rebuilt = Type::new(
+                base.flags,
+                TypeData::Object(ObjectTypeData { node: None,
+                    structured: StructuredTypeData {
+                        members: o.structured.members.clone(),
+                        properties: o.structured.properties.clone(),
+                        signatures: o.structured.signatures.clone(),
+                        call_signature_count: o.structured.call_signature_count,
+                        index_infos: o.structured.index_infos.clone(),
+                        ..Default::default()
+                    },
+                    target: o.target.clone(),
+                    mapper: o.mapper.clone(),
+                    type_arguments: args,
+                }),
+            );
+            rebuilt.object_flags = base.object_flags | ObjectFlags::Reference;
+            rebuilt.symbol = base.symbol.clone();
+            return Arc::new(rebuilt);
+        }
+        Arc::clone(base)
     }
 }

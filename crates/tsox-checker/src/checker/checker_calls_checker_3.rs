@@ -32,6 +32,7 @@ impl Checker {
         else {
             return;
         };
+        let new_call_fallback = std::mem::take(&mut self.new_call_fallback_signature);
 
         let type_arg_filtered: Vec<Arc<Signature>>;
         let signatures: &[Arc<Signature>] = {
@@ -74,6 +75,21 @@ impl Checker {
         };
         let sig = Arc::clone(&signatures[matching_idx]);
 
+        if is_new && new_call_fallback && !self.no_implicit_any {
+            let ret_void = self
+                .get_return_type_of_signature(&sig)
+                .is_some_and(|t| t.flags.contains(TypeFlags::Void));
+            if !ret_void {
+                let file = self.current_file.clone();
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    node.loc,
+                    tsox_core::diagnostics::messages_generated::
+                        ONLY_A_VOID_FUNCTION_CAN_BE_CALLED_WITH_THE_NEW_KEYWORD,
+                    Vec::new(),
+                ));
+            }
+        }
         if !self.check_call_arity(node, &sig, &arguments, callee_expr, is_new) {
             return;
         }
@@ -98,12 +114,30 @@ impl Checker {
             None
         };
 
+        let mut type_arity_ok = true;
         if !sig.type_parameters.is_empty() || Self::has_explicit_type_arguments(node) {
-            self.check_explicit_type_argument_count(node, &sig, is_new, callee_type);
+            type_arity_ok =
+                self.check_explicit_type_argument_count(node, &sig, is_new, callee_type);
+            self.check_call_type_argument_constraints(node, &sig);
         }
 
-        let inferred_types = self.infer_call_type_arguments(node, &sig, &arguments.nodes);
-
+        // 调用位显式类型实参：直接用作代入（Go inferTypeArguments 显式实参
+        // 固定映射，不从实参推断；错误实参落 error 型）
+        let explicit_args: Option<Vec<Arc<Type>>> = match &node.data {
+            tsox_frontend::ast::NodeData::CallExpression(d) => d
+                .type_arguments
+                .as_ref()
+                .map(|ta| ta.iter().map(|t| self.get_type_from_type_node(t)).collect()),
+            _ => None,
+        };
+        let explicit_args = match explicit_args {
+            Some(a) if a.len() == sig.type_parameters.len() => Some(a),
+            _ => None,
+        };
+        let inferred_types = match &explicit_args {
+            Some(ex) => ex.clone(),
+            None => self.infer_call_type_arguments(node, &sig, &arguments.nodes),
+        };
         let new_explicit_subst: Option<(Vec<Arc<Type>>, Vec<Arc<Type>>)> = if is_new {
             self.get_return_type_of_signature(&sig)
                 .and_then(|rt| rt.symbol.clone())
@@ -133,15 +167,18 @@ impl Checker {
         } else {
             None
         };
-        if std::env::var_os("TSOX_DEBUG_INFER").is_some() {
-            eprintln!(
-                "[infer] sig params={} tp={}",
-                sig.parameters.len(),
-                sig.type_parameters.len()
-            );
-            for (i, t) in inferred_types.iter().enumerate() {
-                eprintln!("[infer]   {} -> {}", i, self.type_to_string(t));
-            }
+        if !type_arity_ok {
+            return;
+        }
+        if !is_new
+            && node.kind == SyntaxKind::CallExpression
+            && self.speculation_depth == 0
+            && self.flow_loop_stack.is_empty()
+        {
+            self.signature_links.get_or_default(node).call_inference = Some(CallInference {
+                signature: Arc::clone(&sig),
+                inferred_types: inferred_types.clone(),
+            });
         }
         self.check_call_arguments_loop(
             node,

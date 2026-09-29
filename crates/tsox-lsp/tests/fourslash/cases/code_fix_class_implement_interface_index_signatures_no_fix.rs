@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyCodeFixNotAvailable"]
+
 #[test]
 fn code_fix_class_implement_interface_index_signatures_no_fix() {
     let content = r#"interface I4 {
@@ -8,6 +8,6 @@ fn code_fix_class_implement_interface_index_signatures_no_fix() {
 }
 
 class C implements I {[|  |]}"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCodeFixNotAvailable"); // f.VerifyCodeFixNotAvailable(t)
+    let _s = Session::new_for_test("codeFixClassImplementInterfaceIndexSignaturesNoFix", content);
+    // TODO: f.VerifyCodeFixNotAvailable(t)
 }

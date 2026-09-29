@@ -1,4 +1,5 @@
 #![allow(unused_imports)]
+use std::cell::Cell;
 
 use crate::checker::typenode_template_mapped::*;
 
@@ -44,7 +45,8 @@ impl Checker {
                 sb.push_str(&self.template_string_for_type(t));
                 sb.push_str(text);
             }
-            return self.get_string_literal_type(&sb);
+            return self
+                .get_string_literal_type(&crate::checker::string_surrogate::combine_surrogate_pairs(&sb));
         }
 
         let mut texts = Vec::with_capacity(span_types.len() + 1);
@@ -117,6 +119,7 @@ impl Checker {
             _ => return self.error_type(),
         };
         let constraint_type = self.get_type_from_type_node(&constraint_node);
+        let mapped_symbol = self.program.symbol_map().symbol_of(node).map(Arc::clone);
 
         if data.type_node.is_none()
             && self.no_implicit_any
@@ -135,15 +138,43 @@ impl Checker {
             ));
         }
 
-        let keys = self.string_literal_values(&constraint_type);
-
-        let constraint_all_literals = self.union_is_all_string_literals(&constraint_type);
+        let mut keys: Vec<Arc<Type>> = Vec::new();
+        let mut constraint_all_literals = true;
+        match &constraint_type.data {
+            TypeData::Union(u) => {
+                for m in &u.union_or_intersection.types {
+                    if m.flags
+                        .intersects(TypeFlags::StringLiteral | TypeFlags::NumberLiteral)
+                    {
+                        keys.push(Arc::clone(m));
+                    } else {
+                        constraint_all_literals = false;
+                    }
+                }
+            }
+            _ => {
+                if constraint_type
+                    .flags
+                    .intersects(TypeFlags::StringLiteral | TypeFlags::NumberLiteral)
+                {
+                    keys.push(Arc::clone(&constraint_type));
+                } else {
+                    constraint_all_literals = false;
+                }
+            }
+        }
         if keys.is_empty() || !constraint_all_literals {
-            let tp_type = self.get_type_from_type_node(&data.type_parameter);
-            let template_type = match &data.type_node {
-                Some(tn) => self.get_type_from_type_node(tn),
-                None => self.get_any_type(),
-            };
+            // Go getTypeParameterFromMappedType：类型参数按声明符号取型
+            // （get_type_from_type_node 对 TypeParameter 声明节点无臂，会落 error）
+            let tp_type = self
+                .program
+                .symbol_map()
+                .symbol_of(&data.type_parameter)
+                .cloned()
+                .map(|sym| self.get_type_parameter_from_symbol(&sym))
+                .unwrap_or_else(|| self.error_type());
+            // Go createMappedType：模板按需解析（getTemplateTypeFromMappedType），
+            // 泛型约束下急切解析嵌套别名（Deep<T[K]>）会互递归
             let name_type = data
                 .name_type
                 .as_ref()
@@ -152,10 +183,10 @@ impl Checker {
                 flags: TypeFlags::Object,
                 object_flags: crate::checker::types::ObjectFlags::Mapped,
                 id: crate::checker::types::next_type_id(),
-                symbol: None,
+                symbol: mapped_symbol.clone(),
                 alias: None,
                 data: TypeData::Mapped(MappedTypeData {
-                    object: ObjectTypeData {
+                    object: ObjectTypeData { node: None,
                         structured: StructuredTypeData::default(),
                         ..Default::default()
                     },
@@ -163,10 +194,12 @@ impl Checker {
                     type_parameter: Some(tp_type),
                     constraint_type: Some(constraint_type),
                     name_type,
-                    template_type: Some(template_type),
+                    template_type: None,
+                    template_node: data.type_node.clone(),
+                    template_subst: None,
                     modifiers_type: None,
                     resolved_apparent_type: OnceLock::new(),
-                    contains_error: false,
+                    contains_error: std::sync::atomic::AtomicBool::new(false),
                 }),
             });
         }
@@ -188,12 +221,26 @@ impl Checker {
 
         let mut symbol_table = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::new();
-        for key in &keys {
+        for key_type in &keys {
+            let key_name =
+                crate::checker::utilities_token_is_identifier_or_keyword::get_property_name_from_type(
+                    key_type,
+                );
+            let name = match &data.name_type {
+                Some(name_node) => {
+                    let t = self.resolve_mapped_decl_node(Some(node), name_node, key_type, &[]);
+                    match t.literal_value() {
+                        Some(LiteralValue::String(s)) => s.clone(),
+                        _ => key_name.clone(),
+                    }
+                }
+                None => key_name.clone(),
+            };
             let mut prop_type = match &data.type_node {
                 Some(tn) => {
                     if let Some(k) = tp_key {
                         let mut mapping = HashMap::new();
-                        mapping.insert(k, self.get_string_literal_type(key));
+                        mapping.insert(k, Arc::clone(key_type));
                         self.type_argument_stack.push(mapping);
                     }
                     let t = self.get_type_from_type_node(tn);
@@ -211,7 +258,7 @@ impl Checker {
             if is_optional {
                 flags |= SymbolFlags::Optional;
             }
-            let symbol = Arc::new(Symbol::new(flags, key.clone()));
+            let symbol = Arc::new(Symbol::new(flags, name.clone()));
             self.value_symbol_links.insert(
                 &symbol,
                 ValueSymbolLinks {
@@ -219,16 +266,16 @@ impl Checker {
                     ..Default::default()
                 },
             );
-            symbol_table.insert(key.clone(), Arc::clone(&symbol));
+            symbol_table.insert(name.clone(), Arc::clone(&symbol));
             props.push(symbol);
         }
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
             id: crate::checker::types::next_type_id(),
-            symbol: None,
+            symbol: mapped_symbol,
             alias: None,
-            data: TypeData::Object(ObjectTypeData {
+            data: TypeData::Object(ObjectTypeData { node: None,
                 structured: StructuredTypeData {
                     members: symbol_table,
                     properties: props,

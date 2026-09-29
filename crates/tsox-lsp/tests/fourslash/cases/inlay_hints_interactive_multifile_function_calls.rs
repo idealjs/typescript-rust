@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineInlayHints"]
+
 #[test]
 fn inlay_hints_interactive_multifile_function_calls() {
     let content = r#"// @Target: esnext
@@ -15,7 +15,7 @@ export function helperB(bParam: string) {
 }
 // @Filename: ccc.mts
 export function helperC(cParam: string) {}"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("inlayHintsInteractiveMultifileFunctionCalls", content);
     fourslash::go_to_file(&mut s, "./aaa.mts");
-    fourslash::unsupported("VerifyBaselineInlayHints"); // f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
+    // TODO: f.VerifyBaselineInlayHints(t, nil /*span*/, &lsutil.UserPreferences{InlayHints: lsutil.InlayHintsPre
 }

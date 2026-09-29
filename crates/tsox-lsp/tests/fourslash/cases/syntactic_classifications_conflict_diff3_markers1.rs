@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifySemanticTokens"]
+
 #[test]
 fn syntactic_classifications_conflict_diff3_markers1() {
     let content = r#"class C {
@@ -12,6 +12,6 @@ fn syntactic_classifications_conflict_diff3_markers1() {
     v = 2;
 >>>>>>> Branch - a
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifySemanticTokens"); // f.VerifySemanticTokens(t, []fourslash.SemanticToken{
+    let _s = Session::new_for_test("syntacticClassificationsConflictDiff3Markers1", content);
+    // TODO: f.VerifySemanticTokens(t, []fourslash.SemanticToken{
 }

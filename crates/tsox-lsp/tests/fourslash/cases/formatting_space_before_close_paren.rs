@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: opts235 := f.GetOptions()"]
+
 #[test]
 fn formatting_space_before_close_paren() {
     let content = r#"/*1*/({});
@@ -8,11 +8,10 @@ fn formatting_space_before_close_paren() {
 /*3*/({foo:42});
 /*4*/(  {foo:42}  );
 /*5*/var bar = (function (a) { });"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("formattingSpaceBeforeCloseParen", content);
     // TODO: opts235 := f.GetOptions()
-    // TODO: opts235.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = core.TSTrue
-    fourslash::unsupported("Configure"); // f.Configure(t, opts235)
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    fourslash::configure_format_settings(&mut s, &[("insert_space_after_opening_and_before_closing_nonempty_parenthesis", "true")]);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"( {} );"#);
     fourslash::go_to_marker(&mut s, "2");
@@ -24,9 +23,8 @@ fn formatting_space_before_close_paren() {
     fourslash::go_to_marker(&mut s, "5");
     fourslash::verify_current_line_content(&mut s, r#"var bar = ( function( a ) { } );"#);
     // TODO: opts674 := f.GetOptions()
-    // TODO: opts674.FormatCodeSettings.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = core.TSFalse
-    fourslash::unsupported("Configure"); // f.Configure(t, opts674)
-    fourslash::unsupported("FormatDocument"); // f.FormatDocument(t, "")
+    fourslash::configure_format_settings(&mut s, &[("insert_space_after_opening_and_before_closing_nonempty_parenthesis", "false")]);
+    fourslash::format_document(&mut s, "");
     fourslash::go_to_marker(&mut s, "1");
     fourslash::verify_current_line_content(&mut s, r#"({});"#);
     fourslash::go_to_marker(&mut s, "2");

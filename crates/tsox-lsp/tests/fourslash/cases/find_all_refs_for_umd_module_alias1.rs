@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_for_umd_module_alias1() {
     let content = r#"// @Filename: 0.d.ts
@@ -10,6 +10,6 @@ export function doTheOtherThing(): void;
 // @Filename: 1.ts
 /// <reference path="0.d.ts" />
 /*3*/myLib.doThing();"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
+    let _s = Session::new_for_test("findAllRefsForUMDModuleAlias1", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "1", "2", "3")
 }

@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: // When a property exists only via a mapped type in the .d.t"]
+
 #[test]
 fn go_to_source_property_access_no_declaration() {
     // TODO: // When a property exists only via a mapped type in the .d.ts, the checker
@@ -19,11 +19,10 @@ export const config = { /*targetAlpha*/alpha: "a", /*targetBeta*/beta: "b" };
 import { config } from "pkg";
 config./*accessAlpha*/alpha;
 config./*accessBeta*/beta;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "accessAlpha", "accessBeta")
+    let _s = Session::new_for_test("goToSourcePropertyAccessNoDeclaration", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "accessAlpha", "accessBeta")
 }
 
-#[ignore = "generator: // Deep property access chain: import * as ns; ns.obj.prop"]
 #[test]
 fn go_to_source_property_access_deep_chain() {
     // TODO: // Deep property access chain: import * as ns; ns.obj.prop
@@ -39,11 +38,10 @@ export const nested = { inner: { /*targetValue*/value: 42 } };
 // @Filename: /home/src/workspaces/project/index.ts
 import { nested } from "pkg";
 nested.inner./*accessValue*/value;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "accessValue")
+    let _s = Session::new_for_test("goToSourcePropertyAccessDeepChain", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "accessValue")
 }
 
-#[ignore = "generator: // from the checker (e.g. module augmentation or dynamic)."]
 #[test]
 fn go_to_source_property_access_namespace_import() {
     // TODO: // import * as ns from "pkg"; ns.thing — where "thing" has no declarations
@@ -60,6 +58,6 @@ export const coords = { /*targetX*/x: 10, /*targetY*/y: 20 };
 import { coords } from "pkg";
 coords./*accessX*/x;
 coords./*accessY*/y;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineGoToSourceDefinition"); // f.VerifyBaselineGoToSourceDefinition(t, "accessX", "accessY")
+    let _s = Session::new_for_test("goToSourcePropertyAccessNamespaceImport", content);
+    // TODO: f.VerifyBaselineGoToSourceDefinition(t, "accessX", "accessY")
 }

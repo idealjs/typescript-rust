@@ -1,5 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
+
 #[test]
 fn string_property_names1() {
     let content = r#"export interface Album {
@@ -7,6 +8,6 @@ fn string_property_names1() {
 }
 var a: Album;
 var /**/x = a['artist'];"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("stringPropertyNames1", content);
     fourslash::verify_quick_info_at(&mut s, "", "var x: number", "");
 }

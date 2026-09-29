@@ -22,7 +22,7 @@ impl Checker {
             Arc::as_ptr(prop) as *const tsox_frontend::ast::Symbol as usize,
         );
         if let Some(cached) = self.instantiated_member_type_cache.get(&key) {
-            return Arc::clone(&cached.1);
+            return Arc::clone(&cached.2);
         }
 
         let result = if owner_sym.flags.contains(SymbolFlags::Interface) {
@@ -43,8 +43,10 @@ impl Checker {
             self.instantiated_member_type_cache.clear();
         }
 
-        self.instantiated_member_type_cache
-            .insert(key, (Arc::clone(owner), Arc::clone(&result)));
+        self.instantiated_member_type_cache.insert(
+            key,
+            (Arc::clone(owner), Arc::clone(prop), Arc::clone(&result)),
+        );
         result
     }
 
@@ -56,7 +58,7 @@ impl Checker {
     ) -> Arc<Type> {
         let decl_tps = self.declared_type_parameter_types(owner_sym);
         if decl_tps.len() == args.len() && !decl_tps.is_empty() {
-            let raw = self.get_type_of_symbol(prop);
+            let raw = self.member_decl_symbol_type(prop);
             let substitutions = args.to_vec();
             let r = self.substitute_infer_type_parameters(&raw, &decl_tps, &substitutions);
             r
@@ -66,29 +68,25 @@ impl Checker {
     }
 
     pub(crate) fn declared_type_parameter_types(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Type>> {
-        let decl = symbol.declarations.iter().find(|d| {
-            matches!(
-                d.data,
-                NodeData::InterfaceDeclaration(_) | NodeData::ClassDeclaration(_)
-            )
-        });
-        let Some(decl) = decl else {
-            return Vec::new();
-        };
-        let tps = match &decl.data {
-            NodeData::InterfaceDeclaration(d) => d.type_parameters.as_ref(),
-            NodeData::ClassDeclaration(d) => d.type_parameters.as_ref(),
-            _ => None,
-        };
-        let Some(tps) = tps else {
-            return Vec::new();
-        };
+        // 全部声明的类型参数（interface 增强文件的同名 T 是独立符号，须一并
+        // 纳入代入表，否则增强成员的类型参数悬空）
         let tp_syms: Vec<Arc<Symbol>> = {
             let sym_map = self.program.symbol_map();
-            tps.iter()
+            symbol
+                .declarations
+                .iter()
+                .filter_map(|decl| match &decl.data {
+                    NodeData::InterfaceDeclaration(d) => d.type_parameters.as_ref(),
+                    NodeData::ClassDeclaration(d) => d.type_parameters.as_ref(),
+                    _ => None,
+                })
+                .flat_map(|tps| tps.iter())
                 .filter_map(|tp| sym_map.symbol_of(tp).map(Arc::clone))
                 .collect()
         };
+        if tp_syms.is_empty() {
+            return Vec::new();
+        }
 
         self.push_ts2304_suppression();
         let types = tp_syms
@@ -218,11 +216,15 @@ impl Checker {
     }
 
     pub(crate) fn get_index_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
-        if t.flags.contains(TypeFlags::Never) {
-            return self.never_type();
-        }
-        if t.flags.contains(TypeFlags::Any) {
-            return self.string_type();
+        // Go getIndexTypeEx（checker.go:27049）：any/never 的 keyof 为
+        // string | number | symbol（stringNumberSymbolType）
+        if t.flags.intersects(TypeFlags::Any | TypeFlags::Never) {
+            let parts = vec![
+                self.string_type(),
+                self.number_type(),
+                self.es_symbol_type(),
+            ];
+            return self.get_union_type(parts);
         }
 
         if t.flags.contains(TypeFlags::Union) {
@@ -230,24 +232,23 @@ impl Checker {
                 TypeData::Union(u) => &u.union_or_intersection.types,
                 _ => return self.never_type(),
             };
-            let mut common: Option<Vec<String>> = None;
+            let mut common: Option<Vec<Arc<Type>>> = None;
             for constituent in types {
                 let k = self.get_index_type(constituent);
-                let names = self.string_literal_values(&k);
+                let members = Self::flattened_key_members(&k);
                 common = Some(match common.take() {
-                    None => names,
-                    Some(acc) => acc.into_iter().filter(|n| names.contains(n)).collect(),
+                    None => members,
+                    Some(acc) => acc
+                        .into_iter()
+                        .filter(|m| members.iter().any(|n| Arc::ptr_eq(m, n)))
+                        .collect(),
                 });
             }
-            let names = common.unwrap_or_default();
-            if names.is_empty() {
+            let keys = common.unwrap_or_default();
+            if keys.is_empty() {
                 return self.never_type();
             }
-            let literals: Vec<Arc<Type>> = names
-                .into_iter()
-                .map(|n| self.get_string_literal_type(&n))
-                .collect();
-            return self.get_union_type(literals);
+            return self.get_union_type(keys);
         }
 
         if t.flags.contains(TypeFlags::Intersection) {
@@ -260,11 +261,21 @@ impl Checker {
         }
 
         if t.flags.contains(TypeFlags::TypeParameter) {
-            if let Some(constraint) = self.get_constraint_of_type_parameter(t) {
-                return self.get_index_type(&constraint);
-            }
-
-            return self.string_type();
+            return self.deferred_index_type(t);
+        }
+        // Go shouldDeferIndexType（InstantiableNonPrimitive）：泛型挂起的索引
+        // 访问/条件的 keyof 同样保持延迟（keyof T["_type"] 不归约为 never）
+        if t.flags.intersects(TypeFlags::IndexedAccess | TypeFlags::Conditional)
+            || matches!(&t.data, TypeData::IndexedAccess(_))
+        {
+            return self.deferred_index_type(t);
+        }
+        // Go shouldDeferIndexType 的 isGenericTupleType 分支：variadic 泛型
+        // tuple 的 keyof 挂起（keyof [...T, ...U] 不归约，长度未定）
+        if let TypeData::Tuple(tup) = &t.data
+            && tup.combined_flags.contains(crate::checker::types::ElementFlags::Variadic)
+        {
+            return self.deferred_index_type(t);
         }
 
         if let TypeData::Mapped(m) = &t.data
@@ -274,6 +285,12 @@ impl Checker {
                 .flags
                 .intersects(TypeFlags::TypeParameter | TypeFlags::IndexedAccess | TypeFlags::Index)
                 || matches!(&constraint.data, TypeData::IndexedAccess(_));
+            if generic
+                && m.name_type.is_some()
+                && Self::mapped_constraint_is_bare_keyof(m)
+            {
+                return self.deferred_index_type(t);
+            }
             let domain = if generic {
                 match self.constraint_of_indexed_access(constraint) {
                     Some(reduced) => reduced,
@@ -289,29 +306,56 @@ impl Checker {
             return domain;
         }
 
-        if let Some(structured) = t.as_structured() {
-            let mut keys: Vec<Arc<Type>> = structured
-                .properties
-                .iter()
-                .filter(|p| !p.name.starts_with('#'))
-                .map(|p| self.get_string_literal_type(&p.name))
-                .collect();
-            for info in &structured.index_infos {
-                if let Some(key) = &info.key_type {
-                    keys.push(Arc::clone(key));
+        let props = self.get_properties_of_type(t);
+        let index_infos = self.get_index_infos_of_type(t);
+        let mut keys: Vec<Arc<Type>> = props
+            .iter()
+            .filter(|p| {
+                !p.name.starts_with('#')
+                    && !crate::checker::exports::get_declaration_modifier_flags_from_symbol(p)
+                        .intersects(tsox_frontend::ast::ModifierFlags::NonPublicAccessibilityModifier)
+            })
+            .map(|p| self.literal_type_from_property(p))
+            .collect();
+        for info in &index_infos {
+            if let Some(key) = &info.key_type {
+                keys.push(Arc::clone(key));
 
-                    if key.flags.contains(TypeFlags::String) {
-                        keys.push(self.number_type());
-                    }
+                if key.flags.contains(TypeFlags::String) {
+                    keys.push(self.number_type());
                 }
             }
-            if keys.is_empty() {
-                return self.never_type();
-            }
-            return self.get_union_type(keys);
         }
+        if keys.is_empty() {
+            return self.never_type();
+        }
+        self.get_union_type(keys)
+    }
 
-        self.never_type()
+    fn flattened_key_members(t: &Arc<Type>) -> Vec<Arc<Type>> {
+        if t.flags.contains(TypeFlags::Never) {
+            return Vec::new();
+        }
+        if t.flags.contains(TypeFlags::Union) {
+            return t.types().map(|ts| ts.to_vec()).unwrap_or_default();
+        }
+        vec![Arc::clone(t)]
+    }
+
+    fn literal_type_from_property(&mut self, p: &Arc<Symbol>) -> Arc<Type> {
+        let decl = p
+            .value_declaration
+            .as_ref()
+            .or_else(|| p.declarations.first());
+        if let Some(decl) = decl
+            && let Some(name) = decl.name()
+            && name.kind == SyntaxKind::NumericLiteral
+        {
+            return self.get_number_literal_type(tsox_core::jsnum::Number::from_string(
+                name.text(),
+            ));
+        }
+        self.get_string_literal_type(&p.name)
     }
 
     pub(crate) fn type_node_references_name(node: &Arc<Node>, name: &str) -> bool {
@@ -324,5 +368,96 @@ impl Checker {
             found
         });
         found
+    }
+
+    pub(crate) fn mapped_constraint_is_bare_keyof(
+        m: &crate::checker::types::MappedTypeData,
+    ) -> bool {
+        let Some(decl) = &m.declaration else {
+            return false;
+        };
+        let tsox_frontend::ast::NodeData::MappedTypeNode(d) = &decl.data else {
+            return false;
+        };
+        let constraint_node = match &d.type_parameter.data {
+            tsox_frontend::ast::NodeData::TypeParameterDeclaration(td) => {
+                td.constraint.clone()
+            }
+            _ => None,
+        };
+        matches!(
+            &constraint_node,
+            Some(cn) if matches!(
+                &cn.data,
+                tsox_frontend::ast::NodeData::TypeOperatorNode(op)
+                    if op.operator == SyntaxKind::KeyOfKeyword
+            )
+        )
+    }
+}
+
+impl Checker {
+    fn deferred_index_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        if let Some(cached) = self.index_type_cache.get(&t.id) {
+            return Arc::clone(cached);
+        }
+        let index = Arc::new(Type::new(
+            TypeFlags::Index,
+            TypeData::Index(crate::checker::types::IndexTypeData {
+                constrained: Default::default(),
+                target: Some(Arc::clone(t)),
+                index_flags: Default::default(),
+            }),
+        ));
+        self.index_type_cache.insert(t.id, Arc::clone(&index));
+        index
+    }
+
+    // 类实例型成员是急建合成符号（无注解方法返回 any 驻缓存）：回源 binder
+    // 声明符号走惰性体推断（Go 成员即 binder 符号、返回型惰性解析）
+    pub(crate) fn member_decl_symbol_type(&mut self, prop: &Arc<Symbol>) -> Arc<Type> {
+        if let Some(decl) = prop.declarations.iter().find(|d| {
+            matches!(
+                d.kind,
+                SyntaxKind::MethodDeclaration
+                    | SyntaxKind::GetAccessor
+                    | SyntaxKind::SetAccessor
+            )
+        }) {
+            let binder_sym = self.program.symbol_map().symbol_of(decl).map(Arc::clone);
+            if let Some(bs) = binder_sym
+                && !Arc::ptr_eq(&bs, prop)
+            {
+                let t = self.get_type_of_symbol(&bs);
+                if !t.flags.contains(TypeFlags::Any) {
+                    return self.substitute_member_this_type(decl, t);
+                }
+            }
+        }
+        self.get_type_of_symbol(prop)
+    }
+
+    // Go getTypeWithThisArgument：非 this 接收者上的成员签名把多态 this
+    // 按声明容器实例化（A.foo(): this -> A）
+    fn substitute_member_this_type(
+        &mut self,
+        method_decl: &Arc<Node>,
+        t: Arc<Type>,
+    ) -> Arc<Type> {
+        let owner = match method_decl.parent() {
+            Some(p) => p,
+            None => return t,
+        };
+        if !matches!(
+            owner.kind,
+            SyntaxKind::ClassDeclaration
+                | SyntaxKind::ClassExpression
+                | SyntaxKind::InterfaceDeclaration
+        ) {
+            return t;
+        }
+        let instance = self.container_instance_type_of(&owner);
+        let this_t = self.create_this_type(&owner, Arc::clone(&instance));
+        self.substitute_infer_type_parameters(&t, &[this_t], &[instance])
     }
 }

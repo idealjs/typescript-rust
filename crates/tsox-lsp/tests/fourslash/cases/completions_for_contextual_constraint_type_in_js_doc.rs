@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: //"]
+
 #[test]
 fn completions_for_contextual_constraint_type_in_js_doc() {
     let content = r#"
@@ -20,7 +20,7 @@ let x;
 
 /** @type {a.Blah<{ a: /*2*/ }>} */
 "#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("completionsForContextualConstraintTypeInJsDoc", content);
     // TODO: // These examples both would panic in retrieving the symbols
     // TODO: // of property signature nodes within JSDoc types.
     // TODO: // In both cases, we'd have a JSDoc property signature that has no symbol.
@@ -33,5 +33,5 @@ let x;
     // TODO: // However, that would not fix the case at marker 2 because
     // TODO: // there is no variable to attach the `@type` annotation, so the node basically
     // TODO: // doesn't exist for subsequent passes like the binder.
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyCompletions(t, f.Markers(), &fourslash.CompletionsExpectedList{
 }

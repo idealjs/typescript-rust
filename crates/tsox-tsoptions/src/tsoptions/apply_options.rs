@@ -20,6 +20,26 @@ pub(crate) fn apply_options(options: &HashMap<String, OptValue>, out: &mut Compi
                     out.module_resolution = parse_module_resolution(s);
                 }
             }
+            "resolveJsonModule" => {
+                if let Some(b) = value.as_bool() {
+                    out.resolve_json_module = Tristate::from(b);
+                }
+            }
+            "allowImportingTsExtensions" => {
+                if let Some(b) = value.as_bool() {
+                    out.allow_importing_ts_extensions = Tristate::from(b);
+                }
+            }
+            "allowUnreachableCode" => {
+                if let Some(b) = value.as_bool() {
+                    out.allow_unreachable_code = Tristate::from(b);
+                }
+            }
+            "allowUnusedLabels" => {
+                if let Some(b) = value.as_bool() {
+                    out.allow_unused_labels = Tristate::from(b);
+                }
+            }
             "jsx" => {
                 if let Some(s) = value.as_str() {
                     out.jsx = parse_jsx_emit(s);
@@ -44,6 +64,11 @@ pub(crate) fn apply_options(options: &HashMap<String, OptValue>, out: &mut Compi
                     };
                 }
             }
+            "ignoreDeprecations" | "ignoredeprecations" => {
+                if let Some(s) = value.as_str() {
+                    out.ignore_deprecations = s.to_string();
+                }
+            }
             "lib" => {
                 if let Some(list) = value.as_list() {
                     out.lib = list.to_vec();
@@ -62,6 +87,11 @@ pub(crate) fn apply_options(options: &HashMap<String, OptValue>, out: &mut Compi
             "rootDirs" => {
                 if let Some(list) = value.as_list() {
                     out.root_dirs = list.to_vec();
+                }
+            }
+            "moduleSuffixes" => {
+                if let Some(list) = value.as_list() {
+                    out.module_suffixes = list.to_vec();
                 }
             }
             "outDir" => {
@@ -127,6 +157,16 @@ pub(crate) fn apply_options(options: &HashMap<String, OptValue>, out: &mut Compi
             "reactNamespace" => {
                 if let Some(s) = value.as_str() {
                     out.react_namespace = s.to_string();
+                }
+            }
+            "maxNodeModuleJsDepth" => {
+                if let Some(s) = value.as_str() {
+                    out.max_node_module_js_depth = s.trim().parse::<i32>().ok();
+                }
+            }
+            "ignoreDeprecations" => {
+                if let Some(s) = value.as_str() {
+                    out.ignore_deprecations = s.to_string();
                 }
             }
             "locale" => {

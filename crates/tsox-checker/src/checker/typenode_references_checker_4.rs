@@ -3,11 +3,13 @@
 use crate::checker::typenode_references::*;
 
 impl Checker {
-    pub(crate) fn resolve_interface_type_ex(
+    pub fn resolve_interface_type_ex(
         &mut self,
         symbol: &Arc<Symbol>,
         type_args: Option<Vec<Arc<Type>>>,
     ) -> Arc<Type> {
+        let merged_symbol = self.get_merged_symbol(symbol);
+        let symbol: &Arc<Symbol> = &merged_symbol;
         let has_type_args = type_args.is_some();
         if !has_type_args {
             if let Some(cached) = self
@@ -39,13 +41,32 @@ impl Checker {
         }
 
         let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol;
-        if !self.push_type_resolution(
+                if !self.push_type_resolution(
             key,
             crate::checker::checker::TypeResolutionProperty::DeclaredType,
         ) {
+            if let Some(shell) = self.pending_interface_shells.get(&(key as usize)) {
+                let shell = Arc::clone(shell);
+                let args = type_args.unwrap_or_default();
+                if args.is_empty() {
+                    return shell;
+                }
+                if let Some(ikey) = &instantiation_key {
+                    return self.pending_arg_shell(ikey, symbol, args);
+                }
+                return shell;
+            }
             self.heritage_degraded_events += 1;
             return self.error_type();
         }
+        let shell_key = key as usize;
+        let arg_shell_entry_seq = self.arg_shell_seq;
+        let shell = self.push_interface_shell(symbol);
+        let shell_cleanup = |checker: &mut Checker| {
+            if shell.is_some() {
+                checker.pending_interface_shells.remove(&shell_key);
+            }
+        };
 
         let interface_decls: Vec<Arc<Node>> = symbol
             .declarations
@@ -56,6 +77,7 @@ impl Checker {
 
         let epoch_at_entry = self.heritage_degraded_events;
         let mut heritage_degraded = false;
+        let mut lineage_degraded = false;
         let result = match interface_decls.first() {
             Some(first) => {
                 let data = match &first.data {
@@ -76,6 +98,9 @@ impl Checker {
                 };
 
                 let arg_types: Vec<Arc<Type>> = type_args.unwrap_or_default();
+                // 声明类型（及其实例）的成员按声明自身的类型参数求值，
+                // 不受外层进行中的实例化映射影响（对齐 Go 声明类型与实例化解耦）
+                let saved_type_argument_stack = std::mem::take(&mut self.type_argument_stack);
                 if has_type_args {
                     self.push_interface_type_argument_mapping(
                         &interface_decls,
@@ -84,13 +109,19 @@ impl Checker {
                     );
                 }
 
-                self.push_scope(
+                let saved_scope_stack = std::mem::take(&mut self.scope_stack);
+                for scope_id in crate::checker::checker_resolve_checker::lexical_scope_chain_ids(
                     symbol
                         .declarations
                         .iter()
                         .next()
                         .expect("interface has a declaration"),
-                );
+                )
+                .into_iter()
+                .rev()
+                {
+                    self.scope_stack.push(scope_id);
+                }
 
                 let merged_members: Vec<Arc<Node>> = interface_decls
                     .iter()
@@ -103,19 +134,68 @@ impl Checker {
 
                 let saved_static = self.in_static_member_type;
                 self.in_static_member_type = false;
-                let own_result = self.build_interface_type_from_members(&merged_list);
+                let own_result = self.build_interface_type_from_members_with_symbol(
+                    &merged_list,
+                    None,
+                    Some(symbol),
+                );
                 self.in_static_member_type = saved_static;
+                if has_type_args {
+                    // 增强声明的同名 T 是独立符号：实例化标记须覆盖全部声明，
+                    // 否则增强成员（如 es2015 Array.find）的类型参数悬空
+                    let sym_map = self.program.symbol_map();
+                    let mut all_tp_symbols: Vec<Arc<Symbol>> = tp_symbols.clone();
+                    let mut all_args: Vec<Arc<Type>> = arg_types.clone();
+                    for decl in interface_decls.iter().skip(1) {
+                        let NodeData::InterfaceDeclaration(d) = &decl.data else {
+                            continue;
+                        };
+                        let Some(tps) = &d.type_parameters else {
+                            continue;
+                        };
+                        for (i, tp) in tps.iter().enumerate() {
+                            let Some(tp_sym) = sym_map.symbol_of(tp) else {
+                                continue;
+                            };
+                            if all_tp_symbols.iter().any(|a| Arc::ptr_eq(a, tp_sym)) {
+                                continue;
+                            }
+                            let Some(arg) = arg_types.get(i) else {
+                                continue;
+                            };
+                            all_tp_symbols.push(Arc::clone(tp_sym));
+                            all_args.push(Arc::clone(arg));
+                        }
+                    }
+                    let all_tp_types: Vec<Arc<Type>> = all_tp_symbols
+                        .iter()
+                        .map(|s| self.get_type_parameter_from_symbol(s))
+                        .collect();
+                    self.mark_structured_members_instantiated(
+                        &own_result,
+                        symbol,
+                        &all_tp_symbols,
+                        &all_tp_types,
+                        &all_args,
+                    );
+                }
 
                 let mut heritage_base_degraded = false;
                 let base_types = self
                     .collect_interface_base_types(&interface_decls, &mut heritage_base_degraded);
-                if heritage_base_degraded {
+                // 基类是空壳（解析重入期产物）时合并结果只有自有成员：按 degraded
+                // 处理——结果不进缓存、标 degraded，后续引用重建拿完整版
+                let base_shell = base_types.iter().any(|(_, bt)| {
+                    bt.as_structured().is_some_and(|s| s.members.entries.is_empty())
+                });
+                if heritage_base_degraded || base_shell {
                     heritage_degraded = true;
                 }
-                self.pop_scope();
-                if has_type_args {
-                    self.type_argument_stack.pop();
-                }
+                lineage_degraded = base_types
+                    .iter()
+                    .any(|(_, bt)| self.degraded_type_ptrs.contains(&bt.id));
+                self.scope_stack = saved_scope_stack;
+                self.type_argument_stack = saved_type_argument_stack;
                 let result = if base_types.is_empty() {
                     own_result.clone()
                 } else {
@@ -125,8 +205,13 @@ impl Checker {
                     }
                     merged
                 };
-
                 if !has_type_args && !base_types.is_empty() {
+                    self.report_interface_simultaneous_extends(
+                        symbol,
+                        &interface_decls,
+                        &own_result,
+                        &base_types,
+                    );
                     self.report_interface_extends_incompatibilities(
                         symbol,
                         &interface_decls,
@@ -149,10 +234,27 @@ impl Checker {
             None => self.error_type(),
         };
         self.pop_type_resolution();
+        shell_cleanup(self);
 
         if self.heritage_degraded_events != epoch_at_entry {
             heritage_degraded = true;
         }
+
+        let result = match (
+            shell.as_ref(),
+            has_type_args,
+            crate::checker::utilities::is_type_error(&result),
+        ) {
+            (Some(shell), false, false) => self.fill_interface_shell(shell, result),
+            _ => result,
+        };
+
+        self.backfill_pending_arg_shells(
+            symbol,
+            instantiation_key.as_ref(),
+            &result,
+            arg_shell_entry_seq,
+        );
 
         let mut degraded_accepted = false;
         if heritage_degraded {
@@ -165,7 +267,7 @@ impl Checker {
         if degraded_accepted && self.heritage_degraded_events != epoch_at_entry {
             self.heritage_degraded_events = epoch_at_entry;
         }
-        if heritage_degraded {
+        if heritage_degraded || lineage_degraded {
             self.degraded_type_ptrs.insert(result.id);
         }
         if !has_type_args && cache_result {

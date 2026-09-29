@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "generator: for _, marker := range f.Ranges() {"]
+
 #[test]
 fn completion_colon_token() {
     let content = r#"
@@ -13,6 +13,6 @@ function b(class: /*b*/) {}
 // @filename: /c.ts
 function c(enum: /*c*/) {}
 "#;
-    let mut s = Session::new(content);
+    let _s = Session::new_for_test("completionColonToken", content);
     // TODO: for _, marker := range f.Ranges() {
 }

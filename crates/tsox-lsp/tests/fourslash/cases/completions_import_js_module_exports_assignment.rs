@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: f.MarkTestAsStradaServer()"]
+
 #[test]
 fn completions_import_js_module_exports_assignment() {
     let content = r#"// @Filename: /home/src/workspaces/project/tsconfig.json
@@ -23,14 +23,16 @@ module.exports = {
 };
 // @Filename: /home/src/workspaces/project/index.ts
 /**/"#;
-    let mut s = Session::new(content);
+    let mut s = Session::new_for_test("completionsImport_jsModuleExportsAssignment", content);
     // TODO: f.MarkTestAsStradaServer()
     // TODO: opts666 := f.GetOptions()
     // TODO: opts666.FormatCodeSettings.NewLineCharacter = "\n"
-    fourslash::unsupported("Configure"); // f.Configure(t, opts666)
+    // TODO: f.Configure(t, opts666)
     fourslash::go_to_marker(&mut s, "");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
     fourslash::insert(&mut s, "d");
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyApplyCodeActionFromCompletion"); // f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
 }

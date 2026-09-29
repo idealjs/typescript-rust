@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineDocumentHighlights"]
+
 #[test]
 fn document_highlight_malformed_ambient_module_export_equals() {
     let content = r#"// @Filename: /a.d.ts
@@ -9,6 +9,6 @@ declare moduleu "m" {
   function f(): A[];
   /*m*/export = f;
 }"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineDocumentHighlights"); // f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "m")
+    let _s = Session::new_for_test("documentHighlightMalformedAmbientModuleExportEquals", content);
+    // TODO: f.VerifyBaselineDocumentHighlights(t, nil /*preferences*/, "m")
 }

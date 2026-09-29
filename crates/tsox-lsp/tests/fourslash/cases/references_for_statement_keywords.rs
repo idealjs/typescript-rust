@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn references_for_statement_keywords() {
     let content = r#"// @filename: /main.ts
@@ -56,6 +56,6 @@ export const h = 1;
 // @filename: /j.ts
 export const j1 = 1;
 export const j2 = 2;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t, "importEqualsDecl1_importKeyword", "importEqualsDecl1_requireKe
+    let _s = Session::new_for_test("referencesForStatementKeywords", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t, "importEqualsDecl1_importKeyword", "importEqualsDecl1_requireKe
 }

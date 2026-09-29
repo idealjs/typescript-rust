@@ -3,187 +3,6 @@
 use crate::checker::checker_impl_chunk::*;
 
 impl Checker {
-    pub(crate) fn ensure_host_globals(&mut self) {
-        const DOM_VALUES: &[&str] = &[
-            "document",
-            "window",
-            "navigator",
-            "self",
-            "top",
-            "parent",
-            "frames",
-            "location",
-            "history",
-            "screen",
-            "localStorage",
-            "sessionStorage",
-            "console",
-            "alert",
-            "confirm",
-            "prompt",
-            "fetch",
-            "setTimeout",
-            "setInterval",
-            "clearTimeout",
-            "clearInterval",
-            "queueMicrotask",
-            "requestAnimationFrame",
-            "cancelAnimationFrame",
-            "getComputedStyle",
-            "matchMedia",
-            "addEventListener",
-            "removeEventListener",
-            "postMessage",
-            "atob",
-            "btoa",
-            "scrollTo",
-            "scrollBy",
-        ];
-
-        const DOM_TYPES: &[&str] = &[
-            "HTMLElement",
-            "Element",
-            "Node",
-            "Event",
-            "EventTarget",
-            "Document",
-            "DocumentFragment",
-            "ShadowRoot",
-            "Window",
-            "NodeList",
-            "HTMLInputElement",
-            "HTMLButtonElement",
-            "HTMLDivElement",
-            "HTMLSpanElement",
-            "HTMLAnchorElement",
-            "HTMLFormElement",
-            "HTMLSelectElement",
-            "HTMLTextAreaElement",
-            "HTMLCanvasElement",
-            "CanvasRenderingContext2D",
-            "MouseEvent",
-            "KeyboardEvent",
-            "DataTransfer",
-            "SVGElement",
-            "TrustedHTML",
-            "StyleMedia",
-            "FormData",
-            "Blob",
-            "File",
-            "URL",
-            "URLSearchParams",
-            "TextEncoder",
-            "TextDecoder",
-            "AbortController",
-            "AbortSignal",
-            "Headers",
-            "Request",
-            "Response",
-            "ReadableStream",
-            "WritableStream",
-            "TransformStream",
-        ];
-
-        const ES_TYPES: &[&str] = &[
-            "Promise",
-            "Iterable",
-            "Iterator",
-            "IterableIterator",
-            "Symbol",
-            "Generator",
-            "AsyncIterable",
-            "AsyncIterator",
-            "Awaited",
-            "ArrayBuffer",
-            "Uint8Array",
-            "Int8Array",
-            "Uint16Array",
-            "Int16Array",
-            "Uint32Array",
-            "Int32Array",
-            "Float32Array",
-            "Float64Array",
-            "DataView",
-            "Date",
-            "Math",
-            "Error",
-            "Intl",
-            "JSON",
-            "Map",
-            "Set",
-            "WeakMap",
-            "WeakSet",
-            "TemplateStringsArray",
-            "TypedPropertyDescriptor",
-            "ReadonlyArray",
-            "BigInt",
-            "Proxy",
-            "Reflect",
-            "FinalizationRegistry",
-            "WeakRef",
-            "SharedArrayBuffer",
-            "Atomics",
-            "globalThis",
-        ];
-
-        const UTILITY_TYPES: &[&str] = &[
-            "Partial",
-            "Readonly",
-            "Pick",
-            "Record",
-            "Omit",
-            "Exclude",
-            "Extract",
-            "NonNullable",
-            "Parameters",
-            "ReturnType",
-            "ConstructorParameters",
-            "InstanceType",
-            "Required",
-            "ReadonlyArray",
-        ];
-
-        for &name in DOM_VALUES
-            .iter()
-            .chain(DOM_TYPES.iter())
-            .chain(ES_TYPES.iter())
-            .chain(UTILITY_TYPES.iter())
-        {
-            if self.globals.get(name).is_none() {
-                self.globals.insert(
-                    name.to_string(),
-                    Arc::new(Symbol::new(SymbolFlags::Property, name)),
-                );
-            }
-        }
-    }
-
-    pub(crate) fn ensure_jsx_namespace(&mut self) {
-        use crate::checker::jsx::JsxNames;
-        if !self.is_jsx_enabled() || self.get_jsx_namespace().is_some() {
-            return;
-        }
-
-        let mut jsx = Symbol::new(SymbolFlags::NamespaceModule, JsxNames::JSX);
-
-        let element = Symbol::new(SymbolFlags::TypeLiteral, JsxNames::ELEMENT);
-        jsx.members
-            .insert(JsxNames::ELEMENT.to_string(), Arc::new(element));
-
-        let mut intrinsic = Symbol::new(SymbolFlags::TypeLiteral, JsxNames::INTRINSIC_ELEMENTS);
-        intrinsic.members.insert(
-            tsox_frontend::ast::INTERNAL_SYMBOL_NAME_INDEX.to_string(),
-            Arc::new(Symbol::new(SymbolFlags::TypeLiteral, "")),
-        );
-        jsx.members.insert(
-            JsxNames::INTRINSIC_ELEMENTS.to_string(),
-            Arc::new(intrinsic),
-        );
-
-        self.globals
-            .insert(JsxNames::JSX.to_string(), Arc::new(jsx));
-    }
-
     pub fn any_type(&self) -> Arc<Type> {
         self.any_type
             .get_or_init(|| {
@@ -206,6 +25,26 @@ impl Checker {
                         intrinsic_name: "unknown".to_string(),
                     }),
                 ))
+            })
+            .clone()
+    }
+
+    pub fn empty_object_type(&self) -> Arc<Type> {
+        self.empty_object_type
+            .get_or_init(|| {
+                Arc::new(Type {
+                    flags: TypeFlags::Object,
+                    object_flags: crate::checker::types::ObjectFlags::Anonymous,
+                    id: crate::checker::types::next_type_id(),
+                    symbol: None,
+                    alias: None,
+                    data: TypeData::Object(ObjectTypeData { node: None,
+                        structured: StructuredTypeData::default(),
+                        target: None,
+                        mapper: None,
+                        type_arguments: Vec::new(),
+                    }),
+                })
             })
             .clone()
     }

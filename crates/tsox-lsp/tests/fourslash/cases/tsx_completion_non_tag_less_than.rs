@@ -1,6 +1,6 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "unimplemented: fourslash.VerifyCompletions"]
+
 #[test]
 fn tsx_completion_non_tag_less_than() {
     let content = r#"// @lib: es5
@@ -8,7 +8,8 @@ fn tsx_completion_non_tag_less_than() {
 var x: Array<numb/*a*/;
 [].map<numb/*b*/;
 1 < Infini/*c*/;"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, []string{"a", "b"}, &fourslash.CompletionsExpectedList{
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "c", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("tsxCompletionNonTagLessThan", content);
+    // TODO: f.VerifyCompletions(t, []string{"a", "b"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "c");
+    // TODO: f.VerifyCompletions(t, "c", &fourslash.CompletionsExpectedList{
 }

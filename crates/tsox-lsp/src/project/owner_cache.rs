@@ -20,6 +20,10 @@ impl<K: Eq + Hash + Clone, V: Clone> OwnerCache<K, V> {
         }
     }
 
+    pub fn len(&self) -> usize {
+        self.entries.lock().unwrap().len()
+    }
+
     pub fn load_and_acquire<F>(&self, identity: K, owner: u64, parse: F) -> V
     where
         F: FnOnce(&K) -> V,

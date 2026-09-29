@@ -1,5 +1,4 @@
 use crate::scanner::regexp::RegExpParser;
-use tsox_core::diagnostics;
 
 impl<'a> RegExpParser<'a> {
     pub(super) fn scan_class_set_operand(&mut self) -> String {
@@ -102,10 +101,11 @@ impl<'a> RegExpParser<'a> {
         }
         match ch {
             '/' | '(' | ')' | '[' | ']' | '{' | '}' | '-' | '|' => {
-                self.error(
+                self.error_arg(
                     tsox_core::diagnostics::UNEXPECTED_0_DID_YOU_MEAN_TO_ESCAPE_IT_WITH_BACKSLASH,
                     self.pos,
                     1,
+                    ch,
                 );
                 self.inc_pos(1);
                 ch.to_string()

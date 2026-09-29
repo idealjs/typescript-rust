@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn double_underscore_completions() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"// @allowJs: true
 // @Filename: a.js
 function MyObject(){
@@ -11,6 +11,7 @@ function MyObject(){
 }
 var instance = new MyObject();
 instance./*1*/"#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyCompletions"); // f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+    let mut s = Session::new_for_test("doubleUnderscoreCompletions", content);
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
 }

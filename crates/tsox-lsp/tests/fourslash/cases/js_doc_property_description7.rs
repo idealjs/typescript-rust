@@ -1,9 +1,9 @@
 use tsox_lsp::fourslash::{self, Session};
 
-#[ignore = "generator: t.Skip('Known failing fourslash test')"]
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
 #[test]
 fn js_doc_property_description7() {
-    // TODO: t.Skip("Known failing fourslash test")
     let content = r#"class StringClass {
     /** Something generic */
     static [p: string]: any;
@@ -11,11 +11,6 @@ fn js_doc_property_description7() {
 function stringClass(e: typeof StringClass) {
     console.log(e./*stringClass*/anything);
 }"#;
-    let mut s = Session::new(content);
-    fourslash::verify_quick_info_at(
-        &mut s,
-        "stringClass",
-        "(index) StringClass[string]: any",
-        "Something generic",
-    );
+    let mut s = Session::new_for_test("jsDocPropertyDescription7", content);
+    fourslash::verify_quick_info_at(&mut s, "stringClass", "(index) StringClass[string]: any", "Something generic");
 }

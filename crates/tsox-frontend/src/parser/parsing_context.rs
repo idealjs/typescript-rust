@@ -38,11 +38,17 @@ pub struct Parser {
     pub(crate) diagnostics: Vec<ParserDiagnostic>,
     pub(crate) language_variant: LanguageVariant,
 
+    pub(crate) javascript_file: bool,
+
     pub(crate) last_template_literal_was_middle: bool,
 
     pub(crate) yield_context: bool,
 
     pub(crate) await_context: bool,
+
+    pub(crate) decorator_context: bool,
+
+    pub(crate) disallow_in_context: bool,
 
     pub(crate) parsing_contexts: u32,
 }

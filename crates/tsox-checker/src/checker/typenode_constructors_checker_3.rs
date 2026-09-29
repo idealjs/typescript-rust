@@ -18,6 +18,18 @@ impl Checker {
             return self.any_type();
         }
 
+        // Go getIndexedAccessTypeWorker：对象为联合时按成分分发取并集
+        //（如 ({type:"FOO"}|{type:"BAR"})["type"] → "FOO"|"BAR"）
+        if object_type.is_union() {
+            if let Some(members) = object_type.types() {
+                let parts: Vec<Arc<Type>> = members
+                    .iter()
+                    .map(|c| self.get_indexed_access_type(c, index_type))
+                    .collect();
+                return self.get_union_type(parts);
+            }
+        }
+
         if index_type.flags.contains(TypeFlags::Union) {
             if let TypeData::Union(u) = &index_type.data {
                 let prop_types: Vec<Arc<Type>> = u
@@ -37,7 +49,26 @@ impl Checker {
             if let Some(constraint) = self.get_constraint_of_type_parameter(object_type) {
                 return self.get_indexed_access_type(&constraint, index_type);
             }
-            return self.any_type();
+            // Go createIndexedAccessType：泛型对象的索引访问保持延迟（驻留保恒等）
+            return self.deferred_indexed_access(object_type, index_type);
+        }
+
+        // Go getPropertyTypeForIndexType → getPropertyOfType：交集对象逐成分
+        // 解析属性，命中成分求交（{a: X} & {b: {}}["a"] → X，非 any）
+        if object_type.flags.contains(TypeFlags::Intersection)
+            && let Some(constituents) = object_type.types()
+        {
+            let resolved: Vec<Arc<Type>> = constituents
+                .iter()
+                .filter_map(|c| {
+                    self.try_get_indexed_access_type(c, index_type, AccessFlags::None)
+                })
+                .collect();
+            match resolved.len() {
+                0 => {}
+                1 => return resolved.into_iter().next().unwrap(),
+                _ => return self.get_intersection_type(resolved),
+            }
         }
 
         if let TypeData::Mapped(m) = &object_type.data
@@ -56,42 +87,9 @@ impl Checker {
                 Arc::clone(constraint)
             };
             if self.is_type_assignable_to(index_type, &domain) {
-                let substituted = m
-                    .declaration
-                    .as_ref()
-                    .and_then(|decl| match &decl.data {
-                        tsox_frontend::ast::NodeData::MappedTypeNode(d) => {
-                            d.type_node.as_ref().map(|tn| {
-                                (
-                                    Arc::clone(&d.type_parameter),
-                                    Arc::clone(tn),
-                                    Arc::clone(decl),
-                                )
-                            })
-                        }
-                        _ => None,
-                    })
-                    .and_then(|(tp_node, template_node, decl)| {
-                        let tp_sym = self.program.symbol_map().symbol_of(&tp_node).cloned()?;
-
-                        if !Self::type_node_references_name(&template_node, &tp_sym.name) {
-                            return None;
-                        }
-                        let mut mapping = std::collections::HashMap::new();
-                        mapping.insert(
-                            Arc::as_ptr(&tp_sym) as *const tsox_frontend::ast::Symbol,
-                            Arc::clone(index_type),
-                        );
-                        self.push_scope(&decl);
-                        self.type_argument_stack.push(mapping);
-                        let t = self.get_type_from_type_node(&template_node);
-                        self.type_argument_stack.pop();
-                        self.pop_scope();
-                        Some(t)
-                    });
-                return substituted.unwrap_or_else(|| {
-                    Arc::clone(m.template_type.as_ref().expect("template present"))
-                });
+                return self
+                    .instantiate_mapped_template_with_index(object_type, index_type)
+                    .unwrap_or_else(|| self.get_any_type());
             }
         }
 
@@ -109,6 +107,9 @@ impl Checker {
                             return value_type;
                         }
                     }
+                    if name == "length" && self.is_array_type(object_type) {
+                        return self.number_type();
+                    }
                     return self.any_type();
                 }
             }
@@ -122,16 +123,41 @@ impl Checker {
             }
 
             if self.is_tuple_type(object_type) {
-                if let Some(structured) = object_type.as_structured() {
-                    let elem_types: Vec<Arc<Type>> = structured
-                        .properties
+                if let TypeData::Tuple(tup) = &object_type.data {
+                    // 数字字面量按位取元素，number 取全体并集
+                    if index_type.flags.contains(TypeFlags::NumberLiteral)
+                        && let Some(n) = index_type.literal_value().and_then(|v| match v {
+                            LiteralValue::Number(n) => Some(n),
+                            _ => None,
+                        })
+                    {
+                        let i = n.0 as usize;
+                        if i < tup.element_infos.len()
+                            && let Some(t) = &tup.element_infos[i].type_
+                        {
+                            return Arc::clone(t);
+                        }
+                    }
+                    let elem_types: Vec<Arc<Type>> = tup
+                        .element_infos
                         .iter()
-                        .map(|p| self.get_type_of_symbol(p))
+                        .filter_map(|ei| ei.type_.clone())
                         .collect();
                     if !elem_types.is_empty() {
                         return self.get_union_type(elem_types);
                     }
                 }
+            }
+
+            if index_type.flags.contains(TypeFlags::NumberLiteral)
+                && let Some(n) = index_type.literal_value().and_then(|v| match v {
+                    LiteralValue::Number(n) => Some(n),
+                    _ => None,
+                })
+                && let Some(structured) = object_type.as_structured()
+                && let Some(sym) = structured.members.get(&n.to_string())
+            {
+                return self.get_type_of_symbol(sym);
             }
         }
 
@@ -143,29 +169,110 @@ impl Checker {
         self.any_type()
     }
 
+    pub(crate) fn instantiate_mapped_template_with_index(
+        &mut self,
+        object_type: &Arc<Type>,
+        index_type: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        let TypeData::Mapped(m) = &object_type.data else {
+            return None;
+        };
+        let substituted = m
+            .declaration
+            .as_ref()
+            .and_then(|decl| match &decl.data {
+                tsox_frontend::ast::NodeData::MappedTypeNode(d) => {
+                    d.type_node.as_ref().map(|tn| {
+                        (
+                            Arc::clone(&d.type_parameter),
+                            Arc::clone(tn),
+                            Arc::clone(decl),
+                        )
+                    })
+                }
+                _ => None,
+            })
+            .and_then(|(tp_node, template_node, decl)| {
+                let tp_sym = self.program.symbol_map().symbol_of(&tp_node).cloned()?;
+                let chain = m
+                    .template_subst
+                    .as_ref()
+                    .map(|c| c.as_ref().clone())
+                    .unwrap_or_default();
+
+                if !Self::type_node_references_name(&template_node, &tp_sym.name) {
+                    return None;
+                }
+                let mut mapping = std::collections::HashMap::new();
+                mapping.insert(
+                    Arc::as_ptr(&tp_sym) as *const tsox_frontend::ast::Symbol,
+                    Arc::clone(index_type),
+                );
+                self.push_scope(&decl);
+                self.type_argument_stack.push(mapping);
+                let t = self.get_type_from_type_node(&template_node);
+                self.type_argument_stack.pop();
+                self.pop_scope();
+                let t = if chain.is_empty() {
+                    t
+                } else {
+                    self.apply_template_subst_chain(&t, &chain)
+                };
+                Some(t)
+            });
+        if let Some(t) = substituted {
+            return Some(t);
+        }
+        if let Some(t) = &m.template_type {
+            return Some(Arc::clone(t));
+        }
+        let template_node = m.template_node.clone()?;
+        let chain = m
+            .template_subst
+            .as_ref()
+            .map(|c| c.as_ref().clone())
+            .unwrap_or_default();
+        let saved_stack = std::mem::take(&mut self.type_argument_stack);
+        let t = self.get_type_from_type_node(&template_node);
+        self.type_argument_stack = saved_stack;
+        let t = if chain.is_empty() {
+            t
+        } else {
+            self.apply_template_subst_chain(&t, &chain)
+        };
+        let ptr = Arc::as_ptr(object_type) as *mut crate::checker::types::Type;
+        unsafe {
+            if let TypeData::Mapped(m) = &mut (*ptr).data {
+                m.template_type = Some(Arc::clone(&t));
+            }
+        }
+        Some(t)
+    }
+
     pub(crate) fn lookup_index_signature_value(
         &mut self,
         structured: &StructuredTypeData,
         index_type: &Arc<Type>,
     ) -> Option<Arc<Type>> {
+        let is_string_like = index_type
+            .flags
+            .intersects(TypeFlags::String | TypeFlags::StringLiteral);
+        let is_number_like = index_type
+            .flags
+            .intersects(TypeFlags::Number | TypeFlags::NumberLiteral);
+        let mut string_index: Option<Arc<Type>> = None;
         for info in &structured.index_infos {
-            let key_matches = match info.key_type.as_ref() {
-                Some(key) => {
-                    if key.flags.contains(TypeFlags::String) {
-                        index_type.flags.contains(TypeFlags::String)
-                            || index_type.flags.contains(TypeFlags::StringLiteral)
-                    } else if key.flags.contains(TypeFlags::Number) {
-                        index_type.flags.contains(TypeFlags::Number)
-                            || index_type.flags.contains(TypeFlags::NumberLiteral)
-                    } else {
-                        false
-                    }
-                }
-                None => true,
+            let Some(key) = info.key_type.as_ref() else {
+                continue;
             };
-            if key_matches {
+            if key.flags.contains(TypeFlags::String) {
+                string_index = info.value_type.clone();
+            } else if key.flags.contains(TypeFlags::Number) && is_number_like {
                 return info.value_type.clone();
             }
+        }
+        if (is_string_like || is_number_like) && string_index.is_some() {
+            return string_index;
         }
         None
     }

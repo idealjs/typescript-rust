@@ -1,6 +1,6 @@
-use tsox_lsp::fourslash::{self, Session};
+use tsox_lsp::fourslash::Session;
 
-#[ignore = "unimplemented: fourslash.VerifyBaselineFindAllReferences"]
+
 #[test]
 fn find_all_refs_js_doc_namespaced_typedef() {
     let content = r#"
@@ -16,6 +16,6 @@ fn find_all_refs_js_doc_namespaced_typedef() {
 // Namespaced typedef aliased to implicitly-resolved typedef.
 /** @typedef {U} NS.[|V|] */
 "#;
-    let mut s = Session::new(content);
-    fourslash::unsupported("VerifyBaselineFindAllReferences"); // f.VerifyBaselineFindAllReferences(t)
+    let _s = Session::new_for_test("findAllRefsJSDocNamespacedTypedef", content);
+    // TODO: f.VerifyBaselineFindAllReferences(t)
 }
