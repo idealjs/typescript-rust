@@ -194,7 +194,7 @@ impl Checker {
                 self.check_this_destructuring_abstract_properties(&data.name, &this_type);
             }
             if let Some(init) = &data.initializer {
-                self.check_expression(init);
+                self.check_expression_cached(init);
             }
 
             let resolved_type = match (&data.type_node, &data.initializer) {
