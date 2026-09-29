@@ -139,42 +139,6 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_postfix_type_or_higher(&mut self) -> Arc<Node> {
-        let pos = self.token_pos();
-        let mut type_node = self.parse_non_array_type();
-        loop {
-            if self.token == SyntaxKind::OpenBracketToken {
-                self.next_token();
-                if self.token == SyntaxKind::CloseBracketToken {
-                    self.next_token();
-                    let end = self.node_pos();
-                    type_node = Arc::new(Node::with_loc(
-                        SyntaxKind::ArrayType,
-                        NodeData::ArrayTypeNode(ArrayTypeNodeData {
-                            element_type: type_node,
-                        }),
-                        TextRange::new(pos, end),
-                    ));
-                    continue;
-                }
-                let index_type = self.parse_type();
-                self.expect(SyntaxKind::CloseBracketToken);
-                let end = self.node_pos();
-                type_node = Arc::new(Node::with_loc(
-                    SyntaxKind::IndexedAccessType,
-                    NodeData::IndexedAccessTypeNode(IndexedAccessTypeNodeData {
-                        object_type: type_node,
-                        index_type,
-                    }),
-                    TextRange::new(pos, end),
-                ));
-                continue;
-            }
-            break;
-        }
-        type_node
-    }
-
     pub(crate) fn parse_non_array_type(&mut self) -> Arc<Node> {
         match self.token {
             SyntaxKind::AnyKeyword
@@ -262,6 +226,7 @@ impl Parser {
             SyntaxKind::OpenParenToken => self.parse_parenthesized_or_function_type(),
             SyntaxKind::LessThanToken => self.parse_function_type(),
             SyntaxKind::NewKeyword | SyntaxKind::AbstractKeyword => self.parse_constructor_type(),
+            SyntaxKind::QuestionToken => self.parse_jsdoc_nullable_type(),
             _ => self.parse_type_reference(),
         }
     }

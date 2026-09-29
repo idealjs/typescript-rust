@@ -92,6 +92,7 @@ pub(crate) mod types_parser;
 pub(crate) mod types_parser_2;
 pub(crate) mod types_parser_3;
 pub(crate) mod types_parser_4;
+pub(crate) mod types_parser_5;
 
 // r 轮接线:迁移批次模块
 pub mod mig;
