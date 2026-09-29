@@ -9,6 +9,11 @@ impl Checker {
         if let Some(name) = node.name() {
             self.check_cjs_reserved_top_level_name(node, &name);
         }
+        if !tsox_frontend::ast::is_binding_element(node)
+            && let Some(type_node) = tsox_frontend::ast::node_data_generated::node_type(node)
+        {
+            self.check_source_element(type_node);
+        }
         if let tsox_frontend::ast::NodeData::VariableDeclaration(data) = &node.data {
             if data.initializer.is_none() {
                 let is_const = node

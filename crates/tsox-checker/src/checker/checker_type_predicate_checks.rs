@@ -8,7 +8,7 @@ impl Checker {
             return;
         };
         if let Some(t) = &data.type_node {
-            self.check_type_annotation(t);
+            self.check_source_element(t);
         }
         let Some(parent) = Self::type_predicate_parent(node) else {
             return;

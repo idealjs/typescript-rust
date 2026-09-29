@@ -36,14 +36,10 @@ impl Checker {
                 // Go checkParameterInitializer：参数默认初始化式按表达式检查
                 //（内嵌箭头的隐式 any 参数由此覆盖）
                 self.check_parameter_default_initializer(p);
-                if let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &p.data
-                    && let Some(pt) = &pd.type_node
-                {
-                    self.check_type_annotation(pt);
-                }
+                self.check_source_element(p);
             }
             if let Some(tn) = &data.type_node {
-                self.check_type_annotation(tn);
+                self.check_source_element(tn);
                 self.check_generator_return_annotation(node, tn);
             }
 
