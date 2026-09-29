@@ -77,23 +77,34 @@ impl Binder {
                         vec![name.text().to_string()],
                     ));
                 }
-                // Go bindVariableDeclarationOrBindingElement：JS 里
-                // `var x = require("...")` 绑为别名（目标是模块符号）
-                if self.current_source_file.as_ref().is_some_and(|f| {
-                    f.node
-                        .flags
-                        .contains(tsox_frontend::ast::NodeFlags::JavaScriptFile)
-                }) && is_variable_declaration_initialized_to_require(node)
+                // Go bindVariableDeclarationOrBindingElement binder.go:1175
+                // `!IsBindingPattern(name)`：模式名声明不整体入表，元素单独绑定
+                if node
+                    .name()
+                    .is_some_and(|n| !tsox_frontend::ast::is_binding_pattern(n))
                 {
-                    self.declare_symbol(node, SymbolFlags::Alias, SymbolFlags::Alias);
-                } else if Self::is_let_or_const_declaration(node) {
-                    self.declare_symbol(node, SymbolFlags::BlockScopedVariable, SymbolFlags::VALUE);
-                } else {
-                    self.declare_symbol(
-                        node,
-                        SymbolFlags::FunctionScopedVariable,
-                        SymbolFlags::VALUE,
-                    );
+                    // Go bindVariableDeclarationOrBindingElement：JS 里
+                    // `var x = require("...")` 绑为别名（目标是模块符号）
+                    if self.current_source_file.as_ref().is_some_and(|f| {
+                        f.node
+                            .flags
+                            .contains(tsox_frontend::ast::NodeFlags::JavaScriptFile)
+                    }) && is_variable_declaration_initialized_to_require(node)
+                    {
+                        self.declare_symbol(node, SymbolFlags::Alias, SymbolFlags::Alias);
+                    } else if Self::is_let_or_const_declaration(node) {
+                        self.declare_symbol(
+                            node,
+                            SymbolFlags::BlockScopedVariable,
+                            SymbolFlags::VALUE,
+                        );
+                    } else {
+                        self.declare_symbol(
+                            node,
+                            SymbolFlags::FunctionScopedVariable,
+                            SymbolFlags::VALUE,
+                        );
+                    }
                 }
             }
             SyntaxKind::VariableStatement => {}
@@ -255,11 +266,33 @@ impl Binder {
                         }
                     }
                 }
-                self.declare_symbol(
-                    node,
-                    SymbolFlags::FunctionScopedVariable,
-                    SymbolFlags::VALUE,
-                );
+                // Go bindParameter binder.go:1203：解构参数绑为匿名 __<index>
+                //（bindAnonymousDeclaration，不查重不入表），具名参数才走 declareSymbol
+                if node
+                    .name()
+                    .is_some_and(|n| tsox_frontend::ast::is_binding_pattern(n))
+                {
+                    let index = node
+                        .parent()
+                        .as_ref()
+                        .and_then(|p| {
+                            tsox_frontend::ast::mig::m3b::parameters(p)
+                                .iter()
+                                .position(|q| Arc::ptr_eq(q, node))
+                        })
+                        .unwrap_or(0);
+                    self.bind_anonymous_declaration(
+                        node,
+                        SymbolFlags::FunctionScopedVariable,
+                        &format!("__{index}"),
+                    );
+                } else {
+                    self.declare_symbol(
+                        node,
+                        SymbolFlags::FunctionScopedVariable,
+                        SymbolFlags::VALUE,
+                    );
+                }
                 // Go bindParameter：构造器参数属性（ParameterPropertyModifier）
                 // 同时向所属类 members 表声明 Property 成员（实例表，
                 // Property|Optional，PropertyExcludes）
@@ -347,12 +380,19 @@ impl Binder {
                 self.bind_namespace_export_declaration(node);
             }
             SyntaxKind::BindingElement => {
-                let includes = if Self::is_let_or_const_declaration(node) {
-                    SymbolFlags::BlockScopedVariable
-                } else {
-                    SymbolFlags::FunctionScopedVariable
-                };
-                self.declare_symbol(node, includes, SymbolFlags::VALUE);
+                // Go bindVariableDeclarationOrBindingElement binder.go:1175
+                // `!IsBindingPattern(name)`：模式名的元素不声明，嵌套元素单独绑定
+                if node
+                    .name()
+                    .is_some_and(|n| !tsox_frontend::ast::is_binding_pattern(n))
+                {
+                    let includes = if Self::is_let_or_const_declaration(node) {
+                        SymbolFlags::BlockScopedVariable
+                    } else {
+                        SymbolFlags::FunctionScopedVariable
+                    };
+                    self.declare_symbol(node, includes, SymbolFlags::VALUE);
+                }
             }
             SyntaxKind::TypeParameter => {
                 if let Some(list) = node.parent().as_ref()
