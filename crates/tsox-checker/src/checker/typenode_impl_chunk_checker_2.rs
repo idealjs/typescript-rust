@@ -296,31 +296,18 @@ impl Checker {
         false
     }
 
-    pub fn get_nullable_type(&self, t: &Arc<Type>, flags: TypeFlags) -> Arc<Type> {
-        let mut types = vec![Arc::clone(t)];
-        if flags.contains(TypeFlags::Null) {
-            types.push(self.null_type());
+    pub fn get_nullable_type(&mut self, t: &Arc<Type>, flags: TypeFlags) -> Arc<Type> {
+        let missing = (flags & !t.flags) & (TypeFlags::Undefined | TypeFlags::Null);
+        if missing.is_empty() {
+            return Arc::clone(t);
         }
-        if flags.contains(TypeFlags::Undefined) {
-            types.push(self.undefined_type());
+        if missing == TypeFlags::Undefined {
+            return self.get_union_type(vec![Arc::clone(t), self.undefined_type()]);
         }
-        if types.len() == 1 {
-            return types.into_iter().next().expect("exactly one");
+        if missing == TypeFlags::Null {
+            return self.get_union_type(vec![Arc::clone(t), self.null_type()]);
         }
-        Arc::new(Type::new(
-            TypeFlags::Union,
-            TypeData::Union(UnionTypeData {
-                union_or_intersection: UnionOrIntersectionTypeData {
-                    structured: StructuredTypeData::default(),
-                    types,
-                },
-                resolved_reduced_type: std::sync::OnceLock::new(),
-                regular_type: std::sync::OnceLock::new(),
-                origin: None,
-                key_property_name: None,
-                constituent_map: HashMap::new(),
-            }),
-        ))
+        self.get_union_type(vec![Arc::clone(t), self.undefined_type(), self.null_type()])
     }
 
     pub fn collect_return_types_from_node(
