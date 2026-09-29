@@ -101,7 +101,8 @@ impl Parser {
         let identifier_like = token == SyntaxKind::Identifier
             || (!(token == SyntaxKind::YieldKeyword && self.yield_context)
                 && !(token == SyntaxKind::AwaitKeyword && self.await_context)
-                && !is_reserved_word_kind(token));
+                && !is_reserved_word_kind(token)
+                && is_keyword(token));
         !s.has_preceding_line_break() && (identifier_like || token == SyntaxKind::StringLiteral)
     }
 
