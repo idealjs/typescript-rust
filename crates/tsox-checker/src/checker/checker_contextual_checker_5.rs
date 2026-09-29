@@ -59,6 +59,10 @@ impl Checker {
         });
         let declaration = Arc::clone(declaration?);
 
+        if Self::get_root_declaration(&declaration).kind == SyntaxKind::Parameter {
+            return None;
+        }
+
         // 自初始化式内引用：解析期环路径返回 any（Go reportCircularityError），
         // assumeInitialized 短路
         {
