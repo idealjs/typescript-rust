@@ -352,7 +352,7 @@ impl Parser {
     }
 
     fn missing_identifier_at_current(&self) -> Arc<Node> {
-        let pos = self.token_pos();
+        let pos = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::Identifier,
             NodeData::Identifier(IdentifierData {

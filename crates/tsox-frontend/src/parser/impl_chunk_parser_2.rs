@@ -205,7 +205,7 @@ impl Parser {
 
     /// Go createMissingIdentifier：零宽空名标识符
     pub(crate) fn missing_identifier_expression(&self) -> Arc<Node> {
-        let pos = self.token_pos();
+        let pos = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::Identifier,
             NodeData::Identifier(IdentifierData {
