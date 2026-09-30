@@ -103,8 +103,8 @@ impl Checker {
             .display_target_override
             .clone()
             .unwrap_or_else(|| Arc::clone(&rebound_target));
-        let source_str = self.type_to_string(source);
-        let target_str = self.type_to_string(&displayed_target);
+        let (source_str, target_str) =
+            self.get_type_names_for_error_display(source, &displayed_target);
         let (mut head_source, mut head_target) = if self
             .type_could_have_top_level_singleton_types(&rebound_target)
         {
