@@ -143,6 +143,8 @@ impl Checker {
                 _ => None,
             };
             if let Some(sugg) = suggested {
+                self.arith_operand_error_nodes
+                    .insert(Arc::as_ptr(node) as *const tsox_frontend::ast::Node);
                 let file = self.current_file.clone();
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,

@@ -395,6 +395,10 @@ impl Checker {
                 {
                     let suggested_operator = self.get_suggested_boolean_operator(operator);
                     if suggested_operator != SyntaxKind::Unknown {
+                        if let Some(binary) = operator_token.parent() {
+                            self.arith_operand_error_nodes
+                                .insert(Arc::as_ptr(&binary) as *const tsox_frontend::ast::Node);
+                        }
                         self.error_message(
                             operator_token,THE_0_OPERATOR_IS_NOT_ALLOWED_FOR_BOOLEAN_TYPES_CONSIDER_USING_1_INSTEAD,
                             &[
