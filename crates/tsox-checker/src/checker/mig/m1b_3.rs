@@ -274,7 +274,14 @@ impl Checker {
             let constraint_target = constraint.unwrap_or_else(|| Arc::clone(&type_parameter));
             if let Some(constraint_type) = self.get_constraint_type_from_mapped_type(&t) {
                 let string_number_symbol = Arc::clone(&self.string_number_symbol_type);
-                self.check_type_assignable_to(&constraint_type, &string_number_symbol, Some(&constraint_target), None);
+                // Go relater.go:3726-3731 源侧 keyof 分支：Index 源的 relate 先按
+                // stringNumberSymbolType 桥接比较，本处目标恰为 stringNumberSymbolType，
+                // 判定恒真，keyof 约束由此不报 TS2322；非 Index 约束照常全检
+                let keyof_bridge = constraint_type.flags.contains(TypeFlags::Index)
+                    && self.is_type_assignable_to(&string_number_symbol, &string_number_symbol);
+                if !keyof_bridge {
+                    self.check_type_assignable_to(&constraint_type, &string_number_symbol, Some(&constraint_target), None);
+                }
             }
         }
     }
