@@ -271,7 +271,7 @@ impl Parser {
             ));
         }
 
-        if is_assignment_operator(self.token) {
+        if crate::ast::is_left_hand_side_expression(&expr) && is_assignment_operator(self.token) {
             let pos = expr.pos();
             let operator_token = self.create_token_node();
             self.next_token();
