@@ -13,6 +13,9 @@ impl Checker {
             tsox_frontend::ast::NodeData::Identifier(data) => data.text.as_str(),
             _ => return None,
         };
+        if tsox_frontend::ast::node_is_missing(Some(node)) {
+            return None;
+        }
         let symbol_map = self.program.symbol_map();
 
         let mut chain: std::collections::HashMap<u64, (Arc<Node>, Arc<Node>)> =
