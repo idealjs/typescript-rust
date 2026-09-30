@@ -21,7 +21,7 @@ pub fn get_node_at_position(file: &SourceFile, position: usize, include_jsdoc: b
     loop {
         let mut child: Option<Arc<Node>> = None;
         if include_jsdoc {
-            for jsdoc in file.resolve_jsdoc(&current) {
+            for jsdoc in current.jsdoc(file) {
                 if node_contains_position(&jsdoc, position) {
                     child = Some(Arc::clone(&jsdoc));
                     break;
