@@ -129,7 +129,11 @@ impl Checker {
             // Go 值位语义：符号无 Value 含义的 namespace（Class/Function 合并含 Value 位）不可作值
             let module_without_value_meaning = base.flags.contains(SymbolFlags::NamespaceModule)
                 && !base.flags.intersects(SymbolFlags::VALUE);
-            if !is_export_assignment_name && is_true_namespace && module_without_value_meaning {
+            if !is_export_assignment_name
+                && is_true_namespace
+                && module_without_value_meaning
+                && !self.namespace_value_suppressed_nodes.contains(&node.id())
+            {
                 let file = self.current_file.clone();
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     file,

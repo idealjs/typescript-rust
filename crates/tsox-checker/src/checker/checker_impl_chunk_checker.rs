@@ -312,6 +312,7 @@ impl Checker {
             interface_build_depth: 0,
             reported_unreachable_nodes: std::collections::HashSet::new(),
             this_location_errors_reported: std::collections::HashSet::new(),
+            namespace_value_suppressed_nodes: std::collections::HashSet::new(),
             typequery_instantiation_cache: std::collections::HashMap::new(),
             fn_typequery_shells: std::collections::HashMap::new(),
             fn_typequery_shell_ptrs: std::collections::HashSet::new(),

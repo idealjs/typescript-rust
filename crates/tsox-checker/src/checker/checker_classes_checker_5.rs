@@ -171,7 +171,19 @@ impl Checker {
                             .resolve_entity_name_class_symbol(&ewa.expression)
                             .is_some_and(|s| s.flags.intersects(SymbolFlags::VALUE));
                     if base_has_value || ewa.expression.kind != SyntaxKind::Identifier {
+                        // Go checkClassDeclaration：getBaseTypes 经
+                        // resolveQualifiedName 先以 Namespace 含义解析 heritage
+                        // 左端并缓存 symbolLinks.resolvedSymbol，随后值位
+                        // checkExpression 命中缓存不走解析失败路径，左端
+                        // namespace 不报 TS2708
+                        let suppressed_id = self.namespace_leftmost_suppress_id(&ewa.expression);
+                        if let Some(id) = suppressed_id {
+                            self.namespace_value_suppressed_nodes.insert(id);
+                        }
                         self.check_expression(&ewa.expression);
+                        if let Some(id) = suppressed_id {
+                            self.namespace_value_suppressed_nodes.remove(&id);
+                        }
                     }
 
                     self.push_ts2304_suppression();

@@ -43,6 +43,9 @@ pub struct Checker {
     /// this 引用位置诊断已报节点（Go checkThisExpression 单入口，Rust 分
     /// check/type 两入口，此集合保证位置类错误每节点只报一次）
     pub this_location_errors_reported: std::collections::HashSet<u64>,
+    /// heritage 左端标识符已按 Namespace 含义预解析（Go resolveQualifiedName
+    /// 左端 Namespace 解析 + symbolLinks 缓存），值位复检跳过 TS2708
+    pub namespace_value_suppressed_nodes: std::collections::HashSet<u64>,
     pub strict_function_types: bool,
     pub strict_bind_call_apply: bool,
     pub strict_property_initialization: bool,

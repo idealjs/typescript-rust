@@ -110,6 +110,26 @@ impl Checker {
         }
     }
 
+    /// Go resolveQualifiedName：heritage 左端以 Namespace 含义预解析成功时
+    /// 返回其 node id（仅 namespace 无 Value 含义者会触发 TS2708）
+    pub(crate) fn namespace_leftmost_suppress_id(&mut self, expr: &Arc<Node>) -> Option<u64> {
+        let mut current: &Arc<Node> = expr;
+        while let tsox_frontend::ast::NodeData::PropertyAccessExpression(d) = &current.data {
+            current = &d.expression;
+        }
+        if current.kind != SyntaxKind::Identifier {
+            return None;
+        }
+        let sym = self.resolve_identifier_with_meaning(current, SymbolFlags::NAMESPACE)?;
+        let module_without_value_meaning = sym.flags.contains(SymbolFlags::NamespaceModule)
+            && !sym.flags.intersects(SymbolFlags::VALUE);
+        if module_without_value_meaning {
+            Some(current.id())
+        } else {
+            None
+        }
+    }
+
     pub(crate) fn emit_ts2506(&mut self, class_node: &Arc<Node>, symbol: &Arc<Symbol>) {
         let class_name_loc = match &class_node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(cd) => cd
