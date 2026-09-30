@@ -781,7 +781,11 @@ impl Checker {
                     && !dont_resolve_alias
                     && current.flags.intersects(SymbolFlags::Alias)
                 {
-                    current = self.resolve_alias(&current);
+                    let next = self.resolve_alias_base(Arc::clone(&current));
+                    if Arc::ptr_eq(&next, &current) {
+                        break;
+                    }
+                    current = next;
                 }
                 return Some(current);
             }
