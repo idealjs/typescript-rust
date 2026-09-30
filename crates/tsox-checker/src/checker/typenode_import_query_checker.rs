@@ -122,6 +122,9 @@ impl Checker {
                             && !self.diagnostics.get_all().iter().any(|d| {
                                 d.code == message.code && d.loc == spec_loc
                             })
+                            && !self.program.diagnostics().iter().any(|d| {
+                                d.code == message.code && d.loc == spec_loc
+                            })
                         {
                             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                                 decl_file.clone(),
@@ -229,6 +232,9 @@ impl Checker {
                         .get_all()
                         .iter()
                         .any(|d| d.code == message.code && d.loc == module_spec_node.loc)
+                    && !self.program.diagnostics().iter().any(|d| {
+                        d.code == message.code && d.loc == module_spec_node.loc
+                    })
                 {
                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                         decl_file.clone(),

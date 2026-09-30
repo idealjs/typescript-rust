@@ -101,6 +101,10 @@ pub trait Program: Send + Sync {
     fn source_file_may_be_emitted(&self, _file_name: &str) -> bool {
         true
     }
+
+    fn diagnostics(&self) -> &[Arc<tsox_frontend::ast::Diagnostic>] {
+        &[]
+    }
 }
 
 #[derive(Debug, Default)]

@@ -266,6 +266,9 @@ impl tsox_checker::checker::Program for Program {
     fn is_source_file_default_library(&self, path: &str) -> bool {
         Program::is_source_file_default_library(self, path)
     }
+    fn diagnostics(&self) -> &[Arc<tsox_frontend::ast::Diagnostic>] {
+        Program::diagnostics(self)
+    }
     fn get_resolved_modules(
         &self,
     ) -> std::collections::HashMap<String, Vec<(String, Option<tsox_tsoptions::module::ResolvedModule>)>>
