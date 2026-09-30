@@ -345,7 +345,10 @@ impl Checker {
     }
 
     pub fn is_empty_array_literal_type(&self, t: &Arc<Type>) -> bool {
-        t.object_flags.contains(ObjectFlags::FreshLiteral) && self.is_array_type(t)
+        self.is_array_type(t)
+            && self
+                .get_element_type_of_array_type(t)
+                .is_some_and(|element_type| self.is_empty_literal_type(&element_type))
     }
 
     fn take_variance_chain(&mut self, chain_len: usize) -> (Vec<RelaterChainEntry>, bool) {
