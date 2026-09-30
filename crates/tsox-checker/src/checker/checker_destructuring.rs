@@ -228,18 +228,8 @@ impl Checker {
             return;
         }
         let rest_type = if self.is_tuple_type(source_type) {
-            let mut rest: Vec<Arc<Type>> = Vec::new();
-            let mut index = element_index;
-            while let Some(t) = self.get_tuple_element_type(source_type, index) {
-                rest.push(t);
-                index += 1;
-            }
-            let element_t = if rest.is_empty() {
-                self.never_type()
-            } else {
-                self.get_union_type(rest)
-            };
-            self.create_array_type(element_t)
+            self.slice_tuple_type(source_type, element_index, 0)
+                .unwrap_or_else(|| self.create_tuple_type(Vec::new()))
         } else {
             self.create_array_type(Arc::clone(element_type))
         };

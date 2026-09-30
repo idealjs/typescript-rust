@@ -766,11 +766,37 @@ impl Checker {
 
     pub fn slice_tuple_type(
         &mut self,
-        _t: &Arc<Type>,
-        _index: usize,
-        _end_skip_count: usize,
+        t: &Arc<Type>,
+        index: usize,
+        end_skip_count: usize,
     ) -> Option<Arc<Type>> {
-        None
+        let tuple = t.as_tuple_type()?;
+        let fixed_length = tuple.fixed_length;
+        if index > fixed_length {
+            if tuple
+                .element_infos
+                .last()
+                .is_some_and(|e| e.flags.contains(ElementFlags::Rest))
+            {
+                let rest_elem = self.get_rest_type_of_tuple_type(t);
+                return Some(self.create_array_type(rest_elem));
+            }
+            return Some(self.create_tuple_type(Vec::new()));
+        }
+        let end_index = tuple.element_infos.len().saturating_sub(end_skip_count);
+        if index >= end_index {
+            return Some(self.create_tuple_type(Vec::new()));
+        }
+        let element_types: Vec<Arc<Type>> = tuple.element_infos[index..end_index]
+            .iter()
+            .map(|info| {
+                info.type_
+                    .clone()
+                    .unwrap_or_else(|| self.any_type())
+            })
+            .collect();
+        let element_infos = tuple.element_infos[index..end_index].to_vec();
+        Some(self.create_tuple_type_ex(element_types, element_infos, false))
     }
 
     pub fn get_known_keys_of_tuple_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
