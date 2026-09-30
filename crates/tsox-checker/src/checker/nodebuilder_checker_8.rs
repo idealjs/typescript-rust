@@ -407,9 +407,13 @@ impl Checker {
                     let param_type = self
                         .signature_instantiated_param_type(sig, i)
                         .unwrap_or_else(|| self.get_type_of_symbol(param));
-                    let type_str = self
-                        .annotated_param_type_text(param, &param_type)
-                        .unwrap_or_else(|| self.type_to_string_ex(&param_type, flags));
+                    let reused = if self.display_enclosing_node.is_some() {
+                        self.annotated_param_type_text(param, &param_type)
+                    } else {
+                        None
+                    };
+                    let type_str =
+                        reused.unwrap_or_else(|| self.type_to_string_ex(&param_type, flags));
                     let prefix = if i + 1 == sig.parameters.len() && sig.has_rest_parameter() {
                         "..."
                     } else {
