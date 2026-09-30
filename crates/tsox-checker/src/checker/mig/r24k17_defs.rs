@@ -148,7 +148,11 @@ pub(crate) fn is_property_initialized_in_constructor(
     reference.set_parent(constructor);
     set_flow_node_of(
         &reference,
-        checker.program.symbol_map().flow_node_of(constructor).cloned(),
+        checker
+            .program
+            .symbol_map()
+            .end_flow_node_of(constructor)
+            .cloned(),
     );
     let flow_type = checker.get_flow_type_of_reference_ex(&reference, prop_type, Some(prop_type), None);
     !checker.contains_undefined_type(&flow_type)

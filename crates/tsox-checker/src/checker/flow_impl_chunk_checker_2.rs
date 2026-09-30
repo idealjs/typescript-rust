@@ -17,6 +17,35 @@ impl Checker {
         }
 
         if flow.flags.contains(FlowFlags::START) {
+            if let Some(container) = flow.node.clone() {
+                let same_container = query
+                    .flow_container
+                    .as_ref()
+                    .is_some_and(|fc| Arc::ptr_eq(fc, &container));
+                let guards_pass = query.reference.as_ref().is_none_or(|reference| {
+                    !tsox_frontend::ast::is_property_access_expression(reference)
+                        && !tsox_frontend::ast::is_element_access_expression(reference)
+                        && !(reference.kind == SyntaxKind::ThisKeyword
+                            && !tsox_frontend::ast::is_arrow_function(&container))
+                });
+                if !same_container
+                    && guards_pass
+                    && let Some(creation_flow) = self
+                        .program
+                        .symbol_map()
+                        .flow_node_of(&container)
+                        .map(Arc::clone)
+                {
+                    return self.type_at_flow_node(
+                        declared,
+                        initial,
+                        &creation_flow,
+                        target,
+                        depth,
+                        query,
+                    );
+                }
+            }
             return Arc::clone(initial);
         }
 

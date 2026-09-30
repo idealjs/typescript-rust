@@ -14,6 +14,8 @@ pub struct NodeSymbolMap {
 
     pub flow_nodes: HashMap<u64, Arc<FlowNode>>,
 
+    pub end_flow_nodes: HashMap<u64, Arc<FlowNode>>,
+
     pub binder_diagnostics: Vec<Diagnostic>,
 }
 
@@ -44,5 +46,13 @@ impl NodeSymbolMap {
 
     pub fn set_flow_node(&mut self, node: &Node, flow: Arc<FlowNode>) {
         self.flow_nodes.insert(node.id(), flow);
+    }
+
+    pub fn end_flow_node_of(&self, node: &Node) -> Option<&Arc<FlowNode>> {
+        self.end_flow_nodes.get(&node.id())
+    }
+
+    pub fn set_end_flow_node(&mut self, node: &Node, flow: Arc<FlowNode>) {
+        self.end_flow_nodes.insert(node.id(), flow);
     }
 }

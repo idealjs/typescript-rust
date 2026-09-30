@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::binder::bind_walk::*;
+use tsox_frontend::ast::mig::m3g_2::is_object_literal_or_class_expression_method_or_accessor;
 
 impl Binder {
     pub(crate) fn bind(&mut self, node: &Arc<Node>) {
@@ -30,6 +31,20 @@ impl Binder {
             SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression => {
                 if let Some(flow) = &self.current_flow {
                     self.symbol_map.set_flow_node(node, Arc::clone(flow));
+                }
+            }
+            SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => {
+                if let Some(flow) = &self.current_flow {
+                    self.symbol_map.set_flow_node(node, Arc::clone(flow));
+                }
+            }
+            SyntaxKind::MethodDeclaration
+            | SyntaxKind::GetAccessor
+            | SyntaxKind::SetAccessor => {
+                if is_object_literal_or_class_expression_method_or_accessor(node) {
+                    if let Some(flow) = &self.current_flow {
+                        self.symbol_map.set_flow_node(node, Arc::clone(flow));
+                    }
                 }
             }
             _ => {}

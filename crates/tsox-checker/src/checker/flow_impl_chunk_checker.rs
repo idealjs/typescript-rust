@@ -1,6 +1,8 @@
 #![allow(unused_imports)]
 
 use crate::checker::flow_impl_chunk::*;
+use tsox_frontend::ast::is_function_expression_or_arrow_function;
+use tsox_frontend::ast::mig::m3g_2::is_object_literal_or_class_expression_method_or_accessor;
 
 impl Checker {
     pub fn get_narrowed_type_of_symbol(
@@ -48,10 +50,42 @@ impl Checker {
             return Arc::clone(cached);
         }
         self.flow_type_cache.insert(key, Arc::clone(&declared));
-        let mut query = FlowQuery::default();
+        let mut query = FlowQuery {
+            reference: location.map(Arc::clone),
+            flow_container: location.map(|loc| {
+                self.extended_flow_container(symbol, loc, &declared)
+            }),
+            ..FlowQuery::default()
+        };
         let narrowed = self.type_at_flow_node(&declared, &declared, flow, &target, 0, &mut query);
         self.flow_type_cache.insert(key, Arc::clone(&narrowed));
         narrowed
+    }
+
+    fn extended_flow_container(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        reference: &Arc<Node>,
+        declared: &Arc<Type>,
+    ) -> Arc<Node> {
+        let Some(value_declaration) = symbol.value_declaration.clone() else {
+            return self.get_control_flow_container(reference);
+        };
+        let declaration_container = self.get_control_flow_container(&value_declaration);
+        let mut flow_container = self.get_control_flow_container(reference);
+        while !Arc::ptr_eq(&flow_container, &declaration_container)
+            && (is_function_expression_or_arrow_function(&flow_container)
+                || is_object_literal_or_class_expression_method_or_accessor(
+                    &flow_container,
+                ))
+            && (self.is_constant_variable(symbol)
+                && !Arc::ptr_eq(declared, &self.auto_array_type())
+                || self.is_parameter_or_mutable_local_variable(symbol)
+                    && self.is_past_last_assignment(symbol, Some(reference)))
+        {
+            flow_container = self.get_control_flow_container(&flow_container);
+        }
+        flow_container
     }
 
     pub fn get_narrowable_type_for_reference(
@@ -219,7 +253,10 @@ impl Checker {
             return Arc::clone(cached);
         }
         self.flow_type_cache.insert(key, Arc::clone(declared));
-        let mut query = FlowQuery::default();
+        let mut query = FlowQuery {
+            reference: Some(Arc::clone(reference)),
+            ..FlowQuery::default()
+        };
         let narrowed = self.type_at_flow_node(declared, declared, &flow, &target, 0, &mut query);
         self.flow_type_cache.insert(key, Arc::clone(&narrowed));
 
@@ -273,7 +310,10 @@ impl Checker {
             return Some(Arc::clone(cached));
         }
         self.flow_type_cache.insert(key, Arc::clone(&declared));
-        let mut query = FlowQuery::default();
+        let mut query = FlowQuery {
+            reference: Some(Arc::clone(node)),
+            ..FlowQuery::default()
+        };
         let narrowed = self.type_at_flow_node(&declared, &initial, &flow, &target, 0, &mut query);
         self.flow_type_cache.insert(key, Arc::clone(&narrowed));
         Some(narrowed)

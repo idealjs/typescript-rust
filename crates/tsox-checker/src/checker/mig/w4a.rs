@@ -421,7 +421,10 @@ impl Checker {
         reference.set_parent(constructor);
         set_flow_node_of(
             &reference,
-            self.program.symbol_map().flow_node_of(constructor).cloned(),
+            self.program
+                .symbol_map()
+                .end_flow_node_of(constructor)
+                .cloned(),
         );
         let flow_type = self.get_flow_type_of_property(&reference, Some(symbol));
         if self.no_implicit_any

@@ -31,6 +31,8 @@ pub(crate) struct FlowQuery {
     pub(crate) reduce_labels: Vec<(std::sync::Arc<FlowNode>, Vec<std::sync::Arc<FlowNode>>)>,
 
     pub(crate) loop_stack: Vec<(usize, Vec<Arc<Type>>)>,
+    pub(crate) flow_container: Option<Arc<Node>>,
+    pub(crate) reference: Option<Arc<Node>>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

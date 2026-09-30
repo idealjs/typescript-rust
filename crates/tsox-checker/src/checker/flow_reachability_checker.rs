@@ -99,7 +99,7 @@ impl Checker {
         let Some(end_flow) = self
             .program
             .symbol_map()
-            .flow_node_of(fn_node)
+            .end_flow_node_of(fn_node)
             .map(Arc::clone)
         else {
             return false;

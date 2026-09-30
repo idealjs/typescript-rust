@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::binder::bind_walk::*;
+use tsox_frontend::ast::mig::m3g_2::is_object_literal_or_class_expression_method_or_accessor;
 
 impl Binder {
     pub(crate) fn bind_anonymous_declaration(
@@ -380,7 +381,14 @@ impl Binder {
             None
         };
         if is_function_like && !is_flow_transparent_iife {
-            self.current_flow = Some(Arc::new(FlowNode::new(FlowFlags::START)));
+            let mut flow_start = FlowNode::new(FlowFlags::START);
+            if node.kind == SyntaxKind::FunctionExpression
+                || node.kind == SyntaxKind::ArrowFunction
+                || is_object_literal_or_class_expression_method_or_accessor(node)
+            {
+                flow_start.node = Some(Arc::clone(node));
+            }
+            self.current_flow = Some(Arc::new(flow_start));
         }
         // Go bindWorker 控制流容器分支：进入时清空跳转目标/活跃标签/返回目标，
         // 静态块与非 async/非 generator 的立即调用函数表达式按 IIFE 处理
@@ -457,7 +465,7 @@ impl Binder {
                 && !flow.flags.contains(FlowFlags::UNREACHABLE)
                 && function_like_body_is_present(node)
             {
-                self.symbol_map.set_flow_node(node, Arc::clone(flow));
+                self.symbol_map.set_end_flow_node(node, Arc::clone(flow));
             }
             if let Some(rl) = &iife_return {
                 if let Some(current) = &self.current_flow {
