@@ -268,7 +268,7 @@ impl Checker {
             .map(|s| s.name.clone())
             .unwrap_or_else(|| "object".to_string());
 
-        let qualified = t
+        let mut qualified = t
             .symbol
             .as_ref()
             .filter(|s| {
@@ -304,6 +304,12 @@ impl Checker {
             })
             .unwrap_or(name);
 
+        if let Some(sym) = t.symbol.as_ref()
+            && let Some(chain_name) = self.alias_chain_qualified_type_name(sym)
+        {
+            qualified = chain_name;
+        }
+
         if obj_data.type_arguments.is_empty() {
             return qualified;
         }
@@ -313,6 +319,32 @@ impl Checker {
             flags,
         );
         format!("{}<{}>", qualified, args.join(", "))
+    }
+
+    pub(crate) fn alias_chain_qualified_type_name(
+        &mut self,
+        symbol: &Arc<tsox_frontend::ast::Symbol>,
+    ) -> Option<String> {
+        use tsox_frontend::ast::SymbolFlags;
+        if symbol.flags.intersects(SymbolFlags::Alias) {
+            return None;
+        }
+        let enclosing = self.display_enclosing_node.clone();
+        let chain =
+            self.get_accessible_symbol_chain(symbol, enclosing.as_ref(), SymbolFlags::TYPE, false);
+        if chain.len() < 2 || !chain[0].flags.intersects(SymbolFlags::Alias) {
+            return None;
+        }
+        if chain.iter().any(|s| s.name.starts_with('\u{FE}')) {
+            return None;
+        }
+        Some(
+            chain
+                .iter()
+                .map(|s| s.name.as_str())
+                .collect::<Vec<_>>()
+                .join("."),
+        )
     }
 
     pub(crate) fn signature_instantiated_param_type(
