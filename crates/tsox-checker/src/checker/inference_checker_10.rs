@@ -63,24 +63,11 @@ impl Checker {
             let constraint = m.constraint_type.clone()?;
             let name_literal = self.get_string_literal_type(name);
 
-            let gate_target = self.reduced_keyof_for_contextual_gate(&constraint);
-            let gate_ok = match &gate_target {
-                Some(g) => self.is_type_assignable_to(&name_literal, g),
-                None => {
-                    if matches!(&constraint.data, TypeData::Index(idx)
-                    if idx.target.as_ref().is_some_and(|tgt| {
-                        tgt.flags.contains(TypeFlags::TypeParameter)
-                            && self
-                                .get_constraint_of_type_parameter(tgt)
-                                .is_none()
-                    })) {
-                        true
-                    } else {
-                        self.is_type_assignable_to(&name_literal, &constraint)
-                    }
-                }
-            };
-            if !gate_ok {
+            // Go getIndexedMappedTypeSubstitutedTypeOfContextualType：门控对象是
+            // 约束的 base constraint（keyof T / K / T['type'] 的基约束），
+            // computeBaseConstraint 对 Index 型恒为 string|number|symbol
+            let base = self.base_constraint_or_type_for_contextual_gate(&constraint);
+            if !self.is_type_assignable_to(&name_literal, &base) {
                 return None;
             }
             let tp = m.type_parameter.clone().unwrap();
@@ -218,20 +205,24 @@ impl Checker {
         None
     }
 
-    pub(crate) fn reduced_keyof_for_contextual_gate(
-        &mut self,
-        constraint: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
-        use crate::checker::types::TypeData;
-        let TypeData::Index(idx) = &constraint.data else {
-            return None;
-        };
-        let target = idx.target.as_ref()?;
-        if !target.flags.contains(TypeFlags::TypeParameter) {
-            return None;
+    // Go getBaseConstraintOrType (checker.go:27779)：instantiable/联合/交
+    // 集/模板字面量/字符串映射/索引型走 getResolvedBaseConstraint，无基
+    // 约束（noConstraint/circular）时原样返回
+    fn base_constraint_or_type_for_contextual_gate(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        let mask = TYPE_FLAGS_INSTANTIABLE_NON_PRIMITIVE
+            | TYPE_FLAGS_UNION_OR_INTERSECTION
+            | TypeFlags::TemplateLiteral
+            | TypeFlags::StringMapping
+            | TypeFlags::Index;
+        if t.flags.intersects(mask) {
+            let resolved = self.get_resolved_base_constraint(t, &[]);
+            let no_constraint = self.no_constraint_type();
+            let circular = self.circular_constraint_type();
+            if !Arc::ptr_eq(&resolved, &no_constraint) && !Arc::ptr_eq(&resolved, &circular) {
+                return resolved;
+            }
         }
-        let target_constraint = self.get_constraint_of_type_parameter(target)?;
-        Some(self.get_index_type(&target_constraint))
+        Arc::clone(t)
     }
 
     pub fn get_contextual_type(
