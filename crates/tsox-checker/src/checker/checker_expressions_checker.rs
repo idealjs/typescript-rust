@@ -105,6 +105,15 @@ impl Checker {
                             }
                         }
                     }
+                    if let Some(heritage) = &data.heritage_clauses {
+                        for clause in heritage.iter() {
+                            if let tsox_frontend::ast::NodeData::HeritageClause(hc) = &clause.data
+                                && hc.token == SyntaxKind::ImplementsKeyword
+                            {
+                                self.check_heritage_clause(clause);
+                            }
+                        }
+                    }
                     for member in data.members.iter() {
                         self.check_class_member(member);
                     }

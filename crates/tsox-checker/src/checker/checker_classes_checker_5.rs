@@ -552,8 +552,13 @@ impl Checker {
             Some(p) => p,
             None => return,
         };
-        let class_data = match &class_node.data {
-            tsox_frontend::ast::NodeData::ClassDeclaration(d) => d,
+        let (class_members, class_name_node) = match &class_node.data {
+            tsox_frontend::ast::NodeData::ClassDeclaration(d) => {
+                (d.members.clone(), d.name.clone())
+            }
+            tsox_frontend::ast::NodeData::ClassExpression(d) => {
+                (d.members.clone(), d.name.clone())
+            }
             _ => return,
         };
 
@@ -574,7 +579,7 @@ impl Checker {
             }
             if !self.is_type_assignable_to(&instance_type, &interface_type) {
                 let mut issued_member_error = false;
-                for member in class_data.members.iter() {
+                for member in class_members.iter() {
                     if member.has_syntactic_modifier(ModifierFlags::Static) {
                         continue;
                     }
@@ -664,8 +669,7 @@ impl Checker {
                     let entries = std::mem::replace(&mut self.relater_error_chain, saved_chain);
                     self.relater_chain_active = was_active;
 
-                    let error_loc = class_data
-                        .name
+                    let error_loc = class_name_node
                         .as_ref()
                         .map(|n| n.loc)
                         .unwrap_or(class_node.loc);
