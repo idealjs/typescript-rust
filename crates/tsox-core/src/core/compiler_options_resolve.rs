@@ -32,7 +32,9 @@ impl CompilerOptions {
 
     pub fn get_module_resolution_kind(&self) -> ModuleResolutionKind {
         match self.module_resolution {
-            ModuleResolutionKind::Unknown | ModuleResolutionKind::Classic => {
+            ModuleResolutionKind::Unknown
+            | ModuleResolutionKind::Classic
+            | ModuleResolutionKind::Node10 => {
                 match self.get_emit_module_kind() {
                     ModuleKind::Node16 | ModuleKind::Node18 | ModuleKind::Node20 => {
                         ModuleResolutionKind::Node16
