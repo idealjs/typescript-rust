@@ -28,30 +28,33 @@ impl<'a> ResolutionState<'a> {
                 extensions
             };
 
-        let (features, esm_mode, conditions) = match compiler_options.get_module_resolution_kind() {
-            ModuleResolutionKind::Node16 => (
-                NodeResolutionFeatures::NODE16_DEFAULT,
-                resolution_mode == ModuleKind::ESNext,
-                get_conditions(compiler_options, resolution_mode),
-            ),
-            ModuleResolutionKind::NodeNext => (
-                NodeResolutionFeatures::NODE_NEXT_DEFAULT,
-                resolution_mode == ModuleKind::ESNext,
-                get_conditions(compiler_options, resolution_mode),
-            ),
-            ModuleResolutionKind::Bundler => (
-                NodeResolutionFeatures::BUNDLER_DEFAULT,
-                false,
-                get_conditions(
-                    compiler_options,
-                    if resolution_mode == ResolutionMode::None {
-                        ModuleKind::ESNext
-                    } else {
-                        resolution_mode
-                    },
+        let (features, esm_mode, conditions) = match compiler_options.module_resolution {
+            ModuleResolutionKind::Node10 => (NodeResolutionFeatures::NONE, false, Vec::new()),
+            _ => match compiler_options.get_module_resolution_kind() {
+                ModuleResolutionKind::Node16 => (
+                    NodeResolutionFeatures::NODE16_DEFAULT,
+                    resolution_mode == ModuleKind::ESNext,
+                    get_conditions(compiler_options, resolution_mode),
                 ),
-            ),
-            _ => (NodeResolutionFeatures::NONE, false, Vec::new()),
+                ModuleResolutionKind::NodeNext => (
+                    NodeResolutionFeatures::NODE_NEXT_DEFAULT,
+                    resolution_mode == ModuleKind::ESNext,
+                    get_conditions(compiler_options, resolution_mode),
+                ),
+                ModuleResolutionKind::Bundler => (
+                    NodeResolutionFeatures::BUNDLER_DEFAULT,
+                    false,
+                    get_conditions(
+                        compiler_options,
+                        if resolution_mode == ResolutionMode::None {
+                            ModuleKind::ESNext
+                        } else {
+                            resolution_mode
+                        },
+                    ),
+                ),
+                _ => (NodeResolutionFeatures::NONE, false, Vec::new()),
+            },
         };
 
         ResolutionState {
