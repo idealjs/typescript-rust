@@ -94,6 +94,9 @@ impl Checker {
 
     pub fn is_in_ambient_or_type_node(&self, node: &Arc<Node>) -> bool {
         node.flags.contains(NodeFlags::Ambient)
+            || self
+                .get_source_file_of_node(node)
+                .is_some_and(|f| f.is_declaration_file)
             || find_ancestor_node(node, |n| {
                 n.kind == SyntaxKind::InterfaceDeclaration
                     || n.kind == SyntaxKind::TypeAliasDeclaration
