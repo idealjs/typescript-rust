@@ -179,21 +179,18 @@ impl crate::parser::Parser {
         let pos = self.token_pos();
         let mut params = Vec::new();
         loop {
-            if self.token == SyntaxKind::EndOfFile {
+            let state = self.mark();
+            let child = self.parse_child_parameter_or_property_tag(
+                PropertyLikeParse(PropertyLikeParse::CALLBACK_PARAMETER),
+                indent,
+                None,
+            );
+            let Some(child) = child else {
+                self.rewind(state);
                 break;
-            }
-            if self.token == SyntaxKind::AtToken {
-                if let Some(child) = self.parse_child_parameter_or_property_tag(
-                    PropertyLikeParse(PropertyLikeParse::CALLBACK_PARAMETER),
-                    indent,
-                    None,
-                ) {
-                    if child.kind == SyntaxKind::JSDocParameterTag {
-                        params.push(child);
-                    }
-                }
-            } else {
-                self.next_token_jsdoc();
+            };
+            if child.kind == SyntaxKind::JSDocParameterTag {
+                params.push(child);
             }
         }
         let end = params.last().map(|p| p.end()).unwrap_or(pos);

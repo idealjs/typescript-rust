@@ -68,12 +68,14 @@ impl crate::parser::Parser {
                 }
                 SyntaxKind::AsteriskToken => {
                     let asterisk = self.scanner.token_text().to_string();
-                    if state == JSDocState::SawAsterisk {
-                        state = JSDocState::SavingComments;
-                        push_comment(&mut comments, &mut indent, &mut margin, &asterisk);
-                    } else {
+                    if state == JSDocState::BeginningOfLine {
                         state = JSDocState::SawAsterisk;
-                        indent += asterisk.len();
+                        indent += 1;
+                    } else {
+                        if state != JSDocState::SavingBackticks {
+                            state = JSDocState::SavingComments;
+                        }
+                        push_comment(&mut comments, &mut indent, &mut margin, &asterisk);
                     }
                 }
                 SyntaxKind::WhitespaceTrivia => {

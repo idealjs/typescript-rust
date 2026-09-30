@@ -87,7 +87,9 @@ pub(crate) fn push_comment(
     margin: &mut i32,
     text: &str,
 ) {
-    if *margin == -1 {}
+    if *margin == -1 {
+        *margin = *indent as i32;
+    }
     comments.push(text.to_string());
     *indent += text.len();
 }
