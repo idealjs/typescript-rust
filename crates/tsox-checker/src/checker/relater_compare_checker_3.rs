@@ -579,10 +579,26 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-        _is_related_to: &dyn Fn(&Arc<Type>, &Arc<Type>) -> Ternary,
+        is_related_to: &dyn Fn(&Arc<Type>, &Arc<Type>) -> Ternary,
     ) -> Option<Arc<Type>> {
-        let _ = (source, target);
-        None
+        if let Some(t) = self.find_matching_discriminant_type(source, target, is_related_to) {
+            return Some(t);
+        }
+        if let Some(t) = self.find_matching_type_reference_or_type_alias_reference(source, target) {
+            return Some(t);
+        }
+        if let Some(t) = self.find_best_type_for_object_literal(source, target) {
+            return Some(t);
+        }
+        if let Some(t) = self.find_best_type_for_invokable(source, target, crate::checker::types::SignatureKind::Call) {
+            return Some(t);
+        }
+        if let Some(t) =
+            self.find_best_type_for_invokable(source, target, crate::checker::types::SignatureKind::Construct)
+        {
+            return Some(t);
+        }
+        self.find_most_overlappy_type(source, target)
     }
 
     pub fn find_matching_type_reference_or_type_alias_reference(
@@ -590,7 +606,37 @@ impl Checker {
         source: &Arc<Type>,
         union_target: &Arc<Type>,
     ) -> Option<Arc<Type>> {
-        let _ = (source, union_target);
+        let source_object_flags = source.object_flags;
+        if !source_object_flags
+            .intersects(crate::checker::types::ObjectFlags::Reference | crate::checker::types::ObjectFlags::Anonymous)
+        {
+            return None;
+        }
+        let ui = union_target.as_union_or_intersection()?;
+        for t in &ui.types {
+            if !t.flags.contains(TypeFlags::Object) {
+                continue;
+            }
+            let overlap = source_object_flags & t.object_flags;
+            if overlap.contains(crate::checker::types::ObjectFlags::Reference)
+                && source
+                    .target()
+                    .zip(t.target())
+                    .is_some_and(|(a, b)| Arc::ptr_eq(a, b))
+            {
+                return Some(Arc::clone(t));
+            }
+            if overlap.contains(crate::checker::types::ObjectFlags::Anonymous)
+                && source
+                    .alias
+                    .as_ref()
+                    .and_then(|a| a.symbol.as_ref())
+                    .zip(t.alias.as_ref().and_then(|a| a.symbol.as_ref()))
+                    .is_some_and(|(a, b)| Arc::ptr_eq(a, b))
+            {
+                return Some(Arc::clone(t));
+            }
+        }
         None
     }
 
@@ -598,9 +644,16 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         union_target: &Arc<Type>,
-        _kind: SignatureKind,
+        kind: SignatureKind,
     ) -> Option<Arc<Type>> {
-        let _ = (source, union_target);
-        None
+        if self.get_signatures_of_type(source, kind).is_empty() {
+            return None;
+        }
+        union_target
+            .as_union_or_intersection()?
+            .types
+            .iter()
+            .find(|t| !self.get_signatures_of_type(t, kind).is_empty())
+            .cloned()
     }
 }

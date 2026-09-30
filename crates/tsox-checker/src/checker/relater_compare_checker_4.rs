@@ -51,8 +51,20 @@ impl Checker {
         source: &Arc<Type>,
         union_target: &Arc<Type>,
     ) -> Option<Arc<Type>> {
-        let _ = (source, union_target);
-        None
+        if !source
+            .object_flags
+            .contains(crate::checker::types::ObjectFlags::ObjectLiteral)
+        {
+            return None;
+        }
+        let ui = union_target.as_union_or_intersection()?;
+        if !ui.types.iter().any(|t| self.is_array_like_type(t)) {
+            return None;
+        }
+        ui.types
+            .iter()
+            .find(|t| !self.is_array_like_type(t))
+            .cloned()
     }
 
     pub fn should_report_unmatched_property_error(
