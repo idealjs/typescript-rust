@@ -31,7 +31,12 @@ impl Checker {
                 for seg in segments.iter().rev() {
                     let name = self.node_text(seg);
                     match self.get_property_of_type(&t, &name) {
-                        Some(prop) => t = self.get_type_of_symbol(&prop),
+                        Some(prop) => {
+                            // Go checkExpressionWithTypeArguments：属性访问按值位
+                            // 检查，命中的成员（含私名）标记为已使用
+                            self.mark_property_as_referenced_ex(&prop, None, None);
+                            t = self.get_type_of_symbol(&prop);
+                        }
                         None => {
                             report_unresolved(self, seg);
                             return self.error_type();
@@ -484,10 +489,9 @@ impl Checker {
             .get(&base)
             .and_then(|l| l.resolved_type.clone())
             .or_else(|| {
-                if base
-                    .flags
-                    .intersects(SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable)
-                {
+                // Go checkQualifiedName：最左段按表达式求值（checkNonNullExpression），
+                // 一切值意义符号取符号值类型（类=构造侧类型），不止变量
+                if base.flags.intersects(SymbolFlags::VALUE) {
                     Some(self.get_type_of_symbol(&base))
                 } else {
                     None
@@ -500,7 +504,27 @@ impl Checker {
         let seg_count = segments.len();
         for (i, seg) in segments.iter().rev().enumerate() {
             let name = self.get_property_name_from_node(seg);
-            let prop = self.get_property_of_type(&t, &name)?;
+            let Some(prop) = self.get_property_of_type(&t, &name) else {
+                if seg.kind == SyntaxKind::PrivateIdentifier {
+                    // Go checkPropertyAccessExpressionOrQualifiedName：私名段未命中
+                    // 走 reportNonexistentProperty（TS2339 报在私名节点，名字含 #）
+                    let file = self
+                        .get_source_file_of_node(seg)
+                        .or_else(|| self.current_file.clone());
+                    let type_str = self.type_to_string(&t);
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        seg.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+                        vec![name, type_str],
+                    ));
+                    return Some(self.error_type());
+                }
+                return None;
+            };
+            // Go resolvePropertyName：命中成员标记为已使用（支撑 noUnusedLocals）
+            self.mark_property_as_referenced_ex(&prop, None, None);
             let prop_t = self.get_type_of_symbol(&prop);
             t = if i + 1 < seg_count {
                 self.get_non_nullable_type_of(&prop_t)
