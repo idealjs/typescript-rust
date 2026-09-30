@@ -51,6 +51,16 @@ impl Checker {
         &mut self,
         accessor: &Arc<Node>,
     ) -> Arc<Type> {
+        self.push_scope(accessor);
+        let result = self.resolve_accessor_pair_type_worker(accessor);
+        self.pop_scope();
+        result
+    }
+
+    fn resolve_accessor_pair_type_worker(
+        &mut self,
+        accessor: &Arc<Node>,
+    ) -> Arc<Type> {
         let class = accessor.parent();
         let getter = class.as_ref().and_then(|cls| {
             Self::class_members_of(cls).iter().find(|m| {
