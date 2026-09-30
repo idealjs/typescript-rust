@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker_expr_access::*;
+use crate::checker::types_type_id::{TYPE_FLAGS_ANY_OR_UNKNOWN, TYPE_FLAGS_BIG_INT_LIKE};
 
 impl Checker {
     pub(crate) fn get_type_of_binary_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
@@ -34,7 +35,21 @@ impl Checker {
                 | GreaterThanGreaterThanGreaterThanToken
                 | AmpersandToken
                 | BarToken
-                | CaretToken => self.number_type(),
+                | CaretToken => {
+                    let left_type = self.get_type_of_node(&data.left);
+                    let right_type = self.get_type_of_node(&data.right);
+                    if (self.is_type_assignable_to_kind(&left_type, TYPE_FLAGS_ANY_OR_UNKNOWN)
+                        && self.is_type_assignable_to_kind(&right_type, TYPE_FLAGS_ANY_OR_UNKNOWN))
+                        || (!self.maybe_type_of_kind(&left_type, TYPE_FLAGS_BIG_INT_LIKE)
+                            && !self.maybe_type_of_kind(&right_type, TYPE_FLAGS_BIG_INT_LIKE))
+                    {
+                        self.number_type()
+                    } else if self.both_are_big_int_like(&left_type, &right_type) {
+                        self.bigint_type()
+                    } else {
+                        self.error_type()
+                    }
+                }
 
                 LessThanToken
                 | GreaterThanToken
