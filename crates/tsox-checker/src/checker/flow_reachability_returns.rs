@@ -59,16 +59,15 @@ impl Checker {
             let Some(expected) = annotated else {
                 return;
             };
-            if !expected.flags.contains(TypeFlags::Any)
-                && !self.is_type_assignable_to(&self.undefined_type(), &expected)
-            {
-                let expected_str = self.type_to_string(&expected);
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    self.current_file.clone(),
-                    node.loc,
-                    tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                    vec!["undefined".to_string(), expected_str],
-                ));
+            if !expected.flags.contains(TypeFlags::Any) {
+                self.check_type_assignable_to_and_optionally_elaborate(
+                    &self.undefined_type(),
+                    &expected,
+                    Some(node),
+                    None,
+                    None,
+                    None,
+                );
             }
             return;
         }
