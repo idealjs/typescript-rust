@@ -20,8 +20,6 @@ pub use crate::checker::checker_statements_import_equals_conflicts::*;
 #[allow(unused_imports)]
 pub use crate::checker::checker_statements_module_declaration_checks::*;
 #[allow(unused_imports)]
-pub use crate::checker::checker_statements_return_checks::*;
-#[allow(unused_imports)]
 pub use crate::checker::checker_statements_typealias_and_specifier_checks::*;
 pub(crate) use std::sync::Arc;
 pub(crate) use tsox_core::diagnostics::messages_generated::*;
