@@ -26,6 +26,7 @@ pub use crate::checker::typenode_references_interface_instantiation_helpers::*;
 pub use crate::checker::typenode_references_interface_members_accessors::*;
 #[allow(unused_imports)]
 pub use crate::checker::typenode_references_interface_members_properties::*;
+pub use crate::checker::typenode_references_interface_pass::*;
 #[allow(unused_imports)]
 pub use crate::checker::typenode_references_qualified_name_diagnostics::*;
 #[allow(unused_imports)]
