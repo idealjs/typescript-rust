@@ -188,10 +188,7 @@ impl DeclarationTransformer {
         if is_private {
             return None;
         }
-        let type_parameters = params.map(|list| {
-            let nodes = self.visitor().visit_node_list(Some(list));
-            self.factory().new_node_list(nodes)
-        });
+        let type_parameters = params.map(|list| self.visit_nodes_via_visit(list));
         if let Some(type_parameters) = type_parameters {
             return Some(type_parameters);
         }
@@ -341,8 +338,8 @@ impl DeclarationTransformer {
         let heritage_clauses = cd
             .heritage_clauses
             .clone()
-            .map(|h| self.visitor().visit_nodes(h));
-        let members = self.visitor().visit_nodes(cd.members.clone());
+            .map(|h| self.visit_nodes_via_visit(&h));
+        let members = self.visit_nodes_via_visit(&cd.members);
         let result = self.factory().update_class_declaration(
             input,
             self.ensure_modifiers(input),

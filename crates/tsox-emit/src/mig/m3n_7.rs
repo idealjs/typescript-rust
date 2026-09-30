@@ -4,6 +4,12 @@ pub mod r39k18_defs;
 #[path = "r40k21_defs.rs"]
 pub mod r40k21_defs;
 
+#[path = "m3n_11.rs"]
+pub mod m3n_11;
+
+#[path = "m3n_12.rs"]
+pub mod m3n_12;
+
 pub use r39k18_defs::{
     file_reference_from_ast, file_reference_to_ast, source_file_is_js, R39K18EmitResolverExt,
 };

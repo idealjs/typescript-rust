@@ -390,8 +390,7 @@ impl Emitter {
             declaration_map_path.to_string(),
         );
         let node = declaration_transformer
-            .transformer
-            .transform_source_file(Arc::clone(&source_file.node))
+            .transform_source_file_entry(Arc::clone(&source_file))
             .unwrap_or_else(|| Arc::clone(&source_file.node));
         source_file = source_file_with_node(&source_file, node);
         diags.extend(declaration_transformer.get_diagnostics());

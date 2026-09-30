@@ -253,11 +253,11 @@ impl DeclarationTransformer {
                 }
             }
             input_nodes = normal_declarations;
-            let (visited, _) = self.visitor().visit_slice(imports);
+            let (visited, _) = self.visit_slice_via_visit(imports);
             extra_imports = visited;
         }
 
-        let (nodes, _) = self.visitor().visit_slice(input_nodes);
+        let (nodes, _) = self.visit_slice_via_visit(input_nodes);
         if nodes.is_empty() {
             if !extra_imports.is_empty() {
                 return Some(self.factory().new_syntax_list(extra_imports));
