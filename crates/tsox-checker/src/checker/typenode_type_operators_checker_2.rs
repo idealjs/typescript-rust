@@ -112,6 +112,10 @@ impl Checker {
         index_type_node: &Arc<Node>,
     ) {
         if !self.type_argument_stack.is_empty()
+            || !matches!(
+                index_type_node.kind,
+                SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral
+            )
             || !index_type
                 .flags
                 .intersects(TypeFlags::StringLiteral | TypeFlags::NumberLiteral)
