@@ -21,6 +21,30 @@ impl Checker {
         ) {
             return self.error_type();
         }
+        // Go getTypeOfInstantiatedSymbol：实例化符号类型 = 目标符号类型经
+        // mapper 实例化（惰性求值并驻留）
+        if symbol
+            .check_flags
+            .intersects(tsox_frontend::ast::CheckFlags::Instantiated)
+        {
+            if let Some(t) = self
+                .value_symbol_links
+                .get(symbol)
+                .and_then(|l| l.resolved_type.clone())
+            {
+                return t;
+            }
+            let (target, mapper) = match self.value_symbol_links.get(symbol) {
+                Some(l) => (l.target.clone(), l.mapper.clone()),
+                None => (None, None),
+            };
+            if let Some(target) = target {
+                let t = self.get_type_of_symbol(&target);
+                let t = self.instantiate_type(&t, mapper.as_ref());
+                self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));
+                return t;
+            }
+        }
         // js export=（`module.exports = <表达式>`，BinaryExpression 声明）：
         // 符号类型 = 右侧表达式类型（具名导入经 tryGetMemberInModuleExports
         // AndProperties 取该类型的属性）
@@ -195,8 +219,12 @@ impl Checker {
             && let Some(decl) = symbol
                 .declarations
                 .iter()
-                .find(|d| d.kind == SyntaxKind::MethodDeclaration)
-            && let tsox_frontend::ast::NodeData::MethodDeclaration(data) = &decl.data
+                .find(|d| {
+                    matches!(
+                        d.kind,
+                        SyntaxKind::MethodDeclaration | SyntaxKind::MethodSignature
+                    )
+                })
         {
             if let Some(links) = self.value_symbol_links.get(symbol)
                 && let Some(ref t) = links.resolved_type
@@ -205,30 +233,44 @@ impl Checker {
             }
             // Go getTypeOfFuncClassEnumModule：符号有多声明（过载）时类型是
             // 各声明函数类型的联合；方法侧等价为收集全部无实现体签名
+            //（接口/类型字面量方法是 MethodSignature，一律无实现体）
             let method_decls: Vec<Arc<Node>> = symbol
                 .declarations
                 .iter()
-                .filter(|d| d.kind == SyntaxKind::MethodDeclaration)
+                .filter(|d| {
+                    matches!(
+                        d.kind,
+                        SyntaxKind::MethodDeclaration | SyntaxKind::MethodSignature
+                    )
+                })
                 .cloned()
                 .collect();
             let overload_sigs: Vec<Arc<Signature>> = {
                 let mut sigs: Vec<Arc<Signature>> = Vec::new();
                 for d in &method_decls {
-                    let tsox_frontend::ast::NodeData::MethodDeclaration(md) = &d.data else {
-                        continue;
+                    let (parameters, type_node, has_body) = match &d.data {
+                        tsox_frontend::ast::NodeData::MethodDeclaration(md) => (
+                            &md.parameters,
+                            md.type_node.as_ref(),
+                            md.body.is_some(),
+                        ),
+                        tsox_frontend::ast::NodeData::MethodSignatureDeclaration(md) => {
+                            (&md.parameters, md.type_node.as_ref(), false)
+                        }
+                        _ => continue,
                     };
-                    if md.body.is_some() {
+                    if has_body {
                         continue;
                     }
                     self.push_scope(d);
                     let saved_stack = std::mem::take(&mut self.type_argument_stack);
                     let saved_frames = std::mem::take(&mut self.type_argument_name_frames);
-                    let return_type = match md.type_node.as_ref() {
+                    let return_type = match type_node {
                         Some(tn) => self.get_type_from_type_node(tn),
                         None => self.get_any_type(),
                     };
                     let sig = self.build_signature_from_function_like_type_node(
-                        &md.parameters,
+                        parameters,
                         return_type,
                         false,
                         None,
@@ -246,6 +288,14 @@ impl Checker {
                 self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));
                 return t;
             }
+            if decl.kind == SyntaxKind::MethodSignature {
+                let t = self.create_function_or_constructor_type(overload_sigs, false);
+                self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));
+                return t;
+            }
+            let tsox_frontend::ast::NodeData::MethodDeclaration(data) = &decl.data else {
+                return self.get_any_type();
+            };
             self.push_scope(decl);
             // 符号类型是声明形式：重建时与进行中的实例化映射隔离，防止类型参数被外部绑定污染缓存
             let saved_stack = std::mem::take(&mut self.type_argument_stack);
@@ -260,7 +310,7 @@ impl Checker {
                 return_type,
                 false,
                 None,
-                Some(Arc::clone(&decl)),
+                Some(Arc::clone(decl)),
             );
             self.type_argument_name_frames = saved_frames;
             self.type_argument_stack = saved_stack;
