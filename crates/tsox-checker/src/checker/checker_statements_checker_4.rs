@@ -332,10 +332,21 @@ impl Checker {
                         }
                     }
                 }
-                (None, None) => match self.initial_type_of_declaration(node) {
-                    Some(t) => t,
-                    None => self.auto_type(),
-                },
+                (None, None) => {
+                    if tsox_frontend::ast::mig::m3f_4::is_catch_clause_variable_declaration_or_binding_element(node)
+                    {
+                        if self.use_unknown_in_catch_variables {
+                            self.unknown_type()
+                        } else {
+                            self.any_type()
+                        }
+                    } else {
+                        match self.initial_type_of_declaration(node) {
+                            Some(t) => t,
+                            None => self.auto_type(),
+                        }
+                    }
+                }
             };
 
             if let Some(mut symbol) = self.resolve_identifier(&data.name) {

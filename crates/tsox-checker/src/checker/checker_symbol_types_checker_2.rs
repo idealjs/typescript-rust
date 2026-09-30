@@ -203,14 +203,17 @@ impl Checker {
                     return Some(self.create_array_type(elem));
                 }
             }
-            // catch 子句变量无注解无初始化：unknown（useUnknownInCatchVariables 默认）
             if decl.kind == SyntaxKind::VariableDeclaration
                 && decl
                     .parent()
                     .as_ref()
                     .is_some_and(|p| p.kind == SyntaxKind::CatchClause)
             {
-                return Some(self.get_unknown_type());
+                return Some(if self.use_unknown_in_catch_variables {
+                    self.get_unknown_type()
+                } else {
+                    self.get_any_type()
+                });
             }
             if decl.kind == SyntaxKind::VariableDeclaration {
                 let placeholder = self.error_type();
