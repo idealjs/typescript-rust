@@ -335,9 +335,34 @@ impl Checker {
                 self.hover_write_signatures(b, &[sig], prefix, is_method, symbol, None);
                 return;
             }
+            if let Some(sig) = self.hover_signature_of_method_declaration(parent) {
+                self.hover_write_signatures(b, &[sig], prefix, is_method, symbol, None);
+                return;
+            }
         }
         let (signatures, call) = self.hover_get_signatures_at_location(symbol, node);
         self.hover_write_signatures(b, &signatures, prefix, is_method, symbol, call.as_ref());
+    }
+
+    fn hover_signature_of_method_declaration(
+        &mut self,
+        parent: &Arc<Node>,
+    ) -> Option<Arc<Signature>> {
+        let NodeData::MethodDeclaration(d) = &parent.data else {
+            return None;
+        };
+        let return_type = match (&d.type_node, &d.body) {
+            (Some(type_node), _) => self.get_type_from_type_node(type_node),
+            (None, Some(body)) => self.infer_function_return_type(Some(parent), Some(body), None),
+            (None, None) => self.get_any_type(),
+        };
+        Some(self.build_signature_from_function_like_type_node(
+            &d.parameters,
+            return_type,
+            false,
+            None,
+            Some(Arc::clone(parent)),
+        ))
     }
 
     /// 交集类型变量调用位：取首个带调用签名的成分（Go 结构化成员合并的近似）
