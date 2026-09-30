@@ -14,6 +14,12 @@ impl Checker {
     }
 
     pub(crate) fn resolve_alias(&mut self, symbol: &Arc<Symbol>) -> Arc<Symbol> {
+        if symbol.flags.intersects(SymbolFlags::Alias) {
+            let resolved = self.resolve_alias_base(Arc::clone(symbol));
+            if !Arc::ptr_eq(&resolved, symbol) {
+                return resolved;
+            }
+        }
         self.get_merged_symbol(symbol)
     }
 

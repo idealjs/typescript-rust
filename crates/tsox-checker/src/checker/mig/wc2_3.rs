@@ -767,6 +767,9 @@ impl Checker {
                     return Some(Arc::clone(decl));
                 }
             }
+            if Arc::ptr_eq(&resolved, &symbol) {
+                break;
+            }
             symbol = resolved;
         }
         None
