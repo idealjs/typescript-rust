@@ -1,5 +1,6 @@
 #![allow(unused_imports)]
 
+use crate::checker::checker::CheckMode;
 use crate::checker::checker_classes::*;
 
 // Go getBaseConstructorTypeOfClass 的合法性检查段：extends 表达式的
@@ -32,7 +33,7 @@ impl Checker {
                 return;
             }
         }
-        let value_type = self.get_type_of_node(expr);
+        let value_type = self.check_expression_ex(expr, CheckMode::Normal);
         if value_type.flags.contains(TypeFlags::Any) || self.is_error_type(&value_type) {
             return;
         }
