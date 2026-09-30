@@ -1,6 +1,23 @@
 #![allow(unused_imports)]
 
+use crate::binder::mig::m4a_4::{is_assignment_declaration, is_effective_module_declaration};
 use crate::binder::symbols::*;
+
+fn set_value_declaration(symbol: &Arc<Symbol>, node: &Arc<Node>) {
+    let replace = match &symbol.value_declaration {
+        None => true,
+        Some(vd) => {
+            (is_assignment_declaration(vd) && !is_assignment_declaration(node))
+                || (vd.kind != node.kind && is_effective_module_declaration(vd))
+        }
+    };
+    if replace {
+        let symbol_mut = Arc::as_ptr(symbol) as *mut Symbol;
+        unsafe {
+            (*symbol_mut).value_declaration = Some(Arc::clone(node));
+        }
+    }
+}
 
 impl Binder {
     pub(crate) fn declare_symbol_into(
@@ -79,11 +96,9 @@ impl Binder {
                 let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
                 unsafe {
                     (*symbol_mut).declarations.push(Arc::clone(node));
-                    if (*symbol_mut).value_declaration.is_none()
-                        && includes.intersects(SymbolFlags::VALUE)
-                    {
-                        (*symbol_mut).value_declaration = Some(Arc::clone(node));
-                    }
+                }
+                if includes.intersects(SymbolFlags::VALUE) {
+                    set_value_declaration(&symbol, node);
                 }
                 self.symbol_map.set_symbol(node, Arc::clone(&symbol));
                 return symbol;
@@ -93,11 +108,9 @@ impl Binder {
                 unsafe {
                     (*existing_mut).declarations.push(Arc::clone(node));
                     (*existing_mut).flags |= includes;
-                    if (*existing_mut).value_declaration.is_none()
-                        && includes.intersects(SymbolFlags::VALUE)
-                    {
-                        (*existing_mut).value_declaration = Some(Arc::clone(node));
-                    }
+                }
+                if includes.intersects(SymbolFlags::VALUE) {
+                    set_value_declaration(&existing, node);
                 }
                 self.symbol_map.set_symbol(node, Arc::clone(&existing));
                 return existing;
@@ -109,12 +122,10 @@ impl Binder {
             let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
             unsafe {
                 (*symbol_mut).declarations.push(Arc::clone(node));
-                if (*symbol_mut).value_declaration.is_none()
-                    && includes.intersects(SymbolFlags::VALUE)
-                {
-                    (*symbol_mut).value_declaration = Some(Arc::clone(node));
-                }
             }
+        }
+        if includes.intersects(SymbolFlags::VALUE) {
+            set_value_declaration(&symbol, node);
         }
 
         match &target {
