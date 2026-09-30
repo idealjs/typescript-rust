@@ -186,6 +186,15 @@ impl Checker {
                             .iter()
                             .zip(new_inst.iter())
                             .any(|(old, new)| !Arc::ptr_eq(old, new));
+                        let new_tps = self.substitute_type_parameter_constraints(
+                            &sig.type_parameters,
+                            params,
+                            substitutions,
+                        );
+                        let tps_changed = new_tps
+                            .iter()
+                            .zip(sig.type_parameters.iter())
+                            .any(|(new, old)| !Arc::ptr_eq(new, old));
                         let return_changed = self
                             .get_return_type_of_signature(sig)
                             .is_some_and(|rt| {
@@ -194,7 +203,7 @@ impl Checker {
                                 );
                                 !Arc::ptr_eq(&sub, &rt)
                             });
-                        if !changed && !return_changed {
+                        if !changed && !return_changed && !tps_changed {
                             return Arc::clone(sig);
                         }
                         let mut inst = Signature::new();
@@ -209,11 +218,7 @@ impl Checker {
                             params,
                             substitutions,
                         );
-                        inst.type_parameters = self.substitute_type_parameter_constraints(
-                            &sig.type_parameters,
-                            params,
-                            substitutions,
-                        );
+                        inst.type_parameters = new_tps;
                         inst.resolved_type_predicate = sig.resolved_type_predicate.clone();
                         inst.instantiated_parameter_types = Some(new_inst);
                         if let Some(rt) = self.get_return_type_of_signature(sig) {
@@ -292,6 +297,15 @@ impl Checker {
                 let new_return = self
                     .get_return_type_of_signature(sig)
                     .map(|rt| self.substitute_infer_type_parameters(&rt, params, substitutions));
+                let new_tps = self.substitute_type_parameter_constraints(
+                    &sig.type_parameters,
+                    params,
+                    substitutions,
+                );
+                let tps_changed = new_tps
+                    .iter()
+                    .zip(sig.type_parameters.iter())
+                    .any(|(new, old)| !Arc::ptr_eq(new, old));
                 let params_changed = old_params
                     .iter()
                     .zip(new_params.iter())
@@ -300,7 +314,7 @@ impl Checker {
                     self.get_return_type_of_signature(sig)
                         .is_some_and(|old| !Arc::ptr_eq(nr, &old))
                 });
-                if !params_changed && !return_changed {
+                if !params_changed && !return_changed && !tps_changed {
                     new_sigs.push(Arc::clone(sig));
                     continue;
                 }
@@ -317,11 +331,7 @@ impl Checker {
                     params,
                     substitutions,
                 );
-                inst.type_parameters = self.substitute_type_parameter_constraints(
-                    &sig.type_parameters,
-                    params,
-                    substitutions,
-                );
+                inst.type_parameters = new_tps;
                 inst.resolved_type_predicate = sig.resolved_type_predicate.clone();
                 inst.instantiated_parameter_types = Some(new_params);
                 if let Some(nr) = new_return {
