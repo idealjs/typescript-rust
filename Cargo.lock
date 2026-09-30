@@ -1170,6 +1170,7 @@ dependencies = [
  "criterion",
  "dashmap",
  "flate2",
+ "libc",
  "notify",
  "pretty_assertions",
  "proptest",
@@ -1291,6 +1292,7 @@ dependencies = [
 name = "tsox-lsp"
 version = "0.1.0"
 dependencies = [
+ "libc",
  "notify",
  "regex",
  "serde",

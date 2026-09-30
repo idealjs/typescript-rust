@@ -19,3 +19,6 @@ tsox-frontend = { workspace = true }
 tsox-tsoptions = { workspace = true }
 unicode-ident = "1"
 xxhash-rust = { version = "0.8", features = ["xxh3"] }
+
+[dev-dependencies]
+libc = "0.2"

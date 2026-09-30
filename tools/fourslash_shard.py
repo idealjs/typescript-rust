@@ -33,8 +33,8 @@ from concurrent.futures import ThreadPoolExecutor
 BIN_GLOB = "target/debug/deps/fourslash-*"
 OUT_DIR = os.environ.get("TSOX_FOURSLASH_OUT", "/tmp/fourslash_shards")
 SHARD_SIZE = 200
-AS_LIMIT = 6 * 1024**3        # RLIMIT_AS：6GiB 虚拟内存（提前限制）
-KILL_RSS = 4 * 1024**3        # 采样软阈值 4GiB：主动 SIGKILL 并记录
+AS_LIMIT = 4 * 1024**3        # RLIMIT_AS：4GiB（2026-09-29 拍板口径，与全量 ulimit -v 4194304 一致）
+KILL_RSS = 3 * 1024**3        # 采样软阈值 3GiB：主动 SIGKILL 并记录（须低于 AS_LIMIT）
 POLL_SEC = 0.05
 
 

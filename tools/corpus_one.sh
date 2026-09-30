@@ -8,7 +8,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BIN=${BIN:-$(ls -t "$ROOT"/target/release/deps/corpus-* | grep -v '\.d$' | head -1)}
 cd "$ROOT/crates/tsox" || exit 1
 rm -f "tests/corpus/baselines/local/$SUITE/$name.errors.txt" "tests/corpus/baselines/local/$SUITE/$name.ts.errors.txt"
-out=$(TSOX_SUBMODULE_SUITE=$SUITE TSOX_SUBMODULE_LIMIT=0 TSOX_SUBMODULE_FILTER="$name" timeout 60 "$BIN" --exact submodule_compiler::submodule_compiler_cases --nocapture 2>&1 | grep -E '^\[w0\]|panicked' | head -5)
+# 内存限制强制：与全量口径一致（RLIMIT_AS 4GiB），二进制内守卫会拒绝无限制运行
+out=$(TSOX_SUBMODULE_SUITE=$SUITE TSOX_SUBMODULE_LIMIT=0 TSOX_SUBMODULE_FILTER="$name" timeout 60 bash -c 'ulimit -v 4194304; exec "$0" --exact submodule_compiler::submodule_compiler_cases --nocapture' "$BIN" 2>&1 | grep -E '^\[w0\]|panicked' | head -5)
 echo "$out"
 for f in "tests/corpus/baselines/local/$SUITE/$name.errors.txt" "tests/corpus/baselines/local/$SUITE/$name.ts.errors.txt"; do
   if [[ -f "$f" ]]; then
