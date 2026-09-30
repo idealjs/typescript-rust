@@ -219,8 +219,10 @@ impl Checker {
                     };
                 }
                 let name_text = ident_node.text().to_string();
-                if let Some(sym) = self.resolve_identifier(ident_node)
-                    && let base = self.resolve_alias_base(sym)
+                if let Some(sym) = self.resolve_identifier_with_meaning(
+                    ident_node,
+                    SymbolFlags::VALUE | SymbolFlags::ExportValue,
+                ) && let base = self.resolve_alias_base(sym)
                 {
                     let msg = if base.flags.contains(SymbolFlags::Class) {
                         Some(tsox_core::diagnostics::messages_generated::
