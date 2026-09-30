@@ -551,6 +551,16 @@ impl Checker {
         self.check_unmatched_jsdoc_parameters(node);
         let parameters = tsox_frontend::ast::mig::m3b::parameters(node);
         self.check_source_elements_from_list(parameters);
+        if matches!(
+            node.kind,
+            SyntaxKind::FunctionType
+                | SyntaxKind::ConstructorType
+                | SyntaxKind::CallSignature
+                | SyntaxKind::ConstructSignature
+        ) && let Some(parameter_list) = tsox_frontend::ast::mig::m3b::parameter_list(node)
+        {
+            self.check_parameter_implicit_any(node, parameter_list, 0);
+        }
         let return_type_node = node.type_node();
         if let Some(return_type_node) = &return_type_node {
             self.check_source_element(return_type_node);
