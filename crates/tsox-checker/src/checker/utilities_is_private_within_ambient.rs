@@ -47,7 +47,13 @@ pub fn try_get_property_access_or_identifier_to_string(expr: &Node) -> String {
 }
 
 pub fn get_set_accessor_value_parameter(accessor: &Node) -> Option<Arc<Node>> {
-    let _ = accessor;
+    let parameters = tsox_frontend::ast::mig::m3b::parameters(accessor);
+    if !parameters.is_empty() {
+        let has_this = parameters.len() == 2
+            && tsox_frontend::ast::mig::m3g_2::is_this_parameter(&parameters[0]);
+        let index = if has_this { 1 } else { 0 };
+        return Some(std::sync::Arc::clone(&parameters[index]));
+    }
     None
 }
 
