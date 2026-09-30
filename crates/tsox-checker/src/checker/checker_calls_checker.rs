@@ -402,10 +402,10 @@ impl Checker {
         if !is_new {
             let apparent_callee_type = self.get_apparent_type(&callee_type);
             let call_signature_count = self
-                .get_signatures_of_type(&apparent_callee_type, SignatureKind::Call)
+                .get_signatures_of_type_reduced(&apparent_callee_type, SignatureKind::Call)
                 .len();
             let construct_signature_count = self
-                .get_signatures_of_type(&apparent_callee_type, SignatureKind::Construct)
+                .get_signatures_of_type_reduced(&apparent_callee_type, SignatureKind::Construct)
                 .len();
             if self.is_untyped_function_call(
                 &callee_type,

@@ -16,11 +16,7 @@ impl Checker {
             SignatureKind::Call
         };
         let signatures: &[Arc<Signature>] = if callee_type.is_intersection() {
-            // Go getSignaturesOfStructuredType：交集签名 = 各成分签名拼接，
-            // 不可调用的成分（原始类型等）不贡献签名也不阻断
-            for m in callee_type.types().into_iter().flatten() {
-                union_signatures.extend(self.get_signatures_of_type(m, sig_kind));
-            }
+            union_signatures = self.get_signatures_of_type_reduced(callee_type, sig_kind);
             if union_signatures.is_empty() {
                 self.report_invocation_error(callee_expr, callee_type, is_new);
                 return None;
