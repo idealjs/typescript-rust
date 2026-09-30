@@ -205,16 +205,6 @@ impl Program {
             if skip_default_lib && self.default_library_file_names.contains(&file.file_name) {
                 continue;
             }
-            checker.merge_module_augmentations_in_file(file);
-        }
-        for file in &self.source_files {
-            if skip_lib && (file.is_declaration_file || is_external_library_file(&file.file_name)) {
-                continue;
-            }
-
-            if skip_default_lib && self.default_library_file_names.contains(&file.file_name) {
-                continue;
-            }
             checker.check_source_file(file);
         }
         checker

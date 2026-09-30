@@ -1,27 +1,10 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker::*;
-use tsox_frontend::ast::node_data_generated::NodeData;
-use tsox_frontend::ast::{Node, SourceFile, SyntaxKind};
+use tsox_frontend::ast::Node;
 use std::sync::Arc;
 
 impl Checker {
-    /// Go mergeModuleAugmentation 前置遍历：在任何文件检查之前，把本文件
-    pub fn merge_module_augmentations_in_file(&mut self, file: &Arc<SourceFile>) {
-        let statements: Vec<Arc<Node>> = match &file.node.data {
-            NodeData::SourceFile(data) => data.statements.iter().cloned().collect(),
-            _ => return,
-        };
-        for stmt in &statements {
-            if stmt.kind != SyntaxKind::ModuleDeclaration {
-                continue;
-            }
-            if tsox_frontend::ast::is_global_scope_augmentation(stmt) {
-                self.merge_module_augmentation(&stmt, stmt);
-            }
-        }
-    }
-
     pub(crate) fn merge_module_augmentation(&mut self, name_node: &Arc<Node>, module_node: &Arc<Node>) {
         // 同文件多处增强共享合并符号：仅处理首个声明（Go combined-symbol guard）
         let Some(aug_sym) = self.program.symbol_map().symbol_of(module_node).cloned() else {
