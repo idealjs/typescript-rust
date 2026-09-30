@@ -117,13 +117,12 @@ fn array_method_signature_display_substituted() {
 
 #[test]
 fn explicit_type_arguments_select_generic_overload() {
-    // Go oracle（gotsc --noEmit）：显式 <number> 固定映射后 callback 返回
-    // `c + d`（string）不符 U=number → 报 TS2322（body 级）。我们当前在
-    // 实参位报 2345——语义同为「该调用有错」，代码/位置差异留档
+    // Go oracle（gotsc --noEmit，2026-09-30 主 agent 实测）：单候选经
+    // elaborateArrowFunction 短路默认头，恰报一条 TS2322（body 级）
     let ok = build_checker_with_lib(
         "declare const a: string[]; const r = a.reduce<number>((c, d) => c + d, \" \");",
     );
-    assert_eq!(error_codes(&ok), vec![2345]);
+    assert_eq!(error_codes(&ok), vec![2322]);
 }
 
 #[test]
