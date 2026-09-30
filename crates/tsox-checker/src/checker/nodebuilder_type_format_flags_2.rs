@@ -18,12 +18,18 @@ impl TypeFormatFlags {
 
     pub const MULTILINE_OBJECT_LITERALS: Self = Self(1 << 8);
 
+    pub const IN_TYPE_ALIAS: Self = Self(1 << 9);
+
     pub fn contains(self, other: Self) -> bool {
         (self.0 & other.0) == other.0
     }
 
     pub const fn union(self, other: Self) -> Self {
         Self(self.0 | other.0)
+    }
+
+    pub const fn without(self, other: Self) -> Self {
+        Self(self.0 & !other.0)
     }
 }
 

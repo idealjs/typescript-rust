@@ -5,6 +5,7 @@ use std::sync::Arc;
 
 use super::hover_display_parts::HoverPartsBuilder;
 use crate::checker::nodebuilder::*;
+use crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
 use crate::checker::types::Type;
 use tsox_frontend::ast::{Node, Symbol, SymbolFlags, SyntaxKind};
 
@@ -460,7 +461,14 @@ impl Checker {
         }
         b.write_space(" = ");
         let t = self.try_get_type_alias_declared_type(symbol).unwrap_or_else(|| self.get_declared_type_of_symbol(symbol));
-        b.extend(self.type_to_display_parts(&t));
+        // Go hover.go:933 writeTypeClassified(…, typeFormatFlags|InTypeAlias)：
+        // 别名右值按目标展开，不回写别名名自身
+        b.extend(self.type_to_display_parts_ex(
+            &t,
+            TypeFormatFlags::MULTILINE_OBJECT_LITERALS
+                .union(TypeFormatFlags::USE_ALIAS_DEFINED_OUTSIDE_CURRENT_SCOPE)
+                .union(TypeFormatFlags::IN_TYPE_ALIAS),
+        ));
     }
 
     pub(crate) fn hover_write_declared_type_params(&mut self, b: &mut HoverPartsBuilder, symbol: &Arc<Symbol>) {

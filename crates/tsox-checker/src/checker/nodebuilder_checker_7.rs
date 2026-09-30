@@ -49,6 +49,10 @@ impl Checker {
         t: &Arc<Type>,
         flags: TypeFormatFlags,
     ) -> String {
+        // Go typeToTypeNode（nodebuilderimpl.go:3298）：InTypeAlias 单层消费，
+        // 仅别名右值顶层跳过按别名名呈现，嵌套类型恢复常规判定
+        let in_type_alias = flags.contains(TypeFormatFlags::IN_TYPE_ALIAS);
+        let flags = flags.without(TypeFormatFlags::IN_TYPE_ALIAS);
         if let Some(name) = t.intrinsic_name() {
             if name == "error" {
                 return "any".to_string();
@@ -92,8 +96,11 @@ impl Checker {
         }
 
         // Go typeToTypeNode：alias 可达时先于 union/intersection/类型参数/类接口
-        // 按别名引用呈现（命名空间限定 + 类型实参；Array 单实参写 []）
-        if let Some(alias) = &t.alias
+        // 按别名引用呈现（命名空间限定 + 类型实参；Array 单实参写 []）；
+        // InTypeAlias 置位（别名右值顶层）时跳过，落到结构展开
+        // （Go nodebuilderimpl.go:3443 `inTypeAlias == 0 && t.alias != nil`）
+        if !in_type_alias
+            && let Some(alias) = &t.alias
             && let Some(sym) = &alias.symbol
         {
             let args: Vec<String> = alias
@@ -161,7 +168,8 @@ impl Checker {
             return format!("{name}<{target}>");
         }
         if let TypeData::Mapped(m) = &t.data {
-            if let Some(alias) = &t.alias
+            if !in_type_alias
+                && let Some(alias) = &t.alias
                 && let Some(sym) = &alias.symbol
             {
                 let args: Vec<String> = alias

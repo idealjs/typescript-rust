@@ -1924,11 +1924,19 @@ impl Checker {
 
     pub fn type_to_display_parts(&mut self, t: &Arc<Type>) -> Vec<SymbolDisplayPart> {
         use crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
-        let s = self.type_to_string_ex(
+        self.type_to_display_parts_ex(
             t,
             TypeFormatFlags::MULTILINE_OBJECT_LITERALS
                 .union(TypeFormatFlags::USE_ALIAS_DEFINED_OUTSIDE_CURRENT_SCOPE),
-        );
+        )
+    }
+
+    pub(crate) fn type_to_display_parts_ex(
+        &mut self,
+        t: &Arc<Type>,
+        flags: crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags,
+    ) -> Vec<SymbolDisplayPart> {
+        let s = self.type_to_string_ex(t, flags);
 
         if let Some(name) = t.intrinsic_name() {
             if is_keyword_type_name(name) {
