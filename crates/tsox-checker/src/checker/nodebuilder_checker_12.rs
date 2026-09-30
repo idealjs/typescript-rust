@@ -2523,6 +2523,15 @@ fn anonymous_symbol_display_name(symbol: &Arc<Symbol>) -> Option<String> {
 
 impl Checker {
     fn base_member_documentation(&mut self, symbol: &Arc<Symbol>) -> String {
+        let mut seen = std::collections::HashSet::from([Arc::as_ptr(symbol) as usize]);
+        self.base_member_documentation_seen(symbol, &mut seen)
+    }
+
+    fn base_member_documentation_seen(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        seen: &mut std::collections::HashSet<usize>,
+    ) -> String {
         let decl = symbol
             .value_declaration
             .as_ref()
@@ -2532,7 +2541,12 @@ impl Checker {
             return String::new();
         };
         let Some(class_node) = decl.parent().filter(|p| {
-            matches!(p.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression)
+            matches!(
+                p.kind,
+                SyntaxKind::ClassDeclaration
+                    | SyntaxKind::ClassExpression
+                    | SyntaxKind::InterfaceDeclaration
+            )
         }) else {
             return String::new();
         };
@@ -2546,48 +2560,46 @@ impl Checker {
         };
         let is_static = decl
             .has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Static);
-        let base_type: Option<Arc<Type>> = if is_static {
-            let t = self.get_type_of_symbol(&class_sym);
-            self.get_base_types(&t).into_iter().next()
+        let class_type = self.get_declared_type_of_symbol(&class_sym);
+        if is_static {
+            let Some(base_ctor) = self.get_base_constructor_type_of_class(&class_type) else {
+                return String::new();
+            };
+            let static_base = self.get_apparent_type(&base_ctor);
+            if let Some(doc) = self.jsdoc_from_base_member(&static_base, symbol, seen) {
+                return doc;
+            }
         } else {
-            match class_node.data {
-                crate::checker::nodebuilder::NodeData::ClassDeclaration(_)
-                | crate::checker::nodebuilder::NodeData::ClassExpression(_) => {
-                    let inst = self.build_class_instance_type_with_base(&class_node);
-                    self.get_base_types(&inst).into_iter().next()
+            for base_type in self.get_base_types(&class_type) {
+                if let Some(doc) = self.jsdoc_from_base_member(&base_type, symbol, seen) {
+                    return doc;
                 }
-                _ => None,
-            }
-        };
-        let Some(base) = base_type else {
-            return String::new();
-        };
-        let Some(prop) = self.get_property_of_type(&base, &symbol.name) else {
-            return String::new();
-        };
-        let Some(prop_decl) = prop
-            .value_declaration
-            .as_ref()
-            .or(prop.declarations.first())
-        else {
-            return String::new();
-        };
-        let Some(sf) = self.get_source_file_of_node(prop_decl) else {
-            return String::new();
-        };
-        let jds = tsox_frontend::parser::parse_jsdoc_for_node(&sf, prop_decl);
-        for jd in &jds {
-            let (p0, p1) = (jd.pos().min(sf.text.len()), jd.end().min(sf.text.len()));
-            if p0 >= p1 {
-                continue;
-            }
-            let raw = sf.text[p0..p1].to_string();
-            let cleaned = clean_jsdoc_text(&raw);
-            if !cleaned.is_empty() {
-                return self.render_jsdoc_links(&sf, prop_decl, &cleaned);
             }
         }
         String::new()
+    }
+
+    fn jsdoc_from_base_member(
+        &mut self,
+        base_type: &Arc<Type>,
+        symbol: &Arc<Symbol>,
+        seen: &mut std::collections::HashSet<usize>,
+    ) -> Option<String> {
+        let prop = self.get_property_of_type(base_type, &symbol.name)?;
+        if !seen.insert(Arc::as_ptr(&prop) as usize) {
+            return None;
+        }
+        let prop_decl = prop.value_declaration.as_ref()?;
+        let doc = self.declaration_jsdoc_text(prop_decl);
+        if !doc.is_empty() {
+            return Some(doc);
+        }
+        let inherited = self.base_member_documentation_seen(&prop, seen);
+        if inherited.is_empty() {
+            None
+        } else {
+            Some(inherited)
+        }
     }
 }
 
