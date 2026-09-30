@@ -354,6 +354,14 @@ impl Checker {
                 return t;
             }
             self.get_any_type()
+        } else if symbol.flags.intersects(SymbolFlags::ENUM)
+            && symbol
+                .flags
+                .intersects(SymbolFlags::ValueModule | SymbolFlags::NamespaceModule)
+        {
+            // Go getTypeOfSymbol：Enum 位优先于 module 位，合并符号统一走
+            // getTypeOfFuncClassEnumModule（枚举成员与导出共构匿名对象）
+            self.get_type_of_merged_namespace_symbol(symbol)
         } else if symbol.flags.intersects(SymbolFlags::ValueModule | SymbolFlags::NamespaceModule) {
             // 脚本级 namespace 声明在 binder 中为 NamespaceModule，但值位
             // 引用（new multiM.c()）同样取模块成员型（Go NamespaceModule

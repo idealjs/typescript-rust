@@ -1264,7 +1264,14 @@ impl Checker {
             return cached;
         }
 
-        let value_type = self.get_value_type_of_symbol(symbol);
+        // Go getTypeOfFuncClassEnumModuleWorker：enum+namespace 合并符号的值类型
+        // 是单一匿名对象，枚举成员与 namespace 导出共同构成属性
+        let has_enum = symbol.flags.intersects(SymbolFlags::ENUM);
+        let value_type = if has_enum {
+            self.resolve_enum_value_type(symbol)
+        } else {
+            self.get_value_type_of_symbol(symbol)
+        };
 
         let ns_type = self.resolve_namespace_type(symbol);
 
@@ -1276,7 +1283,43 @@ impl Checker {
             }
             _ => (Vec::new(), Vec::new()),
         };
-        let merged = if call_sigs.is_empty() && construct_sigs.is_empty() {
+        let merged = if has_enum {
+            let (Some(enum_obj), Some(ns_obj)) = (value_type.as_object(), ns_type.as_object())
+            else {
+                return value_type;
+            };
+            let mut structured = StructuredTypeData::default();
+            structured.members = enum_obj.structured.members.clone();
+            structured.properties = enum_obj.structured.properties.clone();
+            structured.index_infos = ns_obj.structured.index_infos.clone();
+            for (name, sym) in ns_obj.structured.members.entries.iter() {
+                if !structured.members.entries.contains_key(name) {
+                    structured.members.insert(name.clone(), Arc::clone(sym));
+                }
+            }
+            for prop in &ns_obj.structured.properties {
+                if !structured
+                    .properties
+                    .iter()
+                    .any(|p| p.name == prop.name)
+                {
+                    structured.properties.push(Arc::clone(prop));
+                }
+            }
+            Arc::new(Type {
+                flags: TypeFlags::Object,
+                object_flags: ObjectFlags::Anonymous,
+                id: crate::checker::types::next_type_id(),
+                symbol: Some(Arc::clone(symbol)),
+                alias: None,
+                data: TypeData::Object(ObjectTypeData { node: None,
+                    structured,
+                    target: None,
+                    mapper: None,
+                    type_arguments: Vec::new(),
+                }),
+            })
+        } else if call_sigs.is_empty() && construct_sigs.is_empty() {
             ns_type
         } else {
             let ns_obj = match &ns_type.data {
