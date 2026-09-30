@@ -291,7 +291,11 @@ impl Checker {
         module_symbol: &Arc<Symbol>,
         module_name: &str,
     ) {
-        let local_symbol: Option<Arc<Symbol>> = None;
+        let local_symbol: Option<Arc<Symbol>> = module_symbol
+            .value_declaration
+            .as_ref()
+            .and_then(|declaration| self.program.symbol_map().locals_of(declaration).cloned())
+            .and_then(|locals| locals.get(name.text()).cloned());
         let exports = module_symbol.exports.clone();
         if let Some(local_symbol) = local_symbol {
             if let Some(exported_equals_symbol) =
