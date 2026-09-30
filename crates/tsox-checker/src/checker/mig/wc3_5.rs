@@ -550,9 +550,11 @@ impl Checker {
         if self.is_error_type(&apparent_type) {
             return Some(self.resolve_error_call(node));
         }
-        let call_signatures = self.get_signatures_of_type(&apparent_type, SignatureKind::Call);
-        let num_construct_signatures =
-            self.get_signatures_of_type(&apparent_type, SignatureKind::Construct).len();
+        let call_signatures =
+            self.get_signatures_of_type_reduced(&apparent_type, SignatureKind::Call);
+        let num_construct_signatures = self
+            .get_signatures_of_type_reduced(&apparent_type, SignatureKind::Construct)
+            .len();
         if self.is_untyped_function_call(&func_type, &apparent_type, call_signatures.len(), num_construct_signatures)
         {
             if !self.is_error_type(&func_type) && node.type_arguments().is_some() {
@@ -634,9 +636,11 @@ impl Checker {
         if self.is_error_type(&apparent_type) {
             return Some(self.resolve_error_call(node));
         }
-        let call_signatures = self.get_signatures_of_type(&apparent_type, SignatureKind::Call);
-        let num_construct_signatures =
-            self.get_signatures_of_type(&apparent_type, SignatureKind::Construct).len();
+        let call_signatures =
+            self.get_signatures_of_type_reduced(&apparent_type, SignatureKind::Call);
+        let num_construct_signatures = self
+            .get_signatures_of_type_reduced(&apparent_type, SignatureKind::Construct)
+            .len();
         if self.is_untyped_function_call(&func_type, &apparent_type, call_signatures.len(), num_construct_signatures)
         {
             return Some(self.resolve_untyped_call(node));

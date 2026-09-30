@@ -388,7 +388,7 @@ impl Checker {
         let awaited_type = self.get_awaited_type(apparent_type);
         let maybe_missing_await = awaited_type
             .as_ref()
-            .is_some_and(|at| !self.get_signatures_of_type(at, kind).is_empty());
+            .is_some_and(|at| !self.get_signatures_of_type_reduced(at, kind).is_empty());
         let mut target = Arc::clone(error_target);
         if ast::is_property_access_expression(error_target)
             && error_target
@@ -402,7 +402,7 @@ impl Checker {
             let types = apparent_type.types().unwrap();
             let mut has_signatures = false;
             for constituent in types {
-                let signatures = self.get_signatures_of_type(constituent, kind);
+                let signatures = self.get_signatures_of_type_reduced(constituent, kind);
                 if !signatures.is_empty() {
                     has_signatures = true;
                     if diagnostic.is_some() {

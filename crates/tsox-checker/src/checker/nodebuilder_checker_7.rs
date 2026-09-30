@@ -13,6 +13,8 @@ impl Checker {
     }
 
     pub fn type_to_string_ex(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String {
+        let reduced = self.get_reduced_type(t);
+        let t: &Arc<Type> = &reduced;
         let key = Arc::as_ptr(t) as usize;
         if self.type_print_stack.len() >= 300 || self.type_print_stack.contains(&key) {
             if self.type_print_stack.contains(&key)

@@ -208,6 +208,24 @@ impl Checker {
         Vec::new()
     }
 
+    pub fn get_signatures_of_type_reduced(
+        &mut self,
+        t: &Arc<Type>,
+        kind: SignatureKind,
+    ) -> Vec<Arc<Signature>> {
+        let reduced = self.get_reduced_type(t);
+        if reduced.is_intersection()
+            && let Some(types) = reduced.types()
+        {
+            let mut all = Vec::new();
+            for m in types {
+                all.extend(self.get_signatures_of_type_reduced(m, kind));
+            }
+            return all;
+        }
+        self.get_signatures_of_type(&reduced, kind)
+    }
+
     pub fn type_has_call_or_construct_signatures(&self, t: &Arc<Type>) -> bool {
         if let Some(structured) = t.as_structured() {
             return !structured.signatures.is_empty();
