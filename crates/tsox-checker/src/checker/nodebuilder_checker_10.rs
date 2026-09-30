@@ -44,13 +44,16 @@ impl Checker {
             return self.reference_to_type_node(t);
         }
 
-        if let Some(structured) = t.as_structured() {
-            if structured.call_signature_count > 0 && t.symbol.is_none() {
-                return self.function_type_to_type_node(structured);
-            }
+        if let Some(structured) = t.as_structured()
+            && structured.call_signature_count > 0
+            && !self.symbol_type_printed_by_name(t)
+        {
+            return self.function_type_to_type_node(structured);
         }
 
-        if let Some(sym) = &t.symbol {
+        if self.symbol_type_printed_by_name(t)
+            && let Some(sym) = &t.symbol
+        {
             let instance_args = t.as_object().and_then(|obj| {
                 (!obj.type_arguments.is_empty()).then(|| {
                     let arg_nodes: Vec<Arc<Node>> = obj
@@ -70,6 +73,13 @@ impl Checker {
                 || !structured.index_infos.is_empty()
             {
                 return self.type_literal_to_type_node(structured);
+            }
+            if t
+                .symbol
+                .as_ref()
+                .is_none_or(|s| s.name.starts_with('\u{FE}') || s.flags.contains(SymbolFlags::TypeLiteral))
+            {
+                return self.type_literal_node(Vec::new());
             }
         }
 
