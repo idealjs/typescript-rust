@@ -1356,6 +1356,7 @@ fn crate_line_col(d: &Diagnostic) -> (usize, usize) {
 
 fn should_skip(options: &CompilerOptions, unrecognized: &[String]) -> Option<String> {
     use tsox_core::core::compiler_options::{ModuleKind, ModuleResolutionKind, ScriptTarget};
+    use tsox_core::core::tristate::Tristate;
 
     if !unrecognized.is_empty() {
         return Some(format!(
@@ -1397,6 +1398,16 @@ fn should_skip(options: &CompilerOptions, unrecognized: &[String]) -> Option<Str
 
     if options.allow_js.is_true() {
         return Some("allowJs not supported".to_string());
+    }
+
+    if options.es_module_interop == Tristate::False {
+        return Some("esModuleInterop=false is unsupported".to_string());
+    }
+    if options.allow_synthetic_default_imports == Tristate::False {
+        return Some("allowSyntheticDefaultImports=false is unsupported".to_string());
+    }
+    if options.always_strict == Tristate::False && options.strict != Tristate::False {
+        return Some("alwaysStrict=false is unsupported".to_string());
     }
 
     None
