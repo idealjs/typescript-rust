@@ -1515,9 +1515,8 @@ fn scan_string_preserves_lone_surrogates() {
     assert_eq!(s.scan(), SyntaxKind::StringLiteral);
 
     let value = s.token_value();
-    assert!(value.contains('🦀'));
-    assert!(value.contains('\u{D7FF}'));
+    assert_eq!(value, "🦀\u{D7FF}\\uD800\\uD801🦀");
 
     let fffd_count = value.chars().filter(|&c| c == '\u{FFFD}').count();
-    assert_eq!(fffd_count, 4);
+    assert_eq!(fffd_count, 0);
 }
