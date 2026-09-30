@@ -598,7 +598,7 @@ impl Checker {
                                 .follow_alias_resolving(exp)
                                 .is_some_and(|target| Arc::ptr_eq(&target, sym))
                     });
-                let qualified = if is_export_equals {
+                let mut qualified = if is_export_equals {
                     self.namespace_qualifier_of(sym)
                         .unwrap_or_else(|| sym.name.clone())
                 } else {
@@ -606,6 +606,9 @@ impl Checker {
                         .map(|q| format!("{q}.{}", sym.name))
                         .unwrap_or_else(|| sym.name.clone())
                 };
+                if let Some(chain_name) = self.alias_chain_qualified_type_name(sym) {
+                    qualified = chain_name;
+                }
                 return format!("{}<{}>", qualified, args.join(", "));
             }
         }
@@ -619,11 +622,10 @@ impl Checker {
             // 类实例（含与命名空间合并的类）：typeof 前缀只给静态侧（构造
             // 签名所在），实例侧按符号名显示（Go typeToString 同）；命名空间
             // 内类同尾部分支给限定名（d.D）
-            return format!(
-                "{}{}",
-                self.symbol_display_name_for_print(sym),
-                self.declared_type_param_suffix(t, sym)
-            );
+            let display_name = self
+                .alias_chain_qualified_type_name(sym)
+                .unwrap_or_else(|| self.symbol_display_name_for_print(sym));
+            return format!("{}{}", display_name, self.declared_type_param_suffix(t, sym));
         }
 
         if sym.flags.contains(SymbolFlags::ValueModule)
