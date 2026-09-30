@@ -5,12 +5,18 @@ use crate::checker::checker_imports_namespace::*;
 impl Checker {
     /// Go getTargetOfModuleDefault：default 导出符号解析；export default <entity>
     /// 的 Alias 跟随其实体目标，export= 模块回落合成 default（resolveExternalModuleSymbol）
-    pub(crate) fn resolve_default_export_target(
+    pub(crate) fn resolve_default_export_target_for(
         &mut self,
         module_sym: &Arc<Symbol>,
     ) -> Option<Arc<Symbol>> {
         let mut target = self.resolve_module_member_symbol(module_sym, "default", 8);
         if target.is_none() {
+            // Go getTargetOfModuleDefault：无合成 default 的模块不走 export= 回落
+            //（module_can_have_synthetic_default 对齐 Go canHaveSyntheticDefault），
+            // TS1192 由 check_default_import_binding 统一上报
+            if !self.module_can_have_synthetic_default(module_sym) {
+                return None;
+            }
             let export_eq = module_sym
                 .exports
                 .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)

@@ -161,7 +161,7 @@ impl Checker {
                 && ic.name.as_ref().is_some_and(|n| n.text() == symbol.name)
                 && let Some((module, _)) = self.import_declaration_context(decl)
             {
-                if let Some(target) = self.resolve_default_export_target(&module) {
+                if let Some(target) = self.resolve_default_export_target_for(&module) {
                     return Some(target);
                 }
                 return Some(

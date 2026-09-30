@@ -101,7 +101,7 @@ impl Checker {
                 if let Some(default_name) = &d.name
                     && default_name.text() == symbol.name
                 {
-                    return self.resolve_default_export_target(&module);
+                    return self.resolve_default_export_target_for(&module);
                 }
                 let _ = spec;
                 Some(module)
