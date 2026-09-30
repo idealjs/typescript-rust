@@ -102,6 +102,16 @@ impl Checker {
                 (Some(Arc::clone(&d.type_node)), None)
             }
             NodeData::ParameterDeclaration(d) => (d.type_node.clone(), d.initializer.clone()),
+            // Go getTypeOfSymbol：Function 位（函数表达式/箭头函数符号）经
+            // getTypeOfFuncClassEnumModule 即时建匿名函数型，不依赖节点型缓存；
+            // 首次求值窗口（contextually_check 取签名做上下文参数定型）早于
+            // check_expression_cached 落节点缓存，缺此臂恒落 any
+            NodeData::FunctionExpression(_) | NodeData::ArrowFunction(_) => {
+                let base = self.get_type_of_function_like(&decl);
+                let t = self.attach_function_expando_type(symbol, base);
+                self.type_node_links.get_or_default(&decl).resolved_type = Some(Arc::clone(&t));
+                return Some(t);
+            }
             // 局部函数声明：按需建函数型（外层返回推断在体检查前消费标识符引用），
             // 与 check_function_declaration 同步挂 expando 属性（binder 期 exports 已就绪）
             NodeData::FunctionDeclaration(_) => {
