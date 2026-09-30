@@ -180,6 +180,7 @@ pub(crate) mod checker_override_modifier_checks;
 pub(crate) mod checker_statements_import_ambient_checks;
 pub(crate) mod checker_statements_import_equals_conflicts;
 pub(crate) mod checker_statements_module_declaration_checks;
+pub(crate) mod checker_statements_return_checks;
 pub(crate) mod checker_statements_typealias_and_specifier_checks;
 pub(crate) mod checker_suggestions_resolve;
 pub(crate) mod checker_suggestions_resolve_checker;
