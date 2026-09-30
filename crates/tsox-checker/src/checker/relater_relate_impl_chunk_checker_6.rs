@@ -106,44 +106,10 @@ impl Checker {
         relation: RelationKind,
     ) -> bool {
         if let Some(ui) = source.as_union_or_intersection() {
-            let save_len = self.relater_error_chain.len();
-            let mut any_failed = false;
-            let mut failed_nullish: Option<Arc<Type>> = None;
-            let mut first_failed: Option<Arc<Type>> = None;
             for t in &ui.types {
                 if !self.is_type_related_to(t, target, relation) {
-                    any_failed = true;
-                    if first_failed.is_none() {
-                        first_failed = Some(Arc::clone(t));
-                    }
-                    if t.flags.contains(TypeFlags::Undefined) {
-                        if failed_nullish
-                            .as_ref()
-                            .is_none_or(|f| f.flags.contains(TypeFlags::Null))
-                        {
-                            failed_nullish = Some(Arc::clone(t));
-                        }
-                    } else if t.flags.contains(TypeFlags::Null) && failed_nullish.is_none() {
-                        failed_nullish = Some(Arc::clone(t));
-                    }
+                    return false;
                 }
-            }
-            if any_failed {
-                if self.relater_chain_active {
-                    self.relater_error_chain.truncate(save_len);
-                    if let Some(t) = failed_nullish {
-                        let member_str = self.type_to_string(&t);
-                        let target_str = self.type_to_string(target);
-                        self.relater_report_error(
-                            tsox_core::diagnostics::messages_generated::
-                                TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
-                            vec![member_str, target_str],
-                        );
-                    } else if let Some(t) = first_failed {
-                        let _ = self.is_type_related_to(&t, target, relation);
-                    }
-                }
-                return false;
             }
             return true;
         }
