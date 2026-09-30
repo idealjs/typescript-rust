@@ -129,13 +129,19 @@ impl Parser {
         }
         let type_node = self.parse_type();
 
-        if self.parse_optional(SyntaxKind::QuestionToken) {
-            let end = self.node_pos();
-            return Arc::new(Node::with_loc(
-                SyntaxKind::OptionalType,
-                NodeData::OptionalTypeNode(OptionalTypeNodeData { type_node }),
-                TextRange::new(pos, end),
-            ));
+        if crate::ast::is_jsdoc_nullable_type(&type_node) {
+            if let Some(inner) = type_node.type_node() {
+                if type_node.pos() == inner.pos() {
+                    return Arc::new(Node::with_loc_flags(
+                        SyntaxKind::OptionalType,
+                        NodeData::OptionalTypeNode(OptionalTypeNodeData {
+                            type_node: Arc::clone(inner),
+                        }),
+                        type_node.loc,
+                        type_node.flags,
+                    ));
+                }
+            }
         }
         type_node
     }
