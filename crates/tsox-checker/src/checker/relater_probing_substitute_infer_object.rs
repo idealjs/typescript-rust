@@ -206,6 +206,35 @@ impl Checker {
                         if !changed && !return_changed && !tps_changed {
                             return Arc::clone(sig);
                         }
+                        // Go instantiateSignatureEx（checker.go:20943）：克隆类型参数后
+                        // 参数/返回经组合 mapper（旧 tp→新 tp + 外层代入）实例化
+                        let final_inst: Vec<Arc<Type>> = if tps_changed {
+                            new_inst
+                                .iter()
+                                .map(|pt| {
+                                    self.substitute_infer_type_parameters(
+                                        pt,
+                                        &sig.type_parameters,
+                                        &new_tps,
+                                    )
+                                })
+                                .collect()
+                        } else {
+                            new_inst
+                        };
+                        let final_rt = self.get_return_type_of_signature(sig).map(|rt| {
+                            let sub =
+                                self.substitute_infer_type_parameters(&rt, params, substitutions);
+                            if tps_changed {
+                                self.substitute_infer_type_parameters(
+                                    &sub,
+                                    &sig.type_parameters,
+                                    &new_tps,
+                                )
+                            } else {
+                                sub
+                            }
+                        });
                         let mut inst = Signature::new();
                         inst.flags = sig.flags;
                         inst.min_argument_count = sig.min_argument_count;
@@ -220,11 +249,9 @@ impl Checker {
                         );
                         inst.type_parameters = new_tps;
                         inst.resolved_type_predicate = sig.resolved_type_predicate.clone();
-                        inst.instantiated_parameter_types = Some(new_inst);
-                        if let Some(rt) = self.get_return_type_of_signature(sig) {
-                            let new_rt =
-                                self.substitute_infer_type_parameters(&rt, params, substitutions);
-                            let _ = inst.resolved_return_type.set(new_rt);
+                        inst.instantiated_parameter_types = Some(final_inst);
+                        if let Some(rt) = final_rt {
+                            let _ = inst.resolved_return_type.set(rt);
                         }
                         Arc::new(inst)
                     })
@@ -319,6 +346,29 @@ impl Checker {
                     continue;
                 }
                 changed = true;
+                // 同 reference shell 路径：Go instantiateSignatureEx 组合 mapper
+                //（旧 tp→新 tp + 外层代入）一并作用于参数/返回
+                let final_params: Vec<Arc<Type>> = if tps_changed {
+                    new_params
+                        .iter()
+                        .map(|pt| {
+                            self.substitute_infer_type_parameters(
+                                pt,
+                                &sig.type_parameters,
+                                &new_tps,
+                            )
+                        })
+                        .collect()
+                } else {
+                    new_params
+                };
+                let final_return = new_return.map(|nr| {
+                    if tps_changed {
+                        self.substitute_infer_type_parameters(&nr, &sig.type_parameters, &new_tps)
+                    } else {
+                        nr
+                    }
+                });
                 let mut inst = Signature::new();
                 inst.flags = sig.flags;
                 inst.min_argument_count = sig.min_argument_count;
@@ -333,8 +383,8 @@ impl Checker {
                 );
                 inst.type_parameters = new_tps;
                 inst.resolved_type_predicate = sig.resolved_type_predicate.clone();
-                inst.instantiated_parameter_types = Some(new_params);
-                if let Some(nr) = new_return {
+                inst.instantiated_parameter_types = Some(final_params);
+                if let Some(nr) = final_return {
                     let _ = inst.resolved_return_type.set(nr);
                 }
                 new_sigs.push(Arc::new(inst));
