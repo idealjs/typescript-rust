@@ -159,9 +159,11 @@ pub fn new_declaration_transformer(
     declaration_file_path: String,
     declaration_map_path: String,
 ) -> DeclarationTransformer {
+    let isolated_declarations = compiler_options.isolated_declarations.is_true();
+    let strip_internal = compiler_options.strip_internal.is_true();
     let state = SymbolTrackerSharedState {
-        isolated_declarations: compiler_options.isolated_declarations.is_true(),
-        strip_internal: compiler_options.strip_internal.is_true(),
+        isolated_declarations,
+        strip_internal,
         ..SymbolTrackerSharedState::empty()
     };
     let tracker = super::m3n_5::new_symbol_tracker(host.clone(), host.get_emit_resolver(), state);
@@ -171,7 +173,11 @@ pub fn new_declaration_transformer(
         host,
         compiler_options,
         tracker,
-        state: SymbolTrackerSharedState::empty(),
+        state: SymbolTrackerSharedState {
+            isolated_declarations,
+            strip_internal,
+            ..SymbolTrackerSharedState::empty()
+        },
         resolver,
         declaration_file_path,
         declaration_map_path,
@@ -200,7 +206,9 @@ pub fn new_declaration_transformer(
 
 impl DeclarationTransformer {
     pub fn get_diagnostics(&self) -> Vec<Diagnostic> {
-        self.state.diagnostics.clone()
+        let mut diagnostics = self.state.diagnostics.clone();
+        diagnostics.extend(self.tracker.state.diagnostics.iter().cloned());
+        diagnostics
     }
 
     pub fn install_expando_function_error_reporter(&mut self) {
