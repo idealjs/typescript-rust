@@ -198,6 +198,7 @@ pub fn type_parameter_list(node: &Node) -> Option<&Arc<crate::ast::node::NodeLis
         NodeData::FunctionTypeNode(d) => d.type_parameters.as_ref(),
         NodeData::ConstructorTypeNode(d) => d.type_parameters.as_ref(),
         NodeData::JSDocSignature(d) => d.type_parameters.as_ref(),
+        NodeData::IndexSignatureDeclaration(_) => None,
         _ => panic!("Unhandled case in Node.TypeParameterList"),
     }
 }
