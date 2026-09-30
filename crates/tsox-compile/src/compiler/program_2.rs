@@ -18,6 +18,31 @@ impl Program {
             std::collections::HashSet::new();
         let mut diagnostics: Vec<Arc<Diagnostic>> = Vec::new();
 
+        if options.module_resolution
+            == tsox_core::core::compiler_options::ModuleResolutionKind::Node10
+        {
+            let mut deprecation = Diagnostic::new(
+                None,
+                TextRange::default(),
+                tsox_core::diagnostics::messages_generated::
+                    OPTION_0_1_IS_DEPRECATED_AND_WILL_STOP_FUNCTIONING_IN_TYPESCRIPT_2_SPECIFY_COMPILEROPTION_IGNOREDEPRECATIONS_COLON_3_TO_SILENCE_THIS_ERROR,
+                vec![
+                    "moduleResolution".to_string(),
+                    "node10".to_string(),
+                    "7.0".to_string(),
+                    "6.0".to_string(),
+                ],
+            );
+            deprecation.message_chain = vec![Diagnostic::new(
+                None,
+                TextRange::default(),
+                tsox_core::diagnostics::messages_generated::
+                    VISIT_HTTPS_COLON_SLASH_SLASHAKA_MS_SLASHTS6_FOR_MIGRATION_INFORMATION,
+                Vec::new(),
+            )];
+            diagnostics.push(Arc::new(deprecation));
+        }
+
         if !options.lib.is_empty() && options.no_lib.is_true() {
             diagnostics.push(Arc::new(Diagnostic::new(
                 None,
