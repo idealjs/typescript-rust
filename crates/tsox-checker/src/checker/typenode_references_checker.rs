@@ -238,21 +238,7 @@ impl Checker {
                 }
             }
             SyntaxKind::BigIntLiteral => {
-                let text = literal.text();
-                if let Some(t) = self.bigint_literal_types.get(text).cloned() {
-                    return t;
-                }
-                let t = Arc::new(Type::new(
-                    TypeFlags::BigIntLiteral,
-                    TypeData::Literal(LiteralTypeData {
-                        value: LiteralValue::BigInt(tsox_core::jsnum::PseudoBigInt::parse(&text)),
-                        fresh_type: std::sync::OnceLock::new(),
-                        regular_type: std::sync::OnceLock::new(),
-                    }),
-                ));
-                self.bigint_literal_types
-                    .insert(text.to_string(), Arc::clone(&t));
-                t
+                self.get_big_int_literal_type(tsox_core::jsnum::PseudoBigInt::parse(&literal.text()))
             }
             SyntaxKind::PrefixUnaryExpression => {
                 let NodeData::PrefixUnaryExpression(unary) = &literal.data else {
