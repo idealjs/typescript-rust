@@ -5,7 +5,7 @@ use crate::binder::symbols::*;
 impl Binder {
     pub(crate) fn get_declaration_name(&self, node: &Arc<Node>) -> String {
         match &node.data {
-            NodeData::VariableDeclaration(data) => self.binding_declaration_name(&data.name),
+            NodeData::VariableDeclaration(data) => self.binding_declaration_name(Some(&data.name)),
             NodeData::VariableStatement(_) => String::new(),
             NodeData::FunctionDeclaration(data) => data
                 .name
@@ -62,14 +62,10 @@ impl Binder {
                 if data.name.kind == SyntaxKind::ThisKeyword {
                     "this".to_string()
                 } else {
-                    self.node_text(&data.name)
+                    self.binding_declaration_name(Some(&data.name))
                 }
             }
-            NodeData::BindingElement(data) => data
-                .name
-                .as_ref()
-                .map(|n| self.node_text(n))
-                .unwrap_or_default(),
+            NodeData::BindingElement(data) => self.binding_declaration_name(data.name.as_ref()),
 
             NodeData::ImportSpecifier(data) => self.node_text(&data.name),
             NodeData::ImportClause(data) => data.name.as_ref().map_or_else(
@@ -142,19 +138,14 @@ impl Binder {
         }
     }
 
-    // Go getDeclarationName：绑定模式名取源文本（[A, V] 等），同名模式
-    // 才会合并，空名坍缩会误报导出重复
-    fn binding_declaration_name(&self, name: &Arc<Node>) -> String {
-        if matches!(
-            name.kind,
-            SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
-        ) && let Some(sf) = self.current_source_file.as_ref()
-            && name.loc.end() <= sf.text.len()
-            && name.loc.pos() <= name.loc.end()
-        {
-            return sf.text[name.loc.pos()..name.loc.end()].to_string();
+    // Go getDeclarationName：GetNameOfDeclaration 对绑定模式名返 nil，
+    // 落到 InternalSymbolNameMissing（declareSymbolEx 建孤立符号，不入容器表）
+    fn binding_declaration_name(&self, name: Option<&Arc<Node>>) -> String {
+        match name {
+            Some(n) if is_binding_pattern(n) => INTERNAL_SYMBOL_NAME_MISSING.to_string(),
+            Some(n) => self.node_text(n),
+            None => INTERNAL_SYMBOL_NAME_MISSING.to_string(),
         }
-        self.node_text(name)
     }
 
     pub(crate) fn node_text(&self, node: &Arc<Node>) -> String {

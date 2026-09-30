@@ -195,6 +195,24 @@ impl Binder {
 
         let name = self.get_declaration_name(node);
 
+        // Go declareSymbolEx：Missing 名符号孤立，不查重、不入容器符号表
+        if name == INTERNAL_SYMBOL_NAME_MISSING {
+            let symbol = self.new_symbol(includes, name);
+            {
+                let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+                unsafe {
+                    (*symbol_mut).declarations.push(Arc::clone(node));
+                    if (*symbol_mut).value_declaration.is_none()
+                        && includes.intersects(SymbolFlags::VALUE)
+                    {
+                        (*symbol_mut).value_declaration = Some(Arc::clone(node));
+                    }
+                }
+            }
+            self.symbol_map.set_symbol(node, Arc::clone(&symbol));
+            return symbol;
+        }
+
         let var_hoist_container: Option<Arc<Node>> =
             if Self::declaration_is_var(node) && self.parent_symbol.is_none() {
                 self.container
