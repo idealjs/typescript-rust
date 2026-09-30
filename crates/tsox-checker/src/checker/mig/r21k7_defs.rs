@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use crate::checker::checker::Checker;
-use crate::checker::checker_this_container::get_this_parameter;
 use crate::checker::mig::m2a::r19k11_defs::R19K11CheckerExt;
 use crate::checker::mig::m2b::r22k6_defs;
 use crate::checker::types::{
@@ -105,9 +104,7 @@ impl Checker {
         &mut self,
         container: &Arc<Node>,
     ) -> Option<Arc<Type>> {
-        let this_parameter = get_this_parameter(container)?;
-        let type_node = this_parameter.type_node()?;
-        Some(self.get_type_from_type_node(&type_node))
+        self.contextual_this_parameter_type(container)
     }
 
     pub(crate) fn create_declared_type_of_class_or_interface(

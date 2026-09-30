@@ -137,7 +137,7 @@ impl Checker {
     }
 
     /// Go getContextualThisParameterType
-    fn contextual_this_parameter_type(&mut self, container: &Arc<Node>) -> Option<Arc<Type>> {
+    pub(crate) fn contextual_this_parameter_type(&mut self, container: &Arc<Node>) -> Option<Arc<Type>> {
         if container.kind == SyntaxKind::ArrowFunction {
             return None;
         }
