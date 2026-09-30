@@ -399,6 +399,30 @@ impl Checker {
                 callee_type = non_nullable;
             }
         }
+        if !is_new {
+            let apparent_callee_type = self.get_apparent_type(&callee_type);
+            let call_signature_count = self
+                .get_signatures_of_type(&apparent_callee_type, SignatureKind::Call)
+                .len();
+            let construct_signature_count = self
+                .get_signatures_of_type(&apparent_callee_type, SignatureKind::Construct)
+                .len();
+            if self.is_untyped_function_call(
+                &callee_type,
+                &apparent_callee_type,
+                call_signature_count,
+                construct_signature_count,
+            ) {
+                if !self.is_error_type(&callee_type) && node.type_arguments().is_some() {
+                    self.error_message(
+                        node,
+                        UNTYPED_FUNCTION_CALLS_MAY_NOT_ACCEPT_TYPE_ARGUMENTS,
+                        &[],
+                    );
+                }
+                return;
+            }
+        }
         self.check_call_arguments_against(node, &callee_type, &arguments, callee_expr, is_new);
     }
 }
