@@ -276,21 +276,49 @@ impl Checker {
                         ));
                         continue;
                     }
-                    let message = if matches!(
-                        self.module_member_lookup(&module_symbol, &member_name),
-                        ModuleMemberLookup::LocalNotExported
-                    ) {
-                        &tsox_core::diagnostics::messages_generated::
-                            MODULE_0_DECLARES_1_LOCALLY_BUT_IT_IS_NOT_EXPORTED
+                    let lookup = self.module_member_lookup(&module_symbol, &member_name);
+                    if matches!(lookup, ModuleMemberLookup::LocalNotExported) {
+                        // Go reportNonExportedMember：同名本地符号若以别名导出
+                        // 则报 TS2460，导出名取 exports 表键
+                        let exported_as =
+                            self.module_local_member_symbol(&module_symbol, &member_name)
+                                .and_then(|local| {
+                                    module_symbol.exports.iter().find_map(|(exported, sym)| {
+                                        self.get_symbol_if_same_reference(sym, &local)
+                                            .map(|_| exported.clone())
+                                    })
+                                });
+                        let (message, args) = match exported_as {
+                            Some(exported) => (
+                                &tsox_core::diagnostics::messages_generated::
+                                    MODULE_0_DECLARES_1_LOCALLY_BUT_IT_IS_EXPORTED_AS_2,
+                                vec![
+                                    format!("\"{spec_text}\""),
+                                    member_display.clone(),
+                                    exported,
+                                ],
+                            ),
+                            None => (
+                                &tsox_core::diagnostics::messages_generated::
+                                    MODULE_0_DECLARES_1_LOCALLY_BUT_IT_IS_NOT_EXPORTED,
+                                vec![format!("\"{spec_text}\""), member_display.clone()],
+                            ),
+                        };
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            Some(file.clone()),
+                            error_node.loc,
+                            message.clone(),
+                            args,
+                        ));
                     } else {
-                        &tsox_core::diagnostics::messages_generated::MODULE_0_HAS_NO_EXPORTED_MEMBER_1
-                    };
-                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                        Some(file.clone()),
-                        error_node.loc,
-                        message.clone(),
-                        vec![format!("\"{spec_text}\""), member_display],
-                    ));
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            Some(file.clone()),
+                            error_node.loc,
+                            tsox_core::diagnostics::messages_generated::MODULE_0_HAS_NO_EXPORTED_MEMBER_1
+                                .clone(),
+                            vec![format!("\"{spec_text}\""), member_display],
+                        ));
+                    }
                 }
             }
         }

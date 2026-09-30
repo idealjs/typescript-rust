@@ -3,6 +3,31 @@
 use crate::checker::checker_modules::*;
 
 impl Checker {
+    pub(crate) fn module_local_member_symbol(
+        &self,
+        module_symbol: &Arc<Symbol>,
+        name: &str,
+    ) -> Option<Arc<Symbol>> {
+        if let Some(sym) = module_symbol.members.get(name) {
+            return if sym.export_symbol.is_some() {
+                None
+            } else {
+                Some(Arc::clone(sym))
+            };
+        }
+        let file_node = module_symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::SourceFile)?;
+        let local = self
+            .program
+            .symbol_map()
+            .locals
+            .get(&file_node.id())
+            .and_then(|table| table.get(name))?;
+        (local.export_symbol.is_none()).then(|| Arc::clone(local))
+    }
+
     pub(crate) fn module_member_lookup(
         &mut self,
         module_symbol: &Arc<Symbol>,
