@@ -151,6 +151,13 @@ impl Checker {
 
     pub(crate) fn resolve_base_class_instance_type(&mut self, type_ref: &Arc<Node>) -> Arc<Type> {
         if let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(data) = &type_ref.data {
+            // Go resolveBaseTypesOfClass 非 class 符号分支（mixin 形态）：
+            // extends 表达式是调用时，实例基型 = 基构造类型首个构造签名的
+            // 返回型；经 get_base_constructor_type_of_class 解析，保持其
+            // TS2507 校验与首解析记忆化
+            if data.expression.kind == SyntaxKind::CallExpression {
+                return self.resolve_mixin_base_instance_type(type_ref, &data.expression);
+            }
             let entity_symbol = match data.expression.kind {
                 SyntaxKind::Identifier => self.resolve_identifier(&data.expression),
                 SyntaxKind::PropertyAccessExpression => {
@@ -243,6 +250,50 @@ impl Checker {
 
         if t.flags.contains(TypeFlags::Object) {
             return t;
+        }
+        self.get_any_type()
+    }
+
+    fn resolve_mixin_base_instance_type(
+        &mut self,
+        type_ref: &Arc<Node>,
+        expr: &Arc<Node>,
+    ) -> Arc<Type> {
+        let own_type = type_ref
+            .parent()
+            .and_then(|clause| clause.parent())
+            .and_then(|class| {
+                if matches!(
+                    class.kind,
+                    SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
+                ) {
+                    self.class_instance_type_cache.get(&class.id()).cloned()
+                } else {
+                    None
+                }
+            });
+        let base_constructor_type = match own_type {
+            Some(ref own) => self.get_base_constructor_type_of_class(own),
+            None => Some(self.check_expression_ex(expr, crate::checker::checker::CheckMode::Normal)),
+        };
+        let Some(base_constructor_type) = base_constructor_type else {
+            return self.get_any_type();
+        };
+        if !base_constructor_type
+            .flags
+            .intersects(TypeFlags::Object | TypeFlags::Intersection | TypeFlags::Any)
+        {
+            return self.get_any_type();
+        }
+        let constructors =
+            self.get_signatures_of_type(&base_constructor_type, SignatureKind::Construct);
+        for constructor in &constructors {
+            if let Some(return_type) = self.get_return_type_of_signature(constructor) {
+                if return_type.flags.contains(TypeFlags::Any) {
+                    return self.get_any_type();
+                }
+                return return_type;
+            }
         }
         self.get_any_type()
     }

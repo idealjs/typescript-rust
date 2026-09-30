@@ -72,6 +72,9 @@ impl Checker {
         {
             return Some(resolved);
         }
+        if let Some(resolved) = self.base_ctor_type_cache.get(&t.id) {
+            return Some(Arc::clone(resolved));
+        }
         let base_type_node = get_base_type_node_of_class(t)?;
         let Some(symbol) = t.symbol.clone() else {
             return None;
@@ -80,7 +83,9 @@ impl Checker {
             Arc::as_ptr(&symbol),
             TypeResolutionProperty::ResolvedBaseConstructorType,
         ) {
-            return Some(self.error_type());
+            let error = self.error_type();
+            self.base_ctor_type_cache.insert(t.id, Arc::clone(&error));
+            return Some(error);
         }
         let expression = base_type_node.expression().unwrap();
         let base_constructor_type = self.check_expression_ex(expression, CheckMode::Normal);
@@ -99,9 +104,12 @@ impl Checker {
                 &[name],
             );
             set_resolved_base_constructor_type(t, self.error_type());
+            let error = self.error_type();
+            self.base_ctor_type_cache.insert(t.id, Arc::clone(&error));
             return t
                 .as_interface_type()
-                .and_then(|i| i.resolved_base_constructor_type.get().cloned());
+                .and_then(|i| i.resolved_base_constructor_type.get().cloned())
+                .or(Some(error));
         }
         if !base_constructor_type.flags.intersects(TypeFlags::Any)
             && !Arc::ptr_eq(&base_constructor_type, &self.null_widening_type())
@@ -114,11 +122,16 @@ impl Checker {
                 &[text],
             );
             set_resolved_base_constructor_type(t, self.error_type());
+            let error = self.error_type();
+            self.base_ctor_type_cache.insert(t.id, Arc::clone(&error));
             return t
                 .as_interface_type()
-                .and_then(|i| i.resolved_base_constructor_type.get().cloned());
+                .and_then(|i| i.resolved_base_constructor_type.get().cloned())
+                .or(Some(error));
         }
         set_resolved_base_constructor_type(t, Arc::clone(&base_constructor_type));
+        self.base_ctor_type_cache
+            .insert(t.id, Arc::clone(&base_constructor_type));
         Some(base_constructor_type)
     }
 }
