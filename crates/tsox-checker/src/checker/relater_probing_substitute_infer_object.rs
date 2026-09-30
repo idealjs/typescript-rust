@@ -329,19 +329,24 @@ impl Checker {
                 }
                 new_sigs.push(Arc::new(inst));
             }
-            if !changed {
+            // Go resolveAnonymousTypeMembers（checker.go:20971）：target+mapper 的
+            // 实例化匿名型成员表一律过 mapper（createInstantiatedSymbolTable），
+            // 签名未变不豁免属性/索引成员的代入
+            let has_members =
+                !o.structured.properties.is_empty() || !o.structured.index_infos.is_empty();
+            if !changed && !has_members {
                 return Arc::clone(t);
             }
-            // 匿名对象同时带属性/索引成员（如 { (...) => void; _out?: T }）时
-            // 保持对象形态：签名代入 + 属性深代入合成（Go instantiateType
-            // 对成员全量实例化，坍缩成纯函数型会丢属性推断通道）
-            if !o.structured.properties.is_empty() || !o.structured.index_infos.is_empty() {
+            if has_members {
                 let fresh = self.subst_object_in_progress.is_empty();
                 let with_props = self.substitute_object_properties_deep(t, params, substitutions);
                 if fresh {
                     self.subst_object_in_progress.clear();
                 }
                 let props_changed = !Arc::ptr_eq(&with_props, t);
+                if !changed && !props_changed {
+                    return Arc::clone(t);
+                }
                 let shell = if props_changed {
                     with_props
                 } else {

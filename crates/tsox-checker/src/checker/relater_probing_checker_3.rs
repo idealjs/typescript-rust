@@ -66,7 +66,14 @@ impl Checker {
             .declarations
             .iter()
             .any(|d| d.kind == tsox_frontend::ast::SyntaxKind::PropertySignature);
-        if !deferred_type_literal_member
+        // Go instantiateSymbol（checker.go:21074）经
+        // instantiateType(getTypeOfSymbol(member), mapper) 惰性定型成员：
+        // 类属性声明（含静态成员 binder 符号，links 未驻留型）同路按需取声明型
+        let class_property_member = prop
+            .declarations
+            .iter()
+            .any(|d| d.kind == tsox_frontend::ast::SyntaxKind::PropertyDeclaration);
+        if !(deferred_type_literal_member || class_property_member)
             || self.is_resolving(
                 Arc::as_ptr(prop) as *const Symbol,
                 crate::checker::TypeResolutionProperty::Type,
