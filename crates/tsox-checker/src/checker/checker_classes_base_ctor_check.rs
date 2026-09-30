@@ -15,6 +15,23 @@ impl Checker {
         {
             return;
         }
+        if matches!(expr.kind, SyntaxKind::Identifier | SyntaxKind::PropertyAccessExpression)
+            && let Some(symbol) = self.resolve_entity_name_class_symbol(expr)
+            && symbol.flags.intersects(SymbolFlags::Class)
+            && let Some(class_node) = symbol
+                .declarations
+                .iter()
+                .find(|d| d.kind == SyntaxKind::ClassDeclaration)
+                .cloned()
+        {
+            let ctor_type = self.get_type_of_class_declaration(&class_node);
+            if !self
+                .get_signatures_of_type(&ctor_type, SignatureKind::Construct)
+                .is_empty()
+            {
+                return;
+            }
+        }
         let value_type = self.get_type_of_node(expr);
         if value_type.flags.contains(TypeFlags::Any) || self.is_error_type(&value_type) {
             return;
