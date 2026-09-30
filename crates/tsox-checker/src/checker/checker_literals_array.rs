@@ -5,7 +5,7 @@ use tsox_frontend::ast::{Node, NodeData, SyntaxKind};
 use crate::checker::checker::Checker;
 use crate::checker::types::{
     ElementFlags, ObjectFlags, ObjectTypeData, StructuredTypeData, TupleElementInfo, Type,
-    TypeData, TypeFlags,
+    TypeData, TypeFlags, UnionReduction,
 };
 
 pub(crate) fn is_spread_into_call_or_new(node: &Arc<Node>) -> bool {
@@ -255,40 +255,17 @@ impl Checker {
             return self.create_array_literal_type(elem);
         }
 
-        let mut reduced_types: Vec<Arc<Type>> = Vec::with_capacity(element_types.len());
-        let mut has_nullable = false;
+        let mut element_union_types: Vec<Arc<Type>> = Vec::with_capacity(element_types.len());
         for (i, t) in element_types.iter().enumerate() {
             if element_infos[i].flags.contains(ElementFlags::Variadic) {
                 let number = self.number_type();
-                reduced_types.push(self.get_indexed_access_type(t, &number));
+                element_union_types.push(self.get_indexed_access_type(t, &number));
             } else {
-                if t.flags.intersects(TypeFlags::Null | TypeFlags::Undefined) {
-                    has_nullable = true;
-                }
-                reduced_types.push(Arc::clone(t));
+                element_union_types.push(Arc::clone(t));
             }
         }
 
-        let reduced = self.remove_subtype_redundant_members(reduced_types);
-        if reduced.is_empty() {
-            let any = self.get_any_type();
-            return self.create_array_literal_type(any);
-        }
-        if reduced.len() == 1 {
-            let only = Arc::clone(&reduced[0]);
-            if !self.strict_null_checks
-                && only.flags.intersects(TypeFlags::Null | TypeFlags::Undefined)
-            {
-                let any = self.get_any_type();
-                return self.create_array_literal_type(any);
-            }
-            return self.create_array_literal_type(only);
-        }
-        if !self.strict_null_checks && has_nullable {
-            let any = self.get_any_type();
-            return self.create_array_literal_type(any);
-        }
-        let elem_union = self.get_union_type(reduced);
+        let elem_union = self.get_union_type_ex(element_union_types, UnionReduction::Subtype);
         self.create_array_literal_type(elem_union)
     }
 

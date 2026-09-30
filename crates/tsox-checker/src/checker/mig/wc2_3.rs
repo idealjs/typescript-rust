@@ -1066,11 +1066,9 @@ impl Checker {
                 type_set = self.remove_constrained_type_variables(&type_set);
             }
             if union_reduction == UnionReduction::Subtype {
-                type_set = self
-                    .remove_subtypes(&type_set, includes.intersects(TypeFlags::Object))
-                    .unwrap_or_default();
-                if type_set.is_empty() {
-                    return self.error_type();
+                match self.remove_subtypes(&type_set, includes.intersects(TypeFlags::Object)) {
+                    Some(reduced) => type_set = reduced,
+                    None => return self.error_type(),
                 }
             }
             if type_set.is_empty() {
