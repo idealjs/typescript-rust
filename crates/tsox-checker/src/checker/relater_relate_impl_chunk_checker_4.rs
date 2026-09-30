@@ -104,10 +104,21 @@ impl Checker {
             if self.is_union_or_intersection_related_to(source, target, relation) {
                 return true;
             }
-            if s.contains(TypeFlags::Object) && t.contains(TypeFlags::Union) {
-                return self.type_related_to_discriminated_type(source, target, relation);
+            if s.contains(TypeFlags::Object) && t.contains(TypeFlags::Union)
+                && self.type_related_to_discriminated_type(source, target, relation)
+            {
+                return true;
             }
-            return false;
+            // Go relater.go:3410-3417：union 分派失败不是终局；source 可实例化
+            // （keyof 属 InstantiablePrimitive）等情形落回主 switch，keyof T 对
+            // string|number|symbol 由 source Index 分支 isRelatedTo(sns, target) 收口
+            if !(s.intersects(TYPE_FLAGS_INSTANTIABLE)
+                || s.contains(TypeFlags::Object) && t.contains(TypeFlags::Union)
+                || s.contains(TypeFlags::Intersection)
+                    && t.intersects(TypeFlags::Object | TypeFlags::Union | TYPE_FLAGS_INSTANTIABLE))
+            {
+                return false;
+            }
         }
 
         // Go relater.go:3424-3437 别名实参变异性快路径：同符号泛型别名实例
