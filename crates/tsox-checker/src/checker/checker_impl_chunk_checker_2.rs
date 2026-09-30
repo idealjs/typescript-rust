@@ -104,13 +104,7 @@ impl Checker {
                     }
                 }
             }
-            // Go createGlobals 只并各文件 exports；别名（import 子句）留在文件
-            // 局部表，不参与全局合并
-            for (name, sym) in member_entries
-                .into_iter()
-                .chain(local_entries)
-                .filter(|(_, sym)| !sym.flags.contains(SymbolFlags::Alias))
-            {
+            for (name, sym) in member_entries.into_iter().chain(local_entries) {
                 self.merge_global_entry(&name, &sym);
             }
         }
