@@ -240,7 +240,10 @@ impl Checker {
             {
                 let source_args = self.get_type_arguments(&source);
                 let target_args = self.get_type_arguments(&target);
-                if source_args.is_empty() && target_args.is_empty() {
+                if source_args.is_empty()
+                    && target_args.is_empty()
+                    && !self.is_class_ctor_vs_instance_pair(&source, &target, ss)
+                {
                     return true;
                 }
                 if source_args.len() == target_args.len()

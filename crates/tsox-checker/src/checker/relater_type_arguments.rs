@@ -153,6 +153,7 @@ impl Checker {
                             tsox_frontend::ast::SymbolFlags::Interface
                                 | tsox_frontend::ast::SymbolFlags::Class,
                         )
+                        && !self.is_class_ctor_vs_instance_pair(&source, &target, ss)
                 }
                 _ => false,
             }
@@ -233,6 +234,21 @@ impl Checker {
             return None;
         }
         Some(Ternary::True)
+    }
+
+    pub fn is_class_ctor_vs_instance_pair(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        symbol: &Arc<tsox_frontend::ast::Symbol>,
+    ) -> bool {
+        if source.object_flags.contains(ObjectFlags::Reference)
+            && target.object_flags.contains(ObjectFlags::Reference)
+        {
+            return false;
+        }
+        let declared = self.get_declared_type_of_class_or_interface(symbol);
+        Arc::ptr_eq(&declared, source) != Arc::ptr_eq(&declared, target)
     }
 
     pub fn bare_generic_type_parameters(&mut self, t: &Arc<Type>) -> Vec<Arc<Type>> {
