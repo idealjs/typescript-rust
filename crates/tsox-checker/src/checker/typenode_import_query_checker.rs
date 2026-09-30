@@ -172,6 +172,9 @@ impl Checker {
             NodeData::ImportDeclaration(d) => Arc::clone(&d.module_specifier),
             _ => return None,
         };
+        if !tsox_frontend::ast::is_string_literal_like(&module_spec_node) {
+            return None;
+        }
         let module_spec = module_spec_node.text().to_string();
         let decl_file = self
             .get_source_file_of_node(&import_decl)
