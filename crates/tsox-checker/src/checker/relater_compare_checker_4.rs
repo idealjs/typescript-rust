@@ -178,8 +178,8 @@ impl Checker {
     ) -> (String, String) {
         // Go getTypeNamesForErrorDisplay：两侧显示名相同（同名不同型）时
         // 改用全限定形式消歧
-        let left_str = self.get_type_name_for_error_display(left);
-        let right_str = self.get_type_name_for_error_display(right);
+        let left_str = self.error_display_type_string(left);
+        let right_str = self.error_display_type_string(right);
         if left_str == right_str {
             return (
                 self.fully_qualified_type_string(left),
@@ -187,6 +187,36 @@ impl Checker {
             );
         }
         (left_str, right_str)
+    }
+
+    fn error_display_type_string(&mut self, t: &Arc<Type>) -> String {
+        let enclosing = self.error_display_enclosing_declaration(t);
+        let Some(enclosing) = enclosing else {
+            return self.get_type_name_for_error_display(t);
+        };
+        let saved_node = self.display_enclosing_node.replace(Arc::clone(&enclosing));
+        let saved_file = self.display_enclosing_file.take();
+        self.display_enclosing_file = self.get_source_file_of_node(&enclosing);
+        let result = self.type_to_string(t);
+        self.display_enclosing_node = saved_node;
+        self.display_enclosing_file = saved_file;
+        result
+    }
+
+    fn error_display_enclosing_declaration(&mut self, t: &Arc<Type>) -> Option<Arc<Node>> {
+        if let Some(symbol) = t.symbol.as_ref()
+            && self.symbol_value_declaration_is_context_sensitive(symbol)
+        {
+            return symbol.value_declaration.clone();
+        }
+        // 函数表达式类型未挂 symbol（Go createAnonymousType 以表达式符号建型），
+        // value 声明等价物在唯一调用签名的 declaration 上
+        let structured = t.as_structured()?;
+        let decl = structured.call_signatures().first()?.declaration.clone()?;
+        if tsox_frontend::ast::is_expression(&decl) && !self.is_context_sensitive(&decl) {
+            return Some(decl);
+        }
+        None
     }
 
     // Go typeToString(TypeFormatFlags.UseFullyQualifiedType)：沿符号 parent
@@ -327,8 +357,11 @@ impl Checker {
         self.type_to_string(t)
     }
 
-    pub fn symbol_value_declaration_is_context_sensitive(&mut self, _symbol: &Arc<Symbol>) -> bool {
-        false
+    pub fn symbol_value_declaration_is_context_sensitive(&mut self, symbol: &Arc<Symbol>) -> bool {
+        let Some(decl) = symbol.value_declaration.as_ref() else {
+            return false;
+        };
+        tsox_frontend::ast::is_expression(decl) && !self.is_context_sensitive(decl)
     }
 
     pub fn type_could_have_top_level_singleton_types(&mut self, t: &Arc<Type>) -> bool {
