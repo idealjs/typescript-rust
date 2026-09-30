@@ -351,9 +351,44 @@ impl Checker {
             }
         }
         let contextual = self.contextual_return_type_of(&current)?;
+        let function_flags = tsox_frontend::ast::mig::m3e::get_function_flags(Some(&current));
+        let is_generator = function_flags
+            .contains(tsox_frontend::ast::mig::m3e::FunctionFlags::GENERATOR);
+        let is_async = function_flags
+            .contains(tsox_frontend::ast::mig::m3e::FunctionFlags::ASYNC);
+        let contextual = if is_generator {
+            let filtered = if contextual.flags.contains(TypeFlags::Union) {
+                let constituents = contextual.types().map(|ts| ts.to_vec()).unwrap_or_default();
+                let kept: Vec<Arc<Type>> = constituents
+                    .into_iter()
+                    .filter(|t| {
+                        self.get_iteration_type_of_generator_function_return_type(
+                            IterationTypeKind::RETURN,
+                            t,
+                            is_async,
+                        )
+                        .is_some()
+                    })
+                    .collect();
+                if kept.is_empty() {
+                    self.never_type()
+                } else {
+                    self.get_union_type(kept)
+                }
+            } else {
+                contextual
+            };
+            self.get_iteration_type_of_generator_function_return_type(
+                IterationTypeKind::RETURN,
+                &filtered,
+                is_async,
+            )?
+        } else {
+            contextual
+        };
         // Go getContextualTypeForReturnExpression：async 容器将上下文返回型
         // 逐成分取 awaited 无别名型，再与 PromiseLike<该型> 取并
-        if current.has_syntactic_modifier(crate::checker::ModifierFlags::Async) {
+        if is_async {
             let awaited = self.get_awaited_type(&contextual)?;
             let promise_like = self.create_promise_like_type(&awaited);
             return Some(self.get_union_type(vec![awaited, promise_like]));
