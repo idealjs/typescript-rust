@@ -134,9 +134,13 @@ impl Checker {
                     }),
                     _ => None,
                 };
+                // Go inferTypeArguments 单循环按序检查实参：CS 实参的上下文型取
+                // 检查时尚未代入的参数位（apparent 约束解析），仅左侧实参参与推断
+                let left_only = self.is_context_sensitive(arg_node);
                 let sibling_args: Vec<Arc<tsox_frontend::ast::Node>> = args
                     .iter()
                     .enumerate()
+                    .take(if left_only { arg_index } else { args.len() })
                     .filter(|(_, a)| !(ignore_node && Arc::ptr_eq(a, arg_node)))
                     .map(|(_, a)| Arc::clone(a))
                     .collect();
