@@ -176,10 +176,8 @@ impl Checker {
         left: &Arc<Type>,
         right: &Arc<Type>,
     ) -> (String, String) {
-        // Go getTypeNamesForErrorDisplay：两侧显示名相同（同名不同型）时
-        // 改用全限定形式消歧
-        let left_str = self.get_type_name_for_error_display(left);
-        let right_str = self.get_type_name_for_error_display(right);
+        let left_str = self.type_to_string_for_error_display(left);
+        let right_str = self.type_to_string_for_error_display(right);
         if left_str == right_str {
             return (
                 self.fully_qualified_type_string(left),
@@ -187,6 +185,53 @@ impl Checker {
             );
         }
         (left_str, right_str)
+    }
+
+    fn type_to_string_for_error_display(&mut self, t: &Arc<Type>) -> String {
+        let Some(enclosing) = self.error_display_enclosing_declaration(t) else {
+            return self.type_to_string(t);
+        };
+        if !self.type_node_resolving.is_empty() || !self.type_argument_stack.is_empty() {
+            return self.type_to_string(t);
+        }
+        let saved_node = self.display_enclosing_node.replace(Arc::clone(&enclosing));
+        let saved_file = self.display_enclosing_file.take();
+        self.display_enclosing_file = self.get_source_file_of_node(&enclosing);
+        let result = self.type_to_string(t);
+        self.display_enclosing_node = saved_node;
+        self.display_enclosing_file = saved_file;
+        result
+    }
+
+    fn error_display_enclosing_declaration(
+        &mut self,
+        t: &Arc<Type>,
+    ) -> Option<Arc<tsox_frontend::ast::Node>> {
+        if let Some(symbol) = t.symbol.as_ref() {
+            if self.symbol_value_declaration_is_context_sensitive(symbol) {
+                return symbol.value_declaration.clone();
+            }
+            return None;
+        }
+        let structured = t.as_structured()?;
+        if !structured.construct_signatures().is_empty() {
+            return None;
+        }
+        let sigs = structured.call_signatures();
+        if sigs.len() != 1 {
+            return None;
+        }
+        let decl = sigs[0].declaration.as_ref()?;
+        if !matches!(
+            decl.kind,
+            SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression
+        ) {
+            return None;
+        }
+        if self.is_context_sensitive(decl) {
+            return None;
+        }
+        Some(Arc::clone(decl))
     }
 
     // Go typeToString(TypeFormatFlags.UseFullyQualifiedType)：沿符号 parent
@@ -327,8 +372,11 @@ impl Checker {
         self.type_to_string(t)
     }
 
-    pub fn symbol_value_declaration_is_context_sensitive(&mut self, _symbol: &Arc<Symbol>) -> bool {
-        false
+    pub fn symbol_value_declaration_is_context_sensitive(&mut self, symbol: &Arc<Symbol>) -> bool {
+        let Some(decl) = symbol.value_declaration.as_ref() else {
+            return false;
+        };
+        tsox_frontend::ast::is_expression(decl) && !self.is_context_sensitive(decl)
     }
 
     pub fn type_could_have_top_level_singleton_types(&mut self, t: &Arc<Type>) -> bool {
