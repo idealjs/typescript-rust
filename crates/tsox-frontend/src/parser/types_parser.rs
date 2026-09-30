@@ -247,6 +247,18 @@ impl Parser {
             _ => self.parse_primary_expression(),
         };
         let end = literal.end();
+        let literal = if negative {
+            Arc::new(Node::with_loc(
+                SyntaxKind::PrefixUnaryExpression,
+                NodeData::PrefixUnaryExpression(PrefixUnaryExpressionData {
+                    operator: SyntaxKind::MinusToken,
+                    operand: literal,
+                }),
+                TextRange::new(pos, end),
+            ))
+        } else {
+            literal
+        };
         Arc::new(Node::with_loc(
             SyntaxKind::LiteralType,
             NodeData::LiteralTypeNode(LiteralTypeNodeData { literal }),
