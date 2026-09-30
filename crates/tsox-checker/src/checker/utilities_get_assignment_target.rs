@@ -207,6 +207,10 @@ pub fn get_external_module_require_argument(node: &Node) -> Option<Arc<Node>> {
 
 pub fn is_shorthand_ambient_module(node: &Node) -> bool {
     node.kind == SyntaxKind::ModuleDeclaration
+        && matches!(
+            &node.data,
+            tsox_frontend::ast::NodeData::ModuleDeclaration(d) if d.body.is_none()
+        )
 }
 
 pub fn is_shorthand_ambient_module_symbol(module_symbol: &Symbol) -> bool {
