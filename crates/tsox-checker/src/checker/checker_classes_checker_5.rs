@@ -48,7 +48,7 @@ impl Checker {
         for c in &constituents {
             let mut ok = self.is_type_assignable_to(c, &object_index_type);
             if !ok && has_number_index_info {
-                ok = self.is_type_assignable_to(c, &self.number_type());
+                ok = self.is_applicable_index_type(c, &self.number_type());
             }
             if ok {
                 continue;

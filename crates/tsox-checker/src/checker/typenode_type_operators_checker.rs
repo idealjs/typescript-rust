@@ -118,7 +118,13 @@ impl Checker {
                     }
                 }
 
-                self.get_indexed_access_type(&object_type, &index_type)
+                let accessed = self.get_indexed_access_type(&object_type, &index_type);
+                self.report_missing_literal_index_property(
+                    &object_type,
+                    &index_type,
+                    &index_type_node,
+                );
+                accessed
             }
         };
         self.cache_type(node, result.clone());

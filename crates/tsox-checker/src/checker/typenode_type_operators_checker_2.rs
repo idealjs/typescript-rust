@@ -104,4 +104,51 @@ impl Checker {
         }
         size
     }
+
+    pub(crate) fn report_missing_literal_index_property(
+        &mut self,
+        object_type: &Arc<Type>,
+        index_type: &Arc<Type>,
+        index_type_node: &Arc<Node>,
+    ) {
+        if !self.type_argument_stack.is_empty()
+            || !index_type
+                .flags
+                .intersects(TypeFlags::StringLiteral | TypeFlags::NumberLiteral)
+            || object_type
+                .flags
+                .intersects(TypeFlags::Any | TypeFlags::Unknown | TypeFlags::Never)
+            || object_type.is_union()
+            || object_type.is_intersection()
+            || matches!(&object_type.data, TypeData::Mapped(_))
+            || self.is_tuple_type(object_type)
+        {
+            return;
+        }
+        let Some(lit) = index_type.literal_value() else {
+            return;
+        };
+        let name = match lit {
+            LiteralValue::String(s) => s.clone(),
+            LiteralValue::Number(n) => n.to_string(),
+            _ => String::new(),
+        };
+        let member_missing = object_type
+            .as_structured()
+            .is_none_or(|s| s.members.get(&name).is_none());
+        if !name.is_empty()
+            && member_missing
+            && self
+                .get_applicable_index_info(object_type, index_type)
+                .is_none()
+        {
+            let object_display = self.type_to_string(object_type);
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                index_type_node.loc,
+                tsox_core::diagnostics::messages_generated::PROPERTY_0_DOES_NOT_EXIST_ON_TYPE_1,
+                vec![name, object_display],
+            ));
+        }
+    }
 }

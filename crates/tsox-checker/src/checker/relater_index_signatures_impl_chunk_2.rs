@@ -129,9 +129,17 @@ impl Checker {
         // 两处 isTypeAssignableTo 均为谓词探针（reportErrors=false），
         // 静默链防探针失败向 elaboration 链泄漏垃圾链节
         let was_silent = self.silence_relation_chain();
-        let applicable = self.is_type_assignable_to(key, target_key)
+        let mut applicable = self.is_type_assignable_to(key, target_key)
             || (target_key.flags.contains(TypeFlags::String)
                 && self.is_type_assignable_to(key, &self.number_type()));
+        if !applicable
+            && target_key.flags.contains(TypeFlags::Number)
+            && key.flags.contains(TypeFlags::StringLiteral)
+            && let Some(LiteralValue::String(name)) = key.literal_value()
+            && canonical_numeric_literal_name(name)
+        {
+            applicable = true;
+        }
         self.restore_relation_chain(was_silent);
         applicable
     }
@@ -160,4 +168,8 @@ impl Checker {
             self.never_type()
         }
     }
+}
+
+pub(crate) fn canonical_numeric_literal_name(name: &str) -> bool {
+    tsox_core::jsnum::Number::from_string(name).to_string() == name
 }
