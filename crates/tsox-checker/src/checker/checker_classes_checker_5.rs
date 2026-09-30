@@ -548,6 +548,36 @@ impl Checker {
                                         }
                                         self.diagnostics.add(diag);
                                     }
+                                } else if let Some(class_symbol) =
+                                    self.get_symbol_of_declaration(&class_node)
+                                {
+                                    let merged_interface_extends = class_symbol
+                                        .flags
+                                        .intersects(tsox_frontend::ast::SymbolFlags::Interface)
+                                        && class_symbol.declarations.iter().any(|d| {
+                                            tsox_frontend::ast::is_interface_declaration(d)
+                                                && !tsox_frontend::ast::get_extends_heritage_clause_elements(d).is_empty()
+                                        });
+                                    if merged_interface_extends {
+                                        let class_type =
+                                            self.get_declared_type_of_symbol(&class_symbol);
+                                        let base_constructor_type = self
+                                            .get_base_constructor_type_of_class(&class_type)
+                                            .unwrap_or_else(|| self.error_type());
+                                        let static_base_type =
+                                            self.get_apparent_type(&base_constructor_type);
+                                        let static_target = self
+                                            .get_type_without_signatures(&static_base_type);
+                                        let static_type = self.get_type_of_symbol(&class_symbol);
+                                        let name_node = class_node.name();
+                                        self.check_type_assignable_to(
+                                            &static_type,
+                                            &static_target,
+                                            name_node.or(Some(&class_node)),
+                                            Some(&tsox_core::diagnostics::messages_generated::
+                                                CLASS_STATIC_SIDE_0_INCORRECTLY_EXTENDS_BASE_CLASS_STATIC_SIDE_1),
+                                        );
+                                    }
                                 }
                             }
                         }
