@@ -2,9 +2,11 @@ use std::sync::Arc;
 
 use crate::checker::checker::Checker;
 use crate::checker::checker_this_container::get_this_parameter;
+use crate::checker::mig::m2a::r19k11_defs::R19K11CheckerExt;
+use crate::checker::mig::m2b::r22k6_defs;
 use crate::checker::types::{
     ConditionalTypeData, IndexedAccessTypeData, LiteralTypeData, MappedTypeData, Type, TypeData,
-    TypeFlags, TypeFacts,
+    TypeFacts, TypeFlags,
 };
 use tsox_frontend::ast::{Node, Symbol};
 
@@ -119,8 +121,45 @@ impl Checker {
         self.unknown_type()
     }
 
-    pub(crate) fn adjust_type_with_facts(&mut self, t: &Arc<Type>, _facts: TypeFacts) -> Arc<Type> {
-        Arc::clone(t)
+    pub(crate) fn adjust_type_with_facts(&mut self, t: &Arc<Type>, facts: TypeFacts) -> Arc<Type> {
+        let t = if self.strict_null_checks && t.flags.intersects(TypeFlags::Unknown) {
+            self.unknown_union_type()
+        } else {
+            Arc::clone(t)
+        };
+        let with_facts = self.get_type_with_facts(&t, facts);
+        let reduced = self.recombine_unknown_type(&with_facts);
+        if self.strict_null_checks {
+            if facts == TypeFacts::NE_UNDEFINED {
+                return self.remove_nullable_by_intersection(
+                    &reduced,
+                    TypeFacts::EQ_UNDEFINED,
+                    TypeFacts::EQ_NULL,
+                    TypeFacts::IS_NULL,
+                    &self.null_type(),
+                );
+            }
+            if facts == TypeFacts::NE_NULL {
+                return self.remove_nullable_by_intersection(
+                    &reduced,
+                    TypeFacts::EQ_NULL,
+                    TypeFacts::EQ_UNDEFINED,
+                    TypeFacts::IS_UNDEFINED,
+                    &self.undefined_type(),
+                );
+            }
+            if facts == TypeFacts::NE_UNDEFINED_OR_NULL || facts == TypeFacts::TRUTHY {
+                return r22k6_defs::map_type_ext(self, &reduced, &mut |c, t| {
+                    if c.has_type_facts(t, TypeFacts::EQ_UNDEFINED_OR_NULL) {
+                        Some(c.get_global_non_nullable_type_instantiation(t))
+                    } else {
+                        Some(Arc::clone(t))
+                    }
+                })
+                .unwrap_or_else(|| Arc::clone(&reduced));
+            }
+        }
+        reduced
     }
 
     pub(crate) fn get_regular_type_of_object_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
