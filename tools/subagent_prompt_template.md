@@ -31,6 +31,9 @@
 ## 资源上限与绝对禁测(违者打回)
 - **禁止执行任何测试、任何构建命令**(cargo test/build/check、跑用例二进制、tools/corpus_one.sh 一律禁止)——语料修复飞轮中 subagent 同样不允许测试、不需要验证结果,**所有测试(含单例验证)一律由主 agent 执行**;subagent 交付物 = 静态修复 commit + 函数变更表 + 交接笔记,验证状态由主 agent 收集时统一跑
 - 探针式调试(eprintln 插桩 + 跑用例看输出)同样禁止,属主 agent 排障手段
+- **禁碰内存限制设施**:测试入口的内存守卫(ensure_memory_limit / .init_array)、脚本中的 ulimit -v 4194304 / setrlimit、fourslash_shard.py 的 AS_LIMIT,一律不得修改、放宽或绕过;修复 diff 触及这些位置即打回
+- 所有测试运行(全量/批量/单例)一律由主 agent 在 `(ulimit -v 4194304; ...)` 内执行,无内存限制的运行禁止存在
+- **禁触主仓**:主仓路径(/home/cqh/workspace/ts2rust-port)对 subagent 绝对只读,禁止对其执行任何 git 写操作(checkout/reset/stash/merge/clean)
 
 ## 禁改清单
 - 仓库根 corpus_results.csv / corpus_skips.csv / skip_baseline.txt / AGENTS.md / tools/:只读
@@ -43,7 +46,7 @@
 语料测试比对本地基线(crates/tsox/tests/corpus/baselines/local/)与参考基线(crates/tsox/tests/corpus/testdata/baselines/reference/)。
 
 你的工作目录(git worktree,分支 {{branch}},基于 {{base-sha}}):{{worktree}}
-所有工作在此 worktree 内,禁止动主仓 /home/cqh/workspace/ts2rust-port 的分支。
+**开工第一步执行 `pwd`,输出必须以 {{worktree}} 开头**;此后所有 git 命令一律 `git -C {{worktree}} ...`。所有工作在此 worktree 内,禁止对主仓 /home/cqh/workspace/ts2rust-port 执行任何写操作(checkout/reset/stash/merge/clean 或直接改文件),禁止动其分支。
 Go oracle 源码(语义权威,只读):/home/cqh/workspace/typescript-go。行为不确定必须对照 Go,禁止以「让用例通过」偏离 Go 语义。
 
 ## 前任交接(如有)

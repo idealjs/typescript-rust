@@ -795,7 +795,7 @@ bind_optional_chain,bindOptionalChain,Binder,tsc/internal/binder/binder.go,,,,go
 bind_optional_chain_flow,bindOptionalChainFlow,Binder,tsc/internal/binder/binder.go,,,,go_only,0.0,,,
 bind_optional_chain_rest,bindOptionalChainRest,Binder,tsc/internal/binder/binder.go,,,,go_only,0.0,,,
 bind_optional_expression,bindOptionalExpression,Binder,tsc/internal/binder/binder.go,,,,go_only,0.0,,,
-bind_parameter,bindParameter,Binder,tsc/internal/binder/binder.go,bind_parameter,tsox-checker/src/binder/mig/m3h_3.rs,Binder,exact,1.0,,,
+bind_parameter,bindParameter,Binder,tsc/internal/binder/binder.go,bind_parameter,tsox-checker/src/binder/mig/m3h_3.rs,Binder,exact,1.0,partial,22,r22
 bind_parameter_flow,bindParameterFlow,Binder,tsc/internal/binder/binder.go,,,,go_only,0.0,,,
 bind_postfix_unary_expression_flow,bindPostfixUnaryExpressionFlow,Binder,tsc/internal/binder/binder.go,,,,go_only,0.0,,,
 bind_prefix_unary_expression_flow,bindPrefixUnaryExpressionFlow,Binder,tsc/internal/binder/binder.go,,,,go_only,0.0,,,
@@ -817,7 +817,7 @@ bind_try_statement,bindTryStatement,Binder,tsc/internal/binder/binder.go,bind_tr
 bind_type_parameter,bindTypeParameter,Binder,tsc/internal/binder/binder.go,bind_type_parameter,tsox-checker/src/binder/bind_walk_binder_2.rs,Binder,exact,1.0,,,
 bind_variable_declaration,,,,bind_variable_declaration,tsox-checker/src/binder/tests.rs,,rust_only,0.0,,,
 bind_variable_declaration_flow,bindVariableDeclarationFlow,Binder,tsc/internal/binder/binder.go,bind_variable_declaration_flow,tsox-checker/src/binder/mig/m4a.rs,Binder,exact,1.0,,,
-bind_variable_declaration_or_binding_element,bindVariableDeclarationOrBindingElement,Binder,tsc/internal/binder/binder.go,bind_variable_declaration_or_binding_element,tsox-checker/src/binder/mig/m4a.rs,Binder,exact,1.0,,,
+bind_variable_declaration_or_binding_element,bindVariableDeclarationOrBindingElement,Binder,tsc/internal/binder/binder.go,bind_variable_declaration_or_binding_element,tsox-checker/src/binder/mig/m4a.rs,Binder,exact,1.0,yes,22,r22
 bind_while_statement,bindWhileStatement,Binder,tsc/internal/binder/binder.go,bind_while_statement,tsox-checker/src/binder/flow_bind_binder.rs,Binder,exact,1.0,,,
 binding_declaration_name,,,,binding_declaration_name,tsox-checker/src/binder/symbols_binder_4.rs,Binder,rust_only,0.0,,,
 binding_default_value_tail,,,,binding_default_value_tail,tsox-checker/src/checker/checker_symbol_types_checker_2.rs,Checker,rust_only,0.0,,,
@@ -1163,7 +1163,7 @@ check_base_type_accessibility,checkBaseTypeAccessibility,Checker,tsc/internal/ch
 check_baselines,checkBaselines,,tsc/internal/testutil/tsbaseline/type_symbol_baseline.go,,,,go_only,0.0,,,
 check_binary_arith_pre,,,,check_binary_arith_pre,tsox-checker/src/checker/checker_operators.rs,Checker,rust_only,0.0,,,
 check_binary_expression,checkBinaryExpression,Checker,tsc/internal/checker/checker.go,check_binary_expression,tsox-checker/src/checker/checker_expressions_binary_expression_checks.rs,Checker,exact,1.0,,,
-check_binary_like_expression,checkBinaryLikeExpression,Checker,tsc/internal/checker/checker.go,check_binary_like_expression,tsox-checker/src/checker/mig/wc1b.rs,Checker,exact,1.0,,,
+check_binary_like_expression,checkBinaryLikeExpression,Checker,tsc/internal/checker/checker.go,check_binary_like_expression,tsox-checker/src/checker/mig/wc1b.rs,Checker,exact,1.0,yes,22,r22
 check_binary_plus_operator_error,,,,check_binary_plus_operator_error,tsox-checker/src/checker/checker_operators.rs,Checker,rust_only,0.0,,,
 check_binary_relational_operator_error,,,,check_binary_relational_operator_error,tsox-checker/src/checker/checker_operators_relational.rs,Checker,rust_only,0.0,,,
 check_binding_element,checkBindingElement,Checker,tsc/internal/checker/checker.go,check_binding_element,tsox-checker/src/checker/mig/wc1.rs,Checker,exact,1.0,,,
@@ -1261,7 +1261,7 @@ check_export_star_export_equals,,,,check_export_star_export_equals,tsox-checker/
 check_exported_function_return,,,,check_exported_function_return,tsox-checker/src/checker/checker_declaration_diagnostics.rs,Checker,rust_only,0.0,,,
 check_exports_on_merged_declarations,checkExportsOnMergedDeclarations,Checker,tsc/internal/checker/checker.go,check_exports_on_merged_declarations,tsox-checker/src/checker/checker_merged_declaration_exports.rs,Checker,exact,1.0,,,
 check_expression,checkExpression,Checker,tsc/internal/checker/checker.go,check_expression,tsox-checker/src/checker/checker_expressions_checker.rs,Checker,exact,1.0,,,
-check_expression_cached,checkExpressionCached,Checker,tsc/internal/checker/checker.go,check_expression_cached,tsox-checker/src/checker/mig/m1b.rs,Checker,exact,1.0,,,
+check_expression_cached,checkExpressionCached,Checker,tsc/internal/checker/checker.go,check_expression_cached,tsox-checker/src/checker/mig/m1b.rs,Checker,exact,1.0,yes,22,r22
 check_expression_cached_ex,checkExpressionCachedEx,Checker,tsc/internal/checker/checker.go,check_expression_cached_ex,tsox-checker/src/checker/mig/m1b.rs,Checker,exact,1.0,,,
 check_expression_ex,checkExpressionEx,Checker,tsc/internal/checker/checker.go,check_expression_ex,tsox-checker/src/checker/mig/m1b.rs,Checker,exact,1.0,,,
 check_expression_for_mutable_location,checkExpressionForMutableLocation,Checker,tsc/internal/checker/checker.go,check_expression_for_mutable_location,tsox-checker/src/checker/mig/m1b.rs,Checker,exact,1.0,,,
@@ -1269,7 +1269,7 @@ check_expression_for_mutable_location_with_contextual_type,checkExpressionForMut
 check_expression_statement,checkExpressionStatement,Checker,tsc/internal/checker/checker.go,check_expression_statement,tsox-checker/src/checker/mig/m1b.rs,Checker,exact,1.0,,,
 check_expression_with_contextual_type,checkExpressionWithContextualType,Checker,tsc/internal/checker/checker.go,check_expression_with_contextual_type,tsox-checker/src/checker/mig/m1b.rs,Checker,exact,1.0,,,
 check_expression_with_type_arguments,checkExpressionWithTypeArguments,Checker,tsc/internal/checker/checker.go,check_expression_with_type_arguments,tsox-checker/src/checker/mig/m1b.rs,Checker,exact,1.0,,,
-check_expression_worker,checkExpressionWorker,Checker,tsc/internal/checker/checker.go,check_expression_worker,tsox-checker/src/checker/mig/m1b.rs,Checker,exact,1.0,,,
+check_expression_worker,checkExpressionWorker,Checker,tsc/internal/checker/checker.go,check_expression_worker,tsox-checker/src/checker/mig/m1b.rs,Checker,exact,1.0,partial,22,r22
 check_extends_private_ctor,,,,check_extends_private_ctor,tsox-checker/src/checker/checker_classes_ctor_accessibility.rs,Checker,rust_only,0.0,,,
 check_external_emit_helpers,checkExternalEmitHelpers,Checker,tsc/internal/checker/checker.go,check_external_emit_helpers,tsox-checker/src/checker/checker_impl_chunk_6_checker_3.rs,Checker,exact,1.0,,,
 check_external_import_in_namespace,,,,check_external_import_in_namespace,tsox-checker/src/checker/checker_statements_import_equals_conflicts.rs,Checker,rust_only,0.0,,,
@@ -1512,7 +1512,7 @@ check_parameter_implicit_any,,,,check_parameter_implicit_any,tsox-checker/src/ch
 check_parameter_property_modifiers,,,,check_parameter_property_modifiers,tsox-checker/src/checker/checker_classes_checker_4.rs,Checker,rust_only,0.0,,,
 check_parenthesized_expression,checkParenthesizedExpression,Checker,tsc/internal/checker/checker.go,check_parenthesized_expression,tsox-checker/src/checker/mig/m1b_4.rs,Checker,exact,1.0,,,
 check_postfix_unary_expression,checkPostfixUnaryExpression,Checker,tsc/internal/checker/checker.go,check_postfix_unary_expression,tsox-checker/src/checker/mig/m1b_4.rs,Checker,exact,1.0,,,
-check_prefix_unary_expression,checkPrefixUnaryExpression,Checker,tsc/internal/checker/checker.go,check_prefix_unary_expression,tsox-checker/src/checker/mig/m1b_4.rs,Checker,exact,1.0,,,
+check_prefix_unary_expression,checkPrefixUnaryExpression,Checker,tsc/internal/checker/checker.go,check_prefix_unary_expression,tsox-checker/src/checker/mig/m1b_4.rs,Checker,exact,1.0,yes,22,r22
 check_private_identifier,checkPrivateIdentifier,Binder,tsc/internal/binder/binder.go,check_private_identifier,tsox-checker/src/binder/mig/m4a.rs,Binder,exact,1.0,,,
 check_private_identifier_access,,,,check_private_identifier_access,tsox-checker/src/checker/checker_expr_access_checker_3.rs,Checker,rust_only,0.0,,,
 check_private_identifier_expression,checkPrivateIdentifierExpression,Checker,tsc/internal/checker/checker.go,check_private_identifier_expression,tsox-checker/src/checker/mig/m1b_4.rs,Checker,exact,1.0,,,
@@ -1522,7 +1522,7 @@ check_property_access_chain,checkPropertyAccessChain,Checker,tsc/internal/checke
 check_property_access_expression,checkPropertyAccessExpression,Checker,tsc/internal/checker/checker.go,check_property_access_expression,tsox-checker/src/checker/mig/m1b_5.rs,Checker,exact,1.0,,,
 check_property_access_expression_or_qualified_name,checkPropertyAccessExpressionOrQualifiedName,Checker,tsc/internal/checker/checker.go,check_property_access_expression_or_qualified_name,tsox-checker/src/checker/mig/wc1d.rs,Checker,exact,1.0,,,
 check_property_accessibility,checkPropertyAccessibility,Checker,tsc/internal/checker/checker.go,check_property_accessibility,tsox-checker/src/checker/mig/m1b_4.rs,Checker,exact,1.0,,,
-check_property_accessibility_at_location,checkPropertyAccessibilityAtLocation,Checker,tsc/internal/checker/checker.go,check_property_accessibility_at_location,tsox-checker/src/checker/mig/m1b_4.rs,Checker,exact,1.0,,,
+check_property_accessibility_at_location,checkPropertyAccessibilityAtLocation,Checker,tsc/internal/checker/checker.go,check_property_accessibility_at_location,tsox-checker/src/checker/mig/m1b_4.rs,Checker,exact,1.0,partial,22,r22
 check_property_accessibility_ex,checkPropertyAccessibilityEx,Checker,tsc/internal/checker/checker.go,check_property_accessibility_ex,tsox-checker/src/checker/mig/m1b_4.rs,Checker,exact,1.0,,,
 check_property_accessor_override_kinds,,,,check_property_accessor_override_kinds,tsox-checker/src/checker/checker_classes_accessor_override_kinds.rs,Checker,rust_only,0.0,,,
 check_property_assignment,checkPropertyAssignment,Checker,tsc/internal/checker/checker.go,check_const_property_assignment,tsox-checker/src/checker/checker_contextual_checker_3.rs,Checker,fuzzy,0.893,,,
@@ -1531,7 +1531,7 @@ check_property_initialization,checkPropertyInitialization,Checker,tsc/internal/c
 check_property_not_used_before_declaration,checkPropertyNotUsedBeforeDeclaration,Checker,tsc/internal/checker/checker.go,check_property_not_used_before_declaration,tsox-checker/src/checker/checker_prop_access_checker_4.rs,Checker,exact,1.0,,,
 check_property_signature,checkPropertySignature,Checker,tsc/internal/checker/checker.go,check_property_signature,tsox-checker/src/checker/mig/m1b_3.rs,Checker,exact,1.0,,,
 check_property_signature_member_types,,,,check_property_signature_member_types,tsox-checker/src/checker/checker_classes_checker_4.rs,Checker,rust_only,0.0,,,
-check_qualified_name,checkQualifiedName,Checker,tsc/internal/checker/checker.go,check_qualified_name,tsox-checker/src/checker/mig/m1b_4.rs,Checker,exact,1.0,,,
+check_qualified_name,checkQualifiedName,Checker,tsc/internal/checker/checker.go,check_qualified_name,tsox-checker/src/checker/mig/m1b_4.rs,Checker,exact,1.0,partial,22,r22
 check_qualified_name_expression,,,,check_qualified_name_expression,tsox-checker/src/checker/checker_expressions_checker.rs,Checker,rust_only,0.0,,,
 check_question_token_agreement_between_overloads,,,,check_question_token_agreement_between_overloads,tsox-checker/src/checker/checker_function_symbol_checks.rs,Checker,rust_only,0.0,,,
 check_reference_assignment,checkReferenceAssignment,Checker,tsc/internal/checker/checker.go,check_reference_assignment,tsox-checker/src/checker/checker_destructuring.rs,Checker,exact,1.0,,,
@@ -1545,7 +1545,7 @@ check_reserved_type_name,,,,check_reserved_type_name,tsox-checker/src/checker/ch
 check_resolved_block_scoped_variable,checkResolvedBlockScopedVariable,Checker,tsc/internal/checker/checker.go,check_resolved_block_scoped_variable,tsox-checker/src/checker/mig/m1b_3.rs,Checker,exact,1.0,,,
 check_return_expression,checkReturnExpression,Checker,tsc/internal/checker/checker.go,collect_return_expressions,tsox-checker/src/checker/checker_expressions_checker_2.rs,Checker,fuzzy,0.857,,,
 check_return_expression_against_type,,,,check_return_expression_against_type,tsox-checker/src/checker/checker_return_expression_checks.rs,Checker,rust_only,0.0,,,
-check_return_statement,checkReturnStatement,Checker,tsc/internal/checker/checker.go,check_return_statement,tsox-checker/src/checker/checker_statements_declaration_member_checks.rs,Checker,exact,1.0,,,
+check_return_statement,checkReturnStatement,Checker,tsc/internal/checker/checker.go,check_return_statement,tsox-checker/src/checker/checker_statements_declaration_member_checks.rs,Checker,exact,1.0,yes,22,r22
 check_right_hand_side_of_for_of,checkRightHandSideOfForOf,Checker,tsc/internal/checker/checker.go,check_right_hand_side_of_for_of,tsox-checker/src/checker/checker_iteration.rs,Checker,exact,1.0,,,
 check_satisfies_expression,checkSatisfiesExpression,Checker,tsc/internal/checker/checker.go,check_satisfies_expression,tsox-checker/src/checker/mig/m1b_4.rs,Checker,exact,1.0,,,
 check_shorthand_property_assignment,checkShorthandPropertyAssignment,Checker,tsc/internal/checker/checker.go,check_shorthand_property_assignment,tsox-checker/src/checker/mig/m1b_4.rs,Checker,exact,1.0,,,
@@ -3009,7 +3009,7 @@ create_member_from_symbol,createMemberFromSymbol,missingMemberFixer,tsc/internal
 create_metadata,createMetadata,esDecoratorTransformer,tsc/internal/transformers/estransforms/esdecorator.go,create_metadata,tsox-emit/src/mig/wt1b_2.rs,EsDecoratorTransformer,exact,1.0,,,
 create_method_descriptor_forwarder,createMethodDescriptorForwarder,esDecoratorTransformer,tsc/internal/transformers/estransforms/esdecorator.go,create_method_descriptor_forwarder,tsox-emit/src/mig/wt1b_2.rs,EsDecoratorTransformer,exact,1.0,,,
 create_method_descriptor_object,createMethodDescriptorObject,esDecoratorTransformer,tsc/internal/transformers/estransforms/esdecorator.go,create_method_descriptor_object,tsox-emit/src/mig/wt1b_2.rs,EsDecoratorTransformer,exact,1.0,,,
-create_missing_identifier,createMissingIdentifier,Parser,tsc/internal/parser/parser.go,,,,go_only,0.0,,,
+create_missing_identifier,createMissingIdentifier,Parser,tsc/internal/parser/parser.go,,,,go_only,0.0,yes,22,r22
 create_missing_list,createMissingList,Parser,tsc/internal/parser/parser.go,,,,go_only,0.0,,,
 create_missing_node,,,,create_missing_node,tsox-frontend/src/parser/jsdoc_tokens.rs,crate::parser::Parser,rust_only,0.0,,,
 create_mock_fs,,,,create_mock_fs,tsox-tsoptions/src/vfs/cachedvfs_tests.rs,CountingFS,rust_only,0.0,,,
@@ -3236,7 +3236,7 @@ declaration_modifier_flags,,,,declaration_modifier_flags,tsox-lsp/src/ls/complet
 declaration_name_display,,,,declaration_name_display,tsox-checker/src/binder/symbols_symbol_conflicts.rs,Binder,rust_only,0.0,,,
 declaration_name_loc,,,,declaration_name_loc,tsox-checker/src/checker/checker_assertions_interfaces_checker_3.rs,Checker,rust_only,0.0,,,
 declaration_name_nodes,,,,declaration_name_nodes,tsox-checker/src/checker/checker_globals_merge.rs,Checker,rust_only,0.0,,,
-declaration_name_to_string,DeclarationNameToString,,tsc/internal/scanner/utilities.go,,,,go_only,0.0,,,
+declaration_name_to_string,DeclarationNameToString,,tsc/internal/scanner/utilities.go,,,,go_only,0.0,yes,22,r22
 declaration_name_to_string,,,,declaration_name_to_string,tsox-frontend/src/scanner/mig/m3i.rs,Scanner,rust_only,0.0,,,
 declaration_names_match_for_merge,,,,declaration_names_match_for_merge,tsox-checker/src/checker/checker_function_symbol_checks.rs,Checker,rust_only,0.0,,,
 declaration_option_compiles_with_flag,,,,declaration_option_compiles_with_flag,tsox-execute/src/execute/tests.rs,BufferWriter,rust_only,0.0,,,
@@ -3251,7 +3251,7 @@ declare_module_symbol,declareModuleSymbol,Binder,tsc/internal/binder/binder.go,d
 declare_source_file_member,declareSourceFileMember,Binder,tsc/internal/binder/binder.go,declare_source_file_member,tsox-checker/src/binder/mig/m4a_2.rs,Binder,exact,1.0,,,
 declare_symbol,declareSymbol,Binder,tsc/internal/binder/binder.go,declare_symbol,tsox-checker/src/binder/symbols_binder_2.rs,Binder,exact,1.0,,,
 declare_symbol_and_add_to_symbol_table,declareSymbolAndAddToSymbolTable,Binder,tsc/internal/binder/binder.go,declare_symbol_and_add_to_symbol_table,tsox-checker/src/binder/mig/m4a_2.rs,Binder,exact,1.0,,,
-declare_symbol_ex,declareSymbolEx,Binder,tsc/internal/binder/binder.go,declare_symbol_ex,tsox-checker/src/binder/mig/m4a_2.rs,Binder,exact,1.0,,,
+declare_symbol_ex,declareSymbolEx,Binder,tsc/internal/binder/binder.go,declare_symbol_ex,tsox-checker/src/binder/mig/m4a_2.rs,Binder,exact,1.0,partial,22,r22
 declare_symbol_into,,,,declare_symbol_into,tsox-checker/src/binder/symbols_binder_3.rs,Binder,rust_only,0.0,,,
 declared_annotation_type_of,,,,declared_annotation_type_of,tsox-checker/src/checker/checker_contextual_checker.rs,Checker,rust_only,0.0,,,
 declared_array_member_symbol,,,,declared_array_member_symbol,tsox-checker/src/checker/typenode_constructors_checker.rs,Checker,rust_only,0.0,,,
@@ -5528,7 +5528,7 @@ get_adjusted_node_for_error,getAdjustedNodeForError,,tsc/internal/checker/checke
 get_adjusted_node_for_error,,,,get_adjusted_node_for_error,tsox-checker/src/checker/mig/m1d_2.rs,M1dKeyBuilder,rust_only,0.0,,,
 get_adjusted_range,GetAdjustedRange,Tracker,tsc/internal/ls/change/trackerimpl.go,get_adjusted_range,tsox-lsp/src/ls/change_tracker_impl.rs,Tracker,exact,1.0,,,
 get_adjusted_start_position,getAdjustedStartPosition,Tracker,tsc/internal/ls/change/trackerimpl.go,get_adjusted_start_position,tsox-lsp/src/ls/change_tracker_impl.rs,Tracker,exact,1.0,,,
-get_adjusted_type_with_facts,getAdjustedTypeWithFacts,Checker,tsc/internal/checker/checker.go,get_adjusted_type_with_facts,tsox-checker/src/checker/mig/m1d.rs,Checker,exact,1.0,,,
+get_adjusted_type_with_facts,getAdjustedTypeWithFacts,Checker,tsc/internal/checker/checker.go,get_adjusted_type_with_facts,tsox-checker/src/checker/mig/m1d.rs,Checker,exact,1.0,yes,22,r22
 get_alias_declaration_from_name,getAliasDeclarationFromName,,tsc/internal/checker/utilities.go,get_alias_declaration_from_name,tsox-checker/src/checker/utilities_is_private_within_ambient.rs,,exact,1.0,,,
 get_alias_for_symbol_in_container,getAliasForSymbolInContainer,Checker,tsc/internal/checker/symbolaccessibility.go,get_alias_for_symbol_in_container,tsox-checker/src/checker/symbolaccessibility_checker_3.rs,Checker,exact,1.0,,,
 get_alias_for_type_node,getAliasForTypeNode,Checker,tsc/internal/checker/checker.go,attach_alias_for_type_node,tsox-checker/src/checker/nodebuilder_alias_display.rs,Checker,fuzzy,0.857,,,
@@ -5692,7 +5692,7 @@ get_awaited_type_with_depth,,,,get_awaited_type_with_depth,tsox-checker/src/chec
 get_base_constraint_of_type,getBaseConstraintOfType,Checker,tsc/internal/checker/checker.go,get_base_constraint_of_type,tsox-checker/src/checker/checker_impl_chunk_5_checker_2.rs,Checker,exact,1.0,,,
 get_base_constraint_of_type,GetBaseConstraintOfType,Checker,tsc/internal/checker/exports.go,get_base_constraint_of_type,tsox-checker/src/checker/checker_impl_chunk_5_checker_2.rs,Checker,exact,1.0,,,
 get_base_constraint_or_type,getBaseConstraintOrType,Checker,tsc/internal/checker/checker.go,get_base_constraint_or_type,tsox-checker/src/checker/relater_relate_impl_chunk_checker_14.rs,Checker,exact,1.0,,,
-get_base_constructor_type_of_class,getBaseConstructorTypeOfClass,Checker,tsc/internal/checker/checker.go,get_base_constructor_type_of_class,tsox-checker/src/checker/exports_impl_chunk.rs,Checker,exact,1.0,,,
+get_base_constructor_type_of_class,getBaseConstructorTypeOfClass,Checker,tsc/internal/checker/checker.go,get_base_constructor_type_of_class,tsox-checker/src/checker/exports_impl_chunk.rs,Checker,exact,1.0,yes,22,r22
 get_base_constructor_type_of_class,GetBaseConstructorTypeOfClass,Checker,tsc/internal/checker/exports.go,get_base_constructor_type_of_class,tsox-checker/src/checker/exports_impl_chunk.rs,Checker,exact,1.0,,,
 get_base_directories_from_root_dirs,getBaseDirectoriesFromRootDirs,,tsc/internal/ls/string_completions.go,,,,go_only,0.0,,,
 get_base_directories_from_root_dirs,,,,get_base_directories_from_root_dirs,tsox-lsp/src/ls/mig/m5w2.rs,LanguageService,rust_only,0.0,,,
@@ -5710,7 +5710,7 @@ get_base_type_of_literal_type_for_comparison,getBaseTypeOfLiteralTypeForComparis
 get_base_type_of_literal_type_for_display,,,,get_base_type_of_literal_type_for_display,tsox-checker/src/checker/relater_compare_checker_3.rs,Checker,rust_only,0.0,,,
 get_base_type_of_literal_type_union,getBaseTypeOfLiteralTypeUnion,Checker,tsc/internal/checker/checker.go,get_base_type_of_literal_type_union,tsox-checker/src/checker/mig/m1d_4.rs,Checker,exact,1.0,,,
 get_base_type_variable_of_class,getBaseTypeVariableOfClass,Checker,tsc/internal/checker/checker.go,get_base_type_variable_of_class,tsox-checker/src/checker/mig/m1d_2.rs,Checker,exact,1.0,,,
-get_base_types,getBaseTypes,Checker,tsc/internal/checker/checker.go,get_base_types,tsox-checker/src/checker/exports_impl_chunk.rs,Checker,exact,1.0,,,
+get_base_types,getBaseTypes,Checker,tsc/internal/checker/checker.go,get_base_types,tsox-checker/src/checker/exports_impl_chunk.rs,Checker,exact,1.0,partial,22,r22
 get_base_types,GetBaseTypes,Checker,tsc/internal/checker/exports.go,get_base_types,tsox-checker/src/checker/exports_impl_chunk.rs,Checker,exact,1.0,,,
 get_base_types_if_unrelated,getBaseTypesIfUnrelated,Checker,tsc/internal/checker/checker.go,get_base_types_if_unrelated,tsox-checker/src/checker/mig/m1d.rs,Checker,exact,1.0,,,
 get_baseline_content_for_file,getBaselineContentForFile,FourslashTest,tsc/internal/fourslash/baselineutil.go,,,,go_only,0.0,,,
@@ -6148,7 +6148,7 @@ get_declaration_modifier_flags_from_symbol_ex,getDeclarationModifierFlagsFromSym
 get_declaration_modifier_flags_from_symbol_ex,,,,get_declaration_modifier_flags_from_symbol_ex,tsox-checker/src/checker/exports_union_reduction.rs,,rust_only,0.0,,,
 get_declaration_name,GetDeclarationName,,tsc/internal/ast/ast.go,,,,go_only,0.0,,,
 get_declaration_name,,,,get_declaration_name,tsox-frontend/src/ast/mig/m3b.rs,,rust_only,0.0,,,
-get_declaration_name,getDeclarationName,Binder,tsc/internal/binder/binder.go,get_declaration_name,tsox-checker/src/binder/symbols_binder_4.rs,Binder,exact,1.0,,,
+get_declaration_name,getDeclarationName,Binder,tsc/internal/binder/binder.go,get_declaration_name,tsox-checker/src/binder/symbols_binder_4.rs,Binder,exact,1.0,yes,22,r22
 get_declaration_name,GetDeclarationName,NodeFactory,tsc/internal/printer/factory.go,get_declaration_name,tsox-emit/src/mig/m4n_4.rs,NodeFactory,exact,1.0,,,
 get_declaration_name_ex,GetDeclarationNameEx,NodeFactory,tsc/internal/printer/factory.go,get_declaration_name_ex,tsox-emit/src/mig/m4n_4.rs,NodeFactory,exact,1.0,,,
 get_declaration_name_for_keyword,getDeclarationNameForKeyword,,tsc/internal/ls/definition.go,,,,go_only,0.0,,,
@@ -7315,7 +7315,7 @@ get_not_equal_facts_from_typeof_switch,getNotEqualFactsFromTypeofSwitch,Checker,
 get_null_type,GetNullType,Checker,tsc/internal/checker/exports.go,get_null_type,tsox-checker/src/checker/checker_impl_chunk_5_checker.rs,Checker,exact,1.0,,,
 get_nullable_symbol_origin_info_kind,getNullableSymbolOriginInfoKind,,tsc/internal/ls/completions.go,,,,go_only,0.0,,,
 get_nullable_symbol_origin_info_kind,,,,get_nullable_symbol_origin_info_kind,tsox-lsp/src/ls/mig/m5r.rs,SymbolOriginInfo,rust_only,0.0,,,
-get_nullable_type,getNullableType,Checker,tsc/internal/checker/checker.go,get_nullable_type,tsox-checker/src/checker/typenode_impl_chunk_checker_2.rs,Checker,exact,1.0,,,
+get_nullable_type,getNullableType,Checker,tsc/internal/checker/checker.go,get_nullable_type,tsox-checker/src/checker/typenode_impl_chunk_checker_2.rs,Checker,exact,1.0,yes,22,r22
 get_number_index_type,,,,get_number_index_type,tsox-checker/src/checker/services_checker_4.rs,Checker,rust_only,0.0,,,
 get_number_index_type,GetNumberIndexType,Checker,tsc/internal/checker/services.go,get_number_index_type,tsox-checker/src/checker/services_checker.rs,Checker,exact,1.0,,,
 get_number_literal_type,getNumberLiteralType,Checker,tsc/internal/checker/checker.go,get_number_literal_type,tsox-checker/src/checker/checker_impl_chunk_checker_4.rs,Checker,exact,1.0,,,
@@ -7803,9 +7803,9 @@ get_resolved_signature_for_signature_help,,,,get_resolved_signature_for_signatur
 get_resolved_signature_for_signature_help,GetResolvedSignatureForSignatureHelp,,tsc/internal/checker/services.go,get_resolved_signature_for_signature_help,tsox-checker/src/checker/services_checker_2.rs,Checker,exact,1.0,,,
 get_resolved_signature_worker,,,,get_resolved_signature_worker,tsox-checker/src/checker/services_checker_6.rs,Checker,rust_only,0.0,,,
 get_resolved_signature_worker,getResolvedSignatureWorker,Checker,tsc/internal/checker/services.go,get_resolved_signature_worker,tsox-checker/src/checker/services_checker_3.rs,Checker,exact,1.0,,,
-get_resolved_symbol,getResolvedSymbol,Checker,tsc/internal/checker/checker.go,get_resolved_symbol,tsox-checker/src/checker/exports_impl_chunk.rs,Checker,exact,1.0,,,
+get_resolved_symbol,getResolvedSymbol,Checker,tsc/internal/checker/checker.go,get_resolved_symbol,tsox-checker/src/checker/exports_impl_chunk.rs,Checker,exact,1.0,partial,22,r22
 get_resolved_symbol,GetResolvedSymbol,Checker,tsc/internal/checker/exports.go,get_resolved_symbol,tsox-checker/src/checker/exports_impl_chunk.rs,Checker,exact,1.0,,,
-get_resolved_symbol,getResolvedSymbol,referenceResolver,tsc/internal/binder/referenceresolver.go,get_resolved_symbol,tsox-checker/src/binder/referenceresolver_resolver_impl.rs,ReferenceResolverImpl,exact,1.0,,,
+get_resolved_symbol,getResolvedSymbol,referenceResolver,tsc/internal/binder/referenceresolver.go,get_resolved_symbol,tsox-checker/src/binder/referenceresolver_resolver_impl.rs,ReferenceResolverImpl,exact,1.0,partial,22,r22
 get_resolved_symbol_nil,,,,get_resolved_symbol_nil,tsox-checker/src/checker/mig/m1f.rs,Checker,rust_only,0.0,,,
 get_resolved_symbol_or_nil,getResolvedSymbolOrNil,Checker,tsc/internal/checker/checker.go,get_resolved_symbol_or_nil,tsox-checker/src/checker/mig/wc2_3.rs,Checker,exact,1.0,,,
 get_resolved_type_of_conditional_type,,,,get_resolved_type_of_conditional_type,tsox-checker/src/checker/checker_impl_chunk_5_checker_2.rs,Checker,rust_only,0.0,,,
@@ -7897,9 +7897,9 @@ get_separating_line_terminator_count,getSeparatingLineTerminatorCount,Printer,ts
 get_session_init_options,GetSessionInitOptions,,tsc/internal/testutil/projecttestutil/projecttestutil.go,,,,go_only,0.0,,,
 get_set_accessor_type_annotation_node,getSetAccessorTypeAnnotationNode,,tsc/internal/transformers/tstransforms/typeserializer.go,,,,go_only,0.0,,,
 get_set_accessor_type_annotation_node,,,,get_set_accessor_type_annotation_node,tsox-emit/src/mig/m4m.rs,MetadataSerializerContext,rust_only,0.0,,,
-get_set_accessor_value_parameter,GetSetAccessorValueParameter,,tsc/internal/transformers/tstransforms/typeserializer.go,,,,go_only,0.0,,,
+get_set_accessor_value_parameter,GetSetAccessorValueParameter,,tsc/internal/transformers/tstransforms/typeserializer.go,,,,go_only,0.0,yes,22,r22
 get_set_accessor_value_parameter,,,,get_set_accessor_value_parameter,tsox-emit/src/mig/m4m.rs,MetadataSerializerContext,rust_only,0.0,,,
-get_set_accessor_value_parameter,GetSetAccessorValueParameter,,tsc/internal/checker/utilities.go,get_set_accessor_value_parameter,tsox-checker/src/checker/utilities_is_private_within_ambient.rs,,exact,1.0,,,
+get_set_accessor_value_parameter,GetSetAccessorValueParameter,,tsc/internal/checker/utilities.go,get_set_accessor_value_parameter,tsox-checker/src/checker/utilities_is_private_within_ambient.rs,,exact,1.0,yes,22,r22
 get_shebang,GetShebang,,tsc/internal/scanner/scanner.go,,,,go_only,0.0,,,
 get_shebang,,,,get_shebang,tsox-frontend/src/scanner/is_jsx_line_break.rs,,rust_only,0.0,,,
 get_shebang_returns_text,,,,get_shebang_returns_text,tsox-frontend/src/scanner/tests.rs,,rust_only,0.0,,,
@@ -8464,7 +8464,7 @@ get_type_of_expression,GetTypeOfExpression,PseudoChecker,tsc/internal/pseudochec
 get_type_of_first_parameter_of_signature,getTypeOfFirstParameterOfSignature,Checker,tsc/internal/checker/checker.go,get_type_of_first_parameter_of_signature,tsox-checker/src/checker/mig/m1g_4.rs,Checker,exact,1.0,,,
 get_type_of_first_parameter_of_signature_with_fallback,getTypeOfFirstParameterOfSignatureWithFallback,Checker,tsc/internal/checker/checker.go,get_type_of_first_parameter_of_signature_with_fallback,tsox-checker/src/checker/mig/m1g_4.rs,Checker,exact,1.0,,,
 get_type_of_func_class_enum_module,getTypeOfFuncClassEnumModule,Checker,tsc/internal/checker/checker.go,get_type_of_func_class_enum_module,tsox-checker/src/checker/mig/m1g_5.rs,Checker,exact,1.0,,,
-get_type_of_func_class_enum_module_worker,getTypeOfFuncClassEnumModuleWorker,Checker,tsc/internal/checker/checker.go,get_type_of_func_class_enum_module_worker,tsox-checker/src/checker/mig/wc2_3.rs,Checker,exact,1.0,,,
+get_type_of_func_class_enum_module_worker,getTypeOfFuncClassEnumModuleWorker,Checker,tsc/internal/checker/checker.go,get_type_of_func_class_enum_module_worker,tsox-checker/src/checker/mig/wc2_3.rs,Checker,exact,1.0,partial,22,r22
 get_type_of_function_like,,,,get_type_of_function_like,tsox-checker/src/checker/checker_symbol_types_checker_3.rs,Checker,rust_only,0.0,,,
 get_type_of_function_like_inner,,,,get_type_of_function_like_inner,tsox-checker/src/checker/checker_symbol_types_checker_3.rs,Checker,rust_only,0.0,,,
 get_type_of_initializer,getTypeOfInitializer,Checker,tsc/internal/checker/flow.go,get_type_of_identifier,tsox-checker/src/checker/checker_impl_chunk_6_checker.rs,Checker,fuzzy,0.844,,,
@@ -10100,7 +10100,7 @@ is_constructor_declared_this_property,isConstructorDeclaredThisProperty,Checker,
 is_constructor_parameter_completion,,,,is_constructor_parameter_completion,tsox-lsp/src/ls/mig/m5r_2.rs,,rust_only,0.0,,,
 is_constructor_parameter_completion,isConstructorParameterCompletion,,tsc/internal/ls/completions.go,is_constructor_parameter_completion,tsox-lsp/src/ls/completions_definition_location.rs,,exact,1.0,,,
 is_constructor_signature_context,isConstructorSignatureContext,,tsc/internal/format/rulecontext.go,is_constructor_signature_context,tsox-frontend/src/format/rule_context_2.rs,FormattingContext,exact,1.0,,,
-is_constructor_type,isConstructorType,Checker,tsc/internal/checker/checker.go,is_constructor_type,tsox-checker/src/checker/mig/wc3_2.rs,Checker,exact,1.0,,,
+is_constructor_type,isConstructorType,Checker,tsc/internal/checker/checker.go,is_constructor_type,tsox-checker/src/checker/mig/wc3_2.rs,Checker,exact,1.0,partial,22,r22
 is_contained_by_namespace,isContainedByNamespace,,tsc/internal/checker/checker.go,,,,go_only,0.0,,,
 is_contained_by_namespace,,,,is_contained_by_namespace,tsox-checker/src/checker/mig/wc3_2.rs,Checker,rust_only,0.0,,,
 is_content_mapped_file_name,isContentMappedFileName,,tsc/internal/outputpaths/outputpaths.go,,,,go_only,0.0,,,
@@ -10507,7 +10507,7 @@ is_homomorphic_mapped_type_with_non_homomorphic_instantiation,isHomomorphicMappe
 is_hyphenated_jsx_name,,,,is_hyphenated_jsx_name,tsox-checker/src/checker/jsx_props_elaborate.rs,,rust_only,0.0,,,
 is_hyphenated_jsx_name,isHyphenatedJsxName,,tsc/internal/checker/relater.go,is_hyphenated_jsx_name,tsox-checker/src/checker/relater_predicates.rs,,exact,1.0,,,
 is_identifier,,,,is_identifier,tsox-checker/src/checker/nodebuilder_alias_display.rs,Checker,rust_only,0.0,,,
-is_identifier,isIdentifier,Parser,tsc/internal/parser/parser.go,is_identifier,tsox-frontend/src/parser/impl_chunk_parser_5.rs,Parser,exact,1.0,,,
+is_identifier,isIdentifier,Parser,tsc/internal/parser/parser.go,is_identifier,tsox-frontend/src/parser/impl_chunk_parser_5.rs,Parser,exact,1.0,yes,22,r22
 is_identifier_in_non_emitting_heritage_clause,isIdentifierInNonEmittingHeritageClause,,tsc/internal/ast/utilities.go,,,,go_only,0.0,,,
 is_identifier_in_non_emitting_heritage_clause,,,,is_identifier_in_non_emitting_heritage_clause,tsox-frontend/src/ast/mig/m3h.rs,,rust_only,0.0,,,
 is_identifier_name,IsIdentifierName,,tsc/internal/ast/utilities.go,is_identifier_name,tsox-frontend/src/ast/utilities_modules.rs,,exact,1.0,,,
@@ -10568,8 +10568,8 @@ is_import_type_context,isImportTypeContext,,tsc/internal/format/rulecontext.go,i
 is_import_type_qualifier_part,isImportTypeQualifierPart,,tsc/internal/checker/utilities.go,is_import_type_qualifier_part,tsox-checker/src/checker/utilities_is_private_within_ambient.rs,,exact,1.0,,,
 is_import_used,,,,is_import_used,tsox-lsp/src/ls/organize_imports.rs,LanguageService,rust_only,0.0,,,
 is_imports,IsImports,ExportsOrImports,tsc/internal/packagejson/exportsorimports.go,is_imports,tsox-tsoptions/src/packagejson/exports.rs,ExportsOrImports,exact,1.0,,,
-is_in_ambient_or_type_node,isInAmbientOrTypeNode,Checker,tsc/internal/checker/checker.go,,,,go_only,0.0,,,
-is_in_ambient_or_type_node,isInAmbientOrTypeNode,,tsc/internal/checker/utilities.go,is_in_ambient_or_type_node,tsox-checker/src/checker/utilities_get_assignment_target.rs,,exact,1.0,,,
+is_in_ambient_or_type_node,isInAmbientOrTypeNode,Checker,tsc/internal/checker/checker.go,,,,go_only,0.0,partial,22,r22
+is_in_ambient_or_type_node,isInAmbientOrTypeNode,,tsc/internal/checker/utilities.go,is_in_ambient_or_type_node,tsox-checker/src/checker/utilities_get_assignment_target.rs,,exact,1.0,partial,22,r22
 is_in_comment,isInComment,,tsc/internal/ls/utilities.go,is_in_comment,tsox-lsp/src/ls/utilities.rs,,exact,1.0,,,
 is_in_compound_like_assignment,isInCompoundLikeAssignment,,tsc/internal/checker/utilities.go,is_in_compound_like_assignment,tsox-checker/src/checker/utilities_get_assignment_target.rs,,exact,1.0,,,
 is_in_const_context,IsInConstContext,,tsc/internal/pseudochecker/lookup.go,,,,go_only,0.0,,,
@@ -11776,7 +11776,7 @@ is_unreferenced_variable_declaration,isUnreferencedVariableDeclaration,Checker,t
 is_unresolved_alias,IsUnresolvedAlias,Export,tsc/internal/ls/autoimport/export.go,is_unresolved_alias,tsox-lsp/src/ls/autoimport_export.rs,Export,exact,1.0,,,
 is_unterminated_literal,IsUnterminatedLiteral,,tsc/internal/ast/utilities.go,,,,go_only,0.0,,,
 is_unterminated_literal,,,,is_unterminated_literal,tsox-frontend/src/ast/mig/m3g_3.rs;tsox-lsp/src/ls/completions_definition_location.rs,OuterExpressionKinds;,rust_only,0.0,,,
-is_untyped_function_call,isUntypedFunctionCall,Checker,tsc/internal/checker/checker.go,is_untyped_function_call,tsox-checker/src/checker/mig/m2a_3.rs,Checker,exact,1.0,,,
+is_untyped_function_call,isUntypedFunctionCall,Checker,tsc/internal/checker/checker.go,is_untyped_function_call,tsox-checker/src/checker/mig/m2a_3.rs,Checker,exact,1.0,partial,22,r22
 is_unusable_name,isUnusableName,,tsc/internal/ls/autoimport/extract.go,is_unusable_name,tsox-lsp/src/ls/autoimport_extract.rs,SymbolExtractor,exact,1.0,,,
 is_unwrapped_return_type_undefined_void_or_any,isUnwrappedReturnTypeUndefinedVoidOrAny,Checker,tsc/internal/checker/checker.go,is_unwrapped_return_type_undefined_void_or_any,tsox-checker/src/checker/mig/m2a_3.rs,Checker,exact,1.0,,,
 is_up_to_date,,,,is_up_to_date,tsox-compile/src/incremental/mod.rs,BuildInfo,rust_only,0.0,,,
@@ -13661,7 +13661,7 @@ next_token_is_identifier_or_keyword_on_same_line,nextTokenIsIdentifierOrKeywordO
 next_token_is_identifier_or_keyword_or_greater_than,nextTokenIsIdentifierOrKeywordOrGreaterThan,Parser,tsc/internal/parser/parser.go,next_token_is_identifier_or_keyword_or_greater_than,tsox-frontend/src/parser/mig/wp1.rs,Parser,exact,1.0,,,
 next_token_is_identifier_or_keyword_or_literal_on_same_line,nextTokenIsIdentifierOrKeywordOrLiteralOnSameLine,Parser,tsc/internal/parser/parser.go,next_token_is_identifier_or_keyword_or_literal_on_same_line,tsox-frontend/src/parser/mig/wp1.rs,Parser,exact,1.0,,,
 next_token_is_identifier_or_keyword_or_open_bracket_or_template,nextTokenIsIdentifierOrKeywordOrOpenBracketOrTemplate,Parser,tsc/internal/parser/parser.go,next_token_is_identifier_or_keyword_or_open_bracket_or_template,tsox-frontend/src/parser/mig/wp1.rs,Parser,exact,1.0,,,
-next_token_is_identifier_or_string_literal_on_same_line,nextTokenIsIdentifierOrStringLiteralOnSameLine,Parser,tsc/internal/parser/parser.go,next_token_is_identifier_or_string_literal_on_same_line,tsox-frontend/src/parser/impl_chunk_parser_5.rs,Parser,exact,1.0,,,
+next_token_is_identifier_or_string_literal_on_same_line,nextTokenIsIdentifierOrStringLiteralOnSameLine,Parser,tsc/internal/parser/parser.go,next_token_is_identifier_or_string_literal_on_same_line,tsox-frontend/src/parser/impl_chunk_parser_5.rs,Parser,exact,1.0,yes,22,r22
 next_token_is_new_keyword,nextTokenIsNewKeyword,Parser,tsc/internal/parser/parser.go,next_token_is_new_keyword,tsox-frontend/src/parser/mig/wp1.rs,Parser,exact,1.0,,,
 next_token_is_numeric_or_big_int_literal,nextTokenIsNumericOrBigIntLiteral,Parser,tsc/internal/parser/parser.go,next_token_is_numeric_or_big_int_literal,tsox-frontend/src/parser/impl_chunk_parser_5.rs,Parser,exact,1.0,,,
 next_token_is_on_same_line_and_can_follow_modifier,nextTokenIsOnSameLineAndCanFollowModifier,Parser,tsc/internal/parser/parser.go,next_token_is_on_same_line_and_can_follow_modifier,tsox-frontend/src/parser/mig/wp1.rs,Parser,exact,1.0,,,
@@ -14218,7 +14218,7 @@ parse_asi_throw_needs_expression,,,,parse_asi_throw_needs_expression,tsox-fronte
 parse_asserts_type_predicate,parseAssertsTypePredicate,Parser,tsc/internal/parser/parser.go,parse_asserts_type_predicate,tsox-frontend/src/parser/types_parser_2.rs,Parser,exact,1.0,,,
 parse_assignment_expression,,,,parse_assignment_expression,tsox-frontend/src/parser/tests.rs,,rust_only,0.0,,,
 parse_assignment_expression_or_higher,parseAssignmentExpressionOrHigher,Parser,tsc/internal/parser/parser.go,,,,go_only,0.0,,,
-parse_assignment_expression_or_higher_worker,parseAssignmentExpressionOrHigherWorker,Parser,tsc/internal/parser/parser.go,,,,go_only,0.0,,,
+parse_assignment_expression_or_higher_worker,parseAssignmentExpressionOrHigherWorker,Parser,tsc/internal/parser/parser.go,,,,go_only,0.0,yes,22,r22
 parse_async_function,,,,parse_async_function,tsox-frontend/src/parser/tests.rs,,rust_only,0.0,,,
 parse_async_function_expression,,,,parse_async_function_expression,tsox-frontend/src/parser/expressions_parser.rs,Parser,rust_only,0.0,,,
 parse_async_generator,,,,parse_async_generator,tsox-frontend/src/parser/tests.rs,,rust_only,0.0,,,
@@ -14477,7 +14477,7 @@ parse_js_doc_link_name,parseJSDocLinkName,Parser,tsc/internal/parser/jsdoc.go,pa
 parse_js_doc_link_prefix,parseJSDocLinkPrefix,Parser,tsc/internal/parser/jsdoc.go,parse_jsdoc_link_prefix,tsox-frontend/src/parser/jsdoc_parser_7.rs,crate::parser::Parser,fuzzy,0.979,,,
 parse_js_doc_name_reference,parseJSDocNameReference,Parser,tsc/internal/parser/jsdoc.go,parse_jsdoc_name_reference,tsox-frontend/src/parser/jsdoc_parser_7.rs,crate::parser::Parser,fuzzy,0.981,,,
 parse_js_doc_non_nullable_type,parseJSDocNonNullableType,Parser,tsc/internal/parser/parser.go,,,,go_only,0.0,,,
-parse_js_doc_nullable_type,parseJSDocNullableType,Parser,tsc/internal/parser/parser.go,,,,go_only,0.0,,,
+parse_js_doc_nullable_type,parseJSDocNullableType,Parser,tsc/internal/parser/parser.go,,,,go_only,0.0,yes,22,r22
 parse_js_doc_signature,parseJSDocSignature,Parser,tsc/internal/parser/jsdoc.go,parse_jsdoc_signature,tsox-frontend/src/parser/jsdoc_parser_5.rs,crate::parser::Parser,fuzzy,0.977,,,
 parse_js_doc_type,parseJSDocType,Parser,tsc/internal/parser/parser.go,parse_jsdoc_type,tsox-frontend/src/parser/jsdoc_parser_6.rs,crate::parser::Parser,fuzzy,0.97,,,
 parse_js_doc_type_expression,parseJSDocTypeExpression,Parser,tsc/internal/parser/jsdoc.go,parse_jsdoc_type_expression,tsox-frontend/src/parser/jsdoc_parser_6.rs,crate::parser::Parser,fuzzy,0.982,,,
@@ -14541,7 +14541,7 @@ parse_list_type_option,parseListTypeOption,commandLineParser,tsc/internal/tsopti
 parse_literal,parseLiteral,Glob,tsc/internal/glob/glob.go,,,,go_only,0.0,,,
 parse_literal_expression,parseLiteralExpression,Parser,tsc/internal/parser/parser.go,,,,go_only,0.0,,,
 parse_literal_of_template_span,parseLiteralOfTemplateSpan,Parser,tsc/internal/parser/parser.go,,,,go_only,0.0,,,
-parse_literal_type_node,parseLiteralTypeNode,Parser,tsc/internal/parser/parser.go,parse_literal_type_node,tsox-frontend/src/parser/types_parser.rs,Parser,exact,1.0,,,
+parse_literal_type_node,parseLiteralTypeNode,Parser,tsc/internal/parser/parser.go,parse_literal_type_node,tsox-frontend/src/parser/types_parser.rs,Parser,exact,1.0,yes,22,r22
 parse_literal_type_node_with_negative,,,,parse_literal_type_node_with_negative,tsox-frontend/src/parser/types_parser.rs,Parser,rust_only,0.0,,,
 parse_mapped_type,parseMappedType,Parser,tsc/internal/parser/parser.go,parse_mapped_type,tsox-frontend/src/parser/types_parser_3.rs,Parser,exact,1.0,,,
 parse_mapped_type_parameter,parseMappedTypeParameter,Parser,tsc/internal/parser/parser.go,parse_mapped_type_parameter,tsox-frontend/src/parser/types_parser_3.rs,Parser,exact,1.0,,,
@@ -14657,7 +14657,7 @@ parse_partial,parsePartial,,tsc/internal/semver/version_range.go,parse_partial,t
 parse_polling_kind,,,,parse_polling_kind,tsox-core/src/core/watch_options.rs,,rust_only,0.0,,,
 parse_polling_kind_roundtrip,,,,parse_polling_kind_roundtrip,tsox-core/src/core/watch_options_tests.rs,,rust_only,0.0,,,
 parse_possible_parenthesized_arrow_function_expression,parsePossibleParenthesizedArrowFunctionExpression,Parser,tsc/internal/parser/parser.go,,,,go_only,0.0,,,
-parse_postfix_type_or_higher,parsePostfixTypeOrHigher,Parser,tsc/internal/parser/parser.go,parse_postfix_type_or_higher,tsox-frontend/src/parser/types_parser.rs,Parser,exact,1.0,,,
+parse_postfix_type_or_higher,parsePostfixTypeOrHigher,Parser,tsc/internal/parser/parser.go,parse_postfix_type_or_higher,tsox-frontend/src/parser/types_parser.rs,Parser,exact,1.0,yes,22,r22
 parse_prefix_unary_expression,parsePrefixUnaryExpression,Parser,tsc/internal/parser/parser.go,,,,go_only,0.0,,,
 parse_prerelease,,,,parse_prerelease,tsox-core/src/semver/tests.rs,,rust_only,0.0,,,
 parse_primary_expression,parsePrimaryExpression,Parser,tsc/internal/parser/parser.go,parse_primary_expression,tsox-frontend/src/parser/expressions_parser_6.rs,Parser,exact,1.0,,,
@@ -15967,12 +15967,12 @@ report_invocation_error,,,,report_invocation_error,tsox-checker/src/checker/chec
 report_likely_unsafe_import_required_error,ReportLikelyUnsafeImportRequiredError,SymbolTrackerImpl,tsc/internal/checker/symboltracker.go,report_likely_unsafe_import_required_error,tsox-checker/src/checker/symboltracker.rs,SymbolTrackerImpl,exact,1.0,,,
 report_likely_unsafe_import_required_error,ReportLikelyUnsafeImportRequiredError,SymbolTrackerImpl,tsc/internal/transformers/declarations/tracker.go,report_likely_unsafe_import_required_error,tsox-checker/src/checker/symboltracker.rs,SymbolTrackerImpl,exact,1.0,,,
 report_likely_unsafe_import_required_error,ReportLikelyUnsafeImportRequiredError,wrappingTracker,tsc/internal/checker/nodecopy.go,report_likely_unsafe_import_required_error,tsox-checker/src/checker/nodecopy_recovery.rs,WrappingTracker,exact,1.0,,,
-report_merge_symbol_error,reportMergeSymbolError,Checker,tsc/internal/checker/checker.go,report_merge_symbol_error,tsox-checker/src/checker/checker_resolve_checker_3.rs,Checker,exact,1.0,,,
+report_merge_symbol_error,reportMergeSymbolError,Checker,tsc/internal/checker/checker.go,report_merge_symbol_error,tsox-checker/src/checker/checker_resolve_checker_3.rs,Checker,exact,1.0,partial,22,r22
 report_missing_global_types,,,,report_missing_global_types,tsox-checker/src/checker/checker_impl_chunk_checker_2.rs,Checker,rust_only,0.0,,,
 report_nested_relation_failure,,,,report_nested_relation_failure,tsox-checker/src/checker/relater_relate_impl_chunk_checker_2.rs,Checker,rust_only,0.0,,,
 report_no_overload_matches,,,,report_no_overload_matches,tsox-checker/src/checker/checker_calls_checker_4.rs,Checker,rust_only,0.0,,,
 report_non_default_export,reportNonDefaultExport,Checker,tsc/internal/checker/checker.go,report_non_default_export,tsox-checker/src/checker/mig/m2b_4.rs,Checker,exact,1.0,,,
-report_non_exported_member,reportNonExportedMember,Checker,tsc/internal/checker/checker.go,report_non_exported_member,tsox-checker/src/checker/mig/m2b_4.rs,Checker,exact,1.0,,,
+report_non_exported_member,reportNonExportedMember,Checker,tsc/internal/checker/checker.go,report_non_exported_member,tsox-checker/src/checker/mig/m2b_4.rs,Checker,exact,1.0,yes,22,r22
 report_non_serializable_property,ReportNonSerializableProperty,SymbolTrackerImpl,tsc/internal/checker/symboltracker.go,report_non_serializable_property,tsox-checker/src/checker/symboltracker.rs,SymbolTrackerImpl,exact,1.0,,,
 report_non_serializable_property,ReportNonSerializableProperty,SymbolTrackerImpl,tsc/internal/transformers/declarations/tracker.go,report_non_serializable_property,tsox-checker/src/checker/symboltracker.rs,SymbolTrackerImpl,exact,1.0,,,
 report_non_serializable_property,ReportNonSerializableProperty,wrappingTracker,tsc/internal/checker/nodecopy.go,report_non_serializable_property,tsox-checker/src/checker/nodecopy_recovery.rs,WrappingTracker,exact,1.0,,,
@@ -16111,7 +16111,7 @@ resolve_default_export_target,,,,resolve_default_export_target,tsox-checker/src/
 resolve_deferred_accessor_member_types,,,,resolve_deferred_accessor_member_types,tsox-checker/src/checker/typenode_references_interface_members_accessors.rs,Checker,rust_only,0.0,,,
 resolve_desired_dirs,ResolveDesiredDirs,WatchManager,tsc/internal/execute/watchmanager/watchmanager.go,resolve_desired_dirs,tsox-execute/src/mig/m5b_4.rs,WatchManager,exact,1.0,,,
 resolve_entity_for_enum,,,,resolve_entity_for_enum,tsox-checker/src/checker/checker_enum_entity.rs,Checker,rust_only,0.0,,,
-resolve_entity_name,resolveEntityName,Checker,tsc/internal/checker/checker.go,resolve_entity_name,tsox-checker/src/checker/mig/wc3_5.rs,Checker,exact,1.0,,,
+resolve_entity_name,resolveEntityName,Checker,tsc/internal/checker/checker.go,resolve_entity_name,tsox-checker/src/checker/mig/wc3_5.rs,Checker,exact,1.0,yes,22,r22
 resolve_entity_name_chain,,,,resolve_entity_name_chain,tsox-checker/src/checker/flow_union_ops_checker_3.rs,Checker,rust_only,0.0,,,
 resolve_entity_name_class_symbol,,,,resolve_entity_name_class_symbol,tsox-checker/src/checker/checker_classes_checker_2.rs,Checker,rust_only,0.0,,,
 resolve_entity_segments_in_scope,,,,resolve_entity_segments_in_scope,tsox-checker/src/checker/typenode_import_query_checker_4.rs,Checker,rust_only,0.0,,,
@@ -17568,7 +17568,7 @@ structured_type_call_construct_signatures,,,,structured_type_call_construct_sign
 structured_type_is_empty,,,,structured_type_is_empty,tsox-checker/src/checker/relater_relate_impl_chunk_checker_10.rs,Checker,rust_only,0.0,,,
 structured_type_related_to,structuredTypeRelatedTo,Relater,tsc/internal/checker/relater.go,,,,go_only,0.0,,,
 structured_type_related_to,,,,structured_type_related_to,tsox-checker/src/checker/mig/m2h.rs,Checker,rust_only,0.0,,,
-structured_type_related_to_worker,structuredTypeRelatedToWorker,Relater,tsc/internal/checker/relater.go,,,,go_only,0.0,,,
+structured_type_related_to_worker,structuredTypeRelatedToWorker,Relater,tsc/internal/checker/relater.go,,,,go_only,0.0,partial,22,r22
 structured_types_identical,,,,structured_types_identical,tsox-checker/src/checker/typenode_references_interface_extends_check.rs,Checker,rust_only,0.0,,,
 style_check_diagnostics_has,,,,style_check_diagnostics_has,tsox-lsp/src/mig/m5u_conv.rs,OriginalTextScriptOwn,rust_only,0.0,,,
 sub,,,,sub,tsox-core/src/jsnum/number.rs,Number,rust_only,0.0,,,
@@ -18882,9 +18882,9 @@ tuple_types_definitely_unrelated,tupleTypesDefinitelyUnrelated,,tsc/internal/che
 tuple_types_definitely_unrelated,,,,tuple_types_definitely_unrelated,tsox-checker/src/checker/mig/m2e_2.rs,Checker,rust_only,0.0,,,
 two_chars_at,,,,two_chars_at,tsox-frontend/src/scanner/regexp_cursor.rs,RegExpParser,rust_only,0.0,,,
 ty,,,,ty,tsox-checker/src/checker/mig/m3a.rs,TypePredicate,rust_only,0.0,,,
-type,Type,Node,tsc/internal/ast/ast.go,,,,go_only,0.0,,,
-type,Type,TypePredicate,tsc/internal/checker/types.go,,,,go_only,0.0,,,
-type,Type,fileInfo,tsc/internal/bundled/embed.go,,,,go_only,0.0,,,
+type,Type,Node,tsc/internal/ast/ast.go,,,,go_only,0.0,partial,22,r22
+type,Type,TypePredicate,tsc/internal/checker/types.go,,,,go_only,0.0,partial,22,r22
+type,Type,fileInfo,tsc/internal/bundled/embed.go,,,,go_only,0.0,partial,22,r22
 type_acquisition,TypeAcquisition,ParsedCommandLine,tsc/internal/tsoptions/parsedcommandline.go,type_acquisition,tsox-tsoptions/src/mig/m5i.rs,ParsedCommandLine,exact,1.0,,,
 type_alias_symbol_display_parts,,,,type_alias_symbol_display_parts,tsox-checker/src/checker/nodebuilder_checker_12.rs;tsox-checker/src/checker/nodebuilder_checker_6.rs,Checker;Checker,rust_only,0.0,,,
 type_alias_type_param_decls,,,,type_alias_type_param_decls,tsox-checker/src/checker/hover_display_symbol.rs,Checker,rust_only,0.0,,,

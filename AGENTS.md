@@ -19,7 +19,7 @@ flowchart TD
     CUT_C --> DISP_C["主 agent 派发一片 = 一个文件<br/>修复 subagent（隔离 worktree · 纯文本）<br/>只读：repo / Go oracle / 编译错误 / 基线 diff<br/>禁止：任何 cargo · 编译 · 测试<br/>输出：patch / 独立 commit"]
     DISP_C --> MERGE_C["主 agent 合并：rebase / cherry-pick<br/>冲突就地解决 · 修复记录追加到 todos/corpus-fix-notes.md"]
     MERGE_C --> WAIT_C{"编译分片队列发完？"}
-    WAIT_C -->|否：派下一片（单发串行）| DISP_C
+    WAIT_C -->|否：并发名额一空立即补发| DISP_C
     WAIT_C -->|是| NR
     NRQ -->|是| RUN["主 agent：全量语料测试<br/>cargo test --release --no-fail-fast"]
     RUN --> EXP["主 agent 导出<br/>corpus_results.csv / corpus_skips.csv"]
@@ -28,7 +28,7 @@ flowchart TD
     CUT_T --> DISP_T["主 agent 派发一片 = 一个用例<br/>修复 subagent（隔离 worktree · 纯文本）<br/>只读：repo / Go oracle / 失败信息 / 基线 diff<br/>允许：改生产代码 + 测试代码<br/>禁止：任何 cargo · 编译 · 测试<br/>输出：patch / 独立 commit"]
     DISP_T --> MERGE_T["主 agent 合并：rebase / cherry-pick<br/>冲突就地解决 · 修复记录追加到 todos/corpus-fix-notes.md"]
     MERGE_T --> WAIT_T{"测试分片队列发完？"}
-    WAIT_T -->|否：派下一片（单发串行）| DISP_T
+    WAIT_T -->|否：并发名额一空立即补发| DISP_T
     WAIT_T -->|是| NR
     TQ -->|是| CHK{"新增 skip / ignore / flaky？"}
     CHK -->|否| END["结束 · 汇总报告<br/>编译零错误 / FAIL 清零 / skip 无新增 / diff 清单"]
@@ -41,7 +41,7 @@ flowchart TD
 - **基线锁定（入口）**：主 agent 串行记录当前 commit、corpus_skips 状态、ignore 清单、基线 diff，作为本轮飞轮的对照基线。
 - **编译闸门**：`cargo test --no-run`（ulimit -v 4194304，TSOX_SUBMODULE_LIMIT=0）。有编译错误则脚本机械切割（按 crate / 错误码 / 错误签名），进入编译分片循环；零错误才放行测试闸门。
 - **测试闸门**：`cargo test --release --no-fail-fast` 全量语料 → `corpus_csv_export.py` 出双表。FAIL > 0 则脚本机械切割（按错误签名 / 用例簇，flaky 候选单独标记），进入测试分片循环；测试修复合并后**必须回到编译闸门**（改动可能引入编译错）。
-- **分发（两轮同规，单发串行 · 2026-09-29 用户拍板）**：脚本仍机械切割出全量分片队列，但主 agent **一次只派发一片**：编译轮一个文件、测试轮一个用例，in-flight 恒为 1；**不做多族 / 多分片并发分发**（旧「并发 8-12 · 名额一空立即补发」口径废止）。每片修复返回即合并，并把该次修复记录（文件/用例、根因、对照的 Go 源、改动点、结果与 CSV 变化）追加到仓库级笔记 `todos/corpus-fix-notes.md`（最新在上；系统记忆已清空，仓库内文件是唯一留存），然后才派发下一片；队列发完回对应闸门做一次复验。
+- **分发（两轮同规，多 subagent 并发 · 2026-09-30 用户拍板，废止 2026-09-29 单发串行口径）**：脚本机械切割出全量分片队列，主 agent **并发派发多片**（8-12 个在飞 subagent）：编译轮一片一个文件、测试轮一片一个用例；subagent 一律**后台运行**（完成经系统通知收集，主 agent 不阻塞等待），名额一空立即从队列补发。主 agent 在**派发前**为每片**预建隔离 worktree**（`git worktree add` + 独立分支，确认干净基线后再派发），subagent 的全部操作（含所有 git 命令）只发生在其 worktree 内，**与主工作树完全分离**；派发 prompt 首步要求 subagent 验证 `pwd` 位于其 worktree。为降低合并冲突，同批并发片尽量分属不同根因域（binder / parser / checker 等错开）。每片修复返回即合并（合并由主 agent 串行执行，后到分片按基线前移处理冲突），并把该次修复记录（文件/用例、根因、对照的 Go 源、改动点、结果与 CSV 变化）追加到仓库级笔记 `todos/corpus-fix-notes.md`（最新在上；系统记忆已清空，仓库内文件是唯一留存）；队列发完回对应闸门做一次复验。
 - **subagent 契约（纯文本）**：隔离 worktree；只读 repo / Go oracle（`/home/cqh/workspace/typescript-go`）/ 派发 prompt 内联的错误清单与基线 diff；禁止任何 cargo 命令、编译、测试；测试分片允许改生产代码 + 测试代码；按根因增量独立 commit；汇报**函数变更表**（缺表打回）。30 分钟预算（剩 6 分钟强制收尾）、单根因 10 分钟熔断、Bash 连续 3 次故障写交接退出。**禁止用空壳实现消错**：恒返 `None`/空函数体/`let _ =` 丢弃结果/捏造常量值/删真实逻辑换占位，均属编造行为迁就编译——符号不存在时只允许三选一：grep 到真实等价符号改接线、按 Go 移植最小真实实现、保留错误记交接留给下一轮。主 agent 收集时抽查 diff，发现 None 化/空壳模式整轮回滚重派。
 - **合并**：主 agent 每片返回即 rebase / cherry-pick 回主仓，冲突按 Go 语义就地解决；全部片发完后回对应闸门做一次复验（不逐片复验）。
 - **异常路由**：flaky / 超时 / OOM 由主 agent 隔离重跑判定，不入分片；熔断条件（max_round / max_attempts / 无进展）触发即停轮交人工；轮末新增 skip / ignore / flaky 必须人工确认保留或撤回，未经批注不得视为收敛。

@@ -1,13 +1,24 @@
 # corpus 修复记录（飞轮单发流水）
 
-飞轮单发串行纪律下的逐次修复记录：一次一个文件（编译轮）或一个用例（测试轮），修一片记一条，最新在上。每条含：文件/用例、根因、对照的 Go 源、改动点、结果与 CSV 变化。系统记忆已清空，本文件是修复连续性的唯一留存。
+飞轮多 subagent 并发纪律下的逐次修复记录（2026-09-30 起），修一片记一条，最新在上。系统记忆已清空且仓内文件遭多次外部重置，本文件主副本同步存 /tmp/corpus-fix-notes-master.md。
+
+## 第 22 轮总状态（2026-09-30，主 agent 维护；第四次重建）
+
+- **严重事件**：主仓工作树被外部清空**三次**（无 reflog 的路径级还原，均发生在后台批次在飞期间，疑似个别 subagent 越权）；已三次全量重建硬化与笔记。**硬化快照：/tmp/hardening_snapshot/**；笔记主副本：/tmp/corpus-fix-notes-master.md。**强烈建议用户提交硬化改动并排查越权 subagent**。
+- **基线与口径**：4GB 内存限制口径（ulimit -v 4194304 + TSOX_SUBMODULE_LIMIT=0 + --release --no-fail-fast，cd crates/tsox 跑 corpus）；183 例确定性挂起（171 timeout + 12 signal6）按异常路由挂起待人工审。
+- **检查点轨迹**：1095 基线 → 1116（大回归已 revert）→ 1062 → 1036 → **1031（检查点 4，114 转绿 / 17 新红）**。skip 超基准 649（含 parity 规则新增合规 SKIP，轮末人工审）。队列 1031 片（/tmp/flywheel_shards）。
+- **17 新红**（多为批内连带，下波优先）：bigintIndex、classExtendsClauseClassMerged*/NotReferringConstructor（TS2507 族=get_type_of_symbol 分派顺序结构分歧）、classVarianceResolveCircularity1、declFileTypeofFunction、declarationEmitReexportedSymlinkReference*2（m2b_6 波及待查）、destructureOptionalParameter、destructuringAssignmentWithDefault 等。
+- **已合并 commit（44+，编译闸门每轮零错误）**：0001 reservedWords2 三连（Missing 标识符/pos/namespace 门）；0002 `?` 可空类型五连；0003 parseBigInt 三连（intern 统一收官）；0004 绑定模式簇；0008 TS2454 isParameter 守卫；0009 负字面量型；0010 LHS 门+resolveEntityName+模块说明符门三连；0011 isIdentifier is_keyword；0014 adjust_type_with_facts 接线；0016 relater 混对守卫；0018 Missing 兜底簇；0019 类静态成员实例化；0020 bare return elaborate；0022 构造器 return 实例型检查（一次误 revert 已恢复）；0023 relater union fall-through；0024 参数 TS7006 遍历位快路径（**TS7006 大簇 15 例收官**）；0025 全局增强单次合并；0026/0028/0035/0041/0054 熔断交接；0027 算术三路+intern；0035 truncate 机制 revert（目标未修绿，挂起）；0036 d.ts ambient；0037 类表达式 implements；0038 heritage 左端 TS2708 抑制；0039 enum+namespace 值类型；0040 get_set_accessor_value_parameter；0044 声明变换 visit 接线（TS90xx 通道仍静默待追因）；0045 赋值值含义门控；0046/0047/0048 基类型移植三连（getBaseTypes/getBaseConstructorTypeOfClass/值语义，0046+0048 同函数冲突融合）；0049 TS2347 untyped 门控；0050 mapped type Index 桥接；0051 TS2417 静态侧分支（仍未触发）；0052 TS2460 同引用判定；0055 report_non_exported_member 空壳填实；0056 accessor scope 压栈。
+- **主 agent 直接修正**：should_skip 补 3 条 Go parity 规则（esModuleInterop=false/allowSyntheticDefaultImports=false/alwaysStrict=false，Tristate::False；alwaysStrict 规则加 `strict != False` 守卫——我们的测试设置解析会展开 strict 而 Go 不展开，实证 skip_baseline 无 @strict:false 用例）；0044 编译修复 7 处；0003/0014 编译修复；两次误判 revert 已纠正。
+- **验证转绿 40+ 例**（抽样）：moduleExports1 族 4、TS2454 簇 4、TS7006 大簇 15、`?` 可空 2、parseBigInt、typeMatch1、baseTypeOrderChecking、extendsClauseAlreadySeen2、enumAssignmentCompat 部分、importNonExportedMember 族 4、classImplementsPrimitive、classExtendsInterfaceInModule、constructorReturningAPrimitive、assignToModule 族 2、classExtendsNull/declFileClassExtendsNull、staticAnonymousType、contextuallyTyped* 等。
+- **挂起池（精确交接在本文件历史条目与下方速查）**：0001 TS7010+L10/L11（Go oracle CLI 实测法）；0002 TS2616 signature 机制（get_signature_from_declaration 空壳）；0013/0006 FT 参数 TS7006 tail 链；0017/0028 TS2564 递归塌缩（结构性：急切注解解析 vs Go 惰性，需插桩）；0021 联合属性型单点；0024/0030 crashIntypeCheck TS2347 apparent 边界；0041/0056 TS2842 scope_stack（需插桩）；0044 TS90xx 通道静默追因；0046 get_type_of_symbol 分派顺序（大轮）；0051 Arc::get_mut 别名缺陷；export= 族 5/7 interop 路径；privateName mangle（binder.go:319）；NodeFlags::Ambient 系统性缺失；TS7080 声明发射通道。
+- **机制与纪律**：flat_segment 只比对纯错误段；merge --ff-only 只在分支上做、rebase 在 worktree 内做；subagent 派发一律后台、并发 8-12；派发前先在最新 HEAD 快测候选（防空派）；corpus_one.sh 传参不带 .ts（rm 目标才对）；FAIL CSV 缺席≠绿（可能是 SKIP，查 skips 表）；/tmp 是 tmpfs 注意 inode。
+- **靠齐标记**：func_alignment.csv r22 若被重置按此重打——yes：DeclarationNameToString/createMissingIdentifier/nextTokenIsIdentifierOrStringLiteralOnSameLine/parsePostfixTypeOrHigher/parseJSDocNullableType/getNullableType/checkExpressionCached/checkPrefixUnaryExpression/parseAssignmentExpressionOrHigherWorker/resolveEntityName/parseLiteralTypeNode/getAdjustedTypeWithFacts/isIdentifier/bindVariableDeclarationOrBindingElement/getDeclarationName/checkReturnStatement/getBaseConstructorTypeOfClass/GetSetAccessorValueParameter/reportNonExportedMember/checkBinaryLikeExpression/getLiteralTypeOfBigIntLiteral；partial：declareSymbolEx/reportMergeSymbolError/Type/checkExpressionWorker/bindParameter/structuredTypeRelatedToWorker/isUntypedFunctionCall/isConstructorType/getBaseTypes/checkQualifiedName/checkPropertyAccessibilityAtLocation/getResolvedSymbol/isInAmbientOrTypeNode/getTypeOfFuncClassEnumModuleWorker。
+- **worktree 预建纪律（2026-09-30 用户拍板）**：主 agent 在派发前为每片预建隔离 worktree（确认干净基线再派发）；subagent 全部操作含 git 命令只发生在其 worktree 内，与主工作树完全分离；派发 prompt 首步 pwd 验证、git 一律 -C worktree。
+- **运行命令模板**：全量 `(ulimit -v 4194304; export TSOX_SUBMODULE_LIMIT=0; cd crates/tsox && cargo test --release --no-fail-fast --test corpus) > fullrun.log`；导出 `python3 tools/corpus_csv_export.py fullrun.log`；单例 `tools/corpus_one.sh <case 不带扩展名>`；切割 `python3 /tmp/cut_test_shards.py`。
 
 ## 基线（2026-09-29，自第 21 轮记忆迁移）
 
 - 终态：CSV 4042 败（generatorTypeCheck 族 6 例 + yield 上下文定型 3 例转绿后）。
-- 已知剩余深水（待单发消化）：
-  - yield* 二级上下文链（26/64）：数组元素从合成 Generator 的 yield 型取、IIFE callee 从 call 上下文签名回传，两跳都缺。
-  - 生成器体自然返回推断（25/62/63）：头行已对齐，差异在 elaboration 链折叠——relater 的 TYPES_RETURNED_BY 需支持「属性+签名返回+属性」折叠出 `a().b()` 形态，迭代协议比较走 next 专道。
-  - 本地接口 extends Iterator+Iterable 的合成成员迭代型提取（8）。
-  - 注解型 `{[Symbol.iterator](): void}` 不报 TS2488 的通道（28）。
-- 运行口径：全量 `ulimit -v 4194304 + TSOX_SUBMODULE_LIMIT=0 + --release --no-fail-fast`，cd crates/tsox 跑 corpus；CSV 只记 FAIL，写操作一律绝对路径 `/home/cqh/workspace/ts2rust-port/corpus_results.csv`。
+- 已知剩余深水（待单发消化）：yield* 二级上下文链（26/64）；生成器体自然返回推断（25/62/63）；本地接口 extends Iterator+Iterable 的合成成员迭代型提取（8）；注解型 `{[Symbol.iterator](): void}` 不报 TS2488 的通道（28）。
+- 运行口径：全量 `ulimit -v 4194304 + TSOX_SUBMODULE_LIMIT=0 + --release --no-fail-fast`，cd crates/tsox 跑 corpus；CSV 只记 FAIL，写操作一律绝对路径。
