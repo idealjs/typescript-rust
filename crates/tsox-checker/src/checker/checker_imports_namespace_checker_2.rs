@@ -159,21 +159,81 @@ impl Checker {
     ) -> Option<Arc<Symbol>> {
         // tspath isExternalModuleNameRelative 语义：仅 ./ ../ 开头是相对路径，
         // `.prisma/client` 这类点前缀包名走 node_modules 解析
-        if !specifier.starts_with("./") && !specifier.starts_with("../") {
-            return self.resolve_module_file_symbol(specifier);
-        }
-        let dir = base_module
+        let base_file = base_module
             .declarations
             .iter()
             .find(|d| d.kind == SyntaxKind::SourceFile)
-            .and_then(|d| self.get_source_file_of_node(d))
-            .map(|f| {
-                f.file_name
-                    .rfind('/')
-                    .map(|i| f.file_name[..i].to_string())
-                    .unwrap_or_default()
-            })?;
+            .and_then(|d| self.get_source_file_of_node(d));
+        if !specifier.starts_with("./") && !specifier.starts_with("../") {
+            // Go resolveModuleName 以导入文件为 containingFile：re-export 链中途
+            // 解析包名说明符必须相对 base 模块所在目录，不能沿用当前检查文件
+            if let Some(f) = &base_file
+                && let Some(sym) = self.resolve_package_symbol_from(&f.file_name, specifier)
+            {
+                return Some(sym);
+            }
+            return self.resolve_module_file_symbol(specifier);
+        }
+        let dir = match base_file {
+            Some(f) => f
+                .file_name
+                .rfind('/')
+                .map(|i| f.file_name[..i].to_string())
+                .unwrap_or_default(),
+            None => return None,
+        };
         self.resolve_module_file_symbol_in(&dir, specifier)
+    }
+
+    fn resolve_package_symbol_from(
+        &self,
+        containing_file: &str,
+        spec: &str,
+    ) -> Option<Arc<Symbol>> {
+        if let Some(path) = self.program.resolve_external_module_path(
+            spec,
+            containing_file,
+            tsox_core::core::compiler_options::ModuleKind::None,
+        ) && let Some(sf) = self.program.get_source_file(&path)
+            && let Some(sym) = self.program.symbol_map().symbol_of(&sf.node).cloned()
+        {
+            return Some(sym);
+        }
+        let mut dir = match containing_file.rfind('/') {
+            Some(i) => containing_file[..i].to_string(),
+            None => return None,
+        };
+        loop {
+            let pkg_dir = format!("{dir}/node_modules/{spec}");
+            for index in ["./index.d.ts", "./index.ts", "./index.tsx"] {
+                if let Some(sym) = self.resolve_module_file_symbol_in(&pkg_dir, index) {
+                    return Some(sym);
+                }
+            }
+            let mangled = if let Some(rest) = spec.strip_prefix('@') {
+                rest.split_once('/')
+                    .map(|(scope, pkg)| format!("{scope}__{pkg}"))
+                    .unwrap_or_else(|| rest.to_string())
+            } else {
+                spec.to_string()
+            };
+            let types_dir = format!("{dir}/node_modules/@types/{mangled}");
+            for index in ["./index.d.ts", "./index.ts", "./index.tsx"] {
+                if let Some(sym) = self.resolve_module_file_symbol_in(&types_dir, index) {
+                    return Some(sym);
+                }
+            }
+            let parent = match dir.rfind('/') {
+                Some(0) => "/".to_string(),
+                Some(i) => dir[..i].to_string(),
+                None => break,
+            };
+            if parent == dir {
+                break;
+            }
+            dir = parent;
+        }
+        None
     }
 
     pub(crate) fn type_of_dynamic_import(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
