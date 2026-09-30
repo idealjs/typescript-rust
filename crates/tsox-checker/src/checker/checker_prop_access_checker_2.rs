@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker_prop_access::*;
+use tsox_frontend::ast::mig::m3b::is_write_access;
 
 impl Checker {
     pub(crate) fn check_property_access(&mut self, node: &Arc<Node>) {
@@ -85,28 +86,63 @@ impl Checker {
                 }
 
                 if let Some(declaring_class) = self.declaring_class_of_member(member_symbol) {
-                    let is_private =
+                    let writing = is_write_access(node);
+                    let flags =
                         crate::checker::exports::get_declaration_modifier_flags_from_symbol_ex(
                             member_symbol,
-                            false,
-                        )
-                        .contains(ModifierFlags::Private);
-                    if is_private && !self.is_within_declaring_class(&declaring_class) {
-                        let class_name = match &declaring_class.data {
-                            tsox_frontend::ast::NodeData::ClassDeclaration(d) => d
-                                .name
-                                .as_ref()
-                                .map(|n| n.text().to_string())
-                                .unwrap_or_default(),
-                            _ => String::new(),
-                        };
-                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                            self.current_file.clone(),
-                            name.loc,
-                            PROPERTY_0_IS_PRIVATE_AND_ONLY_ACCESSIBLE_WITHIN_CLASS_1,
-                            vec![name_text.to_string(), class_name],
-                        ));
-                        return;
+                            writing,
+                        );
+                    let class_name = match &declaring_class.data {
+                        tsox_frontend::ast::NodeData::ClassDeclaration(d) => d
+                            .name
+                            .as_ref()
+                            .map(|n| n.text().to_string())
+                            .unwrap_or_default(),
+                        _ => String::new(),
+                    };
+                    if flags.contains(ModifierFlags::Private) {
+                        if !self.is_within_declaring_class(&declaring_class) {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                name.loc,
+                                PROPERTY_0_IS_PRIVATE_AND_ONLY_ACCESSIBLE_WITHIN_CLASS_1,
+                                vec![name_text.to_string(), class_name],
+                            ));
+                            return;
+                        }
+                    } else if flags.contains(ModifierFlags::Protected)
+                        && obj_expr.kind != SyntaxKind::SuperKeyword
+                    {
+                        let enclosing_classes: Vec<_> = self
+                            .enclosing_class_stack
+                            .iter()
+                            .rev()
+                            .cloned()
+                            .collect();
+                        let mut accessible = false;
+                        for enclosing in enclosing_classes {
+                            if let Some(symbol) = self.get_symbol_of_declaration(&enclosing) {
+                                let declared = self.get_declared_type_of_symbol(&symbol);
+                                if self.is_class_derived_from_declaring_classes(
+                                    &declared,
+                                    member_symbol,
+                                    writing,
+                                ) {
+                                    accessible = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if !accessible {
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                self.current_file.clone(),
+                                name.loc,
+                                tsox_core::diagnostics::messages_generated::
+                                    PROPERTY_0_IS_PROTECTED_AND_ONLY_ACCESSIBLE_WITHIN_CLASS_1_AND_ITS_SUBCLASSES,
+                                vec![name_text.to_string(), class_name],
+                            ));
+                            return;
+                        }
                     }
                 }
             }
