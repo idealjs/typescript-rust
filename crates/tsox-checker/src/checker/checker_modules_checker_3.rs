@@ -111,6 +111,9 @@ impl Checker {
         else {
             return;
         };
+        if self.program.source_files().iter().any(|f| f.file_name == path) {
+            return;
+        }
         let lower = path.to_ascii_lowercase();
         let ts_or_json = lower.ends_with(".ts")
             || lower.ends_with(".tsx")
