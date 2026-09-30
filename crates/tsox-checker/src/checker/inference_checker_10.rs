@@ -70,8 +70,10 @@ impl Checker {
             if !self.is_type_assignable_to(&name_literal, &base) {
                 return None;
             }
-            self.get_template_type_from_mapped_type(&Arc::clone(t))?;
-            let substituted = self.substitute_indexed_mapped_type(&Arc::clone(t), &name_literal);
+            let tp = m.type_parameter.clone().unwrap();
+            let template = self.get_template_type_from_mapped_type(&Arc::clone(t))?;
+            let substituted =
+                self.substitute_infer_type_parameters(&template, &[tp], &[name_literal]);
 
             if let TypeData::IndexedAccess(ia) = &substituted.data
                 && let (Some(obj), Some(idx)) = (&ia.object_type, &ia.index_type)
