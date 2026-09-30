@@ -548,8 +548,8 @@ fn jsx_runtime_import_source_unresolvable_reports_2875() {
     });
     assert_eq!(
         codes,
-        vec![2875],
-        "unresolvable jsx runtime must report TS2875"
+        vec![7026, 2875],
+        "unresolvable jsx runtime: gotsc 实测 [2875,7026]，IntrinsicElements 缺失必随 7026（语料真值序 [7026,2875]）"
     );
 
     let codes = check_files(&files, "/index.tsx", |o| {
@@ -558,8 +558,8 @@ fn jsx_runtime_import_source_unresolvable_reports_2875() {
     });
     assert_eq!(
         codes,
-        vec![2874],
-        "classic mode reports no TS2875 but TS2874 without React in scope"
+        vec![2874, 7026, 2875],
+        "classic+jsxImportSource：gotsc 以 TS5089 拒绝该组合（选项门未实现，记债）；按语料语义 2874+7026+合成运行时导入 2875"
     );
 }
 
