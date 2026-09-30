@@ -198,51 +198,50 @@ impl Checker {
     }
 
     pub(crate) fn check_parameter_default_initializer(&mut self, param: &Arc<Node>) {
-        if let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &param.data
-            && let Some(init) = &pd.initializer
-        {
-            self.check_expression(init);
-            // Go checkVariableLikeDeclaration：带初始化式的绑定模式参数按 widened
-            // 类型逐元素急切解析（TS2339 等在声明检查期发出）
+        if let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &param.data {
+            // Go checkSignatureDeclaration：模式名参数逐元素急切解析，
+            // 不以默认初始化式存在为前提
             if matches!(
                 pd.name.kind,
                 SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
             ) {
                 self.check_binding_pattern_element_types(&pd.name);
                 self.check_binding_pattern_element_initializers(&pd.name);
-                return;
             }
-            // Go getTypeOfVariableOrParameterOrPropertyWorker 对无注解参数的符号型
-            // 是 widened initializer 型,与初始化式比较恒真;上下文定型只发生在
-            // 签名实例化位,声明检查期不可见
-            if pd.type_node.is_none() {
-                return;
+            if let Some(init) = &pd.initializer {
+                self.check_expression(init);
+                // Go getTypeOfVariableOrParameterOrPropertyWorker 对无注解参数的符号型
+                // 是 widened initializer 型,与初始化式比较恒真;上下文定型只发生在
+                // 签名实例化位,声明检查期不可见
+                if pd.type_node.is_none() {
+                    return;
+                }
+                let Some(symbol) = self.get_symbol_of_declaration(param) else {
+                    return;
+                };
+                if symbol
+                    .value_declaration
+                    .as_ref()
+                    .is_some_and(|vd| !Arc::ptr_eq(vd, param))
+                {
+                    return;
+                }
+                let declared = self.get_type_of_symbol(&symbol);
+                let declared = if declared.intrinsic_name() == Some("auto") {
+                    self.get_any_type()
+                } else {
+                    declared
+                };
+                let init_type = self.get_type_of_node(init);
+                self.check_type_assignable_to_and_optionally_elaborate(
+                    &init_type,
+                    &declared,
+                    Some(param),
+                    Some(init),
+                    None,
+                    None,
+                );
             }
-            let Some(symbol) = self.get_symbol_of_declaration(param) else {
-                return;
-            };
-            if symbol
-                .value_declaration
-                .as_ref()
-                .is_some_and(|vd| !Arc::ptr_eq(vd, param))
-            {
-                return;
-            }
-            let declared = self.get_type_of_symbol(&symbol);
-            let declared = if declared.intrinsic_name() == Some("auto") {
-                self.get_any_type()
-            } else {
-                declared
-            };
-            let init_type = self.get_type_of_node(init);
-            self.check_type_assignable_to_and_optionally_elaborate(
-                &init_type,
-                &declared,
-                Some(param),
-                Some(init),
-                None,
-                None,
-            );
         }
     }
 }
