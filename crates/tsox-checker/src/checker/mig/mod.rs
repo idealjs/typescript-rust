@@ -43,6 +43,7 @@ pub mod m2b_2;
 pub mod m2b_3;
 pub mod m2b_4;
 pub mod m2b_5;
+pub mod m2b_6;
 pub mod m2c;
 pub mod m2c_2;
 pub mod m2c_3;
