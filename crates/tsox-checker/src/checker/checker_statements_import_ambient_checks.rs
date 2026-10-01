@@ -55,10 +55,13 @@ impl Checker {
                 );
             }
         }
-        // Go checkExportAssignment：ambient 下 export 赋值表达式须为标识符或限定名
-        if self.declaration_is_ambient(node)
-            && !tsox_frontend::ast::is_entity_name_expression(&d.expression)
-        {
+        // Go checkExportAssignment：ambient 下 export 赋值表达式须为标识符或限定名。
+        // Go parsePrimaryExpression 对 undefined 走 parseIdentifierWithDiagnostic
+        // （isIdentifier: token > LastReservedWord），AST 为 Identifier；Rust scanner
+        // 把 undefined 归入 UndefinedKeyword，此处等价视为标识符
+        let expression_is_entity_name = tsox_frontend::ast::is_entity_name_expression(&d.expression)
+            || d.expression.kind == SyntaxKind::UndefinedKeyword;
+        if self.declaration_is_ambient(node) && !expression_is_entity_name {
             self.grammar_error_on_node(
                 &d.expression,
                 &THE_EXPRESSION_OF_AN_EXPORT_ASSIGNMENT_MUST_BE_AN_IDENTIFIER_OR_QUALIFIED_NAME_IN_AN_AMBIENT_CONTEXT,
