@@ -424,7 +424,8 @@ impl Checker {
         }
     }
 
-    // 方法体返回类型推断：走通用 infer_function_return_type（无 return 的 body 推断为 void）
+    // 方法体返回类型推断：走通用 infer_function_return_type（无 return 的 body 推断为 void）；
+    // 生成器方法按 Go getReturnTypeFromBody 分派 infer_generator_return_type
     pub(crate) fn infer_method_return_type(
         &mut self,
         decl: &Arc<Node>,
@@ -437,7 +438,18 @@ impl Checker {
         if body.is_some() {
             self.set_signature_return_inference_phase(Arc::as_ptr(decl), true);
         }
-        let result = self.infer_function_return_type(Some(decl), body.as_ref(), None);
+        let is_generator = match &decl.data {
+            tsox_frontend::ast::NodeData::MethodDeclaration(d) => d.asterisk_token.is_some(),
+            tsox_frontend::ast::NodeData::FunctionDeclaration(d) => d.asterisk_token.is_some(),
+            tsox_frontend::ast::NodeData::FunctionExpression(d) => d.asterisk_token.is_some(),
+            _ => false,
+        };
+        let is_async_fn = decl.has_syntactic_modifier(ModifierFlags::Async);
+        let result = if is_generator && let Some(body) = body.as_ref() {
+            self.infer_generator_return_type(body, is_async_fn)
+        } else {
+            self.infer_function_return_type(Some(decl), body.as_ref(), None)
+        };
         if body.is_some() {
             self.set_signature_return_inference_phase(Arc::as_ptr(decl), false);
         }
