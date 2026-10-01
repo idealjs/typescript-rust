@@ -22,6 +22,13 @@ impl Checker {
     }
 
     fn resolve_namespace_type_uncached(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+        if symbol.flags.intersects(SymbolFlags::MODULE)
+            && crate::checker::utilities_get_assignment_target::is_shorthand_ambient_module_symbol(
+                symbol,
+            )
+        {
+            return self.get_any_type();
+        }
         let mut members: Vec<(String, Arc<Symbol>)> = symbol
             .exports
             .iter()
