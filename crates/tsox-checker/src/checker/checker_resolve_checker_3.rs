@@ -43,24 +43,31 @@ impl Checker {
                 return Arc::clone(target);
             }
 
-            let effective_target = if !target.flags.intersects(SymbolFlags::Transient) {
-                let resolved_target = self.resolve_symbol(target);
+            let (effective_target, cloned_from) = if !target.flags.intersects(SymbolFlags::Transient) {
+                // Go resolveSymbol：UMD（export as namespace）别名无 export_symbol
+                // 直连目标，须经完整别名解析揭示真身模块符号后再克隆
+                let resolved_target = if target.declarations.iter().any(|d| {
+                    d.kind == tsox_frontend::ast::SyntaxKind::NamespaceExportDeclaration
+                }) {
+                    self.resolve_alias_base(Arc::clone(target))
+                } else {
+                    self.resolve_symbol(target)
+                };
                 if resolved_target
                     .flags
                     .intersects(get_excluded_symbol_flags(source.flags))
                     == false
                     || (source.flags | resolved_target.flags).intersects(SymbolFlags::Assignment)
                 {
-                    if let Some(cloned) = self.clone_symbol(&resolved_target) {
-                        cloned
-                    } else {
-                        return Arc::clone(source);
+                    match self.clone_symbol(&resolved_target) {
+                        Some(cloned) => (cloned, Some(resolved_target)),
+                        None => return Arc::clone(source),
                     }
                 } else {
                     return Arc::clone(source);
                 }
             } else {
-                Arc::clone(target)
+                (Arc::clone(target), None)
             };
 
             let mut source_flags = source.flags;
@@ -140,6 +147,9 @@ result_mut.set_parent(&result);
 
             if !unidirectional {
                 self.record_merged_symbol(&final_result, source);
+            }
+            if let Some(orig) = &cloned_from {
+                self.record_merged_symbol(&final_result, orig);
             }
 
             final_result

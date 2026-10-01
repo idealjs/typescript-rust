@@ -135,7 +135,7 @@ impl Checker {
             }
         }
 
-        let mut global_aug_members: Vec<(String, Arc<Symbol>)> = Vec::new();
+        let mut global_aug_symbols: Vec<Arc<Symbol>> = Vec::new();
         for file in &self.files {
             for aug_name in &file.module_augmentations {
                 let Some(module_node) = aug_name.parent() else {
@@ -153,27 +153,15 @@ impl Checker {
                     {
                         continue;
                     }
-                    global_aug_members.extend(
-                        module_sym
-                            .exports
-                            .iter()
-                            .map(|(k, v)| (k.clone(), Arc::clone(v))),
-                    );
+                    global_aug_symbols.push(Arc::clone(module_sym));
                 }
             }
         }
-        for (name, sym) in global_aug_members {
-            let existing = self.globals.get(&name).cloned();
-            match existing {
-                Some(existing) => {
-                    if !self.report_global_merge_conflict(&existing, &sym) {
-                        self.merge_global_symbols(&existing, &sym);
-                    }
-                }
-                None => {
-                    self.globals.insert(name, sym);
-                }
-            }
+        for aug_sym in global_aug_symbols {
+            let exports = aug_sym.exports.clone();
+            let mut globals = std::mem::take(&mut self.globals);
+            self.merge_symbol_table(&mut globals, &exports, false, None);
+            self.globals = globals;
         }
 
         // Go 模型：脚本文件顶层符号即全局符号（无按文件遮蔽）。全局合并后
@@ -249,8 +237,11 @@ impl Checker {
                 continue;
             };
             // Go mergeModuleAugmentation：resolveExternalModuleSymbol(m, false)
-            // 将 export= 经 resolveAlias 解到目标符号（foo 等）再判 Namespace
+            // 将 export= 经 resolveAlias 解到目标符号（foo 等）再判 Namespace；
+            // resolveExternalModule 返回的是 getMergedSymbol 后的合并符号，
+            // global 增强先行克隆的合并结果在此续并（z/a2.y 同一符号视图）
             let main_module = self.resolve_external_module_symbol_go(&main_module);
+            let main_module = self.get_merged_symbol(&main_module);
             if !main_module.flags.intersects(SymbolFlags::NAMESPACE) {
                 continue;
             }

@@ -203,7 +203,7 @@ impl Checker {
         ) && let Some(sf) = self.program.get_source_file(&path)
             && let Some(sym) = self.program.symbol_map().symbol_of(&sf.node).cloned()
         {
-            return Some(sym);
+            return Some(self.get_merged_symbol(&sym));
         }
         let mut dir = match containing_file.rfind('/') {
             Some(i) => containing_file[..i].to_string(),

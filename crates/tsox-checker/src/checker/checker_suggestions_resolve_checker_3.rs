@@ -326,6 +326,18 @@ impl Checker {
                 }
             }
         }
+        // Go getTargetOfNamespaceExportDeclaration：export as namespace 的
+        // UMD 别名目标 = 所在外部模块符号经 resolveExternalModuleSymbol
+        if let Some(decl) = symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::NamespaceExportDeclaration)
+            && let Some(parent_sym) = decl
+                .parent()
+                .and_then(|p| self.program.symbol_map().symbol_of(&p).cloned())
+        {
+            return Some(self.resolve_external_module_symbol_go(&parent_sym));
+        }
         Some(symbol)
     }
 
@@ -342,7 +354,8 @@ impl Checker {
                             && md.name.kind == SyntaxKind::StringLiteral
                             && md.name.text().trim_matches(['"', '\'']) == specifier
                         {
-                            return self.program.symbol_map().symbol_of(stmt).cloned();
+                            let sym = self.program.symbol_map().symbol_of(stmt).cloned()?;
+                            return Some(self.get_merged_symbol(&sym));
                         }
                     }
                 }
@@ -445,7 +458,7 @@ impl Checker {
                     }
                 });
             if let Some(sym) = sf.and_then(|sf| symbol_map.symbol_of(&sf.node).cloned()) {
-                return Some(sym);
+                return Some(self.get_merged_symbol(&sym));
             }
         }
         None
