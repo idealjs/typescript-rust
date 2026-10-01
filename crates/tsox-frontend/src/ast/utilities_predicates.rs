@@ -76,6 +76,7 @@ pub fn is_property_name_node(node: &Node) -> bool {
 
 pub fn is_entity_name_expression(node: &Node) -> bool {
     is_identifier(node)
+        || node.kind == SyntaxKind::UndefinedKeyword
         || (is_property_access_expression(node) && {
             if let NodeData::PropertyAccessExpression(d) = &node.data {
                 is_identifier(&d.name) && is_entity_name_expression(&d.expression)
