@@ -116,6 +116,15 @@ impl Checker {
         let _ = self.es_symbol_type.set(Arc::clone(&t));
         t
     }
+
+    pub(crate) fn get_global_big_int_type(&mut self) -> Arc<crate::checker::types::Type> {
+        if let Some(t) = self.global_bigint_type.get() {
+            return Arc::clone(t);
+        }
+        let t = self.get_global_type("BigInt", 0, false);
+        let _ = self.global_bigint_type.set(Arc::clone(&t));
+        t
+    }
 }
 
 pub(crate) fn maybe_keys_len() -> usize {

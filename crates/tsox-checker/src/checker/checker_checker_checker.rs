@@ -240,6 +240,7 @@ pub struct Checker {
     pub global_string_type: OnceLock<Arc<Type>>,
     pub global_number_type: OnceLock<Arc<Type>>,
     pub global_boolean_type: OnceLock<Arc<Type>>,
+    pub global_bigint_type: OnceLock<Arc<Type>>,
     pub global_reg_exp_type: OnceLock<Arc<Type>>,
     pub typeof_type: OnceLock<Arc<Type>>,
     pub global_this_type: OnceLock<Arc<Type>>,

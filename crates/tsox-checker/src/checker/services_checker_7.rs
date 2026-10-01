@@ -68,12 +68,54 @@ impl Checker {
         None
     }
 
-    pub fn get_apparent_type(&self, t: &Arc<Type>) -> Arc<Type> {
-        Arc::clone(t)
+    pub fn get_apparent_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        let original_type = Arc::clone(t);
+        let mut t = Arc::clone(t);
+        if t.flags.intersects(TYPE_FLAGS_INSTANTIABLE) {
+            t = self
+                .get_base_constraint_of_type(&t)
+                .unwrap_or_else(|| self.unknown_type());
+        }
+        if t.object_flags.contains(ObjectFlags::Mapped) {
+            return self.get_apparent_type_of_mapped_type(&t);
+        }
+        if t.object_flags.contains(ObjectFlags::Reference) && !Arc::ptr_eq(&t, &original_type) {
+            return self.get_type_with_this_argument(&t, Some(&original_type), false);
+        }
+        if t.flags.intersects(TypeFlags::Intersection) {
+            return self.get_apparent_type_of_intersection_type(&t, &original_type);
+        }
+        if t.flags.intersects(TYPE_FLAGS_STRING_LIKE) {
+            return self.global_string_type();
+        }
+        if t.flags.intersects(TYPE_FLAGS_NUMBER_LIKE) {
+            return self.global_number_type();
+        }
+        if t.flags.intersects(TYPE_FLAGS_BIG_INT_LIKE) {
+            return self.get_global_big_int_type();
+        }
+        if t.flags.intersects(TYPE_FLAGS_BOOLEAN_LIKE) {
+            return self.global_boolean_type();
+        }
+        if t.flags.intersects(TYPE_FLAGS_ES_SYMBOL_LIKE) {
+            return self.get_global_es_symbol_type();
+        }
+        if t.flags.intersects(TypeFlags::NonPrimitive) {
+            return self.empty_object_type();
+        }
+        if t.flags.intersects(TypeFlags::Index) {
+            return self.string_number_symbol_type();
+        }
+        if t.flags.intersects(TypeFlags::Unknown) && !self.strict_null_checks {
+            return self.empty_object_type();
+        }
+        t
     }
 
-    pub fn get_reduced_apparent_type(&self, t: &Arc<Type>) -> Arc<Type> {
-        self.get_apparent_type(t)
+    pub fn get_reduced_apparent_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        let reduced = self.get_reduced_type(t);
+        let apparent = self.get_apparent_type(&reduced);
+        self.get_reduced_type(&apparent)
     }
 
     pub fn resolve_structured_type_members(&self, t: &Arc<Type>) -> Arc<Type> {

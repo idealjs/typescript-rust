@@ -733,9 +733,10 @@ impl Session {
         &self,
         params: &super::m5l::GetTypePropertyParams,
     ) -> Result<Option<TypeResponse>, String> {
-        let setup = self.setup_checker(params.snapshot, &params.project)?;
+        let mut setup = self.setup_checker(params.snapshot, &params.project)?;
         let t = setup.resolve_type_handle(params.r#type)?;
-        Ok(setup.new_type_response(&setup.checker.get_apparent_type(&t)))
+        let apparent = setup.checker.get_apparent_type(&t);
+        Ok(setup.new_type_response(&apparent))
     }
 
     pub fn handle_get_base_constraint_of_type(
