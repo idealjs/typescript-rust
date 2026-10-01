@@ -2,6 +2,7 @@
 #![allow(dead_code)]
 
 use crate::checker::checker::*;
+use crate::checker::flow_flow_max_depth::{FlowQuery, FlowRef};
 use crate::checker::types_type_id::TYPE_FLAGS_NULLABLE;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -82,15 +83,55 @@ impl Checker {
 
     pub(crate) fn get_flow_type_of_reference_ex(
         &mut self,
-        _reference: &Arc<Node>,
+        reference: &Arc<Node>,
         declared_type: &Arc<Type>,
-        narrowable_type: Option<&Arc<Type>>,
-        _container: Option<&Arc<Node>>,
+        initial_type: Option<&Arc<Type>>,
+        container: Option<&Arc<Node>>,
     ) -> Arc<Type> {
-        match narrowable_type {
-            Some(t) => Arc::clone(t),
-            None => Arc::clone(declared_type),
+        if self.flow_analysis_disabled {
+            return self.error_type();
         }
+        let Some(flow) = self
+            .program
+            .symbol_map()
+            .flow_node_of(reference)
+            .cloned()
+        else {
+            return Arc::clone(declared_type);
+        };
+        let initial = initial_type.unwrap_or(declared_type);
+        let target = FlowRef::Node(Arc::clone(reference));
+        let key = self.flow_cache_key(&target, &flow, initial);
+        if let Some(cached) = self.flow_type_cache.get(&key) {
+            return Arc::clone(cached);
+        }
+        self.flow_type_cache.insert(key, Arc::clone(declared_type));
+        let mut query = FlowQuery {
+            reference: Some(Arc::clone(reference)),
+            flow_container: container.map(Arc::clone),
+            ..FlowQuery::default()
+        };
+        let evolved =
+            self.type_at_flow_node(declared_type, initial, &flow, &target, 0, &mut query);
+        let result = if evolved.object_flags.contains(ObjectFlags::EvolvingArray)
+            && self.is_evolving_array_operation_target(reference)
+        {
+            self.auto_array_type()
+        } else {
+            self.finalize_evolving_array_type(&evolved)
+        };
+        self.flow_type_cache.insert(key, Arc::clone(&result));
+        if Arc::ptr_eq(&result, &self.unreachable_never_type) {
+            return Arc::clone(declared_type);
+        }
+        if let Some(parent) = reference.parent()
+            && parent.kind == SyntaxKind::NonNullExpression
+            && !result.flags.contains(TypeFlags::Never)
+            && self.type_is_never_after_removing_nullable(&result)
+        {
+            return Arc::clone(declared_type);
+        }
+        result
     }
 
     pub(crate) fn check_await_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {

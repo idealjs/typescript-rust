@@ -236,39 +236,7 @@ impl Checker {
         reference: &Arc<Node>,
         declared: &Arc<Type>,
     ) -> Arc<Type> {
-        let Some(flow) = self
-            .program
-            .symbol_map()
-            .flow_node_of(reference)
-            .map(Arc::clone)
-        else {
-            return Arc::clone(declared);
-        };
-        if self.flow_analysis_disabled {
-            return Arc::clone(declared);
-        }
-        let target = FlowRef::Node(Arc::clone(reference));
-        let key = self.flow_cache_key(&target, &flow, declared);
-        if let Some(cached) = self.flow_type_cache.get(&key) {
-            return Arc::clone(cached);
-        }
-        self.flow_type_cache.insert(key, Arc::clone(declared));
-        let mut query = FlowQuery {
-            reference: Some(Arc::clone(reference)),
-            ..FlowQuery::default()
-        };
-        let narrowed = self.type_at_flow_node(declared, declared, &flow, &target, 0, &mut query);
-        self.flow_type_cache.insert(key, Arc::clone(&narrowed));
-
-        if let Some(parent) = reference.parent() {
-            if parent.kind == SyntaxKind::NonNullExpression
-                && !narrowed.flags.contains(TypeFlags::Never)
-                && self.type_is_never_after_removing_nullable(&narrowed)
-            {
-                return Arc::clone(declared);
-            }
-        }
-        narrowed
+        self.get_flow_type_of_reference_ex(reference, declared, None, None)
     }
 
     pub(crate) fn type_is_never_after_removing_nullable(&self, t: &Arc<Type>) -> bool {

@@ -154,6 +154,7 @@ pub(crate) fn is_property_initialized_in_constructor(
             .end_flow_node_of(constructor)
             .cloned(),
     );
-    let flow_type = checker.get_flow_type_of_reference_ex(&reference, prop_type, Some(prop_type), None);
+    let optional_prop_type = checker.get_optional_type(prop_type.clone());
+    let flow_type = checker.get_flow_type_of_reference_ex(&reference, prop_type, Some(&optional_prop_type), None);
     !checker.contains_undefined_type(&flow_type)
 }
