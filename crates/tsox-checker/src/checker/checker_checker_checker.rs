@@ -316,6 +316,7 @@ pub struct Checker {
     pub definite_assignment_check_depth: u32,
     pub flow_invocation_count: i32,
     pub flow_type_cache: HashMap<u64, Arc<Type>>,
+    pub union_or_intersection_property_cache: HashMap<(u64, String), Arc<Symbol>>,
     pub flow_node_reachable: HashMap<u64, bool>,
     pub switch_exhaustive_state: HashMap<u64, u8>,
     pub type_instantiation_count: u64,

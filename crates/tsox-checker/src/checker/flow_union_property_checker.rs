@@ -29,6 +29,24 @@ impl Checker {
         containing_type: &Arc<Type>,
         name: &str,
     ) -> Option<Arc<Symbol>> {
+        // Go 在联合/交叉型实例上挂 propertyCache（checker.go:21749-21758），
+        // 合成符号单次创建指针稳定，供 == 比较复用；Rust 侧按 (type id, name)
+        // 缓存持有 Arc 等价保活
+        let key = (u64::from(containing_type.id), name.to_string());
+        if let Some(prop) = self.union_or_intersection_property_cache.get(&key) {
+            return Some(Arc::clone(prop));
+        }
+        let prop = self.compute_union_or_intersection_property(containing_type, name)?;
+        self.union_or_intersection_property_cache
+            .insert(key, Arc::clone(&prop));
+        Some(prop)
+    }
+
+    fn compute_union_or_intersection_property(
+        &mut self,
+        containing_type: &Arc<Type>,
+        name: &str,
+    ) -> Option<Arc<Symbol>> {
         let types: Vec<Arc<Type>> = containing_type.types()?.to_vec();
         let is_union = containing_type.is_union();
 

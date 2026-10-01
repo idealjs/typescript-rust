@@ -376,6 +376,7 @@ impl Checker {
             definite_assignment_check_depth: 0,
             flow_invocation_count: 0,
             flow_type_cache: HashMap::new(),
+            union_or_intersection_property_cache: HashMap::new(),
             type_instantiation_count: 0,
             type_instantiation_limit_reported: false,
             flow_node_reachable: HashMap::new(),
