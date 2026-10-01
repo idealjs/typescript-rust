@@ -15,6 +15,9 @@ impl Checker {
             return;
         };
         let declarations = self.merged_declaration_view(node, &symbol);
+        if !self.any_declaration_reached_binder_exported_branch(&declarations) {
+            return;
+        }
         let first_of_kind = declarations
             .iter()
             .find(|d| d.kind == node.kind)
@@ -94,37 +97,13 @@ impl Checker {
         if name.is_empty() {
             return decls;
         }
-        let enclosing = |n: &Arc<Node>| -> Option<Arc<Node>> {
-            let mut cur = n.parent();
-            while let Some(p) = cur {
-                if matches!(
-                    p.kind,
-                    SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration
-                ) {
-                    return Some(p);
-                }
-                if matches!(
-                    p.kind,
-                    SyntaxKind::FunctionDeclaration
-                        | SyntaxKind::FunctionExpression
-                        | SyntaxKind::ArrowFunction
-                        | SyntaxKind::MethodDeclaration
-                        | SyntaxKind::Constructor
-                        | SyntaxKind::ClassDeclaration
-                        | SyntaxKind::ClassExpression
-                        | SyntaxKind::EnumDeclaration
-                        | SyntaxKind::InterfaceDeclaration
-                ) {
-                    return None;
-                }
-                cur = p.parent();
-            }
-            None
-        };
-        let Some(container) = enclosing(node) else {
+        let Some(container) = self.binder_container_of_member(node) else {
             return decls;
         };
-        let same_container = |d: &Arc<Node>| enclosing(d).is_some_and(|c| c.id() == container.id());
+        let same_container = |d: &Arc<Node>| {
+            self.binder_container_of_member(d)
+                .is_some_and(|c| c.id() == container.id())
+        };
         decls.retain(|d| same_container(d));
         if let Some(locals) = self.program.symbol_map().locals.get(&container.id())
             && let Some(s) = locals.get(&name)
