@@ -396,7 +396,9 @@ impl Checker {
         }
         // Go getPropertyOfTypeEx：原始类型成员走对应全局接口的声明类型
         //（apparent type 即接口声明型；String/Number 等符号的声明型在此惰性补建）
-        // 成员未命中时以接口声明型重入，走 Object 分支的 Function/Object 增补
+        // 成员未命中即 Go Object 分支尾 getPropertyOfObjectType(globalObjectType)
+        //（checker.go:19248，成员查找语义 checker.go:21724）；原始种别无调用/
+        // 构造签名，Function 增补不可达
         if let Some(interface_name) = self.primitive_interface_name(t)
             && let Some(sym) = self.globals.get(interface_name).cloned()
         {
@@ -411,7 +413,9 @@ impl Checker {
             {
                 return Some(member);
             }
-            return self.get_property_of_type(&declared, name);
+            if let Some(member) = self.global_object_member(name) {
+                return Some(member);
+            }
         }
         // Go createTupleTargetType：无 rest/variadic 元素的元组 length 成员
         // 是固定长度的数字字面量（判别式收窄依赖它），带 rest 回落 number
@@ -502,6 +506,23 @@ impl Checker {
                     }
                 }
             };
+        }
+        // Go getApparentType（checker.go:22094-22103）：Object 分支前置的种别
+        // 映射——StringLike（模板字面量/字符串映射）、NonPrimitive、Index、
+        // 非 strict 的 unknown 先行映射，再落下方 Object 分支增补
+        if t.flags
+            .intersects(TypeFlags::TemplateLiteral | TypeFlags::StringMapping)
+        {
+            return self.get_property_of_type(&self.global_string_type(), name);
+        }
+        if t.flags.contains(TypeFlags::NonPrimitive) {
+            return self.get_property_of_type(&self.empty_object_type(), name);
+        }
+        if t.flags.contains(TypeFlags::Index) {
+            return self.get_property_of_type(&self.string_number_symbol_type(), name);
+        }
+        if t.flags.contains(TypeFlags::Unknown) && !self.strict_null_checks {
+            return self.get_property_of_type(&self.empty_object_type(), name);
         }
         // Go getPropertyOfTypeEx：Function/Callable/Newable 与全局 Object 接口
         // 的成员增补仅在 TypeFlagsObject 分支内；其余类型种别（unknown、未解析
