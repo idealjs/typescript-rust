@@ -47,7 +47,8 @@ impl Checker {
                 _ => false,
             });
             if is_destructuring_assignment_target
-                && self.in_ctor_body_stack.last() == Some(&true)
+                && (self.in_ctor_body_stack.last() == Some(&true)
+                    || self.is_node_used_during_class_initialization(node))
                 && let Some(rhs) = node.parent().as_ref().and_then(|p| match &p.data {
                     tsox_frontend::ast::NodeData::BinaryExpression(b) => Some(Arc::clone(&b.right)),
                     _ => None,

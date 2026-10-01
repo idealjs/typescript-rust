@@ -186,7 +186,8 @@ impl Checker {
             self.check_binding_pattern_element_initializers(&data.name);
 
             if data.name.kind == SyntaxKind::ObjectBindingPattern
-                && self.in_ctor_body_stack.last() == Some(&true)
+                && (self.in_ctor_body_stack.last() == Some(&true)
+                    || self.is_node_used_during_class_initialization(&data.name))
                 && let Some(init) = &data.initializer
                 && init.kind == SyntaxKind::ThisKeyword
             {

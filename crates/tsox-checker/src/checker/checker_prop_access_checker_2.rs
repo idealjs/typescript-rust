@@ -39,6 +39,29 @@ impl Checker {
             let self_access = self.is_self_type_access(obj_expr, &obj_type);
             self.mark_property_as_referenced_ex(&prop, Some(node), Some(self_access));
             self.check_property_not_used_before_declaration(&prop, node, name);
+
+            // Go checkPropertyAccessibilityAtLocation：this 访问抽象属性且处于
+            // 构造器/类初始化期（isNodeUsedDuringClassInitialization）报 TS2715
+            if obj_expr.kind == SyntaxKind::ThisKeyword
+                && self.is_node_used_during_class_initialization(node)
+                && let Some(abstract_decl) = prop.declarations.iter().find(|d| {
+                    d.kind == SyntaxKind::PropertyDeclaration
+                        && d.has_syntactic_modifier(ModifierFlags::Abstract)
+                })
+                && let Some(parent) = &abstract_decl.parent()
+                && parent.kind == SyntaxKind::ClassDeclaration
+                && let Some(class_name) = class_declaration_name(parent)
+            {
+                let file = self.current_file.clone();
+                let diagnostic = tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    name.loc,
+                    tsox_core::diagnostics::messages_generated::
+                        ABSTRACT_PROPERTY_0_IN_CLASS_1_CANNOT_BE_ACCESSED_IN_THE_CONSTRUCTOR,
+                    vec![name_text.to_string(), class_name],
+                );
+                self.diagnostics.add(diagnostic);
+            }
         }
 
         if let Some(structured) = obj_type.as_structured() {
@@ -62,29 +85,6 @@ impl Checker {
                     ));
                     return;
                 }
-                let in_ctor = self.in_ctor_body_stack.last() == Some(&true);
-                let in_prop_init = !in_ctor && self.access_in_property_initializer(node);
-                if obj_expr.kind == SyntaxKind::ThisKeyword
-                    && (in_ctor || in_prop_init)
-                    && let Some(abstract_decl) = member_symbol.declarations.iter().find(|d| {
-                        d.kind == SyntaxKind::PropertyDeclaration
-                            && d.has_syntactic_modifier(ModifierFlags::Abstract)
-                    })
-                    && let Some(parent) = &abstract_decl.parent()
-                    && parent.kind == SyntaxKind::ClassDeclaration
-                    && let Some(class_name) = class_declaration_name(parent)
-                {
-                    let file = self.current_file.clone();
-                    let diagnostic = tsox_frontend::ast::Diagnostic::new(
-                        file,
-                        name.loc,
-                        tsox_core::diagnostics::messages_generated::
-                            ABSTRACT_PROPERTY_0_IN_CLASS_1_CANNOT_BE_ACCESSED_IN_THE_CONSTRUCTOR,
-                        vec![name_text.to_string(), class_name],
-                    );
-                    self.diagnostics.add(diagnostic);
-                }
-
                 if let Some(declaring_class) = self.declaring_class_of_member(member_symbol) {
                     let writing = is_write_access(node);
                     let flags =

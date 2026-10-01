@@ -178,10 +178,7 @@ impl Checker {
         prop_text: &str,
         this_type: &Arc<Type>,
     ) {
-        let Some(structured) = this_type.as_structured() else {
-            return;
-        };
-        let Some(member_symbol) = structured.members.get(prop_text) else {
+        let Some(member_symbol) = self.get_property_of_type(this_type, prop_text) else {
             return;
         };
         let Some(abstract_decl) = member_symbol.declarations.iter().find(|d| {
@@ -233,9 +230,6 @@ impl Checker {
         pattern: &Arc<Node>,
         this_type: &Arc<Type>,
     ) {
-        let Some(structured) = this_type.as_structured() else {
-            return;
-        };
         let tsox_frontend::ast::NodeData::BindingPattern(data) = &pattern.data else {
             return;
         };
@@ -244,16 +238,11 @@ impl Checker {
                 continue;
             };
 
-            let Some(prop_name_node) = el
-                .property_name
-                .as_ref()
-                .or(el.name.as_ref())
-                .filter(|n| n.kind == SyntaxKind::Identifier)
-            else {
+            let Some(prop_name_node) = el.property_name.as_ref().or(el.name.as_ref()) else {
                 continue;
             };
             let prop_text = prop_name_node.text();
-            let Some(member_symbol) = structured.members.get(prop_text) else {
+            let Some(member_symbol) = self.get_property_of_type(this_type, &prop_text) else {
                 continue;
             };
             let Some(abstract_decl) = member_symbol.declarations.iter().find(|d| {
