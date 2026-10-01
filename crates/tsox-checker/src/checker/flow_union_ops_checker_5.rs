@@ -513,13 +513,15 @@ impl Checker {
         if t.flags
             .intersects(TypeFlags::TemplateLiteral | TypeFlags::StringMapping)
         {
-            return self.get_property_of_type(&self.global_string_type(), name);
+            let mapped = self.global_string_type();
+            return self.get_property_of_type(&mapped, name);
         }
         if t.flags.contains(TypeFlags::NonPrimitive) {
             return self.get_property_of_type(&self.empty_object_type(), name);
         }
         if t.flags.contains(TypeFlags::Index) {
-            return self.get_property_of_type(&self.string_number_symbol_type(), name);
+            let mapped = self.string_number_symbol_type();
+            return self.get_property_of_type(&mapped, name);
         }
         if t.flags.contains(TypeFlags::Unknown) && !self.strict_null_checks {
             return self.get_property_of_type(&self.empty_object_type(), name);
