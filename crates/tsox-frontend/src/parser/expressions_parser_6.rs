@@ -91,7 +91,7 @@ impl Parser {
             }
             SyntaxKind::ThisKeyword => self.parse_keyword_expression(SyntaxKind::ThisKeyword),
             SyntaxKind::SuperKeyword => self.parse_super_expression(),
-            SyntaxKind::OpenParenToken => self.parse_parenthesized_or_arrow(),
+            SyntaxKind::OpenParenToken => self.parse_parenthesized_expression(),
             SyntaxKind::OpenBracketToken => self.parse_array_literal(),
             SyntaxKind::OpenBraceToken => self.parse_object_literal(),
             SyntaxKind::LessThanToken if self.language_variant == LanguageVariant::Jsx => {
@@ -197,11 +197,10 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_parenthesized_or_arrow(&mut self) -> Arc<Node> {
-        if self.is_parenthesized_arrow_function() {
-            return self.parse_parenthesized_arrow_function();
-        }
-
+    /// Go parseParenthesizedExpression：主表达式位置的 `(` 一律按括号表达式
+    /// 解析，`(` 箭头函数只由 parseAssignmentExpressionOrHigher 入口尝试
+    /// （Go parsePrimaryExpression case OpenParenToken → parseParenthesizedExpression）
+    pub(crate) fn parse_parenthesized_expression(&mut self) -> Arc<Node> {
         let pos = self.token_pos();
         self.next_token();
 
