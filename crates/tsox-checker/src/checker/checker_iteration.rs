@@ -118,7 +118,12 @@ impl Checker {
         if has_string_constituent && array_type.flags.contains(TypeFlags::Never) {
             return Some(self.string_type());
         }
-        if !self.is_array_like_type(&array_type) {
+        let array_like = self.is_array_type(&array_type)
+            || (!array_type.flags.intersects(crate::checker::types_type_id::TYPE_FLAGS_NULLABLE) && {
+                let any_readonly_array = self.any_readonly_array_type();
+                self.is_type_assignable_to(&array_type, &any_readonly_array)
+            });
+        if !array_like {
             if error_node.is_some() {
                 let type_str = self.type_to_string(&array_type);
                 let allows_strings = use_.allows_string_input() && !has_string_constituent;
