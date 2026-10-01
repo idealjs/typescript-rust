@@ -69,7 +69,7 @@ impl Checker {
             self.collect_boxed_heritage_members(stmt, &mut all_members, &mut Vec::new(), 0);
         }
         if all_members.is_empty() {
-            return None;
+            return Some(self.empty_object_type());
         }
         let members = Arc::new(tsox_frontend::ast::NodeList::new(all_members));
         let built = self.build_interface_type_from_members(&members);
