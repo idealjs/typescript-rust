@@ -178,6 +178,19 @@ pub(crate) fn ambient_module_exists(
     false
 }
 
+pub(crate) fn is_side_effect_import(import_node: &Arc<tsox_frontend::ast::Node>) -> bool {
+    import_node
+        .parent()
+        .map(|p| {
+            matches!(
+                &p.data,
+                tsox_frontend::ast::NodeData::ImportDeclaration(d)
+                    if d.import_clause.is_none()
+            )
+        })
+        .unwrap_or(false)
+}
+
 /// NodeNext/Node16 下 ESM 文件的无扩展名相对导入由 checker 侧 TS2834 报告，
 /// 加载期的 module-not-found 让位（tsc 同场景只报一条）
 pub(crate) fn node_next_needs_extension(

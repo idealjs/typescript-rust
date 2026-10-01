@@ -498,6 +498,14 @@ impl Program {
                             // clause）且未显式 noUncheckedSideEffectImports=false 时用
                             // TS2882 专用消息；常规导入经 node 核心模块专用文案选择
                             let is_side_effect = side_effect_spec_ids.contains(&import_node.id());
+                            // Go checkImportDeclaration：显式
+                            // noUncheckedSideEffectImports=false 时副作用导入
+                            // 完全不解析、不报错
+                            if is_side_effect
+                                && options.no_unchecked_side_effect_imports.is_false()
+                            {
+                                continue;
+                            }
                             let (message, args): (_, Vec<String>) = if is_side_effect
                                 && !options.no_unchecked_side_effect_imports.is_false()
                             {

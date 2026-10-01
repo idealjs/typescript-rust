@@ -220,6 +220,14 @@ impl Program {
                     } else if module_spec.starts_with('.')
                         || !ambient_module_exists(&source_files, module_spec)
                     {
+                        // Go checkImportDeclaration：无 import clause 的副作用导入仅
+                        // 在 noUncheckedSideEffectImports 开启时由 checker 解析报错，
+                        // 显式 false 时完全不报；program 层同门控
+                        if options.no_unchecked_side_effect_imports.is_false()
+                            && is_side_effect_import(import_node)
+                        {
+                            continue;
+                        }
                         let mut module_not_found = Diagnostic::new(
                             Some(file.clone()),
                             import_node.loc,
