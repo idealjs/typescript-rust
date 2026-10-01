@@ -55,6 +55,15 @@ impl Checker {
                 );
             }
         }
+        // Go checkExportAssignment：ambient 下 export 赋值表达式须为标识符或限定名
+        if self.declaration_is_ambient(node)
+            && !tsox_frontend::ast::is_entity_name_expression(&d.expression)
+        {
+            self.grammar_error_on_node(
+                &d.expression,
+                &THE_EXPRESSION_OF_AN_EXPORT_ASSIGNMENT_MUST_BE_AN_IDENTIFIER_OR_QUALIFIED_NAME_IN_AN_AMBIENT_CONTEXT,
+            );
+        }
         if !d.is_export_equals {
             return;
         }
