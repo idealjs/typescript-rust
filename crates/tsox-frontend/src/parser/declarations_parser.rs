@@ -168,11 +168,20 @@ impl Parser {
     }
 
     pub(crate) fn parse_function_block(&mut self, is_generator: bool, is_async: bool) -> Arc<Node> {
+        self.parse_function_block_ex(is_generator, is_async, false)
+    }
+
+    pub(crate) fn parse_function_block_ex(
+        &mut self,
+        is_generator: bool,
+        is_async: bool,
+        ignore_missing_open_brace: bool,
+    ) -> Arc<Node> {
         let saved_yield = self.yield_context;
         let saved_await = self.await_context;
         self.yield_context = is_generator;
         self.await_context = is_async;
-        let block = self.parse_block();
+        let block = self.parse_block_ex(ignore_missing_open_brace);
         self.yield_context = saved_yield;
         self.await_context = saved_await;
         block

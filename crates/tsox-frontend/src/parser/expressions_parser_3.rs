@@ -177,11 +177,7 @@ impl Parser {
         let body = if last_token == SyntaxKind::EqualsGreaterThanToken
             || last_token == SyntaxKind::OpenBraceToken
         {
-            if self.token == SyntaxKind::OpenBraceToken {
-                self.parse_block_ex(true)
-            } else {
-                self.parse_assignment_expression()
-            }
+            self.parse_arrow_function_expression_body(false, false)
         } else {
             self.parse_identifier()
         };

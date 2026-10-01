@@ -417,7 +417,7 @@ impl Parser {
             && self.is_start_of_statement()
             && !self.is_start_of_expression_statement()
         {
-            return self.parse_function_block(false, is_async);
+            return self.parse_function_block_ex(false, is_async, true);
         }
         let save_await_context = self.await_context;
         let save_yield_context = self.yield_context;
