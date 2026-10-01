@@ -27,7 +27,14 @@ impl Binder {
         excludes: SymbolFlags,
         target: DeclareTarget,
     ) -> Arc<Symbol> {
-        let name = self.get_declaration_name(node);
+        let mut name = self.get_declaration_name(node);
+        // Go declareSymbolEx：default 导出声明的导出符号恒名 "default"
+        //（isDefaultExport && parent != nil），local 符号 parent 为 nil 保留声明名
+        if has_syntactic_modifier(node, ModifierFlags::Default)
+            && !matches!(target, DeclareTarget::Locals(_))
+        {
+            name = INTERNAL_SYMBOL_NAME_DEFAULT.to_string();
+        }
 
         let existing: Option<Arc<Symbol>> = match &target {
             DeclareTarget::Exports(parent_sym) => parent_sym.exports.get(&name).cloned(),
@@ -66,12 +73,15 @@ impl Binder {
                 && existing.flags.intersects(excludes)
                 && !assignment_merge_exception
             {
-                // Go declareSymbolEx：export default EA 冲突报 2528（multiple
-                // default exports），本表不跟踪 default 命名的 class/function/
-                // interface 声明，2528/2323 由 checker 的
-                // check_external_module_export_duplicates 统一重放，binder 侧不报
+                // Go declareSymbolEx：exports 表内 default 导出冲突报 2528（multiple
+                // default exports），由 checker 的 check_external_module_export_duplicates
+                // 统一重放，binder 侧不报（EA 与具名 default 声明 alike）；locals/
+                // members 表冲突维持原有上报
                 let default_ea = matches!(&node.data, tsox_frontend::ast::NodeData::ExportAssignment(d) if !d.is_export_equals);
-                if !default_ea {
+                if !default_ea
+                    && !(matches!(target, DeclareTarget::Exports(_))
+                        && has_syntactic_modifier(node, ModifierFlags::Default))
+                {
                     if existing.flags.intersects(SymbolFlags::ENUM)
                         || includes.intersects(SymbolFlags::ENUM)
                     {
