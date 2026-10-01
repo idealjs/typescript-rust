@@ -318,8 +318,25 @@ impl Checker {
         false
     }
 
-    pub fn check_grammar_function_like_declaration(&mut self, _node: &Arc<Node>) -> bool {
-        false
+    pub fn check_grammar_function_like_declaration(&mut self, node: &Arc<Node>) -> bool {
+        let file = self
+            .get_source_file_of_node(node)
+            .or_else(|| self.current_file.clone());
+        let (type_parameters, parameters) = function_like_data_lists(node);
+        self.check_grammar_modifiers(node)
+            || match (&file, &type_parameters) {
+                (Some(file), Some(type_parameters)) => {
+                    self.check_grammar_type_parameter_list(type_parameters, file)
+                }
+                _ => false,
+            }
+            || self.check_grammar_parameter_list(&parameters)
+            || match &file {
+                Some(file) => self.check_grammar_arrow_function(node, file),
+                None => false,
+            }
+            || (tsox_frontend::ast::is_function_like_declaration(node)
+                && self.check_grammar_for_use_strict_simple_parameter_list(node))
     }
 
     pub fn check_grammar_class_like_declaration(&mut self, _node: &Arc<Node>) -> bool {
@@ -328,10 +345,58 @@ impl Checker {
 
     pub fn check_grammar_arrow_function(
         &mut self,
-        _node: &Arc<Node>,
-        _file: &Arc<tsox_frontend::ast::SourceFile>,
+        node: &Arc<Node>,
+        file: &Arc<tsox_frontend::ast::SourceFile>,
     ) -> bool {
-        false
+        use tsox_core::diagnostics::messages_generated as msg;
+        if !tsox_frontend::ast::is_arrow_function(node) {
+            return false;
+        }
+        let NodeData::ArrowFunction(arrow_func) = &node.data else {
+            return false;
+        };
+        if let Some(type_parameters) = &arrow_func.type_parameters {
+            let type_param_nodes = &type_parameters.nodes;
+            let has_constraint = type_param_nodes.first().is_some_and(|first| {
+                matches!(
+                    &first.data,
+                    NodeData::TypeParameterDeclaration(tp) if tp.constraint.is_some()
+                )
+            });
+            let has_trailing_comma = type_param_nodes
+                .last()
+                .is_some_and(|last| last.loc.end() < type_parameters.loc.end());
+            if !(type_param_nodes.len() > 1 || has_trailing_comma || has_constraint)
+                && tsox_core::tspath::file_extension_is_one_of(
+                    &file.file_name,
+                    &[tsox_core::tspath::EXTENSION_MTS, tsox_core::tspath::EXTENSION_CTS],
+                )
+                && let Some(first) = type_param_nodes.first()
+            {
+                self.grammar_error_on_node(
+                    first,
+                    &msg::THIS_SYNTAX_IS_RESERVED_IN_FILES_WITH_THE_MTS_OR_CTS_EXTENSION_ADD_A_TRAILING_COMMA_OR_EXPLICIT_CONSTRAINT,
+                );
+            }
+        }
+        let equals_greater_than_token = &arrow_func.equals_greater_than_token;
+        let head_end = arrow_func
+            .type_parameters
+            .as_ref()
+            .map(|tp| tp.loc.end())
+            .unwrap_or(0)
+            .max(arrow_func.parameters.loc.end());
+        let arrow_end = equals_greater_than_token.loc.end();
+        let arrow_text_includes_line_break = head_end <= arrow_end
+            && arrow_end <= file.text.len()
+            && file.text[head_end..arrow_end]
+                .chars()
+                .any(tsox_core::stringutil::is_line_break);
+        arrow_text_includes_line_break
+            && self.grammar_error_on_node(
+                equals_greater_than_token,
+                &msg::LINE_TERMINATOR_NOT_PERMITTED_BEFORE_ARROW,
+            )
     }
 
     pub fn check_grammar_index_signature_parameters(&mut self, node: &Arc<Node>) -> bool {
@@ -643,4 +708,35 @@ pub(crate) fn trailing_comma_before(text: &str, end: usize) -> Option<usize> {
         }
     }
     None
+}
+
+fn function_like_data_lists(
+    node: &Node,
+) -> (
+    Option<Arc<tsox_frontend::ast::NodeList>>,
+    Arc<tsox_frontend::ast::NodeList>,
+) {
+    match &node.data {
+        NodeData::FunctionDeclaration(d)
+        | NodeData::FunctionExpression(d)
+        | NodeData::MethodDeclaration(d)
+        | NodeData::ConstructorDeclaration(d)
+        | NodeData::GetAccessorDeclaration(d)
+        | NodeData::SetAccessorDeclaration(d)
+        | NodeData::MethodSignatureDeclaration(d)
+        | NodeData::CallSignatureDeclaration(d)
+        | NodeData::ConstructSignatureDeclaration(d)
+        | NodeData::FunctionTypeNode(d)
+        | NodeData::ConstructorTypeNode(d) => {
+            (d.type_parameters.clone(), Arc::clone(&d.parameters))
+        }
+        NodeData::ArrowFunction(d) => (d.type_parameters.clone(), Arc::clone(&d.parameters)),
+        _ => (
+            None,
+            Arc::new(tsox_frontend::ast::NodeList {
+                loc: tsox_core::core::text::TextRange::undefined(),
+                nodes: Vec::new(),
+            }),
+        ),
+    }
 }
