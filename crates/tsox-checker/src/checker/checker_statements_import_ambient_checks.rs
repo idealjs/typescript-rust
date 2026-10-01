@@ -204,15 +204,21 @@ impl Checker {
                         if let Some(clause) = &d.import_clause
                             && let tsox_frontend::ast::NodeData::ImportClause(ic) = &clause.data
                         {
-                            if interop
-                                && matches!(
-                                    ic.named_bindings.as_ref().map(|b| b.kind),
-                                    Some(SyntaxKind::NamespaceImport)
-                                )
-                            {
+                            let needs_import_star = matches!(
+                                ic.named_bindings.as_ref().map(|b| b.kind),
+                                Some(SyntaxKind::NamespaceImport)
+                            );
+                            if interop && needs_import_star {
                                 self.check_external_emit_helpers(
                                     node,
                                     EXTERNAL_EMIT_HELPER_IMPORT_STAR,
+                                );
+                            }
+
+                            if ic.name.is_some() && !needs_import_star {
+                                self.check_external_emit_helpers(
+                                    node,
+                                    EXTERNAL_EMIT_HELPER_IMPORT_DEFAULT,
                                 );
                             }
 
