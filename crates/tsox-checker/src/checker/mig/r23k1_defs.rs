@@ -85,7 +85,7 @@ impl Checker {
         &mut self,
         reference: &Arc<Node>,
         declared_type: &Arc<Type>,
-        initial_type: Option<&Arc<Type>>,
+        narrowable_type: Option<&Arc<Type>>,
         container: Option<&Arc<Node>>,
     ) -> Arc<Type> {
         if self.flow_analysis_disabled {
@@ -95,43 +95,36 @@ impl Checker {
             .program
             .symbol_map()
             .flow_node_of(reference)
-            .cloned()
+            .map(Arc::clone)
         else {
             return Arc::clone(declared_type);
         };
-        let initial = initial_type.unwrap_or(declared_type);
+        let initial_type = narrowable_type.unwrap_or(declared_type);
         let target = FlowRef::Node(Arc::clone(reference));
-        let key = self.flow_cache_key(&target, &flow, initial);
-        if let Some(cached) = self.flow_type_cache.get(&key) {
-            return Arc::clone(cached);
-        }
-        self.flow_type_cache.insert(key, Arc::clone(declared_type));
         let mut query = FlowQuery {
             reference: Some(Arc::clone(reference)),
             flow_container: container.map(Arc::clone),
             ..FlowQuery::default()
         };
-        let evolved =
-            self.type_at_flow_node(declared_type, initial, &flow, &target, 0, &mut query);
-        let result = if evolved.object_flags.contains(ObjectFlags::EvolvingArray)
+        let evolved_type =
+            self.type_at_flow_node(declared_type, initial_type, &flow, &target, 0, &mut query);
+        let result_type = if evolved_type.object_flags.contains(ObjectFlags::EvolvingArray)
             && self.is_evolving_array_operation_target(reference)
         {
             self.auto_array_type()
         } else {
-            self.finalize_evolving_array_type(&evolved)
+            self.finalize_evolving_array_type(&evolved_type)
         };
-        self.flow_type_cache.insert(key, Arc::clone(&result));
-        if Arc::ptr_eq(&result, &self.unreachable_never_type) {
+        let unreachable_never = Arc::ptr_eq(&result_type, &self.unreachable_never_type);
+        let non_null_never = reference
+            .parent()
+            .is_some_and(|p| p.kind == SyntaxKind::NonNullExpression)
+            && !result_type.flags.contains(TypeFlags::Never)
+            && self.type_is_never_after_removing_nullable(&result_type);
+        if unreachable_never || non_null_never {
             return Arc::clone(declared_type);
         }
-        if let Some(parent) = reference.parent()
-            && parent.kind == SyntaxKind::NonNullExpression
-            && !result.flags.contains(TypeFlags::Never)
-            && self.type_is_never_after_removing_nullable(&result)
-        {
-            return Arc::clone(declared_type);
-        }
-        result
+        result_type
     }
 
     pub(crate) fn check_await_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
