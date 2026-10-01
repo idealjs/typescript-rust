@@ -140,9 +140,6 @@ impl Checker {
                     self.new_call_fallback_signature = true;
                     return Some(other);
                 }
-                if !is_new && self.report_get_accessor_call(callee_expr) {
-                    return None;
-                }
                 self.report_invocation_error(callee_expr, callee_type, is_new);
                 return None;
             }
@@ -252,9 +249,6 @@ impl Checker {
             }
         }
 
-        if !is_new && self.report_get_accessor_call(callee_expr) {
-            return;
-        }
         self.report_invocation_error(callee_expr, callee_type, is_new);
         return;
     }

@@ -478,7 +478,7 @@ impl Checker {
             .as_ref()
             .is_some_and(|p| {
                 ast::is_call_expression(p)
-                    && p.arguments().as_ref().is_some_and(|a| a.nodes.is_empty())
+                    && p.arguments().as_ref().map_or(true, |a| a.nodes.is_empty())
             })
         {
             let resolved_symbol = self.get_resolved_symbol_or_nil(error_target);

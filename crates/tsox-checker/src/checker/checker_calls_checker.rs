@@ -70,33 +70,6 @@ impl Checker {
         true
     }
 
-    pub(crate) fn report_get_accessor_call(&mut self, callee_expr: &Arc<Node>) -> bool {
-        let tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) = &callee_expr.data else {
-            return false;
-        };
-        if pa.name.kind != SyntaxKind::Identifier {
-            return false;
-        }
-        let target_type = self.get_type_of_node(&pa.expression);
-        let name = pa.name.text().to_string();
-        let is_getter = target_type
-            .as_structured()
-            .and_then(|s| s.properties.iter().find(|p| p.name == name))
-            .is_some_and(|sym| sym.flags.contains(SymbolFlags::GetAccessor));
-        if !is_getter {
-            return false;
-        }
-        let file = self.current_file.clone();
-        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-            file,
-
-            pa.name.loc,
-            tsox_core::diagnostics::messages_generated::
-                THIS_EXPRESSION_IS_NOT_CALLABLE_BECAUSE_IT_IS_A_GET_ACCESSOR_DID_YOU_MEAN_TO_USE_IT_WITHOUT,
-            vec![],
-        ));
-        true
-    }
     pub(crate) fn check_call_arity(
         &mut self,
         node: &Arc<Node>,
