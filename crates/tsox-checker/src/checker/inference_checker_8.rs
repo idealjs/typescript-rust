@@ -902,6 +902,7 @@ impl Checker {
             .iter()
             .map(|info| !info.candidates.is_empty() || !info.contra_candidates.is_empty())
             .collect();
+        let mut binding_pattern_return_pre: Option<Vec<Arc<Type>>> = None;
         if matches!(
             node.kind,
             SyntaxKind::CallExpression | SyntaxKind::NewExpression
@@ -926,13 +927,54 @@ impl Checker {
                             let subs = vec![eraser; outer.len()];
                             self.substitute_infer_type_parameters(&contextual_type, &outer, &subs)
                         };
-                        self.infer_types(
-                            &mut context.inferences,
-                            Some(inference_source),
-                            Some(return_type),
-                            InferencePriority::ReturnType,
-                            false,
-                        );
+                        if self.contextual_type_from_binding_pattern(node) {
+                            // Go isFromBindingPattern（checker.go:9585/9596）：绑定模式的
+                            // 返回位推断只进独立 returnContext → returnMapper
+                            //（checker.go:9627-9638），不向主候选泄漏
+                            let mut scratch = crate::checker::inference::InferenceContext::new(
+                                signature
+                                    .type_parameters
+                                    .iter()
+                                    .map(|tp| {
+                                        crate::checker::inference::InferenceInfo::new(Arc::clone(tp))
+                                    })
+                                    .collect(),
+                            );
+                            scratch.signature = Some(Arc::clone(signature));
+                            self.infer_types(
+                                &mut scratch.inferences,
+                                Some(inference_source),
+                                Some(Arc::clone(&return_type)),
+                                InferencePriority::None,
+                                false,
+                            );
+                            if scratch.inferences.iter().any(|i| {
+                                !i.candidates.is_empty() || !i.contra_candidates.is_empty()
+                            }) {
+                                let mut pre: Vec<Arc<Type>> =
+                                    Vec::with_capacity(scratch.inferences.len());
+                                for idx in 0..scratch.inferences.len() {
+                                    let has = !scratch.inferences[idx].candidates.is_empty()
+                                        || !scratch.inferences[idx].contra_candidates.is_empty();
+                                    if has {
+                                        pre.push(self.get_inferred_type(&scratch, idx));
+                                    } else {
+                                        pre.push(Arc::clone(
+                                            &scratch.inferences[idx].type_parameter,
+                                        ));
+                                    }
+                                }
+                                binding_pattern_return_pre = Some(pre);
+                            }
+                        } else {
+                            self.infer_types(
+                                &mut context.inferences,
+                                Some(inference_source),
+                                Some(return_type),
+                                InferencePriority::ReturnType,
+                                false,
+                            );
+                        }
                     }
                 }
             }
@@ -944,17 +986,24 @@ impl Checker {
         let mut return_pre_types: Vec<Arc<Type>> =
             Vec::with_capacity(context.inferences.len());
         let mut return_pre_hit = false;
-        for idx in 0..context.inferences.len() {
-            let info = &context.inferences[idx];
-            let has_candidates =
-                !info.candidates.is_empty() || !info.contra_candidates.is_empty();
-            if has_candidates {
-                if !before_return_inference[idx] {
-                    return_pre_hit = true;
+        if let Some(pre) = binding_pattern_return_pre {
+            // Go returnMapper（cloneInferredPartOfContext）：仅含返回位预推断产出候选的
+            // 类型参数，无候选参数恒等
+            return_pre_types = pre;
+            return_pre_hit = true;
+        } else {
+            for idx in 0..context.inferences.len() {
+                let info = &context.inferences[idx];
+                let has_candidates =
+                    !info.candidates.is_empty() || !info.contra_candidates.is_empty();
+                if has_candidates {
+                    if !before_return_inference[idx] {
+                        return_pre_hit = true;
+                    }
+                    return_pre_types.push(self.get_inferred_type(context, idx));
+                } else {
+                    return_pre_types.push(Arc::clone(&info.type_parameter));
                 }
-                return_pre_types.push(self.get_inferred_type(context, idx));
-            } else {
-                return_pre_types.push(Arc::clone(&info.type_parameter));
             }
         }
 
@@ -1006,17 +1055,28 @@ impl Checker {
                                 .map(|info| (info.candidates.clone(), info.contra_candidates.clone()))
                                 .collect(),
                         );
-                        // fixTypeParameters：已有候选的类型参数固定（isFixed 后部分推断
-                        // 拓宽字面量并缓存），无候选的保持可推断
+                        // Go fixTypeParameters 取 isFixed（部分推断拓宽字面量）；
+                        // 无候选参数保持恒等（Go nonFixingMapper 语义），不落
+                        // inferred_type 缓存——CS 实参候选须继续累积参与最终推断
                         for info in context.inferences.iter_mut() {
                             if !info.candidates.is_empty() || !info.contra_candidates.is_empty() {
                                 info.is_fixed = true;
                             }
                         }
-                        let fixed = self.get_inferred_types(context);
-                        for (info, t) in context.inferences.iter_mut().zip(fixed.iter()) {
-                            info.inferred_type = Some(Arc::clone(t));
-                        }
+                        let fixed: Vec<Arc<Type>> = context
+                            .inferences
+                            .iter()
+                            .enumerate()
+                            .map(|(idx, info)| {
+                                if !info.candidates.is_empty()
+                                    || !info.contra_candidates.is_empty()
+                                {
+                                    self.get_inferred_type(context, idx)
+                                } else {
+                                    Arc::clone(&info.type_parameter)
+                                }
+                            })
+                            .collect();
                         cs_fixed = Some(fixed);
                     }
                     let saved = cs_snapshot.as_ref().expect("snapshot exists for CS args");
@@ -1041,16 +1101,9 @@ impl Checker {
                         false,
                     );
                     self.cs_echo_inference = saved_echo;
-                    // 固定结果为最终值：仅锁定快照时已有候选（is_fixed）的类型参数；
-                    // 快照时无候选的（约束回退是占位）由本阶段新候选参与最终推断
-                    let fixed = cs_fixed.as_ref().expect("fixed types exist");
-                    for (info, t) in context.inferences.iter_mut().zip(fixed.iter()) {
-                        if info.is_fixed && !self.is_uninferred_type(t) {
-                            info.candidates = Vec::new();
-                            info.contra_candidates = Vec::new();
-                            info.inferred_type = Some(Arc::clone(t));
-                        }
-                    }
+                    // Go chooseOverload 二阶段（checker.go:9260-9279）：CS 实参推断
+                    // 累积进同一推断语境，最终 getInferredTypes 对全体候选取
+                    // 公共超类型，不回锁快照值
                 } else {
                     // Go checkExpressionWithContextualType(checker.go:7662)
                     // pushContextualType：实参检查期经 instantiateContextualType

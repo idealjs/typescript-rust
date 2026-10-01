@@ -295,7 +295,7 @@ impl Checker {
         use tsox_frontend::ast::NodeData;
 
         let parent = node.parent()?;
-        match &parent.data {
+        let direct = match &parent.data {
             NodeData::VariableDeclaration(data) => data
                 .type_node
                 .as_ref()
@@ -304,10 +304,50 @@ impl Checker {
                 let fn_node = parent.parent()?;
                 self.get_return_type_annotation_of_function(&fn_node)
             }
-            // 其余位（属性值/数组元素/实参等）走通用上下文定型
-            //（Go inferTypeArguments 用 getContextualType 全量分发）
-            _ => self.get_contextual_type(node, ContextFlags::None),
+            _ => None,
+        };
+        direct.or_else(|| {
+            // Go inferTypeArguments 的 contextualType 来自 getContextualType 全量分发；
+            // 无类型注解的解构声明走 getContextualTypeForInitializerExpression 的
+            // binding pattern 隐含类型（checker.go:29782）
+            self.get_contextual_type(node, ContextFlags::None)
+        })
+    }
+
+    /// Go inferTypeArguments 的 isFromBindingPattern（checker.go:9585）：
+    /// 上下文型仅来自声明名 binding pattern 的隐含类型（无类型注解时
+    /// SkipBindingPatterns 通道返回 nil 与全量通道不同）
+    pub(crate) fn contextual_type_from_binding_pattern(
+        &self,
+        node: &Arc<tsox_frontend::ast::Node>,
+    ) -> bool {
+        use tsox_frontend::ast::NodeData;
+
+        let Some(parent) = node.parent() else {
+            return false;
+        };
+        let (type_node, name): (bool, Option<&Arc<tsox_frontend::ast::Node>>) = match &parent.data
+        {
+            NodeData::VariableDeclaration(d) => (d.type_node.is_some(), Some(&d.name)),
+            NodeData::ParameterDeclaration(d) => (d.type_node.is_some(), Some(&d.name)),
+            NodeData::PropertyDeclaration(d) => (d.type_node.is_some(), Some(&d.name)),
+            NodeData::PropertySignatureDeclaration(d) => (true, Some(&d.name)),
+            NodeData::BindingElement(d) => (false, d.name.as_ref()),
+            _ => (false, None),
+        };
+        if type_node {
+            return false;
         }
+        let Some(name) = name else {
+            return false;
+        };
+        if !matches!(
+            name.kind,
+            SyntaxKind::ArrayBindingPattern | SyntaxKind::ObjectBindingPattern
+        ) {
+            return false;
+        }
+        matches!(&name.data, NodeData::BindingPattern(p) if !p.elements.nodes.is_empty())
     }
 
     pub(crate) fn get_return_type_annotation_of_function(
