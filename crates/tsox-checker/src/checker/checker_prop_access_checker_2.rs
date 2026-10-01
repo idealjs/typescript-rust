@@ -38,6 +38,7 @@ impl Checker {
         if let Some(prop) = self.get_property_of_type(&obj_type, name_text) {
             let self_access = self.is_self_type_access(obj_expr, &obj_type);
             self.mark_property_as_referenced_ex(&prop, Some(node), Some(self_access));
+            self.symbol_node_links.get_or_default(node).resolved_symbol = Some(Arc::clone(&prop));
             self.check_property_not_used_before_declaration(&prop, node, name);
 
             // Go checkPropertyAccessibilityAtLocation：this 访问抽象属性且处于
@@ -68,6 +69,8 @@ impl Checker {
             if let Some(member_symbol) = structured.members.get(name_text) {
                 let self_access = self.is_self_type_access(obj_expr, &obj_type);
                 self.mark_property_as_referenced_ex(member_symbol, Some(node), Some(self_access));
+                self.symbol_node_links.get_or_default(node).resolved_symbol =
+                    Some(Arc::clone(member_symbol));
                 // TS2855：super 访问基类实例字段（字段在实例上而非原型）不可达，
                 // 优先于 private/protected 可访问性错误
                 if obj_expr.kind == SyntaxKind::SuperKeyword

@@ -47,8 +47,10 @@ pub fn new_diagnostic_chain_for_node(
     args: Vec<String>,
 ) -> ast::Diagnostic {
     if let Some(chain) = chain {
-        let mut result = ast::Diagnostic::new(None, TextRange::default(), message, args);
+        let mut result =
+            ast::Diagnostic::new(chain.file.clone(), chain.loc, message, args);
         result.message_chain.push(chain.clone());
+        result.related_information = chain.related_information.clone();
         return result;
     }
     new_diagnostic_for_node(node, message, args)
