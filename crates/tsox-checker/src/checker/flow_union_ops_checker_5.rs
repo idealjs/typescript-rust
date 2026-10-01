@@ -396,6 +396,7 @@ impl Checker {
         }
         // Go getPropertyOfTypeEx：原始类型成员走对应全局接口的声明类型
         //（apparent type 即接口声明型；String/Number 等符号的声明型在此惰性补建）
+        // 成员未命中时以接口声明型重入，走 Object 分支的 Function/Object 增补
         if let Some(interface_name) = self.primitive_interface_name(t)
             && let Some(sym) = self.globals.get(interface_name).cloned()
         {
@@ -410,6 +411,7 @@ impl Checker {
             {
                 return Some(member);
             }
+            return self.get_property_of_type(&declared, name);
         }
         // Go createTupleTargetType：无 rest/variadic 元素的元组 length 成员
         // 是固定长度的数字字面量（判别式收窄依赖它），带 rest 回落 number
@@ -482,43 +484,54 @@ impl Checker {
                 return Some(member);
             }
         }
-        // 类型参数（含多态 this）成员经约束解析（tsc resolveStructuredTypeMembers 语义）
+        // 类型参数（含多态 this）成员经约束解析；Go getReducedApparentType 在
+        // getPropertyOfTypeEx 开头完成映射：有约束取约束，无约束时非 strict
+        // 映射 emptyObjectType，strict 保持 unknown 返回 nil
         if let crate::checker::types::TypeData::TypeParameter(tp) = &t.data {
-            if let Some(constraint) = tp.constraint.clone()
-                && !constraint.flags.contains(TypeFlags::Unknown)
+            return match tp
+                .constraint
+                .clone()
+                .filter(|c| !c.flags.contains(TypeFlags::Unknown))
             {
-                let member = self.get_property_of_type(&constraint, name);
-                if member.is_some() {
-                    return member;
+                Some(constraint) => self.get_property_of_type(&constraint, name),
+                None => {
+                    if self.strict_null_checks {
+                        None
+                    } else {
+                        self.get_property_of_type(&self.empty_object_type(), name)
+                    }
                 }
-            }
-            if self.strict_null_checks {
-                return None;
-            }
+            };
         }
-        let call_sigs = self.get_signatures_of_type(t, SignatureKind::Call);
-        let construct_sigs = if call_sigs.is_empty() {
-            self.get_signatures_of_type(t, SignatureKind::Construct)
-        } else {
-            Vec::new()
-        };
-        let augment_type = if self.any_function_type.get().is_some_and(|f| Arc::ptr_eq(f, t)) {
-            self.global_function_type_of("Function")
-        } else if !call_sigs.is_empty() {
-            self.global_callable_function_type()
-        } else if !construct_sigs.is_empty() {
-            self.global_newable_function_type()
-        } else {
-            None
-        };
-        if let Some(ft) = augment_type
-            && let Some(member) = self.get_property_of_type(&ft, name)
-        {
-            return Some(member);
+        // Go getPropertyOfTypeEx：Function/Callable/Newable 与全局 Object 接口
+        // 的成员增补仅在 TypeFlagsObject 分支内；其余类型种别（unknown、未解析
+        // 条件型、替换型等）一律 nil，缺失属性报告由此落到 reportNonexistentProperty
+        if t.flags.contains(crate::checker::types::TypeFlags::Object) {
+            let call_sigs = self.get_signatures_of_type(t, SignatureKind::Call);
+            let construct_sigs = if call_sigs.is_empty() {
+                self.get_signatures_of_type(t, SignatureKind::Construct)
+            } else {
+                Vec::new()
+            };
+            let augment_type = if self.any_function_type.get().is_some_and(|f| Arc::ptr_eq(f, t)) {
+                self.global_function_type_of("Function")
+            } else if !call_sigs.is_empty() {
+                self.global_callable_function_type()
+            } else if !construct_sigs.is_empty() {
+                self.global_newable_function_type()
+            } else {
+                None
+            };
+            if let Some(ft) = augment_type
+                && let Some(member) = self.get_property_of_type(&ft, name)
+            {
+                return Some(member);
+            }
+            // Go getPropertyOfObjectType(globalObjectType)：普通成员未命中时回退
+            // 全局 Object 接口成员（对象字面量查 toString 等由此命中）
+            return self.global_object_member(name);
         }
-        // Go getPropertyOfTypeEx：普通成员未命中时回退全局 Object 接口成员
-        //（对象字面量查 toString 等由此命中，缺失属性报告因此不含 Object 原型成员）
-        self.global_object_member(name)
+        None
     }
 
     fn global_object_member(&mut self, name: &str) -> Option<Arc<Symbol>> {
