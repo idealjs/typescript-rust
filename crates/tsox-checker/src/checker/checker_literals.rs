@@ -177,6 +177,13 @@ impl Checker {
                         prop_pairs.push((name, self.get_any_type(), vec![Arc::clone(prop)]));
                     }
                 }
+                // Go getContextualThisParameterType 的 this 型取
+                // checkExpressionCached(containingLiteral)：成员已全数在表
+                //（accessor 成员占位先行入表，体推断延后），体期 this 可见
+                // 本成员名；占位空快照会把 this 缩成 {}
+                let snapshot =
+                    self.object_literal_type_from_pairs(prop_pairs.clone(), literal_symbol.clone());
+                self.in_flight_object_literal_types.insert(node.id(), snapshot);
                 continue;
             }
             match &prop.data {

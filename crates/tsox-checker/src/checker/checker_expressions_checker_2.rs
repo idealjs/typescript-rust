@@ -72,6 +72,13 @@ impl Checker {
         let Some(body) = &gd.body else {
             return false;
         };
+        let own_name = {
+            let name_node = &gd.name;
+            if tsox_frontend::ast::node_data_generated::is_computed_property_name(name_node) {
+                return false;
+            }
+            name_node.text().to_string()
+        };
         let mut returns = Vec::new();
         Self::collect_return_expressions(&body, &mut returns);
         if returns.is_empty() {
@@ -103,26 +110,39 @@ impl Checker {
             }
             false
         });
-        returns.iter().any(|r| {
-            Self::subtree_contains_this(r) || {
-                let mut hit = false;
-                fn walk(n: &Arc<Node>, aliases: &[String], hit: &mut bool) {
-                    if *hit {
-                        return;
-                    }
-                    if n.kind == SyntaxKind::Identifier && aliases.iter().any(|a| a == n.text()) {
-                        *hit = true;
-                        return;
-                    }
-                    tsox_frontend::ast::node_data_generated::for_each_child(n, |c| {
-                        walk(c, aliases, hit);
-                        *hit
-                    });
-                }
-                walk(r, &this_aliases, &mut hit);
-                hit
+        // Go 报 TS7023 仅在体推断真重入本符号 getTypeOfAccessors：返回链
+        // 经 this/别名读取同名成员；读取其他属性缺失时止于 TS2339，不入环
+        returns
+            .iter()
+            .any(|r| Self::subtree_reads_member_from_this(r, &this_aliases, &own_name))
+    }
+
+    fn subtree_reads_member_from_this(
+        node: &Arc<Node>,
+        aliases: &[String],
+        own_name: &str,
+    ) -> bool {
+        let mut found = false;
+        fn walk(n: &Arc<Node>, aliases: &[String], own_name: &str, found: &mut bool) {
+            if *found {
+                return;
             }
-        })
+            if let tsox_frontend::ast::NodeData::PropertyAccessExpression(pd) = &n.data {
+                let object_is_thisish = pd.expression.kind == SyntaxKind::ThisKeyword
+                    || (pd.expression.kind == SyntaxKind::Identifier
+                        && aliases.iter().any(|a| *a == pd.expression.text()));
+                if object_is_thisish && pd.name.text() == own_name {
+                    *found = true;
+                    return;
+                }
+            }
+            tsox_frontend::ast::node_data_generated::for_each_child(n, |c| {
+                walk(c, aliases, own_name, found);
+                *found
+            });
+        }
+        walk(node, aliases, own_name, &mut found);
+        found
     }
 
     pub(crate) fn this_type_marker_argument(

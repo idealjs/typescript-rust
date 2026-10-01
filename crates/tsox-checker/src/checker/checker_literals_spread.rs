@@ -515,6 +515,19 @@ impl Checker {
             let mut sym = Symbol::new(SymbolFlags::Property, name.clone());
             sym.value_declaration = decls.first().cloned();
             sym.declarations.extend(decls);
+            // Go binder addAccessorToSymbol：仅 getter 的成员符号无 setter 位，
+            // isReadonlySymbol 据此印 readonly（{ readonly p: any }）
+            let has_get = sym
+                .declarations
+                .iter()
+                .any(|d| d.kind == tsox_frontend::ast::SyntaxKind::GetAccessor);
+            let has_set = sym
+                .declarations
+                .iter()
+                .any(|d| d.kind == tsox_frontend::ast::SyntaxKind::SetAccessor);
+            if has_get && !has_set {
+                sym.check_flags |= tsox_frontend::ast::CheckFlags::Readonly;
+            }
             let symbol = Arc::new(sym);
             self.value_symbol_links.insert(
                 &symbol,
