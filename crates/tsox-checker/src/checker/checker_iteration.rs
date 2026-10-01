@@ -121,7 +121,8 @@ impl Checker {
         if !self.is_array_like_type(&array_type) {
             if error_node.is_some() {
                 let type_str = self.type_to_string(&array_type);
-                let message = if has_string_constituent {
+                let allows_strings = use_.allows_string_input() && !has_string_constituent;
+                let message = if allows_strings {
                     tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_AN_ARRAY_TYPE_OR_A_STRING_TYPE
                 } else {
                     tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_AN_ARRAY_TYPE
