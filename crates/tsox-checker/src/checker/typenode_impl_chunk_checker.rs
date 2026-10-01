@@ -3,6 +3,31 @@
 use crate::checker::typenode_impl_chunk::*;
 
 impl Checker {
+    fn interface_shell_residue(&self, t: &Arc<Type>) -> bool {
+        let Some(st) = t.as_structured() else {
+            return false;
+        };
+        if !st.members.entries.is_empty()
+            || !st.index_infos.is_empty()
+            || !st.signatures.is_empty()
+        {
+            return false;
+        }
+        let Some(sym) = t.symbol.as_ref() else {
+            return false;
+        };
+        if !sym
+            .flags
+            .contains(tsox_frontend::ast::SymbolFlags::Interface)
+        {
+            return false;
+        }
+        sym.declarations.iter().any(|d| match &d.data {
+            NodeData::InterfaceDeclaration(i) => i.members.iter().next().is_some(),
+            _ => false,
+        })
+    }
+
     pub fn get_type_from_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
         let key = (node.id() as usize, self.type_argument_stack_hash());
         if let Some(t) = self.type_node_subst_cache.get(&key) {
@@ -10,7 +35,8 @@ impl Checker {
                 .pending_interface_shells
                 .values()
                 .any(|s| Arc::ptr_eq(s, t));
-            if stale_shell {
+            let shell_residue = self.interface_shell_residue(t);
+            if stale_shell || shell_residue {
                 self.type_node_subst_cache.remove(&key);
             } else {
                 return Arc::clone(t);
@@ -71,7 +97,10 @@ impl Checker {
             .pending_interface_shells
             .values()
             .any(|s| Arc::ptr_eq(s, &result));
-        if self.heritage_degraded_events == degraded_epoch && !result_pending_shell {
+        if self.heritage_degraded_events == degraded_epoch
+            && !result_pending_shell
+            && !self.interface_shell_residue(&result)
+        {
             if self.type_node_subst_cache.len() >= self.type_node_subst_cache_limit {
                 self.type_node_subst_cache.clear();
             }
