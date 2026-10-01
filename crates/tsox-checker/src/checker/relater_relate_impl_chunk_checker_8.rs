@@ -18,6 +18,11 @@ impl Checker {
                 .iter()
                 .any(|d| matches!(d.data, tsox_frontend::ast::NodeData::InterfaceDeclaration(_)))
             && target.as_structured().is_some_and(|s| s.members.entries.is_empty())
+            // readonly 数组实例（符号 Array、members 空）不得再水化为普通
+            // Array<B> 实例：会丢 IsReadonlyArray 标志，成员比较随之把
+            // ReadonlyArray 没有的 pop/push 当目标成员（Go 目标是
+            // ReadonlyArray<T> 引用，成员表无这些成员）
+            && !target.object_flags.contains(ObjectFlags::IsReadonlyArray)
             && !self
                 .pending_interface_shells
                 .contains_key(&(Arc::as_ptr(sym) as *const tsox_frontend::ast::Symbol as usize))
@@ -63,6 +68,7 @@ impl Checker {
             Some(t) => t,
             None => return false,
         };
+        let target_is_readonly_array = target.object_flags.contains(ObjectFlags::IsReadonlyArray);
 
         // Go propertiesRelatedTo/signaturesRelatedTo/indexSignaturesRelatedTo
         // 的 identity 分派：属性数一致 + 成分直比，签名/索引签名走各自
@@ -131,6 +137,9 @@ impl Checker {
             let mut missing: Vec<String> = Vec::new();
             for prop in self.declared_array_member_symbols() {
                 if prop.flags.contains(SymbolFlags::Optional) {
+                    continue;
+                }
+                if target_is_readonly_array && is_array_only_mutable_member(&prop.name) {
                     continue;
                 }
                 let found = source_struct.members.get(&prop.name).is_some()
@@ -206,23 +215,21 @@ impl Checker {
             && !self.is_tuple_type(source);
         // Go readonly 数组目标（ReadonlyArray<T> 引用）成员表不含 Array 独有的
         // 可变成员（lib.es5: pop/push/reverse/shift/sort/splice/unshift；lib.es2015.core:
-        // fill/copyWithin），本实现 readonly 数组实例共用 Array 成员表，此处对齐裁剪
-        let target_is_readonly_array = target.object_flags.contains(ObjectFlags::IsReadonlyArray);
-        for target_prop in &target_struct.properties {
-            if target_is_readonly_array
-                && matches!(
-                    target_prop.name.as_str(),
-                    "pop"
-                        | "push"
-                        | "reverse"
-                        | "shift"
-                        | "sort"
-                        | "splice"
-                        | "unshift"
-                        | "fill"
-                        | "copyWithin"
-                )
-            {
+        // fill/copyWithin），本实现 readonly 数组实例共用 Array 成员表，此处对齐裁剪；
+        // 实例 members 为空时按引用型成员解析回取（getPropertiesOfType 等价）
+        let target_props: Vec<Arc<tsox_frontend::ast::Symbol>> =
+            if target_is_readonly_array && target_struct.properties.is_empty() {
+                let hydrated = self.get_properties_of_type(target);
+                if hydrated.is_empty() {
+                    self.declared_array_member_symbols()
+                } else {
+                    hydrated
+                }
+            } else {
+                target_struct.properties.clone()
+            };
+        for target_prop in &target_props {
+            if target_is_readonly_array && is_array_only_mutable_member(&target_prop.name) {
                 continue;
             }
             let source_declares_locally = source_struct.members.get(&target_prop.name).is_some();
@@ -470,4 +477,19 @@ impl Checker {
 
         true
     }
+}
+
+fn is_array_only_mutable_member(name: &str) -> bool {
+    matches!(
+        name,
+        "pop"
+            | "push"
+            | "reverse"
+            | "shift"
+            | "sort"
+            | "splice"
+            | "unshift"
+            | "fill"
+            | "copyWithin"
+    )
 }
