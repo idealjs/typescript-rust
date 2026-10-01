@@ -69,10 +69,26 @@ impl Checker {
         let source_sigs = self.get_signatures_of_type(source, kind);
         let target_sigs = self.get_signatures_of_type(target, kind);
 
-        if kind == SignatureKind::Construct && !source_sigs.is_empty() && !target_sigs.is_empty() {}
-
         if relation == RelationKind::Identity {
             return self.signatures_identical_to(source, target, kind);
+        }
+
+        if kind == SignatureKind::Construct
+            && !source_sigs.is_empty()
+            && !target_sigs.is_empty()
+        {
+            let source_is_abstract = source_sigs[0]
+                .flags
+                .intersects(crate::checker::types::SignatureFlags::Abstract);
+            let target_is_abstract = target_sigs[0]
+                .flags
+                .intersects(crate::checker::types::SignatureFlags::Abstract);
+            if source_is_abstract && !target_is_abstract {
+                return Ternary::False;
+            }
+            if !self.constructor_visibilities_are_compatible(&source_sigs[0], &target_sigs[0]) {
+                return Ternary::False;
+            }
         }
 
         let check_mode = match relation {
@@ -179,6 +195,35 @@ impl Checker {
             }
         }
         result
+    }
+
+    pub(crate) fn constructor_visibilities_are_compatible(
+        &self,
+        source_signature: &Arc<Signature>,
+        target_signature: &Arc<Signature>,
+    ) -> bool {
+        let Some(source_declaration) = source_signature.declaration.as_ref() else {
+            return true;
+        };
+        let Some(target_declaration) = target_signature.declaration.as_ref() else {
+            return true;
+        };
+        let source_accessibility = source_declaration.syntactic_modifier_flags()
+            & ModifierFlags::NonPublicAccessibilityModifier;
+        let target_accessibility = target_declaration.syntactic_modifier_flags()
+            & ModifierFlags::NonPublicAccessibilityModifier;
+        if target_accessibility == ModifierFlags::Private {
+            return true;
+        }
+        if target_accessibility == ModifierFlags::Protected
+            && source_accessibility != ModifierFlags::Private
+        {
+            return true;
+        }
+        if target_accessibility != ModifierFlags::Protected && source_accessibility.is_empty() {
+            return true;
+        }
+        false
     }
 
     pub fn signatures_identical_to(
