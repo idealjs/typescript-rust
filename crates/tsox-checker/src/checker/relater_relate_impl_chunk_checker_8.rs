@@ -149,7 +149,20 @@ impl Checker {
                             .is_some())
                     || self
                         .global_interface_member_symbol("Object", &prop.name)
-                        .is_some();
+                        .is_some()
+                    || {
+                        // Go propertiesRelatedTo/getUnmatchedProperty 的缺失判定走
+                        // getPropertyOfType（relater.go:4307）：映射型成员经
+                        // resolveMappedTypeMembers 按约束表面型（keyof L → L 的
+                        // apparent type）惰性解析，裸 members 表未命中不等价缺成员
+                        let saved_skip_index_synthesis =
+                            self.property_lookup_skips_index_synthesis;
+                        self.property_lookup_skips_index_synthesis = true;
+                        let resolved =
+                            self.get_property_of_type(source, &prop.name).is_some();
+                        self.property_lookup_skips_index_synthesis = saved_skip_index_synthesis;
+                        resolved
+                    };
                 if !found {
                     missing.push(prop.name.clone());
                 }
