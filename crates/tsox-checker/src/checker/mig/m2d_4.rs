@@ -48,6 +48,28 @@ impl Checker {
             .unwrap_or(false)
     }
 
+    pub fn get_resolved_symbol_on_demand(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+        if let Some(cached) = self.get_resolved_symbol_or_nil(node) {
+            return Some(cached);
+        }
+        let resolved = if tsox_frontend::ast::node_is_missing(Some(node)) {
+            None
+        } else {
+            self.resolve_name(
+                node.text(),
+                node,
+                SymbolFlags::VALUE | SymbolFlags::ExportValue,
+                false,
+            )
+        };
+        if let Some(symbol) = &resolved {
+            self.symbol_node_links
+                .get_or_default(node)
+                .resolved_symbol = Some(Arc::clone(symbol));
+        }
+        resolved
+    }
+
     pub fn is_past_last_assignment(
         &mut self,
         symbol: &Arc<Symbol>,
@@ -142,7 +164,7 @@ impl Checker {
             SyntaxKind::Identifier => {
                 let assignment_kind = get_assignment_target_kind(node);
                 if assignment_kind != AssignmentKind::None {
-                    if let Some(symbol) = self.get_resolved_symbol_or_nil(node) {
+                    if let Some(symbol) = self.get_resolved_symbol_on_demand(node) {
                         if self.is_parameter_or_mutable_local_variable(&symbol) {
                             let should_update = {
                                 let links = self.marked_assignment_symbol_links.get_or_default(&symbol);
