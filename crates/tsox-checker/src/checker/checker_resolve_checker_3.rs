@@ -64,6 +64,7 @@ impl Checker {
                         None => return Arc::clone(source),
                     }
                 } else {
+                    self.report_merge_symbol_error(target, source);
                     return Arc::clone(source);
                 }
             } else {

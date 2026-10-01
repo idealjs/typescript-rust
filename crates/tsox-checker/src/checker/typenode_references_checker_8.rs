@@ -41,10 +41,9 @@ impl Checker {
             .map(|(k, v)| (k.clone(), Arc::clone(v)))
             .collect();
 
-        let is_global_this = self
-            .global_this_symbol
-            .as_ref()
-            .is_some_and(|g| Arc::ptr_eq(g, symbol));
+        let is_global_this = self.global_this_symbol.as_ref().is_some_and(|g| {
+            Arc::ptr_eq(&self.get_merged_symbol(g), &self.get_merged_symbol(symbol))
+        });
         if is_global_this {
             for (name, sym) in self.globals.iter() {
                 if !members.iter().any(|(n, _)| n == name) {

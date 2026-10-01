@@ -4,16 +4,18 @@ use crate::checker::checker_suggestions_resolve::*;
 
 impl Checker {
     // Go globalThisSymbol.Exports 即 globals 表（引用共享）；单表架构下以
-    // 符号同一性判定后直接查 globals
+    // 符号同一性判定后直接查 globals。同一性按 Go getSymbolIfSameReference
+    // 口径经 getMergedSymbol 对照（declare global 增强后 globals 里是克隆体）
     pub(crate) fn global_this_export(
         &self,
         symbol: &Arc<Symbol>,
         name: &str,
     ) -> Option<Arc<Symbol>> {
+        let merged_view = |s: &Arc<Symbol>| self.get_merged_symbol(s);
         if self
             .global_this_symbol
             .as_ref()
-            .is_some_and(|gt| Arc::ptr_eq(gt, symbol))
+            .is_some_and(|gt| Arc::ptr_eq(&merged_view(gt), &merged_view(symbol)))
         {
             self.globals.get(name).cloned()
         } else {
