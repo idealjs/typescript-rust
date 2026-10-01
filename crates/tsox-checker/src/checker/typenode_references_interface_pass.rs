@@ -6,7 +6,6 @@ pub(crate) struct InterfacePassOutcome {
     pub result: Arc<crate::checker::types::Type>,
     pub base_degraded: bool,
     pub base_shell: bool,
-    pub base_residue: bool,
     pub live_shell_base: bool,
     pub lineage_degraded: bool,
 }
@@ -123,7 +122,6 @@ impl Checker {
                 // 基类是空壳（解析重入期产物）时合并结果只有自有成员：按 degraded
                 // 处理——结果不进缓存、标 degraded，后续引用重建拿完整版
                 let mut base_shell = false;
-                let mut base_residue = false;
                 let mut live_shell_base = false;
                 for (_, bt) in &base_types {
                     let Some(st) = bt.as_structured() else {
@@ -133,9 +131,6 @@ impl Checker {
                         continue;
                     }
                     base_shell = true;
-                    if self.interface_shell_residue(bt) {
-                        base_residue = true;
-                    }
                     if let Some(bsym) = bt.symbol.as_ref()
                         && self.pending_interface_shells.contains_key(
                             &(Arc::as_ptr(bsym) as *const tsox_frontend::ast::Symbol as usize),
@@ -187,7 +182,6 @@ impl Checker {
                     result,
                     base_degraded: heritage_base_degraded,
                     base_shell,
-                    base_residue,
                     live_shell_base,
                     lineage_degraded,
                 }
@@ -196,7 +190,6 @@ impl Checker {
                 result: self.error_type(),
                 base_degraded: false,
                 base_shell: false,
-                base_residue: false,
                 live_shell_base: false,
                 lineage_degraded: false,
             },

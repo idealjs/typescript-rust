@@ -2,8 +2,6 @@
 
 use crate::checker::typenode_references::*;
 
-const RECOVERABLE_BASE_RETRY_CAP: u32 = 3;
-
 impl Checker {
     pub fn resolve_interface_type_ex(
         &mut self,
@@ -36,16 +34,10 @@ impl Checker {
         });
 
         let pinned_args: Option<Vec<Arc<Type>>> = type_args.clone();
-        if let Some(key) = &instantiation_key {
-            let cached_residue = self
-                .interface_instantiation_cache
-                .get(key)
-                .is_some_and(|(_, t)| self.interface_shell_residue(t));
-            if cached_residue {
-                self.interface_instantiation_cache.remove(key);
-            } else if let Some(cached) = self.interface_instantiation_cache.get(key) {
-                return Arc::clone(&cached.1);
-            }
+        if let Some(key) = &instantiation_key
+            && let Some(cached) = self.interface_instantiation_cache.get(key)
+        {
+            return Arc::clone(&cached.1);
         }
 
         let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol;
@@ -88,7 +80,6 @@ impl Checker {
         let mut lineage_degraded = false;
         let mut degraded_accepted = false;
         let mut live_shell_base = false;
-        let mut recoverable_base_retries = 0u32;
         let mut result;
         loop {
             let pass_epoch = self.heritage_degraded_events;
@@ -114,12 +105,7 @@ impl Checker {
                 *retries += 1;
                 degraded_accepted = *retries > crate::checker::checker::HERITAGE_RETRY_LIMIT;
             }
-            let recoverable_base = pass.base_residue || pass.base_degraded;
-            if (live_shell_base || recoverable_base)
-                && !degraded_accepted
-                && recoverable_base_retries < RECOVERABLE_BASE_RETRY_CAP
-            {
-                recoverable_base_retries += 1;
+            if live_shell_base && !degraded_accepted {
                 continue;
             }
             break;

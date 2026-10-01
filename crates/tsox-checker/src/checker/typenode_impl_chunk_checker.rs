@@ -3,7 +3,7 @@
 use crate::checker::typenode_impl_chunk::*;
 
 impl Checker {
-    pub(crate) fn interface_shell_residue(&self, t: &Arc<Type>) -> bool {
+    fn interface_shell_residue(&self, t: &Arc<Type>) -> bool {
         let Some(st) = t.as_structured() else {
             return false;
         };
