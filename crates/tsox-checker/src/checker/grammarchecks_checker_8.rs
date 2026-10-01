@@ -716,21 +716,23 @@ fn function_like_data_lists(
     Option<Arc<tsox_frontend::ast::NodeList>>,
     Arc<tsox_frontend::ast::NodeList>,
 ) {
+    let lists = |type_parameters: &Option<Arc<tsox_frontend::ast::NodeList>>,
+                 parameters: &Arc<tsox_frontend::ast::NodeList>| {
+        (type_parameters.clone(), Arc::clone(parameters))
+    };
     match &node.data {
-        NodeData::FunctionDeclaration(d)
-        | NodeData::FunctionExpression(d)
-        | NodeData::MethodDeclaration(d)
-        | NodeData::ConstructorDeclaration(d)
-        | NodeData::GetAccessorDeclaration(d)
-        | NodeData::SetAccessorDeclaration(d)
-        | NodeData::MethodSignatureDeclaration(d)
-        | NodeData::CallSignatureDeclaration(d)
-        | NodeData::ConstructSignatureDeclaration(d)
-        | NodeData::FunctionTypeNode(d)
-        | NodeData::ConstructorTypeNode(d) => {
-            (d.type_parameters.clone(), Arc::clone(&d.parameters))
-        }
-        NodeData::ArrowFunction(d) => (d.type_parameters.clone(), Arc::clone(&d.parameters)),
+        NodeData::FunctionDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::FunctionExpression(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::MethodDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::ConstructorDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::GetAccessorDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::SetAccessorDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::MethodSignatureDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::CallSignatureDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::ConstructSignatureDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::FunctionTypeNode(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::ConstructorTypeNode(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::ArrowFunction(d) => lists(&d.type_parameters, &d.parameters),
         _ => (
             None,
             Arc::new(tsox_frontend::ast::NodeList {
