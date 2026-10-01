@@ -323,12 +323,23 @@ impl Checker {
                 continue;
             }
 
+            let mut elements_reported = false;
             if matches!(
                 arg.kind,
                 SyntaxKind::ArrayLiteralExpression | SyntaxKind::ObjectLiteralExpression
             ) {
+                let span_diag_count = |checker: &Checker| {
+                    checker
+                        .diagnostics
+                        .get_all()
+                        .iter()
+                        .filter(|d| d.loc.pos() >= arg.loc.pos() && d.loc.end() <= arg.loc.end())
+                        .count()
+                };
+                let before = span_diag_count(self);
                 let pt = Arc::clone(&param_type);
                 self.check_contextual_elements(arg, &pt, arg.loc);
+                elements_reported = span_diag_count(self) > before;
             }
             // 上下文敏感实参（箭头/函数表达式含无注解参数）：用固定后的参数类型重定型，
             // 与 infer_type_arguments 两阶段一致（节点缓存的类型是未固定形态）；
@@ -371,14 +382,6 @@ impl Checker {
                 None
             };
 
-            let elements_reported = matches!(
-                arg.kind,
-                SyntaxKind::ArrayLiteralExpression | SyntaxKind::ObjectLiteralExpression
-            ) && self
-                .diagnostics
-                .get_all()
-                .iter()
-                .any(|d| d.loc.pos() >= arg.loc.pos() && d.loc.end() <= arg.loc.end());
             if elements_reported {
                 continue;
             }
