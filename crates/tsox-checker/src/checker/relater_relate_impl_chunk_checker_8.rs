@@ -204,7 +204,27 @@ impl Checker {
             source,
         ) && !self.is_empty_array_literal_type(source)
             && !self.is_tuple_type(source);
+        // Go readonly 数组目标（ReadonlyArray<T> 引用）成员表不含 Array 独有的
+        // 可变成员（lib.es5: pop/push/reverse/shift/sort/splice/unshift；lib.es2015.core:
+        // fill/copyWithin），本实现 readonly 数组实例共用 Array 成员表，此处对齐裁剪
+        let target_is_readonly_array = target.object_flags.contains(ObjectFlags::IsReadonlyArray);
         for target_prop in &target_struct.properties {
+            if target_is_readonly_array
+                && matches!(
+                    target_prop.name.as_str(),
+                    "pop"
+                        | "push"
+                        | "reverse"
+                        | "shift"
+                        | "sort"
+                        | "splice"
+                        | "unshift"
+                        | "fill"
+                        | "copyWithin"
+                )
+            {
+                continue;
+            }
             let source_declares_locally = source_struct.members.get(&target_prop.name).is_some();
             let mut source_prop = source_struct.members.get(&target_prop.name).cloned();
             if source_prop.is_none() {
