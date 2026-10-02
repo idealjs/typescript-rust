@@ -180,7 +180,7 @@ impl Checker {
             }
             return self.resolve_module_file_symbol(specifier);
         }
-        let dir = match base_file {
+        let dir = match &base_file {
             Some(f) => f
                 .file_name
                 .rfind('/')
