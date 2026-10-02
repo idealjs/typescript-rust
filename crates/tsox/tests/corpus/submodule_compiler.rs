@@ -1132,9 +1132,7 @@ fn build_and_check(
         None => units.iter().collect(),
     };
 
-    let mut file_names: Vec<String> = Vec::new();
-    for unit in units {
-
+    let insert_unit = |unit: &crate::common::case_parser::TestUnit| {
         let abs = unit_abs_path(&unit.name);
 
         let mut parent = tsox_core::tspath::get_directory_path(&abs);
@@ -1147,13 +1145,27 @@ fn build_and_check(
             parent = next;
         }
         fs.insert_file(&abs, &unit.content);
+    };
 
+    // Go harnessutil.CompileFilesEx：inputFiles（root）先写入 testfs，otherFiles 后写入；
+    // 同名 unit 并存时（重复 @filename 指令）otherFiles 覆盖 root，编译的是覆盖后的内容
+    for unit in &rooted {
+        insert_unit(unit);
+    }
+    for unit in units {
+        if !rooted.iter().any(|r| std::ptr::eq(*r, unit)) {
+            insert_unit(unit);
+        }
+    }
+
+    let mut file_names: Vec<String> = Vec::new();
+    for unit in &rooted {
+        let abs = unit_abs_path(&unit.name);
         let lower = abs.to_ascii_lowercase();
-        if rooted.iter().any(|r| std::ptr::eq(*r, unit))
-            && (lower.ends_with(".ts")
-                || lower.ends_with(".tsx")
-                || lower.ends_with(".mts")
-                || lower.ends_with(".cts"))
+        if lower.ends_with(".ts")
+            || lower.ends_with(".tsx")
+            || lower.ends_with(".mts")
+            || lower.ends_with(".cts")
         {
             file_names.push(abs);
         }
