@@ -184,6 +184,25 @@ impl Checker {
             }
             return merged;
         }
+        // Go getIndexInfosOfStructuredType（checker.go:19297-19300）在成员未解析时
+        // 惰性 resolveStructuredTypeMembers；带实参的接口引用（如 string[] 的
+        // Array<string>）实例化索引信息来自 resolve_interface_type_ex，与
+        // get_property_of_type 的实例化引用分支同构
+        if let Some(obj) = t.as_object()
+            && !obj.type_arguments.is_empty()
+            && !matches!(&t.data, TypeData::Tuple(_))
+            && let Some(sym) = t.symbol.as_ref()
+            && sym.flags.contains(SymbolFlags::Interface)
+            && obj.structured.index_infos.is_empty()
+        {
+            let inst = self.resolve_interface_type_ex(sym, Some(obj.type_arguments.clone()));
+            if !Arc::ptr_eq(&inst, t)
+                && let Some(infos) = inst.as_structured().map(|s| s.index_infos.clone())
+                && !infos.is_empty()
+            {
+                return infos;
+            }
+        }
         let mut infos = t
             .as_structured()
             .map(|s| s.index_infos.clone())
