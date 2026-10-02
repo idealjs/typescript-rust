@@ -30,6 +30,15 @@ impl Checker {
 
         let arg_index = args.iter().position(|a| Arc::ptr_eq(a, arg_node))?;
 
+        // Go getContextualTypeForArgumentAtIndex（checker.go:30125）：动态 import()
+        // 实参不经签名解析，arg0 上下文型 string，arg1 为 ImportCallOptions
+        if tsox_frontend::ast::is_import_call(call_node) {
+            return match arg_index {
+                0 => Some(self.string_type()),
+                1 => Some(self.get_global_import_call_options_type_checked()),
+                _ => Some(self.any_type()),
+            };
+        }
 
         let is_new = matches!(&call_node.data, NodeData::NewExpression(_));
         let expression_type = match &call_node.data {
