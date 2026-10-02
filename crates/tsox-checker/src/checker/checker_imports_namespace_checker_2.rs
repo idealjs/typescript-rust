@@ -188,7 +188,17 @@ impl Checker {
                 .unwrap_or_default(),
             None => return None,
         };
-        self.resolve_module_file_symbol_in(&dir, specifier)
+        if let Some(sym) = self.resolve_module_file_symbol_in(&dir, specifier) {
+            return Some(sym);
+        }
+        let file = base_file?;
+        let path = self.program.resolve_external_module_path(
+            specifier,
+            &file.file_name,
+            tsox_core::core::compiler_options::ModuleKind::None,
+        )?;
+        let sf = self.program.get_source_file(&path)?;
+        Some(self.get_merged_symbol(&self.program.symbol_map().symbol_of(&sf.node).cloned()?))
     }
 
     fn resolve_package_symbol_from(
