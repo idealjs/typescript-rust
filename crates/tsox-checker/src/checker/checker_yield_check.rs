@@ -76,6 +76,30 @@ impl Checker {
             return;
         }
         let is_async = container.is_async;
+        let error_node = data
+            .expression
+            .clone()
+            .unwrap_or_else(|| Arc::clone(node));
+        let expression_type = match &data.expression {
+            Some(expr) => self.get_type_of_node(expr),
+            None => self.undefined_type(),
+        };
+        // Go checkYieldExpression：yieldedType 经 getYieldedTypeOfYieldExpression
+        // 无条件求取（yield* 借此报 TS2504），仅赋值检查受返回注解有无约束
+        let yielded_type = if data.asterisk_token.is_some() {
+            self.check_iterated_type_or_element_type(
+                crate::checker::checker_iteration::IterationUse::YieldStar { is_async },
+                &expression_type,
+                Some(&error_node),
+            )
+        } else if is_async {
+            match self.get_awaited_type(&expression_type) {
+                Some(awaited) => awaited,
+                None => Arc::clone(&expression_type),
+            }
+        } else {
+            Arc::clone(&expression_type)
+        };
         let Some(return_type_node) = container.return_type_node else {
             return;
         };
@@ -102,28 +126,6 @@ impl Checker {
         let signature_yield_type = iteration_types
             .yield_type
             .unwrap_or_else(|| self.get_any_type());
-        let expression_type = match &data.expression {
-            Some(expr) => self.get_type_of_node(expr),
-            None => self.undefined_type(),
-        };
-        let error_node = data
-            .expression
-            .clone()
-            .unwrap_or_else(|| Arc::clone(node));
-        let yielded_type = if data.asterisk_token.is_some() {
-            self.check_iterated_type_or_element_type(
-                crate::checker::checker_iteration::IterationUse::YieldStar { is_async },
-                &expression_type,
-                Some(&error_node),
-            )
-        } else if is_async {
-            match self.get_awaited_type(&expression_type) {
-                Some(awaited) => awaited,
-                None => Arc::clone(&expression_type),
-            }
-        } else {
-            Arc::clone(&expression_type)
-        };
         self.check_type_assignable_to_and_optionally_elaborate(
             &yielded_type,
             &signature_yield_type,
