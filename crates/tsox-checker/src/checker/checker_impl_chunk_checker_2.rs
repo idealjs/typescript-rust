@@ -245,6 +245,9 @@ impl Checker {
             if !main_module.flags.intersects(SymbolFlags::NAMESPACE) {
                 continue;
             }
+            if self.module_augmentation_merge_conflict(&main_module, &aug_sym) {
+                continue;
+            }
             let mut aug_entries: Vec<(String, Arc<Symbol>)> = Vec::new();
             for (k, v) in aug_sym.exports.iter() {
                 aug_entries.push((k.clone(), Arc::clone(v)));

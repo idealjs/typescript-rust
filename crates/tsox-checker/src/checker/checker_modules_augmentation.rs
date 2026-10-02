@@ -62,23 +62,37 @@ impl Checker {
             ));
             return;
         }
-        let conflict = main_module
-            .flags
-            .intersects(get_excluded_symbol_flags(aug_sym.flags))
-            && !(aug_sym.flags | main_module.flags)
-                .intersects(tsox_frontend::ast::SymbolFlags::Assignment);
-        if conflict {
-            if main_module
-                .flags
-                .intersects(tsox_frontend::ast::SymbolFlags::NamespaceModule)
-            {
-                self.report_cannot_augment_with_value_exports(&main_module, &aug_sym);
-            } else {
-                self.report_merge_symbol_error(&main_module, &aug_sym);
-            }
+        if self.module_augmentation_merge_conflict(&main_module, &aug_sym) {
             return;
         }
         self.merge_augmentation_exports(&main_module, &aug_sym);
+    }
+
+    /// Go mergeSymbol(mainModule, augmentation) 冲突闸门（checker.go:14388-14412）：
+    /// 冲突且目标含 NamespaceModule → TS2649（globalThis 豁免），其余冲突 →
+    /// reportMergeSymbolError；两种冲突都返回 true，调用方不得再执行合并
+    pub(crate) fn module_augmentation_merge_conflict(
+        &mut self,
+        target: &Arc<Symbol>,
+        source: &Arc<Symbol>,
+    ) -> bool {
+        let conflict = target
+            .flags
+            .intersects(get_excluded_symbol_flags(source.flags))
+            && !(source.flags | target.flags)
+                .intersects(tsox_frontend::ast::SymbolFlags::Assignment);
+        if !conflict {
+            return false;
+        }
+        if target
+            .flags
+            .intersects(tsox_frontend::ast::SymbolFlags::NamespaceModule)
+        {
+            self.report_cannot_augment_with_value_exports(target, source);
+        } else {
+            self.report_merge_symbol_error(target, source);
+        }
+        true
     }
 
     pub(crate) fn report_cannot_augment_with_value_exports(
