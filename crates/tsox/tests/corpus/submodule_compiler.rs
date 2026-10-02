@@ -827,19 +827,41 @@ fn submodule_compiler_cases() {
     } else {
         (0..total, format!("batch file {batch_file} ({} names)", batch_set.len()))
     };
-    let selected: Vec<&std::path::PathBuf> = cases[scan_range.clone()]
-        .iter()
-        .filter(|p| {
-            if !batch_set.is_empty() {
-                let base = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
-                return batch_set.contains(base);
-            }
-            filter_lc.is_empty()
-                || p.file_name()
+    // corpus_one.sh 单用例契约（tools/corpus_one.sh 头注）：filter 为完整用例基名
+    // （含或不含扩展名）时只选该用例；仅余前缀同名兄弟时才退化为 substring 选中
+    let exact_selected: Vec<&std::path::PathBuf> = if batch_set.is_empty() && !filter_lc.is_empty()
+    {
+        cases[scan_range.clone()]
+            .iter()
+            .filter(|p| {
+                p.file_name()
                     .and_then(|n| n.to_str())
-                    .is_some_and(|n| n.to_lowercase().contains(&filter_lc))
-        })
-        .collect();
+                    .is_some_and(|n| n.to_lowercase() == filter_lc)
+                    || p.file_stem()
+                        .and_then(|s| s.to_str())
+                        .is_some_and(|s| s.to_lowercase() == filter_lc)
+            })
+            .collect()
+    } else {
+        Vec::new()
+    };
+    let selected: Vec<&std::path::PathBuf> = if !exact_selected.is_empty() {
+        exact_selected
+    } else {
+        cases[scan_range.clone()]
+            .iter()
+            .filter(|p| {
+                if !batch_set.is_empty() {
+                    let base = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
+                    return batch_set.contains(base);
+                }
+                filter_lc.is_empty()
+                    || p.file_name()
+                        .and_then(|n| n.to_str())
+                        .is_some_and(|n| n.to_lowercase().contains(&filter_lc))
+            })
+            .collect()
+    };
     if selected.is_empty() {
         log.line(&format!(
             "[submodule_compiler] filter '{filter}' matched no cases — nothing to do."
