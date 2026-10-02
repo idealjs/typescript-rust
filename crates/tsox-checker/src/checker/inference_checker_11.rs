@@ -21,13 +21,6 @@ impl Checker {
         if arg_count == 0 {
             return None;
         }
-        if call
-            .arguments
-            .iter()
-            .any(|a| tsox_frontend::ast::is_spread_element(a))
-        {
-            return None;
-        }
 
         let key = node.id();
         if !self.resolving_function_like.insert(key) {
