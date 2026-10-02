@@ -45,11 +45,23 @@ impl Checker {
         if source_has_more {
             if self.relater_chain_active && !check_mode.contains(SignatureCheckMode::StrictArity) {
                 let min_args = self.get_min_argument_count(source).max(0);
-                self.relater_report_error(
-                    tsox_core::diagnostics::messages_generated::
-                        TARGET_SIGNATURE_PROVIDES_TOO_FEW_ARGUMENTS_EXPECTED_0_OR_MORE_BUT_GOT_1,
-                    vec![min_args.to_string(), target_count.to_string()],
-                );
+                // Go compareSignaturesRelated（relater.go:1506-1517）每次关系
+                // 失败只报一条 arity；Rust 上报窗口内同名同参签名对经缓存
+                // Failed 重跑门可多次重入本处，相邻重复条目按已报处理
+                let message = tsox_core::diagnostics::messages_generated::
+                    TARGET_SIGNATURE_PROVIDES_TOO_FEW_ARGUMENTS_EXPECTED_0_OR_MORE_BUT_GOT_1;
+                let args = [min_args.to_string(), target_count.to_string()];
+                let already_reported = self
+                    .relater_error_chain
+                    .last()
+                    .is_some_and(|entry| {
+                        entry.message == message && entry.args.len() == 2
+                            && entry.args[0] == args[0]
+                            && entry.args[1] == args[1]
+                    });
+                if !already_reported {
+                    self.relater_report_error(message, args.to_vec());
+                }
             }
             return Ternary::False;
         }
