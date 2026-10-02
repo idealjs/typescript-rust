@@ -913,5 +913,16 @@ impl Checker {
         if self.should_check_erasable_syntax(node) && is_export_equals && !node.flags.contains(NodeFlags::Ambient) {
             self.error_message(node,THIS_SYNTAX_IS_NOT_ALLOWED_WHEN_ERASABLESYNTAXONLY_IS_ENABLED, &[]);
         }
+        // Go checkExportAssignment：ambient 下表达式须为标识符或限定名；
+        // undefined 在 Go parser 产 Identifier，移植侧 scanner 归
+        // UndefinedKeyword，等价视为标识符
+        let expression_is_entity_name = tsox_frontend::ast::is_entity_name_expression(&expression)
+            || expression.kind == SyntaxKind::UndefinedKeyword;
+        if self.declaration_is_ambient(node) && !expression_is_entity_name {
+            self.grammar_error_on_node(
+                &expression,
+                &THE_EXPRESSION_OF_AN_EXPORT_ASSIGNMENT_MUST_BE_AN_IDENTIFIER_OR_QUALIFIED_NAME_IN_AN_AMBIENT_CONTEXT,
+            );
+        }
     }
 }

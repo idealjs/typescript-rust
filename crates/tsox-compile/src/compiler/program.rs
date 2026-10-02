@@ -224,7 +224,8 @@ impl Program {
                         // 在 noUncheckedSideEffectImports 开启时由 checker 解析报错，
                         // 显式 false 时完全不报；program 层同门控
                         if options.no_unchecked_side_effect_imports.is_false()
-                            && is_side_effect_import(import_node)
+                            && (is_side_effect_import(import_node)
+                                || is_side_effect_import_in_file(&file, import_node))
                         {
                             continue;
                         }

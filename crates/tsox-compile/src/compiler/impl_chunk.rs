@@ -191,6 +191,25 @@ pub(crate) fn is_side_effect_import(import_node: &Arc<tsox_frontend::ast::Node>)
         .unwrap_or(false)
 }
 
+/// 加载期判副作用导入的 parent 无关回退：按 Arc 同一性在文件顶层
+/// import 声明中定位说明符所属声明（Go checkImportDeclaration 语义：
+/// 无 import clause 即副作用导入）
+pub(crate) fn is_side_effect_import_in_file(
+    file: &SourceFile,
+    import_node: &Arc<tsox_frontend::ast::Node>,
+) -> bool {
+    let tsox_frontend::ast::NodeData::SourceFile(sf) = &file.node.data else {
+        return false;
+    };
+    sf.statements.iter().any(|stmt| {
+        matches!(
+            &stmt.data,
+            tsox_frontend::ast::NodeData::ImportDeclaration(d)
+                if d.import_clause.is_none() && Arc::ptr_eq(&d.module_specifier, import_node)
+        )
+    })
+}
+
 /// NodeNext/Node16 下 ESM 文件的无扩展名相对导入由 checker 侧 TS2834 报告，
 /// 加载期的 module-not-found 让位（tsc 同场景只报一条）
 pub(crate) fn node_next_needs_extension(
