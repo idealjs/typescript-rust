@@ -62,7 +62,51 @@ impl Checker {
             ));
             return;
         }
+        let conflict = main_module
+            .flags
+            .intersects(get_excluded_symbol_flags(aug_sym.flags))
+            && !(aug_sym.flags | main_module.flags)
+                .intersects(tsox_frontend::ast::SymbolFlags::Assignment);
+        if conflict {
+            if main_module
+                .flags
+                .intersects(tsox_frontend::ast::SymbolFlags::NamespaceModule)
+            {
+                self.report_cannot_augment_with_value_exports(&main_module, &aug_sym);
+            } else {
+                self.report_merge_symbol_error(&main_module, &aug_sym);
+            }
+            return;
+        }
         self.merge_augmentation_exports(&main_module, &aug_sym);
+    }
+
+    pub(crate) fn report_cannot_augment_with_value_exports(
+        &mut self,
+        target: &Arc<Symbol>,
+        source: &Arc<Symbol>,
+    ) {
+        if self
+            .global_this_symbol
+            .as_ref()
+            .is_some_and(|g| Arc::ptr_eq(g, target))
+        {
+            return;
+        }
+        let Some(first) = source.declarations.first() else {
+            return;
+        };
+        let name_node = tsox_frontend::ast::utilities::get_name_of_declaration(first)
+            .unwrap_or_else(|| Arc::clone(first));
+        let file = self.get_source_file_of_node(&name_node);
+        let target_name = self.symbol_to_string(target);
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            file,
+            name_node.loc,
+            tsox_core::diagnostics::messages_generated::
+                CANNOT_AUGMENT_MODULE_0_WITH_VALUE_EXPORTS_BECAUSE_IT_RESOLVES_TO_A_NON_MODULE_ENTITY,
+            vec![target_name],
+        ));
     }
 
     /// 把增强符号的 exports 并入目标模块符号：同名条目合并声明（class+interface

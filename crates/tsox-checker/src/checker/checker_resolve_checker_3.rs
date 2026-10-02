@@ -154,6 +154,9 @@ result_mut.set_parent(&result);
             }
 
             final_result
+        } else if target.flags.intersects(SymbolFlags::NamespaceModule) {
+            self.report_cannot_augment_with_value_exports(target, source);
+            Arc::clone(target)
         } else {
             self.report_merge_symbol_error(target, source);
             Arc::clone(target)
