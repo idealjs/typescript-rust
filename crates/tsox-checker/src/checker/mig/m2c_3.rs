@@ -79,7 +79,21 @@ pub fn signature_has_rest_parameter(sig: &Arc<Signature>) -> bool {
 }
 
 pub fn some_signature(signatures: &[Arc<Signature>], f: &dyn Fn(&Arc<Signature>) -> bool) -> bool {
-    signatures.iter().any(f)
+    for sig in signatures {
+        match crate::checker::mig::wc1c::signature_composite(sig) {
+            Some(composite) => {
+                if composite.is_union && some_signature(&composite.signatures, f) {
+                    return true;
+                }
+            }
+            None => {
+                if f(sig) {
+                    return true;
+                }
+            }
+        }
+    }
+    false
 }
 
 pub fn some_type(t: &Arc<Type>, f: &dyn Fn(&Arc<Type>) -> bool) -> bool {
