@@ -300,10 +300,16 @@ impl Checker {
         let mut resolved = resolved;
         for _ in 0..4 {
             let Some(t) = resolved.clone() else { break };
-            // Go resolveAlias：Alias 位仍在即继续（import 别名与 const 合并的
-            // 双意义符号也须跟到 import 目标定类型意义）
+            // Go resolveAlias + ast.IsNonLocalAlias（utilities.go）：仅纯 alias
+            // 目标继续透传；interface/const 等与 import 合并的双意义符号是
+            // resolveAlias 的链终点，停在自身以保留其类型含义
             if !t.flags.contains(tsox_frontend::ast::SymbolFlags::Alias)
                 || Arc::ptr_eq(&t, alias)
+                || t.flags.intersects(
+                    tsox_frontend::ast::SymbolFlags::VALUE
+                        | tsox_frontend::ast::SymbolFlags::TYPE
+                        | tsox_frontend::ast::SymbolFlags::NAMESPACE,
+                )
                 || !t.declarations.iter().any(|d| {
                     matches!(
                         d.kind,

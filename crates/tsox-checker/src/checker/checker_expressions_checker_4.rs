@@ -353,9 +353,24 @@ impl Checker {
 }
 
 impl Checker {
-    fn value_meaning_resolves(&self, node: &Arc<Node>) -> bool {
-        self.resolve_identifier_with_meaning(node, SymbolFlags::VALUE)
-            .is_some_and(|s| s.flags.intersects(SymbolFlags::VALUE))
+    fn value_meaning_resolves(&mut self, node: &Arc<Node>) -> bool {
+        let Some(mut s) = self.resolve_identifier_with_meaning(node, SymbolFlags::VALUE) else {
+            return false;
+        };
+        // Go resolveEntityName 尾段（checker.go）：按 Value 含义沿 resolveAlias
+        // 链逐级解析，含义命中即停；import 与 interface 合并的双意义符号的
+        // 值含义在链上更深处，不是链终点
+        for _ in 0..4 {
+            if s.flags.intersects(SymbolFlags::VALUE) || !s.flags.intersects(SymbolFlags::Alias) {
+                break;
+            }
+            let next = self.resolve_alias_base(Arc::clone(&s));
+            if Arc::ptr_eq(&next, &s) {
+                break;
+            }
+            s = next;
+        }
+        s.flags.intersects(SymbolFlags::VALUE)
     }
 
     pub(crate) fn is_es2015_or_later_constructor_name(name: &str) -> bool {
