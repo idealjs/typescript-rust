@@ -33,8 +33,9 @@ impl Checker {
             return;
         }
         let object_index_type = self.get_index_type(&object_type);
+        let apparent_object_type = self.get_reduced_apparent_type(&object_type);
         let has_number_index_info = self
-            .get_index_info_of_type(&object_type, &self.number_type())
+            .get_index_info_of_type(&apparent_object_type, &self.number_type())
             .is_some();
 
         let constituents: Vec<Arc<Type>> = if index_type.flags.contains(TypeFlags::Union) {

@@ -111,9 +111,13 @@ impl Checker {
         index_type: &Arc<Type>,
         index_type_node: &Arc<Node>,
     ) {
+        let index_literal_kind = match &index_type_node.data {
+            NodeData::LiteralTypeNode(d) => d.literal.kind,
+            _ => index_type_node.kind,
+        };
         if !self.type_argument_stack.is_empty()
             || !matches!(
-                index_type_node.kind,
+                index_literal_kind,
                 SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral
             )
             || !index_type
