@@ -1182,10 +1182,20 @@ fn build_and_check(
 
     // Go compiler_runner.go newCompilerTest：toBeCompiled = 全量 rooted unit
     //（refs_only 时 lastUnit），无扩展过滤；.js 是否参与编译由编译器按
-    // allowJs/checkJs 决定，不由 harness 预筛
+    // allowJs/checkJs 决定，不由 harness 预筛。
+    // Go harnessutil.CompileFilesEx（harnessutil.go:125-133）：programFileNames
+    // 跳过 .json/.tsbuildinfo 扩展的 inputFile，两类 unit 仅落 testfs 供
+    // 模块解析/增量 buildinfo 读取，不作为编译根
     let file_names: Vec<String> = rooted
         .iter()
         .map(|unit| unit_abs_path(&unit.name))
+        .filter(|abs| {
+            !tsox_core::tspath::file_extension_is(abs, tsox_core::tspath::EXTENSION_JSON)
+                && !tsox_core::tspath::file_extension_is(
+                    abs,
+                    tsox_core::tspath::EXTENSION_TS_BUILD_INFO,
+                )
+        })
         .collect();
 
     // Go harnessutil：@symlink/@link 挂为指向真实 unit 的符号链接（InMemoryFS
