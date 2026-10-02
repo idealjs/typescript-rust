@@ -47,6 +47,15 @@ impl Checker {
     }
 
     pub fn check_function_like_expression(&mut self, node: &Arc<Node>) {
+        let has_grammar_error = self.check_grammar_function_like_declaration(node);
+        if !has_grammar_error
+            && matches!(
+                node.data,
+                tsox_frontend::ast::NodeData::FunctionExpression(_)
+            )
+        {
+            self.check_grammar_for_generator(node);
+        }
         let mut contextual_param_count = self
             .call_arg_arrow_context
             .last_mut()

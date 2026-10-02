@@ -181,6 +181,7 @@ bitflags! {
         const InCheckIdentifier                        = 1 << 22;
         const InitializerIsUndefined                   = 1 << 24;
         const InitializerIsUndefinedComputed           = 1 << 25;
+        const FunctionLikeGrammarChecked               = 1 << 26;
     }
 }
 

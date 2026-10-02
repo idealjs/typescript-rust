@@ -319,6 +319,19 @@ impl Checker {
     }
 
     pub fn check_grammar_function_like_declaration(&mut self, node: &Arc<Node>) -> bool {
+        use crate::checker::types::NodeCheckFlags;
+        if self
+            .node_links
+            .get_or_default(node)
+            .flags
+            .contains(NodeCheckFlags::FunctionLikeGrammarChecked)
+        {
+            return false;
+        }
+        self.node_links
+            .get_or_default(node)
+            .flags
+            .insert(NodeCheckFlags::FunctionLikeGrammarChecked);
         let file = self
             .get_source_file_of_node(node)
             .or_else(|| self.current_file.clone());
@@ -381,10 +394,15 @@ impl Checker {
         }
         let equals_greater_than_token = &arrow_func.equals_greater_than_token;
         let head_end = arrow_func
-            .type_parameters
+            .type_node
             .as_ref()
-            .map(|tp| tp.loc.end())
+            .map(|tn| tn.loc.end())
             .unwrap_or(0)
+            .max(arrow_func
+                .type_parameters
+                .as_ref()
+                .map(|tp| tp.loc.end())
+                .unwrap_or(0))
             .max(arrow_func.parameters.loc.end());
         let arrow_end = equals_greater_than_token.loc.end();
         let arrow_text_includes_line_break = head_end <= arrow_end
