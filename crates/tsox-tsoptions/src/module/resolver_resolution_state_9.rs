@@ -352,10 +352,13 @@ impl<'a> ResolutionState<'a> {
         }
     }
 
-    pub(crate) fn create_resolved_module(&self, resolved: Option<Resolved>) -> ResolvedModule {
+    pub(crate) fn create_resolved_module(
+        &self,
+        resolved: Option<Resolved>,
+        is_external_library_import: bool,
+    ) -> ResolvedModule {
         match resolved {
             Some(r) => {
-                let is_external = r.path.contains("/node_modules/");
                 let package_id =
                     r.package_id.or_else(|| compute_package_id(self.fs, &r.path));
                 ResolvedModule {
@@ -363,13 +366,64 @@ impl<'a> ResolutionState<'a> {
                     original_path: r.original_path,
                     extension: r.extension,
                     resolved_using_ts_extension: r.resolved_using_ts_extension,
-                    is_external_library_import: is_external,
+                    is_external_library_import,
                     package_id,
                     ..Default::default()
                 }
             }
             None => ResolvedModule::default(),
         }
+    }
+
+    // Go createResolvedModuleHandlingSymlink：preserveSymlinks 未开启时，对
+    // 非相对名且落在 node_modules 的解析结果按 realpath 回写真实路径，
+    // 符号链接路径记入 originalPath；isExternalLibraryImport 仍按 swap 前
+    // 的符号链接路径判定（Go 同序）
+    pub(crate) fn create_resolved_module_handling_symlink(
+        &self,
+        resolved: Option<Resolved>,
+    ) -> ResolvedModule {
+        let mut resolved = resolved;
+        let is_external_library_import = resolved
+            .as_ref()
+            .is_some_and(|r| r.path.contains("/node_modules/"));
+        if is_external_library_import
+            && self.compiler_options.preserve_symlinks
+                != tsox_core::core::tristate::Tristate::True
+            && resolved
+                .as_ref()
+                .is_some_and(|r| r.original_path.is_empty())
+            && !tsox_core::tspath::is_external_module_name_relative(&self.name)
+        {
+            let r = resolved.as_mut().unwrap();
+            let (original_path, resolved_file_name) =
+                self.get_original_and_resolved_file_name(&r.path);
+            if !original_path.is_empty() {
+                r.path = resolved_file_name;
+                r.original_path = original_path;
+            }
+        }
+        self.create_resolved_module(resolved, is_external_library_import)
+    }
+
+    // Go getOriginalAndResolvedFileName：realpath 与原路径仅大小写差异时
+    // 保留原路径（forceConsistentCasingInFileNames 报错需要原拼写）
+    fn get_original_and_resolved_file_name(&self, file_name: &str) -> (String, String) {
+        let resolved_file_name =
+            tsox_core::tspath::normalize_path(&self.fs.realpath(file_name));
+        let compare_paths_options = tsox_core::tspath::ComparePathsOptions {
+            use_case_sensitive_file_names: self.fs.use_case_sensitive_file_names(),
+            current_directory: self.current_directory.to_string(),
+        };
+        if tsox_core::tspath::compare_paths(
+            file_name,
+            &resolved_file_name,
+            &compare_paths_options,
+        ) == 0
+        {
+            return (String::new(), file_name.to_string());
+        }
+        (file_name.to_string(), resolved_file_name)
     }
 }
 

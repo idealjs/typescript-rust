@@ -190,9 +190,9 @@ impl<'a> ResolutionState<'a> {
                     };
                 }
             }
-            return self.create_resolved_module(None);
+            return self.create_resolved_module_handling_symlink(None);
         }
-        self.create_resolved_module(result)
+        self.create_resolved_module_handling_symlink(result)
     }
 
     pub(crate) fn resolve_node_like_worker(&mut self) -> Option<Resolved> {
