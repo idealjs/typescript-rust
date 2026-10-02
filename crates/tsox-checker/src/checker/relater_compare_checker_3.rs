@@ -38,21 +38,23 @@ impl Checker {
         self.relater_error_node = error_node.cloned();
         let saved_chain = std::mem::take(&mut self.relater_error_chain);
         let was_active = self.relater_chain_active;
-        self.relater_chain_active = true;
-        if self.weak_type_precheck_fires(source, target, relation) {
-            return self.emit_chain_diagnostic_and_restore(
-                error_node,
-                diagnostic_output,
-                was_active,
-                saved_chain,
-            );
-        }
+        // Go checkTypeRelatedToAndOptionallyElaborate（relater.go:427-434）两段式：
+        // 第一段 isTypeRelatedTo 静默（Go 侧全新 relater、reportErrors=false，
+        // errorChain 恒空）；失败且 errorNode 非空才进入上报段
+        // checkTypeRelatedToEx——上报段取全新 relater（清链）重算一次，
+        // 链条目只来自该次重算
+        self.relater_chain_active = false;
         let ok = self.is_type_related_to(source, target, relation);
+        self.relater_chain_active = was_active;
         if ok {
-            self.relater_chain_active = was_active;
             self.relater_error_chain = saved_chain;
             return true;
         }
+
+        let Some(error_node) = error_node else {
+            self.relater_error_chain = saved_chain;
+            return false;
+        };
 
         if let Some(expr) = expr
             && self.elaborate_error_with_head(
@@ -64,9 +66,26 @@ impl Checker {
                 diagnostic_output.as_deref_mut(),
             )
         {
-            self.relater_chain_active = was_active;
             self.relater_error_chain = saved_chain;
             return false;
+        }
+
+        // 上报段：等价 Go getRelater 的全新 relater（errorChain=nil）
+        self.relater_error_chain.clear();
+        self.relater_chain_active = true;
+        if self.weak_type_precheck_fires(source, target, relation) {
+            return self.emit_chain_diagnostic_and_restore(
+                Some(error_node),
+                diagnostic_output,
+                was_active,
+                saved_chain,
+            );
+        }
+        let related = self.is_type_related_to(source, target, relation);
+        if related {
+            self.relater_chain_active = was_active;
+            self.relater_error_chain = saved_chain;
+            return true;
         }
 
         self.try_elaborate_primitive_and_object(source, target);
@@ -200,11 +219,6 @@ impl Checker {
             );
         }
 
-        let Some(error_node) = error_node else {
-            self.relater_chain_active = was_active;
-            self.relater_error_chain = saved_chain;
-            return false;
-        };
         self.emit_chain_diagnostic_and_restore(
             Some(error_node),
             diagnostic_output,
