@@ -212,14 +212,19 @@ impl Checker {
             let arg_type = if self.is_context_sensitive(arg) {
                 self.type_of_context_sensitive_arg(arg, &param_type)
             } else {
-                // Go isSignatureApplicable(checker.go:9446)：定型后签名对每个
-                // 非 CS 实参 checkExpressionWithContextualType(paramType, nil)
-                // 重检，元组/Iterable 等上下文在适用性判定现场成立
-                self.clear_node_type_cache_under(arg);
-                self.active_inferential_contextual = Some((arg.id(), Arc::clone(&param_type)));
-                let t = self.get_type_of_node(arg);
-                self.active_inferential_contextual = None;
-                t
+                // Go isSignatureApplicable（checker.go:9446）经
+                // checkExpressionWithContextualType 进 checkExpressionWorker
+                // 完整检查实参（checker.go:7962 箭头函数臂 →
+                // checkFunctionExpressionOrObjectLiteralMethod →
+                // checkGrammarFunctionLikeDeclaration，grammarchecks.go:763
+                // TS1200 等语法检查在报错判定现场触发）；
+                // get_type_of_node 只算型不走检查分派
+                self.check_expression_with_contextual_type(
+                    arg,
+                    &param_type,
+                    None,
+                    CheckMode::Normal,
+                )
             };
             if self.is_type_related_to(
                 &arg_type,
