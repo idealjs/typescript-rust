@@ -415,7 +415,7 @@ impl<'a> ResolutionState<'a> {
             use_case_sensitive_file_names: self.fs.use_case_sensitive_file_names(),
             current_directory: self.current_directory.to_string(),
         };
-        if tsox_core::tspath::compare_paths(
+        if tsox_core::tspath::mig::m3i::compare_paths(
             file_name,
             &resolved_file_name,
             &compare_paths_options,
