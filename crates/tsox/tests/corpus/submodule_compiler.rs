@@ -1180,18 +1180,13 @@ fn build_and_check(
         }
     }
 
-    let mut file_names: Vec<String> = Vec::new();
-    for unit in &rooted {
-        let abs = unit_abs_path(&unit.name);
-        let lower = abs.to_ascii_lowercase();
-        if lower.ends_with(".ts")
-            || lower.ends_with(".tsx")
-            || lower.ends_with(".mts")
-            || lower.ends_with(".cts")
-        {
-            file_names.push(abs);
-        }
-    }
+    // Go compiler_runner.go newCompilerTest：toBeCompiled = 全量 rooted unit
+    //（refs_only 时 lastUnit），无扩展过滤；.js 是否参与编译由编译器按
+    // allowJs/checkJs 决定，不由 harness 预筛
+    let file_names: Vec<String> = rooted
+        .iter()
+        .map(|unit| unit_abs_path(&unit.name))
+        .collect();
 
     // Go harnessutil：@symlink/@link 挂为指向真实 unit 的符号链接（InMemoryFS
     // 原生支持，resolver 列目录与读取均穿透；program 侧按 realpath 规范化
