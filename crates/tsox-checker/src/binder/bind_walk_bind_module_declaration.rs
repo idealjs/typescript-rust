@@ -169,8 +169,12 @@ impl Binder {
                 _ => false,
             };
             if name_is_string_literal {
-                // Go bindModuleDeclaration ambient 分支：字符串名 ambient 模块恒 ValueModule
-                self.declare_symbol(node, SymbolFlags::ValueModule, SymbolFlags::ValueModuleExcludes);
+                if tsox_frontend::ast::mig::m3g::is_module_augmentation_external(node) {
+                    let (includes, excludes) = Self::module_symbol_flags(node);
+                    self.declare_symbol(node, includes, excludes);
+                } else {
+                    self.declare_symbol(node, SymbolFlags::ValueModule, SymbolFlags::ValueModuleExcludes);
+                }
             } else {
                 // Go declareModuleSymbol：按模块实例化状态取 ValueModule/NamespaceModule
                 let state = get_module_instance_state(node);

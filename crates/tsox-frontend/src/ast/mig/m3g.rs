@@ -4,9 +4,20 @@ use std::sync::Arc;
 use super::m3g_2::is_proto_setter;
 use super::m3g_3::{skip_outer_expressions, OuterExpressionKinds};
 use super::m3h::{climb_past_property_access, climb_past_property_or_element_access};
+use super::w7a::is_external_module_indicator;
 
 fn is_external_module_node(node: &Arc<Node>) -> bool {
-    is_source_file(node)
+    if !is_source_file(node) {
+        return false;
+    }
+    match &node.data {
+        NodeData::SourceFile(d) => d
+            .statements
+            .nodes
+            .iter()
+            .any(|stmt| is_external_module_indicator(stmt)),
+        _ => false,
+    }
 }
 
 pub fn is_jsx_call_like(node: &Node) -> bool {
