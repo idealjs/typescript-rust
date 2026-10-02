@@ -201,6 +201,14 @@ impl Checker {
 
         self.add_undefined_to_globals_or_error_on_redeclaration();
 
+        let args_symbol = self.arguments_symbol.clone();
+        if let Some(sym) = args_symbol {
+            let t = self.get_global_type_by_name("IArguments");
+            if let Some(t) = t {
+                self.value_symbol_links.get_or_default(&sym).resolved_type = Some(t);
+            }
+        }
+
         self.report_missing_global_types();
     }
 
