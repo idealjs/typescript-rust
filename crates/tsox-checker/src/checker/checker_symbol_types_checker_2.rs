@@ -732,17 +732,6 @@ impl Checker {
                     }
                     let args: Vec<Arc<Node>> = d.arguments.iter().cloned().collect();
                     let result = (|| {
-                        // Go getContextuallyTypedParameterType（checker.go:29812-29814）：
-                        // rest 参数先于位置取型走 getSpreadArgumentType
-                        let is_rest = matches!(
-                            &param.data,
-                            NodeData::ParameterDeclaration(pd) if pd.dot_dot_dot_token.is_some()
-                        );
-                        if is_rest {
-                            return Some(
-                                self.get_spread_argument_type(&args, param_index, args.len()),
-                            );
-                        }
                         if param_index < args.len() {
                             let raw = self.get_type_of_node(&args[param_index]);
                             let widened = self.widen_argument_type_deep(&raw);
