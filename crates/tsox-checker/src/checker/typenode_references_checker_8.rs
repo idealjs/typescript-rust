@@ -29,8 +29,8 @@ impl Checker {
         {
             return self.get_any_type();
         }
-        let mut members: Vec<(String, Arc<Symbol>)> = symbol
-            .exports
+        let mut members: Vec<(String, Arc<Symbol>)> = self
+            .get_exports_of_module_table(symbol)
             .iter()
             .filter(|(_, v)| {
                 // type-only 导出别名不属于模块实例的值成员
