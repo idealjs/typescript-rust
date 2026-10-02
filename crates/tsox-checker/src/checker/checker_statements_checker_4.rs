@@ -343,7 +343,13 @@ impl Checker {
                         }
                     } else {
                         match self.initial_type_of_declaration(node) {
-                            Some(t) => t,
+                            Some(t) => {
+                                self.widen_type_for_variable_like_declaration(
+                                    Some(t),
+                                    node,
+                                    true,
+                                )
+                            }
                             None => self.auto_type(),
                         }
                     }

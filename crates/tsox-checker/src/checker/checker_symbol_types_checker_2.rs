@@ -153,7 +153,12 @@ impl Checker {
                     None => Some(self.true_type()),
                 };
             }
-            NodeData::BindingElement(_) => return self.binding_element_type(&decl),
+            NodeData::BindingElement(_) => {
+                let t = self.binding_element_type(&decl)?;
+                return Some(
+                    self.widen_type_for_variable_like_declaration(Some(t), &decl, true),
+                );
+            }
             // Go getTypeOfVariableOrParameterOrPropertyWorker：export= 符号
             // 类型 = 表达式（或注解型）拓宽
             NodeData::ExportAssignment(d) => {
@@ -232,7 +237,9 @@ impl Checker {
                     .get_or_default(symbol)
                     .resolved_type
                     .replace(placeholder);
-                let t = self.initial_type_of_declaration(&decl);
+                let t = self
+                    .initial_type_of_declaration(&decl)
+                    .map(|t| self.widen_type_for_variable_like_declaration(Some(t), &decl, true));
                 // expando：函数初始化式的变量携带函数体属性赋值（binder exports）
                 let t = t.map(|t| {
                     let is_fn_init = matches!(
