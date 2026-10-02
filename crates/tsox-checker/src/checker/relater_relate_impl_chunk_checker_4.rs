@@ -284,6 +284,31 @@ impl Checker {
                 return self.is_tuple_type_related_to(&source, &target, relation);
             }
 
+            // Go relater.go:3873-3879
+            if self.is_array_type(&target)
+                && ((target
+                    .object_flags
+                    .contains(crate::checker::types::ObjectFlags::IsReadonlyArray)
+                    && crate::checker::mig::wc1b::every_type(&source, &|t: &Arc<Type>| {
+                        crate::checker::utilities_is_optional_symbol::is_array_or_tuple_type(t)
+                    }))
+                    || crate::checker::mig::wc1b::every_type(&source, &|t: &Arc<Type>| {
+                        crate::checker::utilities_token_is_identifier_or_keyword::is_tuple_type(t)
+                            && crate::checker::mig::m2a::is_mutable_tuple_type(t)
+                    }))
+            {
+                if relation != RelationKind::Identity {
+                    let number_type = self.number_type();
+                    let any_type = self.any_type();
+                    let source_index =
+                        self.get_index_type_of_type_ex(&source, &number_type, &any_type);
+                    let target_index =
+                        self.get_index_type_of_type_ex(&target, &number_type, &any_type);
+                    return self.is_type_related_to(&source_index, &target_index, relation);
+                }
+                return false;
+            }
+
             // Go propertiesRelatedTo 元组目标分支：源非数组/元组/演进数组时，
             // 变长（rest/variadic）目标直接拒绝；固定长度目标要求源 length
             // 可赋给长度字面量（接口的 length: number 不可赋给 N）
