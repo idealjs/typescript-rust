@@ -214,10 +214,19 @@ impl Program {
             } else {
                 options.types.clone()
             };
+            let containing_directory = if !options.config_file_path.is_empty() {
+                tsox_core::tspath::get_directory_path(&options.config_file_path)
+            } else {
+                host.current_directory().to_string()
+            };
+            let inferred_types_containing_file = tsox_core::tspath::combine_paths(
+                &containing_directory,
+                &[tsox_tsoptions::module::INFERRED_TYPES_CONTAINING_FILE],
+            );
             for type_name in &expanded_types {
                 let (resolved, _traces) = resolver.resolve_type_reference_directive(
                     type_name,
-                    &config_file_name,
+                    &inferred_types_containing_file,
                     tsox_core::core::compiler_options::ModuleKind::None,
                     None,
                 );
