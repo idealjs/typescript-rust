@@ -159,7 +159,7 @@ pub(crate) fn skip_satisfies_expressions(node: Option<&Arc<Node>>) -> Option<Arc
     node
 }
 
-pub(crate) fn get_function_like_host(host: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_function_like_host(host: &Arc<Node>) -> Option<Arc<Node>> {
     let mut fun: Option<Arc<Node>> = Some(host.clone());
     match host.kind {
         SyntaxKind::VariableStatement => {

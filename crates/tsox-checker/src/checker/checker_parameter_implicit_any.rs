@@ -186,21 +186,73 @@ impl Checker {
         let Some(file) = &self.current_file else {
             return false;
         };
-        for jsdoc in file.resolve_jsdoc(node) {
-            let tsox_frontend::ast::NodeData::JSDoc(d) = &jsdoc.data else {
-                continue;
-            };
-            let Some(tags) = &d.tags else { continue };
-            for tag in tags.iter() {
-                if let tsox_frontend::ast::NodeData::JSDocParameterOrPropertyTag(td) = &tag.data
-                    && td.name.kind == SyntaxKind::Identifier
-                    && td.name.text() == param_name
-                    && td.type_expression.is_some()
-                {
-                    return true;
-                }
+        let Some(tag) = jsdoc_param_tag_of_function(file, node, param_name) else {
+            return false;
+        };
+        matches!(
+            &tag.data,
+            tsox_frontend::ast::NodeData::JSDocParameterOrPropertyTag(td)
+                if td.type_expression.is_some()
+        )
+    }
+}
+
+/// Go reparseHosted(JSDocParameterTag)（reparser.go:477）经
+/// getFunctionLikeHost（reparser.go:657）解析宿主：挂在宿主语句
+/// （module.exports = fn / var f = fn / obj.p = fn / return fn）上的
+/// @param 标签同样适用于右值函数；宿主只取最后一段 JSDoc（reparseTags
+/// 的 isLast），函数自身直挂的 JSDoc 优先（Go 内层节点先 reparse）
+pub(crate) fn jsdoc_param_tag_of_function(
+    file: &tsox_frontend::ast::SourceFile,
+    func: &Arc<Node>,
+    param_name: &str,
+) -> Option<Arc<Node>> {
+    fn tag_matching(jsdoc: &Arc<Node>, param_name: &str) -> Option<Arc<Node>> {
+        let tsox_frontend::ast::NodeData::JSDoc(d) = &jsdoc.data else {
+            return None;
+        };
+        let tags = d.tags.as_ref()?;
+        tags.nodes
+            .iter()
+            .find(|tag| {
+                tag.kind == SyntaxKind::JSDocParameterTag
+                    && matches!(
+                        &tag.data,
+                        tsox_frontend::ast::NodeData::JSDocParameterOrPropertyTag(td)
+                            if td.name.kind == SyntaxKind::Identifier
+                                && td.name.text() == param_name
+                    )
+            })
+            .cloned()
+    }
+
+    for jsdoc in file.resolve_jsdoc(func) {
+        if let Some(tag) = tag_matching(&jsdoc, param_name) {
+            return Some(tag);
+        }
+    }
+
+    let mut ancestor = func.parent();
+    while let Some(host) = ancestor {
+        if matches!(
+            host.kind,
+            SyntaxKind::VariableStatement
+                | SyntaxKind::PropertyAssignment
+                | SyntaxKind::PropertyDeclaration
+                | SyntaxKind::ExportAssignment
+                | SyntaxKind::ReturnStatement
+                | SyntaxKind::ExpressionStatement
+        ) && let Some(hosted) = tsox_frontend::parser::mig::m4d_2::get_function_like_host(&host)
+            && Arc::ptr_eq(&hosted, func)
+        {
+            let jsdocs = file.resolve_jsdoc(&host);
+            if let Some(last) = jsdocs.last()
+                && let Some(tag) = tag_matching(last, param_name)
+            {
+                return Some(tag);
             }
         }
-        false
+        ancestor = host.parent();
     }
+    None
 }
