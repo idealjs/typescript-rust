@@ -69,7 +69,11 @@ impl Checker {
                     ) {
                         continue;
                     }
-                    let type_str = self.type_to_string(&p);
+                    let type_str = if arg_expr.kind == SyntaxKind::BigIntLiteral {
+                        "bigint".to_string()
+                    } else {
+                        self.type_to_string(&p)
+                    };
                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                         self.current_file.clone(),
                         arg_expr.loc,
