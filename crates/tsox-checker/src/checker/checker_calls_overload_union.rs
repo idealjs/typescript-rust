@@ -186,12 +186,14 @@ impl Checker {
 }
 
 impl Checker {
-    /// Go getUnionSignatures 兜底分支（checker.go:21465 起）：各成分单签名、
-    /// 无泛型、无有效 rest（定长 tuple rest 视作位置参数）时合并为单一
-    /// 签名，参数位取交集（combineUnionOrIntersectionParameters，
-    /// union 方向）、min 取 max、返回取并集。有效 rest（数组/非元组/
-    /// 变长 tuple）与泛型签名维持逐成员拼接，避免无 composite 分布语义
-    /// 的真交集误伤上下文敏感推断
+    /// Go getUnionSignatures 兜底分支（checker.go:22386 起）：各成分单签名、
+    /// 无泛型、无变长 tuple rest 时合并为单一签名，参数位取交集
+    /// （combineUnionOrIntersectionParameters，union 方向）、min 取 max、
+    /// 返回取并集。数组 rest 参与合并：rest 位型取元素交集再重包数组
+    /// （tryGetTypeAtPosition 在 rest 位给元素型 relater.go:1908、
+    /// checker.go:22513），最长签名无有效 rest 而任一成分有时追加 rest 位
+    /// （checker.go:22526）。变长 tuple rest 与泛型签名维持逐成员拼接，
+    /// 避免无 composite 分布语义的真交集误伤上下文敏感推断
     pub(crate) fn try_combine_union_call_signatures(
         &mut self,
         sigs: &[Arc<Signature>],
@@ -199,38 +201,55 @@ impl Checker {
         if sigs.len() < 2 {
             return None;
         }
+        // Go hasEffectiveRestParameter（relater.go:1873）：数组/变长 tuple
+        // rest 为有效 rest
+        let mut effective_rest: Vec<bool> = Vec::with_capacity(sigs.len());
         for s in sigs {
             if !s.type_parameters.is_empty() {
                 return None;
             }
+            let mut has_effective_rest = false;
             if s.has_rest_parameter() {
                 let rest_type = self.effective_rest_param_type(s)?;
-                let TypeData::Tuple(t) = &rest_type.data else {
-                    return None;
-                };
-                if t.combined_flags.intersects(
-                    ElementFlags::Variadic | ElementFlags::Rest,
-                ) {
-                    return None;
+                match &rest_type.data {
+                    TypeData::Tuple(t) => {
+                        if t.combined_flags.intersects(
+                            ElementFlags::Variadic | ElementFlags::Rest,
+                        ) {
+                            return None;
+                        }
+                    }
+                    _ => has_effective_rest = true,
                 }
             }
+            effective_rest.push(has_effective_rest);
         }
+        // Go getParameterCount（relater.go:1814）：数组 rest 的 rest 位计 1 位
         let mut positional_counts: Vec<usize> = Vec::with_capacity(sigs.len());
         for s in sigs {
             let mut count = s.parameters.len();
             if s.has_rest_parameter() {
-                count -= 1;
                 let rest_type = self.effective_rest_param_type(s)?;
                 if let TypeData::Tuple(t) = &rest_type.data {
+                    count -= 1;
                     count += t.fixed_length;
                 }
             }
             positional_counts.push(count);
         }
         let max_count = positional_counts.iter().copied().max().unwrap_or(0);
+        let longest_has_rest = positional_counts
+            .iter()
+            .position(|c| *c == max_count)
+            .and_then(|k| effective_rest.get(k))
+            .copied()
+            .unwrap_or(false);
+        let either_has_rest = effective_rest.iter().any(|b| *b);
+        let needs_extra_rest = either_has_rest && !longest_has_rest;
         let max_min = sigs.iter().map(|s| s.min_argument_count).max().unwrap_or(0);
 
-        let mut parameters: Vec<Arc<Symbol>> = Vec::with_capacity(max_count);
+        let mut parameters: Vec<Arc<Symbol>> =
+            Vec::with_capacity(max_count + usize::from(needs_extra_rest));
         for i in 0..max_count {
             let mut types: Vec<Arc<Type>> = Vec::new();
             for sig in sigs {
@@ -243,12 +262,19 @@ impl Checker {
             } else {
                 self.get_intersection_type(types)
             };
+            let is_rest_slot =
+                either_has_rest && !needs_extra_rest && i + 1 == max_count;
+            let stored = if is_rest_slot {
+                self.create_array_type(combined_type)
+            } else {
+                combined_type
+            };
             let optional = sigs
                 .iter()
                 .all(|s| i >= s.min_argument_count.max(0) as usize);
             let mut symbol = Symbol::new(
                 SymbolFlags::Property
-                    | if optional {
+                    | if optional && !is_rest_slot {
                         SymbolFlags::Optional
                     } else {
                         SymbolFlags::empty()
@@ -256,11 +282,37 @@ impl Checker {
                 format!("arg{i}"),
             );
             symbol.check_flags |= CheckFlags::SyntheticProperty;
+            if is_rest_slot {
+                symbol.check_flags |= CheckFlags::RestParameter;
+            }
             let arc = Arc::new(symbol);
             self.value_symbol_links.insert(
                 &arc,
                 crate::checker::types::ValueSymbolLinks {
-                    resolved_type: Some(combined_type),
+                    resolved_type: Some(stored),
+                    ..Default::default()
+                },
+            );
+            parameters.push(arc);
+        }
+        if needs_extra_rest {
+            let rest_sig = sigs
+                .iter()
+                .zip(effective_rest.iter())
+                .find(|(_, r)| **r)
+                .map(|(s, _)| Arc::clone(s));
+            let elem = rest_sig
+                .and_then(|s| self.try_get_type_at_position(&s, max_count))
+                .unwrap_or_else(|| self.any_type());
+            let array = self.create_array_type(elem);
+            let mut symbol = Symbol::new(SymbolFlags::Property, "args".to_string());
+            symbol.check_flags |=
+                CheckFlags::SyntheticProperty | CheckFlags::RestParameter;
+            let arc = Arc::new(symbol);
+            self.value_symbol_links.insert(
+                &arc,
+                crate::checker::types::ValueSymbolLinks {
+                    resolved_type: Some(array),
                     ..Default::default()
                 },
             );
@@ -281,9 +333,16 @@ impl Checker {
 
         let mut combined = Signature::new();
         combined.flags = SignatureFlags::IsSignatureCandidateForOverloadFailure;
+        if parameters
+            .last()
+            .is_some_and(|p| p.check_flags.contains(CheckFlags::RestParameter))
+        {
+            combined.flags |= SignatureFlags::HasRestParameter;
+        }
         combined.declaration = sigs.first().and_then(|s| s.declaration.clone());
         combined.parameters = parameters;
         combined.min_argument_count = max_min;
+        combined.resolved_min_argument_count = -1;
         if let Some(rt) = return_type {
             let _ = combined.resolved_return_type.set(rt);
         }
