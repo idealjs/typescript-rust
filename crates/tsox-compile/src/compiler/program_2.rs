@@ -70,6 +70,8 @@ impl Program {
             );
         }
 
+        let mut source_files_found_searching_node_modules: std::collections::HashSet<String> =
+            std::collections::HashSet::new();
         {
             let resolver = &resolver;
 
@@ -296,6 +298,10 @@ impl Program {
                         let resolved_path = host
                             .fs()
                             .realpath(resolved_module.resolved_file_name.as_str());
+                        if resolved_module.is_external_library_import {
+                            source_files_found_searching_node_modules
+                                .insert(tsox_core::tspath::normalize_path(&resolved_path));
+                        }
                         let first_path = resolved_module
                             .package_id
                             .as_ref()
@@ -462,6 +468,14 @@ impl Program {
                         resolver.resolve_module_name(&module_ref, &file.file_name, mode, None);
                     if resolved.as_ref().is_some_and(|m| m.is_resolved()) {
                         let resolved_path = resolved.as_ref().unwrap().resolved_file_name.as_str();
+                        if resolved
+                            .as_ref()
+                            .is_some_and(|m| m.is_external_library_import)
+                        {
+                            source_files_found_searching_node_modules.insert(
+                                tsox_core::tspath::normalize_path(resolved_path),
+                            );
+                        }
                         if visited.insert(resolved_path.to_string()) {
                             load_source_file_with_references(
                                 resolved_path,
@@ -542,7 +556,7 @@ impl Program {
             jsx_runtime_import_specifiers: HashMap::new(),
             import_helpers_import_specifiers: HashMap::new(),
             lib_files: HashMap::new(),
-            source_files_found_searching_node_modules: std::collections::HashSet::new(),
+            source_files_found_searching_node_modules,
             include_processor: None,
             output_file_to_project_reference_source: HashMap::new(),
             redirect_targets_map: HashMap::new(),
