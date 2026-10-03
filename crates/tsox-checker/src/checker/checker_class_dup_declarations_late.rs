@@ -111,7 +111,7 @@ impl Checker {
             let Some(includes) = member_symbol_includes(m) else {
                 continue;
             };
-            let key = (name, m.has_syntactic_modifier(ModifierFlags::Static));
+            let key = (name.clone(), m.has_syntactic_modifier(ModifierFlags::Static));
             let group = groups.entry(key.clone()).or_insert_with(|| {
                 order.push(key.clone());
                 Group {

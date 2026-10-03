@@ -344,7 +344,7 @@ impl Binder {
                     // 报错路径（cloduleWithDuplicateMember1）
                     .filter(|d| {
                         let mut p = d.parent();
-                        while let Some(cur) = p {
+                        while let Some(cur) = p.clone() {
                             if matches!(
                                 cur.kind,
                                 SyntaxKind::VariableDeclarationList
