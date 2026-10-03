@@ -10,7 +10,7 @@ impl Checker {
             _ => return self.error_type(),
         };
         match keyword_token {
-            SyntaxKind::NewKeyword => self.any_type(),
+            SyntaxKind::NewKeyword => self.check_new_target_meta_property(node),
             SyntaxKind::ImportKeyword => {
                 if name.text() == "defer" {
                     return self.error_type();
