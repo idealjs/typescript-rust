@@ -965,7 +965,11 @@ impl Checker {
                     }
                 }
                 if diagnostics_allowed {
-                    let type_str = self.type_to_string(&name_expr_type);
+                    let type_str = if cd.expression.kind == SyntaxKind::BigIntLiteral {
+                        "bigint".to_string()
+                    } else {
+                        self.type_to_string(&name_expr_type)
+                    };
                     let anchor_loc = cd.expression.loc;
                     self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                         self.current_file.clone(),
