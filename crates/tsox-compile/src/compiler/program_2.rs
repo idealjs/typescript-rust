@@ -62,6 +62,16 @@ impl Program {
             )));
         }
 
+        if options.check_js.is_true() && !options.get_allow_js() {
+            diagnostics.push(Arc::new(Diagnostic::new(
+                None,
+                TextRange::default(),
+                tsox_core::diagnostics::messages_generated::
+                    OPTION_0_CANNOT_BE_SPECIFIED_WITHOUT_SPECIFYING_OPTION_1,
+                vec!["checkJs".to_string(), "allowJs".to_string()],
+            )));
+        }
+
         let module_in_node_family = matches!(
             options.module,
             ModuleKind::Node16 | ModuleKind::Node18 | ModuleKind::Node20 | ModuleKind::NodeNext
@@ -184,6 +194,15 @@ impl Program {
             Vec<(String, Option<tsox_tsoptions::module::ResolvedModule>)>,
         > = HashMap::new();
         for file_name in &opts.config.file_names {
+            if root_file_unsupported_extension_diagnostic(
+                file_name,
+                &options,
+                allow_js,
+                host.use_case_sensitive_file_names(),
+                &mut diagnostics,
+            ) {
+                continue;
+            }
             load_source_file_with_references(
                 file_name,
                 host.as_ref(),
@@ -746,4 +765,90 @@ fn apply_module_detection_force(
             }
         }
     }
+}
+
+// Go fileloader isSupportedExtension + GetSupportedExtensions（tsconfigparsing.go:2095）：
+// TS 扩展恒支持，JS 扩展仅 allowJs 时支持，resolveJsonModule 追加 .json
+fn is_supported_root_extension(canonical_file_name: &str, allow_js: bool, resolve_json_module: bool) -> bool { ::tsox_core::fntrace::enter("is_supported_root_extension"); 
+    let ts_groups: [&[&str]; 3] = [
+        &[".ts", ".tsx", ".d.ts"],
+        &[".cts", ".d.cts"],
+        &[".mts", ".d.mts"],
+    ];
+    let all_groups: [&[&str]; 3] = [
+        &[".ts", ".tsx", ".d.ts", ".js", ".jsx"],
+        &[".cts", ".d.cts", ".cjs"],
+        &[".mts", ".d.mts", ".mjs"],
+    ];
+    let groups: &[&[&str]] = if allow_js { &all_groups } else { &ts_groups };
+    if groups
+        .iter()
+        .any(|g| g.iter().any(|e| tsox_core::tspath::file_extension_is(canonical_file_name, e)))
+    {
+        return true;
+    }
+    resolve_json_module && tsox_core::tspath::file_extension_is(canonical_file_name, ".json")
+}
+
+// Go filesparser findSourceFile（filesparser.go:79-104）：allowNonTsExtensions
+// 未开且扩展不受支持时不解析该根文件，记 processing 诊断（TS6504/TS6054，
+// 挂 Root file specified for compilation 理由链）。
+fn root_file_unsupported_extension_diagnostic(
+    file_name: &str,
+    options: &CompilerOptions,
+    allow_js: bool,
+    use_case_sensitive_file_names: bool,
+    diagnostics: &mut Vec<Arc<Diagnostic>>,
+) -> bool { ::tsox_core::fntrace::enter("root_file_unsupported_extension_diagnostic");
+    if !tsox_core::tspath::has_extension(file_name) || options.allow_non_ts_extensions.is_true() {
+        return false;
+    }
+    let canonical = tsox_core::tspath::get_canonical_file_name(file_name, use_case_sensitive_file_names);
+    if is_supported_root_extension(&canonical, allow_js, options.resolve_json_module.is_true()) {
+        return false;
+    }
+    let is_js = tsox_core::tspath::has_js_file_extension(&canonical);
+    let (message, args) = if is_js {
+        (
+            tsox_core::diagnostics::messages_generated::
+                FILE_0_IS_A_JAVASCRIPT_FILE_DID_YOU_MEAN_TO_ENABLE_THE_ALLOWJS_OPTION,
+            vec![file_name.to_string()],
+        )
+    } else {
+        let ts_groups: [&[&str]; 3] = [
+            &[".ts", ".tsx", ".d.ts"],
+            &[".cts", ".d.cts"],
+            &[".mts", ".d.mts"],
+        ];
+        let all_groups: [&[&str]; 3] = [
+            &[".ts", ".tsx", ".d.ts", ".js", ".jsx"],
+            &[".cts", ".d.cts", ".cjs"],
+            &[".mts", ".d.mts", ".mjs"],
+        ];
+        let flat: Vec<&str> = (if allow_js { &all_groups } else { &ts_groups })
+            .iter()
+            .flat_map(|g| g.iter().copied())
+            .collect();
+        (
+            tsox_core::diagnostics::messages_generated::
+                FILE_0_HAS_AN_UNSUPPORTED_EXTENSION_THE_ONLY_SUPPORTED_EXTENSIONS_ARE_1,
+            vec![file_name.to_string(), format!("'{}'", flat.join("', '"))],
+        )
+    };
+    let mut reason = Diagnostic::new(
+        None,
+        TextRange::default(),
+        tsox_core::diagnostics::messages_generated::THE_FILE_IS_IN_THE_PROGRAM_BECAUSE_COLON,
+        Vec::new(),
+    );
+    reason.message_chain = vec![Diagnostic::new(
+        None,
+        TextRange::default(),
+        tsox_core::diagnostics::messages_generated::ROOT_FILE_SPECIFIED_FOR_COMPILATION,
+        Vec::new(),
+    )];
+    let mut diag = Diagnostic::new(None, TextRange::default(), message, args);
+    diag.message_chain = vec![reason];
+    diagnostics.push(Arc::new(diag));
+    true
 }
