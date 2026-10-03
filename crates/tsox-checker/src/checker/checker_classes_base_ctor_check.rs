@@ -33,7 +33,25 @@ impl Checker {
                 return;
             }
         }
-        let value_type = self.check_expression_ex(expr, CheckMode::Normal);
+        // Go getBaseConstructorTypeOfClass（checker.go:17958）：heritage 表达式经
+        // checkExpression→resolveEntityName(Value)→getTypeOfSymbol 取值型；
+        // check_expression_ex 对 heritage 位标识符经 binder 节点链接解析失败
+        // 静默得 errorType，被 is_error_type 早退吞掉 TS2507，故实体名形态按
+        // Value 含义解析到符号后直接取其值型
+        let value_type = if matches!(
+            expr.kind,
+            SyntaxKind::Identifier | SyntaxKind::PropertyAccessExpression
+        ) {
+            match self
+                .resolve_entity_name_class_symbol(expr)
+                .filter(|s| s.flags.intersects(SymbolFlags::VALUE | SymbolFlags::ExportValue))
+            {
+                Some(symbol) => self.get_type_of_symbol(&symbol),
+                None => self.check_expression_ex(expr, CheckMode::Normal),
+            }
+        } else {
+            self.check_expression_ex(expr, CheckMode::Normal)
+        };
         if value_type.flags.contains(TypeFlags::Any) || self.is_error_type(&value_type) {
             return;
         }
