@@ -75,6 +75,22 @@ impl Checker {
         if !self.declaration_is_ambient(node) {
             self.erasable_syntax_error(node, node.loc);
         }
+        // Go checkExportAssignment：export 赋值被 namespace 包裹时报
+        // TS1063/TS1319 并提前返回，跳过后续 ESM/System 文法检查
+        if crate::checker::mig::wc3_2::is_contained_by_namespace(node) {
+            let message = if d.is_export_equals {
+                &AN_EXPORT_ASSIGNMENT_CANNOT_BE_USED_IN_A_NAMESPACE
+            } else {
+                &A_DEFAULT_EXPORT_CAN_ONLY_BE_USED_IN_AN_ECMASCRIPT_STYLE_MODULE
+            };
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                node.loc,
+                *message,
+                Vec::new(),
+            ));
+            return;
+        }
         let module_kind = self.compiler_options.get_emit_module_kind();
         let ambient = self.declaration_is_ambient(node);
         let implied_format = self
