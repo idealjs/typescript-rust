@@ -367,10 +367,30 @@ impl Checker {
             TypeData::Object(o) => &o.structured,
             _ => return Arc::clone(derived),
         };
-        let base_data = match &base.data {
-            TypeData::Object(o) => &o.structured,
-            _ => return Arc::clone(derived),
-        };
+        // Go resolveObjectTypeMembers（checker.go:20275-20293）：继承成员经
+        // getPropertiesOfType / getSignaturesOfType / getIndexInfosOfType 取得，
+        // 交集基型走联合交集视图（同名属性合成符号、签名按成分拼接、索引
+        // 信息按键型合并），对象基型直取已解析成员
+        let (base_props, base_index_infos, base_call_signatures, base_construct_signatures) =
+            if let TypeData::Intersection(_) = &base.data {
+                (
+                    self.get_properties_of_type(base),
+                    self.get_index_infos_of_type(base),
+                    self.get_signatures_of_type(base, SignatureKind::Call),
+                    self.get_signatures_of_type(base, SignatureKind::Construct),
+                )
+            } else {
+                let base_data = match &base.data {
+                    TypeData::Object(o) => &o.structured,
+                    _ => return Arc::clone(derived),
+                };
+                (
+                    base_data.properties.clone(),
+                    base_data.index_infos.clone(),
+                    base_data.call_signatures().to_vec(),
+                    base_data.construct_signatures().to_vec(),
+                )
+            };
 
         let mut symbol_table = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::new();
@@ -380,7 +400,7 @@ impl Checker {
             props.push(Arc::clone(prop));
         }
 
-        for prop in &base_data.properties {
+        for prop in &base_props {
             if symbol_table.get(&prop.name).is_some() {
                 continue;
             }
@@ -389,14 +409,14 @@ impl Checker {
         }
 
         let mut index_infos = derived_data.index_infos.clone();
-        index_infos.extend(base_data.index_infos.iter().cloned());
+        index_infos.extend(base_index_infos.iter().cloned());
 
         let mut call_signatures: Vec<Arc<Signature>> = derived_data.call_signatures().to_vec();
         let derived_call_count = call_signatures.len();
-        call_signatures.extend(base_data.call_signatures().iter().cloned());
+        call_signatures.extend(base_call_signatures.iter().cloned());
         let mut signatures = call_signatures;
         signatures.extend(derived_data.construct_signatures().iter().cloned());
-        signatures.extend(base_data.construct_signatures().iter().cloned());
+        signatures.extend(base_construct_signatures.iter().cloned());
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::Anonymous,
