@@ -158,7 +158,9 @@ impl Checker {
                 return;
             }
         }
-        self.check_variable_like_declaration_not_binding_element_tail(node, name, type_node.as_ref(), initializer);
+        if !is_binding_element(node) {
+            self.check_variable_like_declaration_not_binding_element_tail(node, name, type_node.as_ref(), initializer);
+        }
     }
 
     pub fn check_variable_like_declaration_not_binding_element_tail(

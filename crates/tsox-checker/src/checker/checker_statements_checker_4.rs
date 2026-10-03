@@ -5,7 +5,6 @@ use crate::checker::checker_statements::*;
 impl Checker {
     pub(crate) fn check_variable_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_variable_declaration"); 
         self.check_grammar_variable_declaration(node);
-        self.check_variable_like_declaration(node);
         self.check_exports_on_merged_declarations(node);
         if let Some(name) = node.name() {
             self.check_cjs_reserved_top_level_name(node, &name);
