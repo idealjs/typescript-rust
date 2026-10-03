@@ -289,7 +289,7 @@ impl Checker {
             .value_symbol_links
             .get_or_default(symbol)
             .resolved_type
-            .replace(placeholder);
+            .replace(Arc::clone(&placeholder));
         let result = self.with_declaring_file_context(&decl, |checker| {
             let (type_node, initializer) = match &decl.data {
                 NodeData::VariableDeclaration(d) => (d.type_node.clone(), d.initializer.clone()),
@@ -390,6 +390,29 @@ impl Checker {
             }
             _ => result,
         };
+        // 窗口内已发生真实赋值（嵌套 assignContextualParameterTypes 经
+        // assign_parameter_type 写入位置型 + 初始化器回退的定型）：
+        // Go 侧该赋值直接写 links.resolvedType 且后续读取返回它，
+        // 窗口自身的原始位置型（如 rest 位 never）不回写覆盖
+        let assigned_in_window = match self
+            .value_symbol_links
+            .get(symbol)
+            .and_then(|l| l.resolved_type.clone())
+        {
+            Some(current) => {
+                !crate::checker::utilities::is_type_error(&current)
+                    && !Arc::ptr_eq(&current, &placeholder)
+                    && !existing.as_ref().is_some_and(|e| Arc::ptr_eq(&current, e))
+            }
+            None => false,
+        };
+        if assigned_in_window {
+            return self
+                .value_symbol_links
+                .get(symbol)
+                .and_then(|l| l.resolved_type.clone())
+                .or(result);
+        }
         match &result {
             Some(t) => {
                 // 递归类型在构建窗口内经环断路器拿到 in-flight error：不驻留，

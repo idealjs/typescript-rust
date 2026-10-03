@@ -991,12 +991,23 @@ impl Checker {
         parameter: &Arc<Symbol>,
         contextual_type: Option<&Arc<Type>>,
     ) { ::tsox_core::fntrace::enter("assign_parameter_type"); 
-        if self
+        if let Some(existing) = self
             .value_symbol_links
             .get(parameter)
-            .is_some_and(|l| l.resolved_type.is_some())
+            .and_then(|l| l.resolved_type.as_ref())
         {
-            return;
+            // 解析窗口内的 in-flight error 占位不是已定型：Go 的
+            // resolvedType != nil 守卫下该状态不存在（解析期不污染缓存），
+            // 此时仍需执行赋值（嵌套 assignContextualParameterTypes 经此
+            // 写入位置型 + 初始化器回退的结果）
+            let in_flight = crate::checker::utilities::is_type_error(existing)
+                && self.is_resolving(
+                    Arc::as_ptr(parameter) as *const Symbol,
+                    crate::checker::TypeResolutionProperty::Type,
+                );
+            if !in_flight {
+                return;
+            }
         }
         let declaration = parameter.value_declaration.clone();
         let t: Option<Arc<Type>> = match contextual_type {
