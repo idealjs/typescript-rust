@@ -3,6 +3,35 @@
 use crate::checker::relater_relate_impl_chunk::*;
 
 impl Checker {
+    // Go reportUnmatchedProperty（relater.go:4557-4560）属性名经 symbolToString
+    // → getNameOfSymbolAsWritten（nodebuilderimpl.go:1008）→
+    // DeclarationNameToString（scanner/utilities.go:132，GetTextOfNode 原文）：
+    // 取首个带名声明的名字节点原文，字符串字面量名带引号显示；
+    // 其余名态（标识符/数字/内部名）维持 property_name_for_display 渲染
+    pub(crate) fn missing_property_display_name(
+        &self,
+        symbol: Option<&Arc<tsox_frontend::ast::Symbol>>,
+        fallback: &str,
+    ) -> String {
+        if let Some(symbol) = symbol
+            && let Some((_, name)) = symbol
+                .declarations
+                .iter()
+                .find_map(|d| {
+                    tsox_frontend::ast::node_data_generated::node_name(d).map(|n| (d, n))
+                })
+            && matches!(
+                name.kind,
+                tsox_frontend::ast::SyntaxKind::StringLiteral
+                    | tsox_frontend::ast::SyntaxKind::NoSubstitutionTemplateLiteral
+            )
+            && let Some(text) = self.node_source_text(name)
+        {
+            return text;
+        }
+        crate::checker::property_name_for_display(fallback)
+    }
+
     pub(crate) fn is_object_type_related_to(
         &mut self,
         source: &Arc<Type>,
@@ -412,7 +441,7 @@ impl Checker {
             let (source_str, target_str) = self.get_type_names_for_error_display(source, target);
             if missing_props.len() == 1 {
                 let display =
-                    crate::checker::property_name_for_display(&missing_props[0]);
+                    self.missing_property_display_name(missing_prop_syms[0].as_ref(), &missing_props[0]);
                 self.relater_report_error_with_related(
                     tsox_core::diagnostics::messages_generated::
                         PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
@@ -430,23 +459,31 @@ impl Checker {
                     }),
                 );
             } else if missing_props.len() <= 5 {
+                let prop_names = missing_props
+                    .iter()
+                    .zip(missing_prop_syms.iter())
+                    .map(|(n, s)| self.missing_property_display_name(s.as_ref(), n))
+                    .collect::<Vec<_>>()
+                    .join(", ");
                 self.relater_report_error(
                     tsox_core::diagnostics::messages_generated::
                         TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
-                    vec![
-                        source_str,
-                        target_str,
-                        crate::checker::property_names_for_display(&missing_props),
-                    ],
+                    vec![source_str, target_str, prop_names],
                 );
             } else {
+                let prop_names = missing_props[..4]
+                    .iter()
+                    .zip(missing_prop_syms.iter())
+                    .map(|(n, s)| self.missing_property_display_name(s.as_ref(), n))
+                    .collect::<Vec<_>>()
+                    .join(", ");
                 self.relater_report_error(
                     tsox_core::diagnostics::messages_generated::
                         TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2_AND_3_MORE,
                     vec![
                         source_str,
                         target_str,
-                        crate::checker::property_names_for_display(&missing_props[..4]),
+                        prop_names,
                         (missing_props.len() - 4).to_string(),
                     ],
                 );
