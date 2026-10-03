@@ -79,8 +79,11 @@ impl Checker {
                     if parent_type.flags.contains(TypeFlags::UNKNOWN)
                         || !self.is_valid_spread_type(&parent_type)
                     {
+                        // Go scanner.GetErrorRangeForNode：KindBindingElement
+                        // 报错定位到声明名（scanner.go:2702 → GetNameOfDeclaration）
+                        let location = declaration.name().map(Arc::clone).unwrap_or_else(|| Arc::clone(declaration));
                         self.error_message(
-                            declaration,tsox_core::diagnostics::messages_generated::REST_TYPES_MAY_ONLY_BE_CREATED_FROM_OBJECT_TYPES,
+                            &location,tsox_core::diagnostics::messages_generated::REST_TYPES_MAY_ONLY_BE_CREATED_FROM_OBJECT_TYPES,
                             &[],
                         );
                         return self.error_type();

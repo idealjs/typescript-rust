@@ -4,7 +4,13 @@ use crate::checker::checker_statements::*;
 
 impl Checker {
     pub(crate) fn check_variable_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_variable_declaration"); 
-        self.check_grammar_variable_declaration(node);
+        // Go checkCatchClause 直呼 checkVariableLikeDeclaration（checker.go:4412），
+        // catch 变量声明不经 checkGrammarVariableDeclaration：模式名无初始化式
+        // 不报 TS1182，绑定元素也不落 reportImplicitAny 通道报 TS7031
+        //（catch 声明类型恒为 any/unknown）
+        if !tsox_frontend::ast::mig::m3f_4::is_catch_clause_variable_declaration_or_binding_element(node) {
+            self.check_grammar_variable_declaration(node);
+        }
         self.check_exports_on_merged_declarations(node);
         if let Some(name) = node.name() {
             self.check_cjs_reserved_top_level_name(node, &name);

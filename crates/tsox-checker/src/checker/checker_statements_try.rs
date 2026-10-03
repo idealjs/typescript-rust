@@ -26,6 +26,32 @@ impl Checker {
         };
         if let Some(declaration) = &data.variable_declaration {
             self.check_variable_declaration(declaration);
+            // Go checkVariableLikeDeclaration：模式元素经 checkSourceElements →
+            // checkBindingElement 尾部 getTypeOfSymbol 解析符号类型（checker.go:6263）；
+            // rest 元素在 getBindingElementTypeFromParentType 对 unknown/非对象父类型
+            // 报 TS2700（checker.go:18787），父类型为 any 时静默
+            if let tsox_frontend::ast::NodeData::VariableDeclaration(d) = &declaration.data
+                && tsox_frontend::ast::node_data_generated::is_binding_pattern(&d.name)
+            {
+                let rest_elements: Vec<Arc<Node>> = match &d.name.data {
+                    tsox_frontend::ast::NodeData::BindingPattern(bp) => bp
+                        .elements
+                        .iter()
+                        .filter(|e| {
+                            matches!(
+                                &e.data,
+                                tsox_frontend::ast::NodeData::BindingElement(be)
+                                    if be.dot_dot_dot_token.is_some()
+                            )
+                        })
+                        .cloned()
+                        .collect(),
+                    _ => Vec::new(),
+                };
+                for element in &rest_elements {
+                    let _ = self.get_type_for_binding_element(element);
+                }
+            }
             let type_node = match &declaration.data {
                 tsox_frontend::ast::NodeData::VariableDeclaration(d) => d.type_node.as_ref(),
                 _ => None,
