@@ -150,7 +150,7 @@ impl Parser {
 
     pub(crate) fn parse_left_hand_side_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_left_hand_side_expression"); 
         let expr = if self.token == SyntaxKind::NewKeyword {
-            self.parse_new_expression()
+            self.parse_new_expression_or_new_dot_target()
         } else {
             self.parse_primary_expression()
         };
@@ -161,34 +161,28 @@ impl Parser {
         self.parse_call_and_member_chain(expr, true)
     }
 
-    pub(crate) fn parse_new_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_new_expression"); 
+    pub(crate) fn parse_new_expression_or_new_dot_target(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_new_expression_or_new_dot_target"); 
         let pos = self.token_pos();
         self.next_token();
-        let expression = if self.token == SyntaxKind::DotToken {
+        if self.token == SyntaxKind::DotToken {
             self.next_token();
-            let name = self.parse_identifier();
+            let name = self.parse_identifier_name_or_keyword();
             let end = name.end();
-            Arc::new(Node::with_loc(
-                SyntaxKind::PropertyAccessExpression,
-                NodeData::PropertyAccessExpression(PropertyAccessExpressionData {
-                    expression: Arc::new(Node::with_loc(
-                        SyntaxKind::Unknown,
-                        NodeData::Token,
-                        TextRange::new(pos, pos),
-                    )),
-                    question_dot_token: None,
+            return Arc::new(Node::with_loc(
+                SyntaxKind::MetaProperty,
+                NodeData::MetaProperty(MetaPropertyData {
+                    keyword_token: SyntaxKind::NewKeyword,
                     name,
                 }),
                 TextRange::new(pos, end),
-            ))
+            ));
+        }
+        let primary = if self.token == SyntaxKind::NewKeyword {
+            self.parse_new_expression_or_new_dot_target()
         } else {
-            let primary = if self.token == SyntaxKind::NewKeyword {
-                self.parse_new_expression()
-            } else {
-                self.parse_primary_expression()
-            };
-            self.parse_member_chain(primary)
+            self.parse_primary_expression()
         };
+        let expression = self.parse_member_chain(primary);
         let type_arguments = self.parse_optional_type_arguments();
         let arguments = if self.token == SyntaxKind::OpenParenToken {
             Some(self.parse_argument_list())
