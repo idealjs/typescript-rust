@@ -28,7 +28,7 @@ use tsox_core::diagnostics::{self, Message};
 // initializeState 的 scanner.SetOnError(scanError) → 架构差异：drain_scanner_errors 约定承接扫描错误，error_callback 保持 None
 // finishSourceFile 的 SetDiagnostics/SetJSDocDiagnostics → 架构差异：诊断由 parse 返回值 (SourceFile, Vec<ParserDiagnostic>) 携带
 // finishSourceFile 的 Flags|=sourceFlags / NodeCount/TextCount/IdentifierCount → 架构差异：SourceFile 无对应存储，计数由 NodeFactory 原子计数承接
-// finishSourceFile 的 processPragmasIntoFields → 架构差异：目标字段 (CheckJsDirective/ReferencedFiles/TypeReferenceDirectives/LibReferenceDirectives) 未移植，pragmas 暂存 FILE_PRAGMAS
+// finishSourceFile 的 processPragmasIntoFields → wp1_2.rs process_pragmas_into_fields（活体入口 impl_chunk_parser.rs parse_source_file_text_with_diagnostics；CheckJsDirective 无存储未落字段）
 // finishSourceFile 的 ReparsedClones → 架构差异：由 m4d.rs REPARSED_CLONES thread_local 承接，SourceFile 无存储
 // createJSDocCache → 架构差异：jsdocInfos 未积累，缓存维持空表
 
@@ -79,6 +79,7 @@ impl Parser {
     ) { ::tsox_core::fntrace::enter("finish_source_file"); 
         result.comment_directives = self.scanner.comment_directives().to_vec();
         FILE_PRAGMAS.with(|c| *c.borrow_mut() = super::wp1_2::get_comment_pragmas(self.source_text()));
+        self.process_pragmas_into_fields(result);
         result.is_declaration_file = is_declaration_file;
         result.language_variant = self.language_variant;
         result.script_kind = SCRIPT_KIND.with(|c| c.get());

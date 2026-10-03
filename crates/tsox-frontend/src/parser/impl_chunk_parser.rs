@@ -149,6 +149,10 @@ impl Parser {
             supplemental_source_files: Vec::new(),
         };
 
+        parser.process_pragmas_into_fields(&mut file);
+        file.parse_error_spans = parser.diagnostics.iter().map(|d| d.range).collect();
+        file.has_parse_diagnostics = !parser.diagnostics.is_empty();
+
         references::set_external_module_indicator(&mut file);
         crate::parser::reparse_await::reparse_top_level_await(&mut file, &mut parser.diagnostics);
         references::collect_external_module_references(&mut file);

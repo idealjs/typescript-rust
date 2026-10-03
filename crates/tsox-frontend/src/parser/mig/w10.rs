@@ -15,7 +15,7 @@ use tsox_core::diagnostics::{self, Message};
 // parseTypeOperator → types_parser.rs parse_type_operator_or_higher（内联：operator 节点构造并入 or_higher）
 // putParser → wp1.rs 已裁决（无对象池，Parser 字段直构）
 // setContextFlags → 架构差异：context flags 以 yield_context/await_context/disallow_in_context 布尔字段表达
-// processPragmasIntoFields → 未移植交接：Rust SourceFile 无 pragmas/check_js_directive/referenced_files 等字段，需先扩 SourceFile（见 progress_notes）
+// processPragmasIntoFields → wp1_2.rs process_pragmas_into_fields（活体入口 impl_chunk_parser.rs parse_source_file_text_with_diagnostics；CheckJsDirective 无存储未落字段）
 
 impl Parser {
     pub(crate) fn parse_type_annotation(&mut self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_type_annotation"); 

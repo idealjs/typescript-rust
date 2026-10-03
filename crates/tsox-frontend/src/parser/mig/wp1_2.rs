@@ -3,8 +3,12 @@
 //! wp1 continuation: pragma/error-span helpers
 
 use crate::ast::*;
+use crate::ast::node_source_file::FileReference;
+use crate::parser::parsing_context::Parser;
 use crate::scanner::{get_leading_comment_ranges, CommentRange, CommentRangeKind};
+use tsox_core::core::compiler_options_kinds::ModuleKind;
 use tsox_core::core::text::TextRange;
+use tsox_core::diagnostics;
 
 /// Go ast.PragmaArgument
 #[derive(Debug, Clone)]
@@ -141,3 +145,60 @@ pub(crate) fn get_space_suggestion(expression_text: &str) -> String { ::tsox_cor
 pub(crate) const VIABLE_KEYWORD_SUGGESTIONS: &[&str] = &[
     "abstract", "any", "as", "asserts", "assert", "boolean", "break", "case", "catch", "class",
 ];
+
+impl Parser {
+    pub(crate) fn process_pragmas_into_fields(
+        &mut self,
+        context: &mut crate::ast::node_source_file::SourceFile,
+    ) { ::tsox_core::fntrace::enter("process_pragmas_into_fields");
+        context.referenced_files = Vec::new();
+        context.type_reference_directives = Vec::new();
+        context.lib_reference_directives = Vec::new();
+        for pragma in get_comment_pragmas(self.source_text()) {
+            let find_arg = |name: &str| pragma.args.iter().find(|a| a.name == name).cloned();
+            match pragma.name.as_str() {
+                "reference" => {
+                    if find_arg("no-default-lib").is_some_and(|a| a.value == "true") {
+                        // Ignored.
+                    } else if let Some(types) = find_arg("types") {
+                        let resolution_mode = find_arg("resolution-mode").map_or(
+                            ModuleKind::None,
+                            |m| self.parse_resolution_mode(&m.value, m.text_range.pos(), m.text_range.end()),
+                        );
+                        context.type_reference_directives.push(FileReference {
+                            range: types.text_range,
+                            file_name: types.value,
+                            resolution_mode,
+                            preserve: find_arg("preserve").is_some_and(|a| a.value == "true"),
+                        });
+                    } else if let Some(lib) = find_arg("lib") {
+                        context.lib_reference_directives.push(FileReference {
+                            range: lib.text_range,
+                            file_name: lib.value,
+                            resolution_mode: ModuleKind::None,
+                            preserve: find_arg("preserve").is_some_and(|a| a.value == "true"),
+                        });
+                    } else if let Some(path) = find_arg("path") {
+                        context.referenced_files.push(FileReference {
+                            range: path.text_range,
+                            file_name: path.value,
+                            resolution_mode: ModuleKind::None,
+                            preserve: find_arg("preserve").is_some_and(|a| a.value == "true"),
+                        });
+                    } else {
+                        self.parse_error_at_range(
+                            TextRange::new(pragma.comment_range.pos, pragma.comment_range.end),
+                            diagnostics::INVALID_REFERENCE_DIRECTIVE_SYNTAX,
+                            &[],
+                        );
+                    }
+                }
+                "ts-check" | "ts-nocheck" => {
+                    // CheckJsDirective 无存储（wp1b 架构裁决），暂不落字段
+                }
+                "jsx" | "jsxfrag" | "jsximportsource" | "jsxruntime" => {}
+                other => panic!("Unhandled pragma kind: {}", other),
+            }
+        }
+    }
+}
