@@ -404,6 +404,12 @@ impl Checker {
         self.class_type_resolution_stack.push(node_id);
         let result = self.build_type_of_class_declaration(node, &members);
         self.class_type_resolution_stack.pop();
+        // Go getTypeOfFuncClassEnumModuleWorker：基构造类型为类型变量（mixin
+        // 基）时，类静态型 = 自身静态型与该类型变量的交集
+        let result = match self.class_base_type_variable(node) {
+            Some(base_var) => self.get_intersection_type(vec![result, base_var]),
+            None => result,
+        };
         self.type_node_links.get_or_default(node).resolved_type = Some(result.clone());
         result
     }

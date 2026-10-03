@@ -88,7 +88,7 @@ impl Checker {
             return Some(error);
         }
         let expression = base_type_node.expression().unwrap();
-        let base_constructor_type = self.check_expression_ex(expression, CheckMode::Normal);
+        let base_constructor_type = self.heritage_extends_value_type(&expression);
         if base_constructor_type
             .flags
             .intersects(TypeFlags::Object | TypeFlags::Intersection)
@@ -100,7 +100,7 @@ impl Checker {
             let name = self.symbol_to_string(&symbol);
             self.error_message(
                 &declaration,
-                msg::X_0_IS_REFERENCED_DIRECTLY_OR_INDIRECTLY_IN_ITS_OWN_BASE_EXPRESSION,
+                msg::X_0IS_REFERENCED_DIRECTLY_OR_INDIRECTLY_IN_ITS_OWN_BASE_EXPRESSION,
                 &[name],
             );
             set_resolved_base_constructor_type(t, self.error_type());
@@ -116,11 +116,38 @@ impl Checker {
             && !self.is_constructor_type(&base_constructor_type)
         {
             let text = self.type_to_string(&base_constructor_type);
-            self.error_message(
-                expression,
+            let mut diag = tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                expression.loc,
                 msg::TYPE_0_IS_NOT_A_CONSTRUCTOR_FUNCTION_TYPE,
-                &[text],
+                vec![text],
             );
+            if base_constructor_type.flags.contains(TypeFlags::TypeParameter) {
+                let ctor_return = self
+                    .get_constraint_from_type_parameter(&base_constructor_type)
+                    .and_then(|constraint| {
+                        self.get_signatures_of_type(&constraint, SignatureKind::Construct)
+                            .into_iter()
+                            .next()
+                            .and_then(|sig| self.get_return_type_of_signature(&sig))
+                    })
+                    .map(|ty| self.type_to_string(&ty))
+                    .unwrap_or_else(|| "unknown".to_string());
+                if let Some(tp_symbol) = &base_constructor_type.symbol
+                    && let Some(decl) = tp_symbol.declarations.first()
+                {
+                    let related_file = self
+                        .get_source_file_of_node(decl)
+                        .or_else(|| self.current_file.clone());
+                    diag.related_information.push(tsox_frontend::ast::Diagnostic::new(
+                        related_file,
+                        decl.loc,
+                        msg::DID_YOU_MEAN_FOR_0_TO_BE_CONSTRAINED_TO_TYPE_NEW_ARGS_COLON_ANY_1,
+                        vec![tp_symbol.name.clone(), ctor_return],
+                    ));
+                }
+            }
+            self.diagnostics.add(diag);
             set_resolved_base_constructor_type(t, self.error_type());
             let error = self.error_type();
             self.base_ctor_type_cache.insert(t.id, Arc::clone(&error));
