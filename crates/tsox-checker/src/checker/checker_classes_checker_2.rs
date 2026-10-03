@@ -243,15 +243,15 @@ impl Checker {
             }
         }
 
-        // Go resolveBaseTypesOfClass else 分支：类样构造函数/类型变量基
-        // （mixin 形态），实例基型 = 基构造类型首个构造签名的返回型
-        let expr = match &type_ref.data {
-            tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(d) => {
-                Arc::clone(&d.expression)
-            }
-            _ => return self.get_any_type(),
-        };
-        self.resolve_mixin_base_instance_type(type_ref, &expr)
+        let t = self.get_type_from_type_node(type_ref);
+        if t.flags.contains(TypeFlags::Any) {
+            return self.get_any_type();
+        }
+
+        if t.flags.contains(TypeFlags::Object) {
+            return t;
+        }
+        self.get_any_type()
     }
 
     fn resolve_mixin_base_instance_type(
@@ -274,14 +274,11 @@ impl Checker {
             });
         let base_constructor_type = match own_type {
             Some(ref own) => self.get_base_constructor_type_of_class(own),
-            None => Some(self.heritage_extends_value_type(expr)),
+            None => Some(self.check_expression_ex(expr, crate::checker::checker::CheckMode::Normal)),
         };
         let Some(base_constructor_type) = base_constructor_type else {
             return self.get_any_type();
         };
-        // Go resolveBaseTypesOfClass：getApparentType(基构造类型)，类型变量
-        // 基经此落到其基约束的构造签名
-        let base_constructor_type = self.get_apparent_type(&base_constructor_type);
         if !base_constructor_type
             .flags
             .intersects(TypeFlags::Object | TypeFlags::Intersection | TypeFlags::Any)

@@ -3,95 +3,141 @@
 use crate::checker::checker::CheckMode;
 use crate::checker::checker_classes::*;
 
-// Go getBaseConstructorTypeOfClass 的合法性检查段：TS2507/TS2735 在
-// get_base_constructor_type_of_class 内随首解析记忆化发射，此处仅触发解析
+// Go getBaseConstructorTypeOfClass 的合法性检查段：extends 表达式的
+// 值类型须为构造器类型（含构造签名），否则 TS2507
 impl Checker {
     pub(crate) fn check_base_constructor_type(&mut self, expr: &Arc<Node>) {
-        let Some(class_node) = expr
-            .parent()
-            .and_then(|ewa| ewa.parent())
-            .and_then(|clause| clause.parent())
-            .filter(|class| {
-                matches!(
-                    class.kind,
-                    SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
-                )
-            })
-        else {
+        if expr.kind == SyntaxKind::NullKeyword {
             return;
-        };
-        let shell = self.build_class_instance_type_with_base(&class_node);
-        let _ = self.get_base_constructor_type_of_class(&shell);
-    }
-
-    // Go checkExpression(heritage 表达式) 的值语义取型：标识符按 Value 含义
-    // 解析到符号后取其值类型（类符号得构造器侧静态型）；Value 含义解析失败
-    // 对应 Go resolveEntityName 失败得 errorType
-    pub(crate) fn heritage_extends_value_type(&mut self, expr: &Arc<Node>) -> Arc<Type> {
-        if expr.kind == SyntaxKind::Identifier {
-            let Some(symbol) = self.resolve_identifier_with_meaning(
-                expr,
-                SymbolFlags::VALUE | SymbolFlags::ExportValue,
-            ) else {
-                return self.error_type();
-            };
-            if symbol.flags.intersects(SymbolFlags::Class) {
-                if let Some(class_node) = symbol
-                    .declarations
-                    .iter()
-                    .find(|d| d.kind == SyntaxKind::ClassDeclaration)
-                    .cloned()
-                {
-                    let ctor_type = self.get_type_of_class_declaration(&class_node);
-                    if !self
-                        .get_signatures_of_type(&ctor_type, SignatureKind::Construct)
-                        .is_empty()
-                    {
-                        return ctor_type;
-                    }
-                }
-            }
-            return self.get_type_of_symbol(&symbol);
         }
-        self.check_expression_ex(expr, CheckMode::Normal)
-    }
-
-    // Go getBaseTypeVariableOfClass：基构造类型本身是类型变量（或含类型变量
-    // 的交集）时返回之；实例壳经 class_instance_type_cache 稳定驻留，基构造
-    // 类型随之复用首解析记忆化
-    pub(crate) fn class_base_type_variable(
-        &mut self,
-        class_node: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
-        let shell = self.build_class_instance_type_with_base(class_node);
-        let base_constructor_type = self.get_base_constructor_type_of_class(&shell)?;
-        if base_constructor_type.flags.contains(TypeFlags::TypeParameter) {
-            return Some(base_constructor_type);
+        if matches!(expr.kind, SyntaxKind::Identifier | SyntaxKind::PropertyAccessExpression)
+            && let Some(symbol) = self.resolve_entity_name_class_symbol(expr)
+            && !symbol.flags.intersects(SymbolFlags::VALUE)
+        {
+            return;
         }
-        if base_constructor_type.is_intersection() {
-            return base_constructor_type
-                .types()?
+        if matches!(expr.kind, SyntaxKind::Identifier | SyntaxKind::PropertyAccessExpression)
+            && let Some(symbol) = self.resolve_entity_name_class_symbol(expr)
+            && symbol.flags.intersects(SymbolFlags::Class)
+            && let Some(class_node) = symbol
+                .declarations
                 .iter()
-                .find(|t| t.flags.contains(TypeFlags::TypeParameter))
-                .cloned();
+                .find(|d| d.kind == SyntaxKind::ClassDeclaration)
+                .cloned()
+        {
+            let ctor_type = self.get_type_of_class_declaration(&class_node);
+            if !self
+                .get_signatures_of_type(&ctor_type, SignatureKind::Construct)
+                .is_empty()
+            {
+                return;
+            }
         }
-        None
+        let value_type = self.check_expression_ex(expr, CheckMode::Normal);
+        if value_type.flags.contains(TypeFlags::Any) || self.is_error_type(&value_type) {
+            return;
+        }
+        // Go getSignaturesOfType：类型参数经约束解析构造签名
+        let signatures_in = if value_type.is_type_parameter() {
+            self.get_constraint_of_type_parameter(&value_type)
+                .unwrap_or_else(|| Arc::clone(&value_type))
+        } else {
+            Arc::clone(&value_type)
+        };
+        let has_construct_signatures = !self
+            .get_signatures_of_type(&signatures_in, SignatureKind::Construct)
+            .is_empty();
+        if has_construct_signatures {
+            return;
+        }
+        let type_str = self.type_to_string(&value_type);
+        let file = self.current_file.clone();
+        let mut diag = tsox_frontend::ast::Diagnostic::new(
+            file,
+            expr.loc,
+            tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_A_CONSTRUCTOR_FUNCTION_TYPE,
+            vec![type_str],
+        );
+        if value_type.is_type_parameter() {
+            let ctor_return = self
+                .get_constraint_of_type_parameter(&value_type)
+                .and_then(|constraint| {
+                    constraint
+                        .as_structured()?
+                        .construct_signatures()
+                        .first()
+                        .and_then(|sig| self.get_return_type_of_signature(sig))
+                })
+                .map(|t| self.type_to_string(&t))
+                .unwrap_or_else(|| "unknown".to_string());
+            if let Some(tp_symbol) = &value_type.symbol {
+                let related_loc = tp_symbol
+                    .declarations
+                    .first()
+                    .map(|d| d.loc)
+                    .unwrap_or(expr.loc);
+                let related_file = tp_symbol
+                    .declarations
+                    .first()
+                    .and_then(|d| self.get_source_file_of_node(d))
+                    .or_else(|| self.current_file.clone());
+                let related = tsox_frontend::ast::Diagnostic::new(
+                    related_file,
+                    related_loc,
+                    tsox_core::diagnostics::messages_generated::
+                        DID_YOU_MEAN_FOR_0_TO_BE_CONSTRAINED_TO_TYPE_NEW_ARGS_COLON_ANY_1,
+                    vec![tp_symbol.name.clone(), ctor_return],
+                );
+                diag.related_information.push(related);
+            }
+        }
+        self.diagnostics.add(diag);
     }
 }
 
 impl Checker {
-    // Go checkClassLikeDeclaration 的 mixin 分支：基构造类型是类型变量时，
-    // 自身静态型须为 mixin 构造型（isMixinConstructorType），否则 TS2545
+    // Go checkClassDeclaration 的 mixin 分支：基构造类型是类型变量时，
+    // 自身构造器须为单 rest any 参数（TS2545）
     pub(crate) fn check_mixin_constructor_type(&mut self, class_node: &Arc<Node>) {
-        let shell = self.build_class_instance_type_with_base(class_node);
-        let Some(base_constructor_type) = self.get_base_constructor_type_of_class(&shell) else {
+        let Some(heritage_element) = class_extends_heritage_element(class_node) else {
             return;
         };
-        if !base_constructor_type.flags.contains(TypeFlags::TypeParameter) {
+        let expr = expression_with_type_arguments_expression(&heritage_element);
+        if expr.kind == SyntaxKind::NullKeyword {
+            return;
+        }
+        if matches!(expr.kind, SyntaxKind::Identifier | SyntaxKind::PropertyAccessExpression)
+            && let Some(symbol) = self.resolve_entity_name_class_symbol(&expr)
+            && !symbol.flags.intersects(SymbolFlags::VALUE)
+        {
+            return;
+        }
+        let value_type = self.get_type_of_node(&expr);
+        if value_type.flags.contains(TypeFlags::Any)
+            || self.is_error_type(&value_type)
+            || !value_type.is_type_parameter()
+        {
             return;
         }
         let static_type = self.get_type_of_class_declaration(class_node);
-        if !self.is_mixin_constructor_type(&static_type) {
+        let is_mixin_ctor = static_type
+            .as_structured()
+            .map(|s| s.construct_signatures())
+            .is_some_and(|sigs| {
+                sigs.len() == 1
+                    && sigs[0].type_parameters.is_empty()
+                    && sigs[0].parameters.len() == 1
+                    && sigs[0].has_rest_parameter()
+                    && {
+                        let param_type = self.get_type_of_symbol(&sigs[0].parameters[0]);
+                        param_type.flags.contains(TypeFlags::Any)
+                            || self
+                                .get_array_element_type(&param_type)
+                                .flags
+                                .contains(TypeFlags::Any)
+                    }
+            });
+        if !is_mixin_ctor {
             let loc = class_node
                 .name()
                 .map(|n| n.loc)
