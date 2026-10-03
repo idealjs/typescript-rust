@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker_unused_diagnostics::*;
+use crate::checker::utilities_has_only_expression_initialization::all_declarations_in_same_source_file;
 
 impl Checker {
     pub(crate) fn check_unused_identifiers_in_file(&mut self, file_node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_unused_identifiers_in_file"); 
@@ -167,6 +168,12 @@ impl Checker {
         use tsox_core::diagnostics::messages_generated::{
             ALL_TYPE_PARAMETERS_ARE_UNUSED, X_0_IS_DECLARED_BUT_NEVER_USED,
         };
+        let Some(symbol) = self.get_symbol_of_declaration(node) else {
+            return;
+        };
+        if !all_declarations_in_same_source_file(&self.get_merged_symbol(&symbol)) {
+            return;
+        }
         let Some(list) = Self::type_parameter_list(node) else {
             return;
         };
