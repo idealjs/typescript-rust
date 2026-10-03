@@ -1137,12 +1137,7 @@ fn compute_common_source_directory_of_filenames(
 ) -> String { ::tsox_core::fntrace::enter("compute_common_source_directory_of_filenames"); 
     let mut common_path_components: Option<Vec<String>> = None;
     for source_file in file_names {
-        let absolute = tspath::get_normalized_absolute_path(source_file, current_directory);
-        let mut source_path_components: Vec<String> = absolute
-            .split('/')
-            .filter(|part| !part.is_empty())
-            .map(|part| part.to_string())
-            .collect();
+        let mut source_path_components = tspath::get_path_components(source_file, current_directory);
         source_path_components.pop();
         match &mut common_path_components {
             None => common_path_components = Some(source_path_components),
