@@ -188,3 +188,43 @@
 - **澄清记录**：errors.txt 详细段（==== 段）是套件有意豁免（flat_segment 只比错误头），非缺陷；corpus_one.sh 不构建只挑最新二进制。
 
 **r26 批次最终结算（mixin revert 后全量复核）**：FAIL 1058→**1054（净 −4）**，skip 零增。保留 6 绿：bigintArbirtraryIdentifier/bigintAmbientMinimal/bigintIndex/bigintPropertyName/betterErrorForUnionCall/baseExpressionTypeParameters（连带绿 6 例中 mixin 族 5 例随 revert 回红）。**mixin 修复（f6cfe874b9）已整体 revert**：其"对一切非类符号 extends 生效"的边界误伤 aliasUsage/递归基类/jsx/HOC 等 30+ 例（全量实测确认，抽查 aliasUsageInArray=import alias 基类误入 mixin 分支丢成员）；baseConstraintOfDecorator 回红留队，重派时须收窄触发条件（仅类型变量基约束形态，排除 import=require 别名/递归基）。**真新红 2 例**：baseTypeOrderChecking、declarationEmitNestedAnonymousMappedType（归因待查，嫌疑 bigintPropertyName 的 __missing/显示名波及，下批优先）。留队：bigintWithLib（fix26/w26q-8 两轮熔断）。
+
+**r27 类分片批次结算（2026-10-03，按错误码族分片 · 并发 3 · 直接后台 subagent）**：
+- **三族 6 例 PASS 合入**：defassign 族 2（86a87301a2 parser 实例化表达式早退修 baseTypeOrderChecking TS2562 误报；de7ea29534 TS2507 值语义取型修 classExtendsClauseNot）；implicitany 族 1（4b6423fa70+191c0ce979 别名环 error 不污染缓存+union 上下文签名全同修 contextualOverloadList，改动面大待全量观察）；dupident 族 3（b3f7d6c825 lateBindMember 计算名查重+6f744901ed/25974ed2a5 binder 分表+66232600b8 跨文件合并，修 acrossFileBoundaries/cloduleWithDuplicateMember1/cloduleSplitAcrossFiles 两连带兑现）。
+- **两例两轮熔断留队**：callOfConditionalType（逆变位 C∩E 收缩按行为拟合未收敛，72fbcb9395 已回退）；bigintWithLib（前批，fix26/w26q-8）。
+- **duplicateIdentifierChecks 精确缺口（CRLF 归一化后仅 6 行）**：(62,9)(63,14)(64,9)(68,9)(69,14)(70,9) TS2300——declare class 中 auto-accessor（accessor x）与 get/set 混合声明形态，列 14=accessor 成员名位。族 agent kind_of 的 auto-accessor→2 部分覆盖但该形态漏。留队下批单例片。
+- **教训（第三次同类）**：shell 层对比基线必须 `tr -d '\r'`（期望基线 CRLF vs 本地 LF）+ 截断 `====` 详细段——本次误判经历：先因详细段重复报"缺对象字面量 108 行"（错误回喂，浪费 agent 一轮 21.6M 证伪），再因 CRLF 全行假差异。**回喂前残差必须用归一化 multiset 对比脚本**（可固化进 tools/）。
+- **方法论数据**：错误码族聚合的根因命中率——defassign 3/41、dupident ~6/20、implicitany ~3/23（其余主导 diff 属其他码域）。类分片适合"一个机制根因带一族同形态"的场景（如 clodule 兑现），但纯错误码聚合噪声大；下批分族建议按「错误码+形态签名（列模式/消息模板）」二次聚类。
+- **合并摩擦**：类分片改动面大（多文件/函数移动/300 行拆分），本批 3 处编译错误主 agent 就地修 + 2 轮 rebase 冲突 + 1 次 progress_notes 误入库（git add -A 教训：解决冲突时禁用 -A，逐文件 add）。
+
+**r27 全量终态（2026-10-03）**：FAIL 1054→**1047（净 −7）**，真绿 25（6 直接 + 19 连带：dupident 跨文件合并带绿 fundule/qualifiedName/umdNamespace/strictModeReservedWord 族；implicitany union 签名带绿 compositeContextualSignature/contextualTyping 族；defassign 带绿 extendNonClassSymbol2 等）。**新红 18**（contextual 族为主：contextualTypeCaching/contextualTypingOfOptionalMembers/contextuallyTypedByDiscriminableUnion/controlFlowLoopAnalysis/arrayBestCommonTypes 等——implicitany 的 union 签名收紧过冲波及，agent 交接已预警方向正确但需收敛），下批 prioritize。**新增 skip 1 例待人工确认：intersectionWithConflictingPrivates（panic: never_type，FAIL 转 crash 属恶化方向非转绿，待修）**。轨迹：1095→…→1058→1054→1047。
+
+**.types 发射器上线（2026-10-03 用户拍板：生成内容不入 git）**：
+- crates/tsox/tests/corpus/common/types_baseline.rs（忠实移植 Go tsbaseline types 通道：for_each_child_and_js_doc 遍历 + is_expression_node/Identifier/is_declaration_name 标注 + is_part_of_type_node/Interface/TypeReference 过滤 + alias T:T 特例 + EWTAS-extends 取 parent 型 + 源码交织 CRLF）；runner 接线 TSOX_TYPES_EMIT_DIR/HEADER/STEM（per-case），spawn 透传；两个判定 #[doc(hidden)] pub 化（is_expression_node/is_declaration_name）、types_type_id mod pub 化。
+- 数据：.traces/types/ 40MB/6348 文件（gitignore，不入 git）；重采=全量带 TSOX_TYPES_EMIT_DIR 跑 corpus。锚点工具 tools/types_anchor.py → corpus_types_anchor.csv（4688 例首分歧，已知偏差过滤：typeof 侧/裸 any）。
+- 分片新增「.types 首分歧锚点」段（三层锚点：.types → 错误 diff → 执行栈）。
+- **发射器已知偏差**（fixer 需跳过的形态）：class 声明名 `typeof X` vs `X`（get_type_of_symbol class 分支取构造型侧——真语义分歧留修）；名字节点覆盖不全 any；union 中 alias 渲染带括号 `(Validate)`。
+- **能力验证**：PASS 例的 .types diff 非零（如 `=> false` 拓宽为 `boolean`、class 取型侧）——**错误基线全对但类型语义已分歧的暗差异检测**成立，这是 .errors/.types 双维锚点的核心价值。水位顺手更新：FAIL 1045（+2 例上批未计入的绿）。
+- r28 试验（wtC_1..3）：contextualTypeCaching（锚点：缺 `>callback : (response: T) => void`）、controlFlowLoopAnalysis（`number` vs `number | undefined` 循环收窄）、contextualTypingOfOptionalMembers（缺 `>prop : string`），汇报含「锚点是否命中真根因」数据采集项。
+
+**r28 .types 锚点试验结算（2026-10-03，3 例直接并发 · GLM-5.3）**：
+- **contextualTypingOfOptionalMembers PASS**（32feef17f9：type_of_context_sensitive_arg 对非函数 CS 实参以实例化参数位重定型 + contextual_element_of_constituent 补 getIteratedTypeOrElementType 回落——Go isSignatureApplicable→checkExpressionWithContextualType 链）；
+- **contextualTypeCaching 回喂中**（899e13904d：**contextualInfos 栈查询接入 get_contextual_type 入口**（波10 起挂起池多轮提及的「从不查栈」遗留首次落地）+ CS 重检压栈；残差 1 条 (43,15) TS7006 匹配期方向回喂）；
+- **controlFlowLoopAnalysis 熔断闭案**（fix28/w28q-2 归档）：三轮 18M tokens。事实链——create_array_literal_type 契约修复方向正确（Go clone 语义）但过冲消除 (12,25)；agent 二轮回退判断踩「FAIL CSV 缺席≠绿（可能被 SKIP）」老坑（其考证 a300 态本例 PASS，实测纯 a300 仍 FAIL=真实存量红）；主仓已 reset 回 a300。**教训两条**：①派发前防空派快测必须执行（本例分片信息与实际状态不符）；②create_array_literal_type 的 Go 契约对齐重派时须连同 ArrayLiteral 标志全部消费者审计（jsx 推断域实证波及），并先具备本地复跑验证手段。
+- **.types 锚点命中率 0/3（定量结论）**：三例锚点全部未命中真根因——发射器三个系统性缺口形态吞掉首分歧位（索引签名参数不序列化 / 函数类型属性空行（333/813 例共患）/ write-target 独立暗分歧）。**.types 通道当前作为「锚点」不合格，作为「暗差异检测器」有效**（暴露 write-target 收窄、`=> false` 拓宽等真实语义分歧）；修复方向=补发射器序列化覆盖（索引签名/函数类型属性），使首分歧位有效后再作定位通道。分片锚点段保留（agent 用于排除法仍有价值）。
+
+**r28 终态（2026-10-03）**：FAIL 1047→**1042（净 −5）**，绿 10/新红 5。亮点：899e13904d 的 contextualInfos 栈查询顺带修绿 **badInferenceLowerPriorityThanGoodInference**（波10 起挂起 3 轮的深水例）+ contextual 族连带 9 绿；contextualTypingOfOptionalMembers 直接绿。新红 5：contextuallyTypedParametersWithInitializers1-4（32feef17f9 CS 重定型的波及面，下批 prioritize）+ discriminantUsingEvaluatableTemplateExpression。轨迹：1095→…→1054→1047→1042。.types 数据已随本轮全量刷新（.traces/types 40MB）。
+
+**r30 双波结算（2026-10-03，循环第 2 轮）**：FAIL 1039→**1024（净 −15，单轮新高）**，10 例尝试 8 绿 2 未过。
+- 入口绿：arrayFromAsync（CS 窗口代入）、callExpressionWithMissingTypeArgument1（errorType 语义+TS1110）、callsOnComplexSignatures（联合 rest 合并）、cannotIndexGenericWritingError（TS2862 写规则）、capturedParametersInInitializers1+2（TS2373 跟踪模块 f6 版，g1 同根因撞车作废）、catchClauseRestProperties、checkChildrenAlwaysChecked（TS1063+TS2304）；连带绿 9（含 contravariantInferenceAndTypeGuard、genericFunctionInference2 回归修复）。
+- **f2（heritage 值位求值）+126 大波及已 revert**：extends 基类解析域二次实证（与 r27 mixin 同域同下场）——aliasUsage/abstractProperty 族全红。**该域（heritage 值位+mixin+基构造类型）需整体规划立项**，单点修复两次翻车。
+- 未过留队：builtinIterator（GROUP 2 Iterator.from 推断，agent 已给嫌疑定位）、chainedCalls（g3 约束惰性解析，渲染链已备）、Initializers1 回红（f1 的代入形态与 r29-d1 的 base 形态互斥——真语义是 Go instantiateContextualType 有条件代入，下轮统一修）。
+- 轨迹：1095→…→1047→1042→1039→1024。模式观察：批式验证下两轮各出一次大波及（e2 解构管线、f2 heritage），均靠全量闸门兜住；防线条款（大面收窄）在其余 8 片生效（多 agent 主动收窄并在 handoff 声明更大对齐面）。
+
+**「错错相抵」回归模式与处置规程（2026-10-03 用户拍板）**：有些回归不是新修复的错，而是**旧修复本是 hack**——两个片面实现互相抵消凑出正确输出，纠正一个后另一个暴露成回归（实证：r29-d1 的无条件 base 上下文形态与 r30-f1 的无条件代入形态互斥，各修一例、合在一起必翻一个，真语义是 Go instantiateContextualType 的有条件代入）。**处置规程**：此类回红例不回喂旧 agent、不在旧分支续修，一律**新建 worktree 重新分发**——派发词需说明前置修复的互斥史与真语义嫌疑，授权新 agent 纠正前置 commit 的片面语义（含 revert/重写前置 hack），按 Go 统一修正。
+
+**分发策略（2026-10-03 用户拍板）**：后续修复波分发优先使用 start-plan 通道（account:bigmodel-start-plan/GLM-5.3-Flash），individual plan 通道留给主 agent 会话与特殊重审分片；双波并行时主波通道为 start-plan。
+
+**部分修复+部分回归的处置规程（2026-10-03 用户拍板）**：改动后若出现部分修复、部分回归，这是分析回归与改动相关关系的最佳时机——**不能只看数字变化就整体丢弃改动**。正确流程：主 agent 先①建好含该改动的工作区（worktree）、②更新该状态下的调用栈数据（对回归例重采 trace/差集），然后③把「回归-改动相关关系分析」分发给处理该内容的 subagent（带新调用栈+改动 diff+回归例清单），由它逐例判定真回归 vs 假绿暴露（旧绿若依赖被纠正的错误形态即为假绿），产出统一收口方案。首个应用：f2 heritage 值位求值（曾 +126 新红被整体 revert，方向本身正确）。
+
+**r31 整合结算（2026-10-03，三波+错错相抵重审+回归分析全链闭环）**：整合态 FAIL 1024→**1031（净 +7，绿 23/新红 30）**——数字微涨但结构健康：f2 保留成功（未 revert），分析线预测的四族收口大量兑现（importAsBaseClass/exportClassExtendingIntersection/contextuallyTypedByDiscriminableUnion/jsxComplexSignature 族 B/D 转绿、checkInheritedProperty 双例绿、jsFileCompilationWithoutJsExtensions 13 片族兑现 k2 预测）；30 新红中约半数为分析预测内（genericRecursiveImplicitConstructorErrors1=假绿例预期红待基线收口、declarationEmitExpressionInExtends7=族A 残余、extendsUntypedModule=遗留疑点 TS6133），其余待归因（genericFunctionInference2 第二次回红=f1 代入修复与其旧绿的又一交互，错错相抵候选）。合并插曲三起已处置：rebase patch-id 误判跳 f2（实证 j3 已携带语义）、污染 commit 重做、原型 3 处编译修复。主仓 HEAD 含：k1-k6+j1-j3+f2 语义+原型入口 d0d7a25ec7。轨迹：1095→…→1024→1031（结构性回调，非退化）。
