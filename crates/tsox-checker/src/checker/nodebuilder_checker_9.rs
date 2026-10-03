@@ -711,11 +711,29 @@ impl Checker {
         }
         let decl = sym.declarations.first()?;
         match decl.kind {
-            SyntaxKind::ClassExpression => Some("(Anonymous class)".to_string()),
-            SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => {
-                Some("(Anonymous function)".to_string())
+            SyntaxKind::ClassExpression
+            | SyntaxKind::FunctionExpression
+            | SyntaxKind::ArrowFunction => {}
+            _ => return None,
+        }
+        for d in &sym.declarations {
+            if let Some(name) = tsox_frontend::ast::get_name_of_declaration(d) {
+                return Some(
+                    tsox_frontend::scanner::mig::m3i::declaration_name_to_string(Some(&name)),
+                );
             }
-            _ => None,
+        }
+        let parent = decl.parent();
+        if parent.as_ref().is_some_and(|p| p.kind == SyntaxKind::VariableDeclaration)
+            && let Some(NodeData::VariableDeclaration(vd)) = parent.as_ref().map(|p| &p.data)
+        {
+            return Some(
+                tsox_frontend::scanner::mig::m3i::declaration_name_to_string(Some(&vd.name)),
+            );
+        }
+        match decl.kind {
+            SyntaxKind::ClassExpression => Some("(Anonymous class)".to_string()),
+            _ => Some("(Anonymous function)".to_string()),
         }
     }
 
