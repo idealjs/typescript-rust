@@ -290,14 +290,11 @@ impl Binder {
                 });
                 if parent_is_class && node_is_static_member {
                     parent_sym.exports.get(&name).cloned()
-                } else if parent_is_class {
-                    parent_sym.members.get(&name).cloned()
                 } else {
-                    parent_sym
-                        .members
-                        .get(&name)
-                        .cloned()
-                        .or_else(|| parent_sym.exports.get(&name).cloned())
+                    // Go declareClassMember/bindEnumMember：接口/枚举/类实例
+                    // 成员只在 members 表内查重；命名空间导出在 exports 表，
+                    // 二者分表永不冲突（合并 ns+interface 符号同理）
+                    parent_sym.members.get(&name).cloned()
                 }
             } else if let Some(hoist) = &var_hoist_container {
                 match hoist.kind {
@@ -342,6 +339,17 @@ impl Binder {
                 let node_exported = self.module_member_is_exported(node);
                 e.declarations
                     .iter()
+                    // 仅模块级语句参与导出性混合判定；类 static 成员与命名空间
+                    // 导出同住 exports 表但不是模块成员，冲突走 declareSymbol
+                    // 报错路径（cloduleWithDuplicateMember1）
+                    .filter(|d| {
+                        d.parent().is_some_and(|p| {
+                            matches!(
+                                p.kind,
+                                SyntaxKind::ModuleBlock | SyntaxKind::SourceFile
+                            )
+                        })
+                    })
                     .map(|d| self.module_member_is_exported(d))
                     .any(|d_exported| d_exported != node_exported)
             });
