@@ -51,7 +51,8 @@ impl Checker {
     }
 
     // Go checkExternalImportOrExportDeclaration：模块名非字符串字面量报
-    // TS1141；非文件级且非 ambient 外部模块内的导入/导出报 TS1147/TS1194
+    // TS1141；非文件级且非 ambient 外部模块内的导入/导出报 TS1147/TS1194。
+    // 两处 Go 均用普通 c.error（非 grammarErrorOnNode），文件带解析错误时仍报
     pub fn check_external_import_or_export_declaration(&mut self, node: &Arc<Node>) -> bool {
         let module_name = match &node.data {
             NodeData::ImportDeclaration(d) => Some(Arc::clone(&d.module_specifier)),
@@ -69,7 +70,7 @@ impl Checker {
             return false;
         }
         if module_name.kind != SyntaxKind::StringLiteral {
-            self.grammar_error_on_node(&module_name, &msgs::STRING_LITERAL_EXPECTED);
+            self.error_message(&module_name, msgs::STRING_LITERAL_EXPECTED, &[]);
             return false;
         }
         let parent = node.parent();
@@ -85,7 +86,7 @@ impl Checker {
             } else {
                 &msgs::IMPORT_DECLARATIONS_IN_A_NAMESPACE_CANNOT_REFERENCE_A_MODULE
             };
-            self.grammar_error_on_node(&module_name, message);
+            self.error_message(&module_name, *message, &[]);
             return false;
         }
         true
