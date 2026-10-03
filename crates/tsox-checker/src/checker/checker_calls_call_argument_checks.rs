@@ -346,26 +346,15 @@ impl Checker {
             // 泛型 callee 的实参在 walk 期被 check_call_arg_with_context 跳过
             //（防未固定 T 污染），此处定型完成后补跑表达式检查（体内语句诊断）
             let arg_type = if self.is_context_sensitive(arg) {
-                // Go chooseOverload 二阶段（checker.go:9599-9601）：CS 实参的完整
-                // 检查发生在第二推断轮，checkExpressionWithContextualType（参数型
-                // 压入 contextualInfos 栈，checker.go:7944）压入的是候选签名的
-                // 未固定参数位 T（checker.go:10012 getTypeAtPosition 取候选签名），
-                // 参数定型上下文签名经 apparent 约束解析（g6<T extends () => any>
-                // 的无注解可选参数按约束 0 参签名落 TS7006，rest 参数取
-                // getRestTypeAtPosition 的 []）；固定实例化型只在后续
-                // isSignatureApplicable 复检压入（checker.go:9813），彼时节点已
-                // ContextChecked 不再参与参数定型。非函数 CS 实参（对象字面量
-                // 嵌套成员定型）维持实例化型窗口
+                // Go isSignatureApplicable（checker.go:9812）对每个实参压入
+                // getTypeAtPosition(signature, i)，适用性复检的 signature 是
+                // 实例化后的 checkCandidate，参数位已代入推断实参；推断轮内
+                // 压入的未固定参数位也在使用点经 instantiateContextualType
+                // （checker.go:32609）配 nonFixingMapper 代入。压未代入型会让
+                // 箭头参数以裸 T 定型缓存（Awaited<T> vs string TS2345），
+                // 未推断参数位代入后仍为裸 T，约束解析语义不变
                 let context_node = self.get_context_node(arg);
-                let contextual_type = if matches!(
-                    arg.kind,
-                    SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression
-                ) {
-                    Arc::clone(&base_param_type)
-                } else {
-                    Arc::clone(&param_type)
-                };
-                self.push_contextual_type(&context_node, &contextual_type, false);
+                self.push_contextual_type(&context_node, &param_type, false);
                 let t = self.type_of_context_sensitive_arg(arg, &param_type);
                 if !sig.type_parameters.is_empty() {
                     self.check_expression(arg);
