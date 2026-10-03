@@ -18,8 +18,7 @@ impl Checker {
 
         let lookup_type;
         if !question_dot && self.strict_null_checks && type_is_possibly_undefined(&obj_type) {
-            self.report_possibly_null_or_undefined(obj_expr, &obj_type, false);
-            lookup_type = self.get_non_nullable_type_of(&obj_type);
+            lookup_type = self.check_non_null_type(&obj_type, obj_expr);
         } else {
             lookup_type = obj_type;
         }
