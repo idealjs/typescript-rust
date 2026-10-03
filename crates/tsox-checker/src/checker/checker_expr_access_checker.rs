@@ -159,7 +159,21 @@ impl Checker {
                 | GreaterThanGreaterThanGreaterThanEqualsToken
                 | AmpersandEqualsToken
                 | BarEqualsToken
-                | CaretEqualsToken => self.number_type(),
+                | CaretEqualsToken => {
+                    let left_type = self.get_type_of_node(&data.left);
+                    let right_type = self.get_type_of_node(&data.right);
+                    if (self.is_type_assignable_to_kind(&left_type, TYPE_FLAGS_ANY_OR_UNKNOWN)
+                        && self.is_type_assignable_to_kind(&right_type, TYPE_FLAGS_ANY_OR_UNKNOWN))
+                        || (!self.maybe_type_of_kind(&left_type, TYPE_FLAGS_BIG_INT_LIKE)
+                            && !self.maybe_type_of_kind(&right_type, TYPE_FLAGS_BIG_INT_LIKE))
+                    {
+                        self.number_type()
+                    } else if self.both_are_big_int_like(&left_type, &right_type) {
+                        self.bigint_type()
+                    } else {
+                        self.error_type()
+                    }
+                }
                 _ => self.get_any_type(),
             }
         } else {

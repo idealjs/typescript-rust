@@ -4,6 +4,7 @@ use tsox_frontend::ast::Node;
 use tsox_frontend::ast::Symbol;
 use tsox_frontend::ast::SymbolFlags;
 use tsox_frontend::ast::SyntaxKind;
+use tsox_core::core::compiler_options_kinds::ScriptTarget;
 
 use crate::checker::checker::*;
 
@@ -188,6 +189,19 @@ impl Checker {
                 data.right.loc,
                 tsox_core::diagnostics::messages_generated::
                     THE_RIGHT_HAND_SIDE_OF_AN_ARITHMETIC_OPERATION_MUST_BE_OF_TYPE_ANY_NUMBER_BIGINT_OR_AN_ENUM_TYPE,
+                Vec::new(),
+            ));
+        }
+        if matches!(op, AsteriskAsteriskToken | AsteriskAsteriskEqualsToken)
+            && self.both_are_big_int_like(&lt, &rt)
+            && self.language_version < ScriptTarget::ES2016
+        {
+            let file = self.current_file.clone();
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                file,
+                node.loc,
+                tsox_core::diagnostics::messages_generated::
+                    EXPONENTIATION_CANNOT_BE_PERFORMED_ON_BIGINT_VALUES_UNLESS_THE_TARGET_OPTION_IS_SET_TO_ES2016_OR_LATER,
                 Vec::new(),
             ));
         }
