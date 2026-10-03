@@ -128,7 +128,13 @@ impl Checker {
             } else {
                 self.infer_param_matches(p, t)
             } {
-                return Arc::clone(&substitutions[i.min(substitutions.len() - 1)]);
+                // Go newTypeMapper：参数/实参按下标配对，缺位（实参短于参数）
+                // 映射为恒等，不得回退末位实参（否则 P 会错代成 T 的实参）
+                return if i < substitutions.len() {
+                    Arc::clone(&substitutions[i])
+                } else {
+                    Arc::clone(t)
+                };
             }
         }
 

@@ -403,6 +403,7 @@ impl Checker {
             conditional_constraint_depth: 0,
             contextual_infos: Vec::new(),
             inference_context_infos: Vec::new(),
+            contextual_arg_types: HashMap::new(),
             active_mappers: Vec::new(),
             active_type_mappers_caches: Vec::new(),
             deferred_diagnostic_callbacks: Vec::new(),

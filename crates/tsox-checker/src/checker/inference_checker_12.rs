@@ -30,6 +30,18 @@ impl Checker {
 
         let arg_index = args.iter().position(|a| Arc::ptr_eq(a, arg_node))?;
 
+        // Go getContextualTypeForArgumentAtIndex 以调用位已解析签名（缓存）取
+        // 实参上下文型；Rust 重入窗口（resolving_contextual_calls 持有中）原回退
+        // 裸参数型，令 T[P] 未代入形态泄漏进元素/属性上下文链（TS7006 误报源）。
+        // 重入时改回最近一次非推测期成功推导的实例化型
+        if self.resolving_contextual_calls.contains(&call_node.id())
+            && let Some(cached) = self
+                .contextual_arg_types
+                .get(&(call_node.id(), arg_index))
+        {
+            return Some(Arc::clone(cached));
+        }
+
         // Go getContextualTypeForArgumentAtIndex（checker.go:30125）：动态 import()
         // 实参不经签名解析，arg0 上下文型 string，arg1 为 ImportCallOptions
         if tsox_frontend::ast::is_import_call(call_node) {
@@ -175,6 +187,10 @@ impl Checker {
                         &sig.type_parameters,
                         &inferred,
                     );
+                    if self.speculation_depth == 0 {
+                        self.contextual_arg_types
+                            .insert((call_node.id(), arg_index), Arc::clone(&substed));
+                    }
                     if rest_raw.is_some() {
                         let lit = self.get_number_literal_type(tsox_core::jsnum::Number(
                             (arg_index - (sig.parameters.len() - 1)) as f64,

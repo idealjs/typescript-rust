@@ -342,6 +342,7 @@ pub struct Checker {
     pub conditional_constraint_depth: u32,
     pub contextual_infos: Vec<crate::checker::mig::m2b_2::ContextualInfo>,
     pub inference_context_infos: Vec<crate::checker::mig::m2b_2::InferenceContextInfo>,
+    pub contextual_arg_types: HashMap<(u64, usize), Arc<Type>>,
     pub active_mappers: Vec<Arc<crate::checker::types_impl_chunk::TypeMapper>>,
     pub active_type_mappers_caches: Vec<HashMap<CacheHashKey, Arc<Type>>>,
     pub deferred_diagnostic_callbacks: Vec<Box<dyn FnOnce() + Send>>,
