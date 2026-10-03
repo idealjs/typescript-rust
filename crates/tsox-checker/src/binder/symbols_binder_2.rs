@@ -344,14 +344,16 @@ impl Binder {
                     // 报错路径（cloduleWithDuplicateMember1）
                     .filter(|d| {
                         let mut p = d.parent();
-                        while let Some(cur) = p.filter(|c| {
-                            matches!(
-                                c.kind,
+                        while let Some(cur) = p {
+                            if matches!(
+                                cur.kind,
                                 SyntaxKind::VariableDeclarationList
                                     | SyntaxKind::VariableStatement
-                            )
-                        }) {
-                            p = cur.parent();
+                            ) {
+                                p = cur.parent();
+                            } else {
+                                break;
+                            }
                         }
                         p.is_some_and(|p| {
                             matches!(p.kind, SyntaxKind::ModuleBlock | SyntaxKind::SourceFile)
