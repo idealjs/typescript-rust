@@ -184,6 +184,11 @@ impl Binder {
         if name.kind == SyntaxKind::NumericLiteral {
             return tsox_core::jsnum::Number::from_string(&self.node_text(name)).to_string();
         }
+        // Go getDeclarationName：BigIntLiteral 不属 IsPropertyNameLiteral，
+        // 落 InternalSymbolNameMissing（declareSymbolEx 孤立符号不入容器表）
+        if name.kind == SyntaxKind::BigIntLiteral {
+            return INTERNAL_SYMBOL_NAME_MISSING.to_string();
+        }
         self.node_text(name)
     }
 }

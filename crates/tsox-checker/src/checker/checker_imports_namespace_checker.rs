@@ -138,6 +138,11 @@ impl Checker {
     /// 计算名为实体名表达式且其类型可用作属性名（string/number 字面量、
     /// unique symbol）时，以类型推导的名字入表
     pub(crate) fn member_declaration_name(&mut self, name: &Arc<Node>) -> String {
+        // Go getDeclarationName：BigIntLiteral 不属 IsPropertyNameLiteral，
+        // 名落 InternalSymbolNameMissing，成员不入容器符号表
+        if name.kind == tsox_frontend::ast::SyntaxKind::BigIntLiteral {
+            return crate::binder::symbols::INTERNAL_SYMBOL_NAME_MISSING.to_string();
+        }
         let early = self.get_property_name_from_node(name);
         if !early.is_empty() || !matches!(name.data, NodeData::ComputedPropertyName(_)) {
             return early;

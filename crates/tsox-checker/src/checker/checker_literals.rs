@@ -188,6 +188,18 @@ impl Checker {
             }
             match &prop.data {
                 NodeData::PropertyAssignment(data) => {
+                    // Go checkObjectLiteral：bigint 名成员报 TS1539 后以
+                    // __missing 名入表（不可被属性查找命中、不参与显示），
+                    // 初始化式仍照常检查
+                    if data.name.kind == SyntaxKind::BigIntLiteral {
+                        self.property_assignment_type(
+                            prop,
+                            &data.initializer,
+                            node,
+                            crate::binder::symbols::INTERNAL_SYMBOL_NAME_MISSING,
+                        );
+                        continue;
+                    }
                     let name = self.get_property_name_from_node(&data.name);
                     if name.is_empty() {
                         fell_back_to_any = true;

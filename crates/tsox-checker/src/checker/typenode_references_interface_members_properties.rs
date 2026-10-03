@@ -14,6 +14,10 @@ impl Checker {
             unreachable!()
         };
         let name = self.member_declaration_name(&data.name);
+        // Go declareSymbolEx：__missing 名成员不入容器符号表
+        if name == crate::binder::symbols::INTERNAL_SYMBOL_NAME_MISSING {
+            return;
+        }
         // 空串字面量名 `"": any` 是合法属性；仅计算属性取名失败才跳过
         if name.is_empty() && matches!(&data.name.data, NodeData::ComputedPropertyName(_)) {
             return;
@@ -95,6 +99,10 @@ impl Checker {
             unreachable!()
         };
         let name = self.member_declaration_name(&data.name);
+        // Go declareSymbolEx：__missing 名成员不入容器符号表
+        if name == crate::binder::symbols::INTERNAL_SYMBOL_NAME_MISSING {
+            return;
+        }
         // 空串字面量名 `"": any` 是合法属性；仅计算属性取名失败才跳过
         if name.is_empty() && matches!(&data.name.data, NodeData::ComputedPropertyName(_)) {
             return;
@@ -187,6 +195,10 @@ impl Checker {
             return;
         }
         let name = self.member_declaration_name(&data.name);
+        // Go declareSymbolEx：__missing 名成员不入容器符号表
+        if name == crate::binder::symbols::INTERNAL_SYMBOL_NAME_MISSING {
+            return;
+        }
         // 空串字面量名 `"": any` 是合法属性；仅计算属性取名失败才跳过
         if name.is_empty() && matches!(&data.name.data, NodeData::ComputedPropertyName(_)) {
             return;
@@ -284,6 +296,10 @@ impl Checker {
             return;
         }
         let name = self.member_declaration_name(&data.name);
+        // Go declareSymbolEx：__missing 名成员不入容器符号表
+        if name == crate::binder::symbols::INTERNAL_SYMBOL_NAME_MISSING {
+            return;
+        }
         // 空串字面量名 `"": any` 是合法属性；仅计算属性取名失败才跳过
         if name.is_empty() && matches!(&data.name.data, NodeData::ComputedPropertyName(_)) {
             return;
