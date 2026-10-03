@@ -298,9 +298,19 @@ impl Checker {
                         | tsox_frontend::ast::SymbolFlags::Class,
                 ) && !sym.declarations.is_empty()
             });
+        // 环断路器 in-flight error 同样不缓存（Go 惰性求值下重入查询
+        // 不发生，直接别名环才产 error 并驻留声明型）：窗口内的 error 是
+        // 临时占位，别名/接口解析完成后重查应得完整型
+        let transient_cycle_error = crate::checker::utilities::is_type_error(&result)
+            && (!self.type_resolution_stack.is_empty()
+                || !self.alias_args_resolution_stack.is_empty()
+                || !self.alias_type_instantiation_stack.is_empty());
         // 类成员填充窗口内的解析结果可能取到半成品 attach 快照，同样不缓存
         // 类成员填充窗口内的解析结果可能取到半成品 attach 快照，同样不缓存
-        if !incomplete && self.filling_class_members.is_empty() {
+        if !incomplete
+            && !transient_cycle_error
+            && self.filling_class_members.is_empty()
+        {
             self.cache_type(node, result.clone());
         }
         result

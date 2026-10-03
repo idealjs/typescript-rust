@@ -2,6 +2,19 @@
 
 use crate::checker::typenode_references::*;
 
+fn type_node_contains_type_reference(node: &Arc<Node>) -> bool {
+    match &node.data {
+        NodeData::TypeReferenceNode(_) | NodeData::MappedTypeNode(_) => true,
+        NodeData::UnionTypeNode(d) => d.types.iter().any(type_node_contains_type_reference),
+        NodeData::IntersectionTypeNode(d) => {
+            d.types.iter().any(type_node_contains_type_reference)
+        }
+        NodeData::ParenthesizedTypeNode(d) => type_node_contains_type_reference(&d.type_node),
+        NodeData::TypeOperatorNode(d) => type_node_contains_type_reference(&d.type_node),
+        _ => false,
+    }
+}
+
 impl Checker {
     pub(crate) fn add_property_signature_member(
         &mut self,
@@ -75,10 +88,8 @@ impl Checker {
         if self.variable_type_frame_depth > 0 {
             return true;
         }
-        matches!(
-            &type_node.data,
-            NodeData::TypeReferenceNode(_) | NodeData::MappedTypeNode(_)
-        ) && own_symbol.is_some()
+        type_node_contains_type_reference(type_node)
+            && own_symbol.is_some()
             && (self.type_argument_stack.is_empty() || {
                 own_symbol.is_some_and(|sym| {
                     self.is_resolving(
