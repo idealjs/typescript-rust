@@ -399,9 +399,14 @@ impl Checker {
         // 成员未命中即 Go Object 分支尾 getPropertyOfObjectType(globalObjectType)
         //（checker.go:19248，成员查找语义 checker.go:21724）；原始种别无调用/
         // 构造签名，Function 增补不可达
-        if let Some(interface_name) = self.primitive_interface_name(t)
-            && let Some(sym) = self.globals.get(interface_name).cloned()
-        {
+        if let Some(interface_name) = self.primitive_interface_name(t) {
+            let Some(sym) = self.globals.get(interface_name).cloned() else {
+                // Go getReducedApparentType（checker.go:20013）：原始种别全局接口
+                // 缺失时 apparent type 降为 emptyObjectType，成员查找落 Object
+                // 分支尾增补（如无 es2020 lib 时 bigint 的 valueOf/toString）
+                let apparent = self.get_apparent_type(t);
+                return self.get_property_of_type(&apparent, name);
+            };
             let declared = self
                 .type_alias_links
                 .get(&sym)
