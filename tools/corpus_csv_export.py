@@ -5,7 +5,7 @@
 日志默认依次尝试 fullrun.log 与 corpus run log。
 
 产出(仓库根):
-  corpus_results.csv        本轮失败用例,表头 key,seconds(向上取整整数秒),按 key 字典序
+  corpus_results.csv        本轮失败用例,表头 key,按 key 字典序（2026-10-02 用户拍板：耗时列移除）
   corpus_skips.csv          SKIP 差异表:超出 Go 基准的 SKIP 用例
   *.prev.csv / *.diff       上一轮副本与两轮机械差异
 
@@ -50,11 +50,11 @@ def scan(log_path):
     return fails, skips
 
 
-def emit(rows, path, header="key,seconds\n"):
+def emit(rows, path, header="key\n"):
     with open(path, "w", encoding="utf-8") as f:
         f.write(header)
         for key in sorted(rows):
-            f.write(f"{key},{rows[key]}\n")
+            f.write(f"{key}\n")
 
 
 def stash_prev(path):
