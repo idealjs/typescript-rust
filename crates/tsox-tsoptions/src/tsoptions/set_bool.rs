@@ -91,14 +91,6 @@ pub(crate) fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) { ::t
         "strict" => {
             options.strict = t;
             if t == Tristate::True {
-                options.strict_null_checks = t;
-                options.strict_function_types = t;
-                options.strict_bind_call_apply = t;
-                options.strict_property_initialization = t;
-                options.strict_builtin_iterator_return = t;
-                options.no_implicit_any = t;
-                options.no_implicit_this = t;
-                options.use_unknown_in_catch_variables = t;
                 options.always_strict = t;
             }
         }
