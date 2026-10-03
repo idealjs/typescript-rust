@@ -62,6 +62,7 @@ impl Checker {
             SyntaxKind::NullKeyword => self.nullish_widening_type(self.null_type()),
             SyntaxKind::UndefinedKeyword => self.nullish_widening_type(self.undefined_type()),
             SyntaxKind::BigIntLiteral => {
+                self.check_grammar_big_int_literal(node);
                 let literal = self.get_big_int_literal_type(parse_pseudo_big_int(&node.text()));
                 self.get_fresh_type_of_literal_type(&literal)
             }
@@ -101,6 +102,7 @@ impl Checker {
                     if data.operator == SyntaxKind::MinusToken
                         && data.operand.kind == SyntaxKind::BigIntLiteral
                     {
+                        self.check_grammar_big_int_literal(&data.operand);
                         let positive = parse_pseudo_big_int(&data.operand.text());
                         let negative =
                             tsox_core::jsnum::PseudoBigInt::new(&positive.to_string(), true);
@@ -110,6 +112,7 @@ impl Checker {
                     if data.operator == SyntaxKind::PlusToken
                         && data.operand.kind == SyntaxKind::BigIntLiteral
                     {
+                        self.check_grammar_big_int_literal(&data.operand);
                         self.error_message(
                             &data.operand,
                             OPERATOR_0_CANNOT_BE_APPLIED_TO_TYPE_1,
