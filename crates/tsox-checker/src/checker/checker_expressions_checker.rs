@@ -25,7 +25,7 @@ impl Checker {
                 self.check_this_expression_reference(node);
             }
             SyntaxKind::MetaProperty => {
-                let _ = self.get_type_of_node(node);
+                let _ = self.check_expression_ex(node, CheckMode::Normal);
             }
             SyntaxKind::SuperKeyword => {
                 self.check_super_expression(node);
