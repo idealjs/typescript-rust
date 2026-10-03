@@ -41,7 +41,6 @@ compiler/collisionArgumentsFunction.ts
 compiler/commonJsExportTypeDeclarationError.ts
 compiler/commonSourceDir2.ts
 compiler/commonSourceDirectory_dts.ts
-compiler/complexRecursiveCollections.ts
 compiler/complicatedGenericRecursiveBaseClassReference.ts
 compiler/complicatedIndexedAccessKeyofReliesOnKeyofNeverUpperBound.ts
 compiler/complicatedIndexesOfIntersectionsAreInferencable.ts
@@ -105,7 +104,6 @@ compiler/controlFlowFunctionLikeCircular1.ts
 compiler/controlFlowLoopAnalysis.ts
 compiler/controlFlowManyCallExpressionStatementsPerf.ts
 compiler/controlFlowNoImplicitAny.ts
-compiler/convertClassExpressionToFunctionFromObjectProperty2.ts
 compiler/convertKeywordsYes.ts
 compiler/correctOrderOfPromiseMethod.ts
 compiler/correlatedUnions.ts
@@ -138,7 +136,6 @@ compiler/declarationEmitInvalidReference.ts
 compiler/declarationEmitIsolatedDeclarationErrorNotEmittedForNonEmittedFile.ts
 compiler/declarationEmitMappedTypePreservesTypeParameterConstraint.ts
 compiler/declarationEmitMappedTypeTemplateTypeofSymbol.ts
-compiler/declarationEmitMixinPrivateProtected.ts
 compiler/declarationEmitNestedAnonymousMappedType.ts
 compiler/declarationEmitPatternAmbientModuleImportAttributes.ts
 compiler/declarationEmitPrivateNameInTypeQuery.ts
@@ -239,7 +236,6 @@ compiler/dynamicNamesErrors.ts
 compiler/elaboratedErrorsOnNullableTargets01.ts
 compiler/emitCapturingThisInTupleDestructuring1.ts
 compiler/emitCapturingThisInTupleDestructuring2.ts
-compiler/emitClassExpressionInDeclarationFile2.ts
 compiler/emitDecoratorMetadata_isolatedModules.ts
 compiler/emitSkipsThisWithRestParameter.ts
 compiler/emptyAnonymousObjectNarrowing.ts
@@ -251,14 +247,11 @@ compiler/enumAssignmentCompat6.ts
 compiler/enumAssignmentCompat7.ts
 compiler/enumLiteralAssignableToEnumInsideUnion.ts
 compiler/enumLiteralUnionNotWidened.ts
-compiler/enumLiteralsSubtypeReduction.ts
 compiler/enumNaNValues.ts
 compiler/errorElaboration.ts
 compiler/errorForUsingPropertyOfTypeAsType01.ts
 compiler/errorForUsingPropertyOfTypeAsType02.ts
 compiler/errorForUsingPropertyOfTypeAsType03.ts
-compiler/errorInUnnamedClassExpression.ts
-compiler/errorInUnnamedClassExpression_promoted.ts
 compiler/errorInfoForRelatedIndexTypesNoConstraintElaboration.ts
 compiler/errorMessagesIntersectionTypes03.ts
 compiler/errorOnEnumReferenceInCondition.ts
@@ -514,7 +507,6 @@ compiler/invokingNonGenericMethodWithTypeArguments1.ts
 compiler/isolatedDeclarationErrors.ts
 compiler/isolatedDeclarationErrorsAugmentation.ts
 compiler/isolatedDeclarationErrorsClasses.ts
-compiler/isolatedDeclarationErrorsClassesExpressions.ts
 compiler/isolatedDeclarationErrorsDefault.ts
 compiler/isolatedDeclarationErrorsEnums.ts
 compiler/isolatedDeclarationErrorsExpandoFunctions.ts
@@ -553,7 +545,6 @@ compiler/jsxChildrenArrayWrongType.tsx
 compiler/jsxChildrenIndividualErrorElaborations.tsx
 compiler/jsxChildrenWrongType.tsx
 compiler/jsxClassAttributeResolution.tsx
-compiler/jsxComponentTypeErrors.tsx
 compiler/jsxElementTypeLiteral.tsx
 compiler/jsxElementTypeLiteralWithGeneric.tsx
 compiler/jsxExcessPropsAndAssignability.tsx
@@ -665,7 +656,6 @@ compiler/narrowingByTypeofInSwitch.ts
 compiler/narrowingMutualSubtypes.ts
 compiler/narrowingNoInfer1.ts
 compiler/narrowingOfQualifiedNames.ts
-compiler/narrowingPastLastAssignment.ts
 compiler/narrowingTruthyObject.ts
 compiler/narrowingTypeofDiscriminant.ts
 compiler/narrowingTypeofUndefined2.ts
@@ -781,7 +771,6 @@ compiler/primitiveUnionDetection.ts
 compiler/privacyGloImportParseErrors.ts
 compiler/privacyImportParseErrors.ts
 compiler/privateAccessInSubclass1.ts
-compiler/privateFieldsInClassExpressionDeclaration.ts
 compiler/privateIdentifierPropertyAccessDestructuringAssignmentES6.ts
 compiler/privateNameInTypeQuery.ts
 compiler/privateNameWeakMapCollision.ts
@@ -1012,7 +1001,6 @@ compiler/unresolvableSelfReferencingAwaitedUnion.ts
 compiler/unspecializedConstraints.ts
 compiler/untypedModuleImport_withAugmentation2.ts
 compiler/unusedInvalidTypeArguments.ts
-compiler/unusedLocalsAndParameters.ts
 compiler/unusedLocalsInMethod4.ts
 compiler/unusedTypeParameters6.ts
 compiler/unusedTypeParameters7.ts

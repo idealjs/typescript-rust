@@ -10,14 +10,14 @@
 
 主 agent 是唯一构建者、测试者与循环驱动者；subagent 全程**纯文本**（隔离 worktree 内只修**一个用例**，禁构建禁测试，输出独立 commit）。
 
-**修复模型**：GLM-5.3 · low 思考档。
+**修复模型**：GLM-5.3-Flash · low 思考档。
 
 **架构约束**：一个 workflow 只做**单波并发修复**——N 个并发位 = N 个用例，每个 subagent 只修一个用例，不做组内串行循环；跨多波的目标用例总数由主 agent 分波达成，不在 workflow 内循环。
 
 ```mermaid
 flowchart TD
     START["波入口（主 agent）<br/>① 全量测试基线就绪（数据体系五份 CSV 全部最新）<br/>② 挑选 N 例分发给 workflow"]
-    START --> WF["单波 workflow：N 个 subagent 并发<br/>每人一例 · 预建隔离 worktree · 纯文本禁测 · GLM-5.3 low<br/>（整波完成后通知一次）"]
+    START --> WF["单波 workflow：N 个 subagent 并发<br/>每人一例 · 预建隔离 worktree · 纯文本禁测 · GLM-5.3-Flash low<br/>（整波完成后通知一次）"]
     WF --> PICK["主循环：取下一个 worktree 的结果<br/>cherry-pick 该例 commit 到整合分支（线性，禁 merge）"]
     PICK --> FULL["主循环：cargo test --release 全量<br/>（带 TSOX_FN_TRACE_DIR + TSOX_TYPES_EMIT_DIR）<br/>约 2 分钟，每例 pick 后必跑<br/>同步刷新五份 CSV"]
     FULL --> VERDICT{"该 commit 的净效果"}
