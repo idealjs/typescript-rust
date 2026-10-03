@@ -293,11 +293,11 @@ impl Program {
                             || is_external_library_file(&file.file_name));
                     if is_resolved {
                         let resolved_module = resolved.unwrap();
-                        // Go tsc 默认 preserveSymlinks=false：解析结果经 realpath
-                        // 规范化回真实路径，符号链接目标与原文件合一
-                        let resolved_path = host
-                            .fs()
-                            .realpath(resolved_module.resolved_file_name.as_str());
+                        // Go 程序层不对解析结果做 realpath（fileloader/filesparser 无
+                        // Realpath）；node_modules 符号链接的真实路径化由解析器
+                        // createResolvedModuleHandlingSymlink（resolver.go:1193-1206）
+                        // 按 isExternalLibraryImport 完成，此处直接取 resolved_file_name
+                        let resolved_path = resolved_module.resolved_file_name.clone();
                         if resolved_module.is_external_library_import {
                             source_files_found_searching_node_modules
                                 .insert(tsox_core::tspath::normalize_path(&resolved_path));
