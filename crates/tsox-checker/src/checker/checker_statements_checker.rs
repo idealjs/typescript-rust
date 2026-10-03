@@ -429,6 +429,25 @@ impl Checker {
                         &tsox_core::diagnostics::messages_generated::INTERFACE_NAME_CANNOT_BE_0,
                     );
                     self.check_class_type_for_duplicate_declarations(node);
+
+                    for heritage_element in
+                        tsox_frontend::ast::get_extends_heritage_clause_elements(node).iter()
+                    {
+                        if tsox_frontend::ast::is_expression_with_type_arguments(heritage_element) {
+                            if let Some(expr) = heritage_element.expression() {
+                                if !tsox_frontend::ast::is_entity_name_expression(expr)
+                                    || tsox_frontend::ast::is_optional_chain(expr)
+                                {
+                                    self.error_message(
+                                        expr,
+                                        tsox_core::diagnostics::messages_generated::
+                                            AN_INTERFACE_CAN_ONLY_EXTEND_AN_IDENTIFIER_SLASHQUALIFIED_NAME_WITH_OPTIONAL_TYPE_ARGUMENTS,
+                                        &[],
+                                    );
+                                }
+                            }
+                        }
+                    }
                     self.check_interface_members(&data.members);
                 }
 
